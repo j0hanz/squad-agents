@@ -5,98 +5,298 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eval Review</title>
   <link rel="stylesheet" href="../assets/bootstrap.min.css">
-  <!-- SheetJS is optional: if it fails to load (e.g. offline), xlsx outputs fall back to a download link. -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
-          integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT"
-          crossorigin="anonymous"></script>
   <style>
-    /* ════ D2 · Review Workbench — custom CSS only where Bootstrap has no equivalent ════ */
+    /* ════ Eval Viewer — CSS custom properties (single source of truth for every dimension) ════ */
+    :root {
+      /* ── Rail widths (static at lg / xl+; offcanvas below) ── */
+      --ev-nav-rail-w:         clamp(200px, 20%, 260px);
+      --ev-fb-rail-w:          clamp(300px, 24%, 360px);
+
+      /* ── Reading column ── */
+      --ev-read-col-max:       min(780px, 95vw);
+
+      /* ── Navbar ── */
+      --ev-navbar-min-h:       58px;
+      --ev-progress-meter-w:   clamp(110px, 12vw, 150px);
+      --ev-progress-bar-h:     5px;
+
+      /* ── Content panels ── */
+      --ev-pdf-h:              clamp(300px, 70vh, 900px);
+      --ev-img-thumb-max-h:    clamp(160px, 30vh, 260px);
+      --ev-collapse-h:         clamp(10rem, 22vh, 16rem);
+      --ev-matrix-col-w:       clamp(80px, 12vw, 120px);
+
+      /* ── Touch targets (WCAG 2.5.5 / Apple HIG 44 pt) ── */
+      --ev-touch-target:       44px;
+
+      /* ── Run indicator dot ── */
+      --ev-dot-sz:             8px;
+
+      /* ── Typography ── */
+      --ev-eyebrow-fs:         .75rem;
+      --ev-eyebrow-ls:         .08em;
+      --ev-seg-tab-fs:         .85rem;
+      --ev-file-name-fs:       .8125rem;
+      --ev-icon-fs:            1.1rem;
+      --ev-empty-icon-fs:      2.25rem;
+      --ev-save-status-min-h:  1.1rem;
+
+      /* ── Accent borders ── */
+      --ev-accent-w:           3px;
+    }
 
     /* ── Layout shell ── */
-    .app-shell   { height: 100vh; height: 100dvh; }
-    .scroll-pane { overflow-y: auto; min-height: 0; }
-    .output-text { white-space: pre-wrap; word-break: break-word; }
-    .pdf-frame   { height: 70vh; }
-    .skill-name  { max-width: 22ch; }
-    .read-col    { max-width: 780px; }
-    .label-flex  { flex: 1 1 0; min-width: 0; }
+    .app-shell    { height: 100vh; height: 100dvh; }
+    .scroll-pane  { overflow-y: auto; min-height: 0; }
+    .output-text  { white-space: pre-wrap; word-break: break-word; }
+    .pdf-frame    { height: var(--ev-pdf-h); }
+    .skill-name   { max-width: 22ch; }
+    .read-col     { max-width: var(--ev-read-col-max); }
+    .label-flex   { flex: 1 1 0; min-width: 0; }
+    .img-thumb    { max-height: var(--ev-img-thumb-max-h); object-fit: contain; }
+    .nav-hamburger { font-size: var(--ev-icon-fs); }
 
-    /* Shared typographic token: tiny uppercase section label. Replaces the old
-       kicker / brand-eyebrow / sidebar-group-header / stat-label / sec-title /
-       vs-tag rules — one source of truth, spacing/color via Bootstrap utilities. */
-    .eyebrow { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bs-secondary-color); }
+    /* Shared typographic token: tiny uppercase section label */
+    .eyebrow {
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+    }
 
     /* ── Navbar: segmented tab control (no 1:1 Bootstrap component) ── */
     .seg-tabs { background: var(--bs-tertiary-bg); border-radius: 999px; padding: 3px; }
-    .seg-tabs .nav-link { border-radius: 999px; padding: .28rem .9rem; font-size: .85rem; color: var(--bs-secondary-color); border: 0; }
+    .seg-tabs .nav-link { border-radius: 999px; padding: .28rem .9rem; font-size: var(--ev-seg-tab-fs); color: var(--bs-secondary-color); border: 0; }
     .seg-tabs .nav-link.active { background: var(--bs-body-bg); color: var(--bs-body-emphasis); box-shadow: var(--bs-box-shadow-sm); }
-    .progress-meter { width: 132px; }
+    .progress-meter { width: var(--ev-progress-meter-w); }
 
     /* ── Nav rail: grouped eval list (static on lg+, offcanvas below) ── */
-    .nav-rail { width: 244px; }
-    @media (min-width: 992px) { .nav-rail { flex: 0 0 244px; border-right: 1px solid var(--bs-border-color); } }
+    .nav-rail { width: var(--ev-nav-rail-w); }
+    @media (min-width: 992px) { .nav-rail { flex: 0 0 var(--ev-nav-rail-w); border-right: 1px solid var(--bs-border-color); } }
     #eval-list .list-group-item-action {
-      border: 0; border-left: 3px solid transparent; background: transparent;
-      color: var(--bs-body-color); padding: .5rem .85rem .5rem .6rem;
+      border: 0;
+      border-left: var(--ev-accent-w) solid transparent;
+      background: transparent;
+      color: var(--bs-body-color);
+      padding: .5rem .85rem .5rem .6rem;
     }
     #eval-list .list-group-item-action:hover { background: var(--bs-secondary-bg); }
     #eval-list .list-group-item-action.active { background: var(--bs-secondary-bg); color: var(--bs-body-emphasis); border-left-color: var(--bs-primary); }
     #eval-list .list-group-item-action.active.is-baseline { border-left-color: var(--bs-warning); }
-    .run-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .run-dot { width: var(--ev-dot-sz); height: var(--ev-dot-sz); border-radius: 50%; flex-shrink: 0; }
     .run-dot.v-good { background: var(--bs-success); }
-    .run-dot.v-bad  { background: var(--bs-danger); }
+    .run-dot.v-bad  { background: var(--bs-danger); border-radius: 2px; }
     .run-dot.v-none { border: 1.5px solid var(--bs-secondary-color); }
 
+    /* Touch targets */
+    #prev-btn, #next-btn { min-height: var(--ev-touch-target); min-width: var(--ev-touch-target); }
+    #eval-list .list-group-item-action { min-height: var(--ev-touch-target); }
+
     /* ── Output files: collapsed long code ── */
-    .output-collapsed { max-height: 16rem; overflow: hidden; }
+    .output-collapsed { max-height: var(--ev-collapse-h); overflow: hidden; }
 
     /* ── Feedback rail (static on xl+, offcanvas below) ── */
-    .fb-rail { width: 344px; }
-    @media (min-width: 1200px) { .fb-rail { flex: 0 0 344px; border-left: 1px solid var(--bs-border-color); } }
+    .fb-rail { width: var(--ev-fb-rail-w); }
+    @media (min-width: 1200px) { .fb-rail { flex: 0 0 var(--ev-fb-rail-w); border-left: 1px solid var(--bs-border-color); } }
     .fb-rail .offcanvas-body { display: block; }
-    .save-status { min-height: 1.1rem; }
+    .save-status { min-height: var(--ev-save-status-min-h); }
+    .navbar .container-fluid { min-height: var(--ev-navbar-min-h); }
 
-    /* ── Benchmark: versus scorecards (2-up grid + subtle config tints) ── */
-    .vs-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    /* ── Benchmark: versus scorecards (Bootstrap row/col + config tints) ── */
     .vs-col.is-with    { background: var(--bs-primary-bg-subtle); }
     .vs-col.is-without { background: var(--bs-warning-bg-subtle); }
     @media (min-width: 576px) { .vs-col.is-with { border-right: 1px solid var(--bs-border-color); } }
+
+    /* ── Assertion matrix: responsive column header width ── */
+    .matrix-cfg-col { width: var(--ev-matrix-col-w); }
+
+    /* ── Empty state ── */
+    .empty-state-icon { font-size: var(--ev-empty-icon-fs); line-height: 1; opacity: .2; }
+
+    /* ── File card: tinted header, stronger filename label ── */
+    .file-header { background: var(--bs-tertiary-bg); }
+    .file-header .file-name { font-size: var(--ev-file-name-fs); }
+
+    /* ── Verdict buttons: icon-aligned, consistent touch target height ── */
+    .verdict-stack label.btn { min-height: var(--ev-touch-target); display: flex; align-items: center; }
+
+    /* ════ Additions: surface, animation, and component consistency ════ */
+
+    /* Shared card radius token — applied everywhere a surface has rounding */
+    :root { --ev-card-radius: .45rem; }
+
+    /* Code pre: give it a background so it reads as a distinct surface */
+    pre.output-text {
+      background: var(--bs-tertiary-bg);
+      border: 1px solid var(--bs-border-color);
+      border-radius: var(--ev-card-radius);
+      margin-bottom: 0;
+    }
+
+    /* Code collapse: soft gradient fade at the cut-off point */
+    .output-collapsed {
+      mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+    }
+
+    /* Assertion matrix: full-cell pass/fail tinting */
+    td.assert-pass { background-color: rgba(25, 135, 84, .16); }
+    td.assert-fail  { background-color: rgba(220, 53, 69, .14); }
+
+    /* Benchmark hero: left-accent stripe on the winning card only */
+    .stat-hero-win {
+      border-left: var(--ev-accent-w) solid var(--bs-success) !important;
+    }
+
+    /* Per-eval breakdown: styled card shell */
+    .bench-eval-card {
+      border: 1px solid var(--bs-border-color);
+      border-radius: var(--ev-card-radius);
+      overflow: hidden;
+    }
+    .bench-eval-head {
+      background: var(--bs-tertiary-bg);
+      border-bottom: 1px solid var(--bs-border-color);
+      padding: .6rem 1rem;
+    }
+
+    /* Sticky reading subbar: opaque background + full-width (not .container) */
+    #reading-subbar {
+      background: var(--bs-body-bg);
+      border-bottom: 1px solid var(--bs-border-color);
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Sidebar group header: consistent spacing + visual divider between groups */
+    .sidebar-group-head {
+      padding: .5rem .85rem .3rem;
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+      user-select: none;
+    }
+    .sidebar-group-sep { border-top: 1px solid var(--bs-border-color); margin-top: .25rem; padding-top: .5rem; }
+
+    /* Multi-file switcher: plain monospace buttons in the same header bar as single-file */
+    .file-switch-btn {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font-family: var(--bs-font-monospace);
+      font-size: var(--ev-file-name-fs);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .file-switch-btn.is-active { color: var(--bs-body-emphasis); font-weight: 600; }
+    .file-switch-btn:not(.is-active) { color: var(--bs-secondary-color); }
+    .file-switch-btn:not(.is-active):hover { color: var(--bs-body-color); }
+    /* ensure switcher container can shrink in flex layouts */
+    .file-header > div:first-child { min-width: 0; }
+
+    /* Benchmark summary table delta column */
+    .bm-delta { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; font-family: var(--bs-font-monospace); font-size: .9em; }
+
+    /* Ensure eval-fade animation */
+    @keyframes eval-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    .eval-fade { animation: eval-fade-in .14s ease; }
+
+    /* Responsive hero delta number size */
+    :root { --ev-hero-delta-fs: clamp(1.7rem, 3.2vw, 2.4rem); }
+    .hero-delta-value { font-size: var(--ev-hero-delta-fs); line-height: 1; }
+
+    /* Benchmark: eyebrow-style table headers (all tables in benchmark panel) */
+    #benchmark-content table thead th {
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+      font-weight: 500;
+      white-space: nowrap;
+      border-bottom-width: 2px;
+    }
+
+    /* Benchmark container top/bottom breathing room */
+    #benchmark-content { padding-top: 1.5rem; padding-bottom: 4rem; }
+
+    /* Eval content: ensure last item never clips against viewport edge */
+    #eval-content { padding-bottom: 5rem !important; }
+
+    /* Config chip: dot + label in config color — replaces generic badge pills */
+    .cfg-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .7rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .cfg-chip::before {
+      content: "";
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .cfg-chip.is-with     { color: var(--bs-info); }
+    .cfg-chip.is-with::before    { background: var(--bs-primary); }
+    .cfg-chip.is-baseline { color: var(--bs-warning); }
+    .cfg-chip.is-baseline::before { background: var(--bs-warning); }
+
+    /* Subbar position counter */
+    #subbar-pos {
+      font-size: .75rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--bs-secondary-color);
+      min-width: 3.5ch;
+      text-align: center;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body class="d-flex flex-column app-shell">
 
   <!-- ============ Navbar: brand · tabs · progress · submit ============ -->
-  <nav class="navbar bg-body-tertiary border-bottom flex-shrink-0 py-0">
-    <div class="container-fluid" style="min-height:58px">
+  <nav class="navbar bg-body-tertiary border-bottom flex-shrink-0 py-1">
+    <div class="container-fluid">
     <div class="d-flex align-items-center gap-2 me-auto">
-      <button class="btn btn-sm btn-link text-body p-1 d-lg-none" type="button"
+      <button class="btn btn-link text-body d-lg-none" type="button"
               data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="Toggle eval list">
-        <span aria-hidden="true" style="font-size:1.1rem">&#9776;</span>
+        <span aria-hidden="true" class="nav-hamburger">&#9776;</span>
       </button>
-      <div class="lh-1">
-        <div class="eyebrow mb-1">Skill review</div>
-        <span id="skill-name" class="fw-semibold text-body-emphasis text-truncate skill-name d-inline-block align-bottom" title=""></span>
+      <div>
+        <div class="eyebrow">Skill review</div>
+        <div id="skill-name" class="skill-name d-inline-block align-bottom h5 mb-0" title=""></div>
       </div>
     </div>
     <ul class="nav seg-tabs d-none mx-2" id="view-tabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-outputs" aria-selected="true" aria-label="Outputs">Outputs</button>
+        <button id="tab-outputs" class="nav-link active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-outputs" aria-selected="true" aria-controls="panel-outputs">Outputs</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false">Benchmark</button>
+        <button id="tab-benchmark" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false" aria-controls="panel-benchmark">Benchmark</button>
       </li>
     </ul>
-    <div class="d-flex align-items-center gap-3 ms-auto">
+    <div class="d-flex align-items-center gap-5 ms-auto">
       <div class="progress-meter d-none d-sm-block">
-        <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span id="reviewed-count" class="text-body-emphasis fw-semibold">0 / 0</span></div>
-        <div class="progress" role="progressbar" style="height:5px"
+        <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span id="reviewed-count" class="text-body-emphasis">0 / 0</span></div>
+        <div class="progress" role="progressbar" style="--bs-progress-height: var(--ev-progress-bar-h)"
              aria-label="Review progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
           <div id="progress-bar" class="progress-bar bg-success"></div>
         </div>
       </div>
-      <button class="btn btn-outline-secondary btn-sm d-xl-none" type="button"
+      <button class="btn btn-primary btn-sm d-xl-none" type="button"
               data-bs-toggle="offcanvas" data-bs-target="#feedback-rail" aria-label="Open review panel">Review</button>
-      <button class="btn btn-outline-secondary btn-sm" id="submit-btn" type="button" data-action="submit">Submit All</button>
+      <button class="btn btn-primary btn-sm" id="submit-btn" type="button" data-action="submit">Submit All</button>
     </div>
     </div>
   </nav>
@@ -105,39 +305,36 @@
   <main class="tab-content flex-grow-1 overflow-hidden">
 
     <!-- ---- Outputs panel (qualitative review) — three-column workbench ---- -->
-    <div class="tab-pane fade show active h-100" id="panel-outputs">
+    <div class="tab-pane fade show active h-100" id="panel-outputs" role="tabpanel" aria-labelledby="tab-outputs" tabindex="-1">
       <div class="d-flex h-100 overflow-hidden">
 
         <!-- Nav rail: grouped eval list (static on lg+, offcanvas below) -->
         <aside class="nav-rail offcanvas-start d-flex flex-column" id="sidebar"
                tabindex="-1" aria-labelledby="sidebar-title">
-          <div class="offcanvas-header border-bottom">
-            <h6 class="offcanvas-title mb-0" id="sidebar-title">Evals</h6>
-            <button class="btn-close" type="button" data-bs-dismiss="offcanvas"
-                    data-bs-target="#sidebar" aria-label="Close eval list"></button>
-          </div>
-          <div class="offcanvas-body p-0 scroll-pane flex-grow-1 bg-body-tertiary">
-            <div id="eval-list" class="list-group list-group-flush"></div>
+          <div class="offcanvas-body p-0 scroll-pane flex-grow-1">
+            <h2 id="sidebar-title" class="visually-hidden">Eval list</h2>
+          <div id="eval-list" class="list-group list-group-flush"></div>
           </div>
         </aside>
 
         <!-- Reading column -->
         <div class="d-flex flex-column flex-grow-1 overflow-hidden">
-          <div class="border-bottom d-flex align-items-center gap-2 px-3 py-2 flex-shrink-0">
-            <button id="prev-btn" class="btn btn-sm btn-outline-secondary" type="button"
-                    aria-label="Previous eval">&#8592;</button>
-            <button id="next-btn" class="btn btn-sm btn-outline-secondary" type="button"
-                    aria-label="Next eval">&#8594;</button>
-            <span id="current-config-label" class="fw-semibold text-body-emphasis text-truncate ms-1 label-flex"></span>
-            <span id="config-badge" class="badge d-none"></span>
-            <span class="small text-secondary opacity-50 ms-auto d-none d-lg-inline" aria-hidden="true">Navigate with ← →</span>
-          </div>
+          <div id="main-scroll" class="scroll-pane flex-grow-1 d-flex flex-column">
 
-          <div id="main-scroll" class="scroll-pane flex-grow-1">
+            <div id="reading-subbar" class="d-flex align-items-center gap-2 px-3 py-2">
+              <button id="prev-btn" class="btn btn-dark btn-lg px-4" type="button"
+                      aria-label="Previous eval">&#8592;</button>
+              <span id="subbar-pos" aria-live="polite"></span>
+              <button id="next-btn" class="btn btn-dark btn-lg px-4" type="button"
+                      aria-label="Next eval">&#8594;</button>
+              <span id="current-config-label" class="ms-2 fw-semibold text-body-emphasis text-truncate label-flex"></span>
+              <span id="config-badge" class="cfg-chip d-none"></span>
+            </div>
 
             <!-- Empty state -->
-            <div id="no-eval-state" class="h-100 d-flex align-items-center justify-content-center">
-              <span class="text-secondary small fst-italic">No eval selected</span>
+            <div id="no-eval-state" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-2">
+              <div class="empty-state-icon" aria-hidden="true">&#9633;</div>
+              <span class="text-secondary small">Select an eval from the sidebar to begin reviewing</span>
             </div>
 
             <!-- Eval content -->
@@ -197,30 +394,31 @@
         <aside class="fb-rail offcanvas-xl offcanvas-end" id="feedback-rail"
                tabindex="-1" aria-labelledby="fb-rail-title">
           <div class="offcanvas-header border-bottom d-xl-none">
-            <h6 class="offcanvas-title mb-0" id="fb-rail-title">Your Review</h6>
+            <h6 class="offcanvas-title">Your Review</h6>
             <button class="btn-close" type="button" data-bs-dismiss="offcanvas"
                     data-bs-target="#feedback-rail" aria-label="Close review panel"></button>
           </div>
           <div class="offcanvas-body scroll-pane p-3 bg-body-tertiary">
+            <span id="fb-rail-title" class="visually-hidden">Your Review</span>
             <div class="d-flex align-items-center justify-content-between mb-3 d-none d-xl-flex">
               <span class="fw-semibold text-body-emphasis">Your Review</span>
               <span id="rail-grade-badge" class="badge rounded-pill d-none"></span>
             </div>
-            <div id="rail-note" class="bg-body-secondary rounded small p-2 mb-3 text-secondary">Select an eval to review.</div>
-
             <div class="eyebrow mb-2">Verdict</div>
             <div class="d-grid gap-2 verdict-stack mb-3" role="group" aria-label="Verdict">
               <input type="radio" class="btn-check" name="verdict" id="verdict-good" value="good" autocomplete="off">
-              <label class="btn btn-outline-success text-start" for="verdict-good">👍 Looks good</label>
+              <label class="btn btn-outline-success text-start" for="verdict-good"><span class="me-2" aria-hidden="true">✓</span>Looks good</label>
               <input type="radio" class="btn-check" name="verdict" id="verdict-needs_work" value="needs_work" autocomplete="off">
-              <label class="btn btn-outline-danger text-start" for="verdict-needs_work">👎 Needs work</label>
+              <label class="btn btn-outline-danger text-start" for="verdict-needs_work"><span class="me-2" aria-hidden="true">✗</span>Needs work</label>
               <input type="radio" class="btn-check" name="verdict" id="verdict-skip" value="skip" autocomplete="off">
-              <label class="btn btn-outline-secondary text-start" for="verdict-skip">⏭ Skip for now</label>
+              <label class="btn btn-outline-secondary text-start" for="verdict-skip"><span class="me-2" aria-hidden="true">→</span>Skip for now</label>
             </div>
 
             <div class="eyebrow mb-2">Notes</div>
             <textarea id="feedback" class="form-control mb-1" rows="6"
-              placeholder="What worked, what didn't… (optional)" aria-describedby="feedback-status"></textarea>
+              placeholder="What worked, what didn't… (optional)"
+              aria-label="Notes"
+              aria-describedby="feedback-status"></textarea>
             <div id="feedback-status" class="save-status small text-secondary mb-3" aria-live="polite"></div>
 
             <div id="prev-feedback" class="p-2 ps-3 d-none border-start border-3 border-primary bg-body-secondary rounded-end">
@@ -234,9 +432,9 @@
     </div>
 
     <!-- ---- Benchmark panel (quantitative stats) ---- -->
-    <div class="tab-pane fade h-100" id="panel-benchmark">
+    <div class="tab-pane fade h-100" id="panel-benchmark" role="tabpanel" aria-labelledby="tab-benchmark" tabindex="-1">
       <div class="scroll-pane h-100">
-        <div id="benchmark-content" class="p-4 mx-auto" style="max-width:1100px"></div>
+        <div id="benchmark-content" class="container-xl"></div>
       </div>
     </div>
   </main>
@@ -265,30 +463,48 @@
     </div>
   </div>
 
+  <div id="sr-announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
   <script src="../assets/bootstrap.bundle.min.js"></script>
   <script>
   (() => {
     "use strict";
 
+
     /*__EMBEDDED_DATA__*/
 
-    // ===================== (1) Data access =====================
+
+    // ═══════════════════════════════════════════════════════════════
+    // DATA
+    // ═══════════════════════════════════════════════════════════════
     const DATA = (typeof EMBEDDED_DATA !== "undefined") ? EMBEDDED_DATA : { skill_name: "", runs: [] };
     const RUNS = DATA.runs || [];
     const PREV_FB = DATA.previous_feedback || {};
     const PREV_OUT = DATA.previous_outputs || {};
 
-    // ===================== (2) DOM builder + utils =====================
+    // ═══════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════
+    const feedbackMap = {};   // run_id → feedback text
+    const verdictMap = {};    // run_id → "good" | "needs_work" | "skip"
+    const visited = new Set();
+    let currentIndex = 0;
+    let saveTimer = null;
+
+    const COLLAPSE_LINE_THRESHOLD = 30;
+
+    // ═══════════════════════════════════════════════════════════════
+    // DOM UTILS
     // el(tag, attrs, children): attrs supports class, text (textContent, safe),
-    // html (innerHTML — only for trusted SheetJS markup), on<event> handlers, and
-    // any other key as an attribute. Children may be nodes or strings.
+    // on<event> handlers, and any other key as an attribute.
+    // Children may be nodes or strings.
+    // ═══════════════════════════════════════════════════════════════
     function el(tag, attrs = {}, children = []) {
       const node = document.createElement(tag);
       for (const [k, v] of Object.entries(attrs)) {
         if (v == null) continue;
         if (k === "class") node.className = v;
         else if (k === "text") node.textContent = v;
-        else if (k === "html") node.innerHTML = v;
         else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
         else node.setAttribute(k, v);
       }
@@ -300,16 +516,26 @@
     }
     const $ = (id) => document.getElementById(id);
 
-    function detectConfig(id) {
-      const m = (id || "").match(/(with_skill|without_skill|new_skill|old_skill)/);
+    // ═══════════════════════════════════════════════════════════════
+    // CONFIG UTILS
+    // ═══════════════════════════════════════════════════════════════
+    const BASELINE_CONFIGS = new Set(["without_skill", "old_skill"]);
+
+    function isBaselineCfg(cfg) { return BASELINE_CONFIGS.has(cfg); }
+
+    function detectConfig(runOrId) {
+      const isRun = runOrId && typeof runOrId === "object";
+      const explicit = isRun ? runOrId.configuration : null;
+      if (explicit) {
+        return { config: explicit, label: explicit.replace(/_/g, " "), baseline: isBaselineCfg(explicit) };
+      }
+      const id = isRun ? (runOrId.id || "") : (runOrId || "");
+      const m = id.match(/(with_skill|without_skill|new_skill|old_skill)/);
       if (!m) return null;
       const config = m[1];
-      return {
-        config,
-        label: config.replace(/_/g, " "),
-        baseline: config === "without_skill" || config === "old_skill",
-      };
+      return { config, label: config.replace(/_/g, " "), baseline: isBaselineCfg(config) };
     }
+
     function downloadUri(file) {
       if (file.data_uri) return file.data_uri;
       if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
@@ -318,24 +544,76 @@
       if (file.type === "image_url") return file.src;
       return "#";
     }
+
     function titleCase(s) {
       return (s || "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
     }
+
     function evalTitle(run) {
       return run.eval_id != null ? `Eval ${run.eval_id}` : run.id;
     }
+
     function gradePct(run) {
       const s = run.grading && run.grading.summary;
       return (s && s.pass_rate != null) ? Math.round(s.pass_rate * 100) : null;
     }
 
-    // ===================== (3) Copy helper =====================
+    // ═══════════════════════════════════════════════════════════════
+    // COLOR HELPERS
+    // Pass-rate → Bootstrap class mapping. Thresholds (80% / 50%) are
+    // defined once here so all badge, bar, and text uses stay in sync.
+    // ═══════════════════════════════════════════════════════════════
+    function passBadgeClass(pct) {   // → text-bg-* for badges
+      if (pct == null) return "text-bg-secondary";
+      return pct >= 80 ? "text-bg-success" : pct < 50 ? "text-bg-danger" : "text-bg-warning";
+    }
+    function passBarClass(pct) {     // → bg-* for progress bars
+      if (pct == null) return "bg-secondary";
+      return pct >= 80 ? "bg-success" : pct < 50 ? "bg-danger" : "bg-warning";
+    }
+    function passTextClass(pct) {    // → text-* for inline text
+      if (pct == null) return "text-secondary";
+      return pct >= 80 ? "text-success" : pct < 50 ? "text-danger" : "text-warning";
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FEEDBACK UTILS
+    // ═══════════════════════════════════════════════════════════════
+
+    function setFeedbackStatus(msg, variant = "secondary") {
+      const st = $("feedback-status");
+      st.textContent = msg;
+      st.className = `save-status small text-${variant} mb-3`;
+    }
+
+    function buildReviewEntry(run_id, ts = new Date().toISOString()) {
+      return { run_id, feedback: feedbackMap[run_id] || "", verdict: verdictMap[run_id] || "", timestamp: ts };
+    }
+
+    // Syncs the feedback textarea into feedbackMap for the current run.
+    function flushCurrentFeedback() {
+      const run = RUNS[currentIndex];
+      if (!run) return;
+      const text = $("feedback").value;
+      if (text.trim()) feedbackMap[run.id] = text; else delete feedbackMap[run.id];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // COPY HELPER
+    // ═══════════════════════════════════════════════════════════════
+    function announceToSR(msg) {
+      const region = $("sr-announcer");
+      region.textContent = "";
+      requestAnimationFrame(() => { region.textContent = msg; });
+    }
+
     function copyText(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         const orig = btn.textContent;
         btn.textContent = "Copied!";
         btn.classList.replace("btn-outline-secondary", "btn-success");
         btn.classList.add("copied");
+        announceToSR("Copied to clipboard");
         setTimeout(() => {
           btn.textContent = orig;
           btn.classList.replace("btn-success", "btn-outline-secondary");
@@ -348,59 +626,32 @@
       });
     }
 
-    // ===================== (4) Sidebar =====================
-    function buildSidebar() {
-      const list = $("eval-list");
-      list.replaceChildren();
-
-      // Group by eval_id when multiple runs share the same eval_id
-      const grouped = RUNS.some(
-        (r, i) => r.eval_id != null && RUNS.findIndex((x) => x.eval_id === r.eval_id) !== i
-      );
-
-      if (grouped) {
-        const groups = new Map();
-        RUNS.forEach((run, i) => {
-          const gid = run.eval_id != null ? run.eval_id : "_";
-          if (!groups.has(gid)) groups.set(gid, []);
-          groups.get(gid).push({ run, i });
-        });
-        let first = true;
-        for (const [gid, items] of groups) {
-          list.append(el("div", {
-            class: "eyebrow px-3 pb-1 user-select-none " + (first ? "pt-2" : "pt-3"),
-            text: gid === "_" ? "Other" : `Eval ${gid}`,
-          }));
-          first = false;
-          items.forEach(({ run, i }) => list.append(makeSidebarItem(run, i, true)));
-        }
-      } else {
-        RUNS.forEach((run, i) => list.append(makeSidebarItem(run, i, false)));
-      }
-    }
-
+    // ═══════════════════════════════════════════════════════════════
+    // SIDEBAR
+    // ═══════════════════════════════════════════════════════════════
     function verdictDotClass(runId) {
       const v = verdictMap[runId];
       return v === "good" ? "v-good" : v === "needs_work" ? "v-bad" : "v-none";
     }
 
     function makeSidebarItem(run, i, isChild) {
-      const cfg = detectConfig(run.id);
+      const cfg = detectConfig(run);
       const pct = gradePct(run);
-      // In grouped mode the config name IS the label; in flat mode show "Eval N [· config]"
+      // In grouped mode the config name IS the label; in flat mode show "Eval N"
       const labelText = isChild ? (cfg ? cfg.label : evalTitle(run)) : evalTitle(run);
       const dot = el("span", {
         class: "run-dot " + verdictDotClass(run.id),
         "data-dot": run.id,
         title: "Your review state",
+        "aria-label": "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"),
       });
       const badges = el("span", { class: "d-flex align-items-center gap-1 flex-shrink-0 ms-auto" }, [
         !isChild && cfg ? el("span", {
-          class: "badge rounded-pill " + (cfg.baseline ? "text-bg-warning" : "text-bg-primary"),
+          class: "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with"),
           text: cfg.label,
         }) : null,
         pct == null ? null : el("span", {
-          class: "badge rounded-pill " + (pct >= 80 ? "text-bg-success" : "text-bg-danger"),
+          class: "badge rounded-pill " + passBadgeClass(pct),
           text: pct + "%",
         }),
       ]);
@@ -412,20 +663,59 @@
       }, [dot, el("span", { class: "text-truncate small flex-grow-1", text: labelText }), badges]);
     }
 
+    function buildSidebar() {
+      const list = $("eval-list");
+      list.replaceChildren();
+
+      // Group by eval_id when multiple runs share the same eval_id
+      const seenEvalIds = new Set();
+      const grouped = RUNS.some((r) => {
+        if (r.eval_id == null) return false;
+        if (seenEvalIds.has(r.eval_id)) return true;
+        seenEvalIds.add(r.eval_id);
+        return false;
+      });
+
+      if (grouped) {
+        const groups = new Map();
+        RUNS.forEach((run, i) => {
+          const gid = run.eval_id != null ? run.eval_id : "_";
+          if (!groups.has(gid)) groups.set(gid, []);
+          groups.get(gid).push({ run, i });
+        });
+        let first = true;
+        for (const [gid, items] of groups) {
+          const head = el("div", {
+            class: "sidebar-group-head" + (first ? "" : " sidebar-group-sep"),
+            text: gid === "_" ? "Other" : `Eval ${gid}`,
+          });
+          list.append(head);
+          first = false;
+          items.forEach(({ run, i }) => list.append(makeSidebarItem(run, i, true)));
+        }
+      } else {
+        RUNS.forEach((run, i) => list.append(makeSidebarItem(run, i, false)));
+      }
+    }
+
     function setActiveSidebar(i) {
       $("eval-list").querySelectorAll("[data-index]").forEach((b) => {
         const active = +b.dataset.index === i;
         b.classList.toggle("active", active);
-        b.setAttribute("aria-current", active ? "true" : "false");
+        if (active) b.setAttribute("aria-current", "true");
+        else b.removeAttribute("aria-current");
         if (active) b.scrollIntoView({ block: "nearest" });
       });
     }
+
     function closeSidebarOnMobile() {
       const inst = window.bootstrap && bootstrap.Offcanvas.getInstance($("sidebar"));
       if (inst) inst.hide();
     }
 
-    // ===================== (5) Eval detail =====================
+    // ═══════════════════════════════════════════════════════════════
+    // EVAL DETAIL
+    // ═══════════════════════════════════════════════════════════════
     function showRun(index) {
       const run = RUNS[index];
       if (!run) return;
@@ -435,17 +725,20 @@
       $("no-eval-state").classList.add("d-none");
       const content = $("eval-content");
       content.classList.remove("d-none");
+      content.classList.remove("eval-fade");
+      void content.offsetWidth;
+      content.classList.add("eval-fade");
 
-      const cfg = detectConfig(run.id);
-      $("current-config-label").textContent = evalTitle(run) + (cfg ? " · " + cfg.label : "");
+      const cfg = detectConfig(run);
+      $("current-config-label").textContent = evalTitle(run);
       $("prompt-text").textContent = run.prompt || "(No prompt found)";
 
       const badge = $("config-badge");
       if (cfg) {
-        badge.className = "badge rounded-pill " + (cfg.baseline ? "text-bg-warning" : "text-bg-primary");
+        badge.className = "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with");
         badge.textContent = cfg.label;
       } else {
-        badge.className = "badge d-none";
+        badge.className = "cfg-chip d-none";
         badge.textContent = "";
       }
 
@@ -453,18 +746,13 @@
       renderPrevOutputs(run);
       renderGrades(run);
       renderPrevFeedback(run);
-
-      // Feedback rail: context line + grade-at-a-glance
-      $("rail-note").replaceChildren(
-        document.createTextNode("Reviewing "),
-        el("strong", { class: "text-body-emphasis", text: evalTitle(run) + (cfg ? " · " + cfg.label : "") }),
-        document.createTextNode(". Your verdict and notes save automatically.")
-      );
       const pct = gradePct(run);
       const rgb = $("rail-grade-badge");
-      if (pct == null) { rgb.className = "badge rounded-pill d-none"; rgb.textContent = ""; }
-      else {
-        rgb.className = "badge rounded-pill " + (pct >= 80 ? "text-bg-success" : pct >= 50 ? "text-bg-warning" : "text-bg-danger");
+      if (pct == null) {
+        rgb.className = "badge rounded-pill d-none";
+        rgb.textContent = "";
+      } else {
+        rgb.className = "badge rounded-pill " + passBadgeClass(pct);
         rgb.textContent = "Grade " + pct + "%";
       }
 
@@ -483,13 +771,37 @@
       $("main-scroll").scrollTop = 0;
     }
 
-    // ===================== (6) File rendering =====================
+    // ═══════════════════════════════════════════════════════════════
+    // FILE RENDERING
+    // ═══════════════════════════════════════════════════════════════
 
-    // Populates `container` with the rendered file content (no card wrapper).
-    function buildFileContentInto(container, file) {
+    // SheetJS — load on demand (only when an xlsx file type is encountered)
+    const XLSX_CDN = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
+    const XLSX_SRI = "sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT";
+    let _xlsxPromise = null;
+
+    function loadXlsx() {
+      if (typeof XLSX !== "undefined") return Promise.resolve(XLSX);
+      if (_xlsxPromise) return _xlsxPromise;
+      _xlsxPromise = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = XLSX_CDN;
+        s.integrity = XLSX_SRI;
+        s.crossOrigin = "anonymous";
+        s.onload = () => resolve(XLSX);
+        s.onerror = () => { _xlsxPromise = null; reject(new Error("SheetJS load failed")); };
+        document.head.appendChild(s);
+      });
+      return _xlsxPromise;
+    }
+
+    // Raw file content. Pass includeActions=true to overlay Copy+Download
+    // in the top-right corner of text blocks (used for multi-file tab panes).
+    // fileCard() handles its own actions in the card-header instead.
+    function buildFileContentInto(container, file, includeActions) {
       if (file.type === "image_url") {
         const imgWrap = el("div", { class: "bg-body-secondary rounded p-2" });
-        const thumb = el("img", { alt: file.name, class: "img-fluid d-block", style: "max-height:260px;object-fit:contain;" });
+        const thumb = el("img", { alt: file.name, class: "img-fluid d-block img-thumb" });
         thumb.src = file.src;
         imgWrap.append(
           thumb,
@@ -497,30 +809,48 @@
         );
         container.append(imgWrap);
       } else if (file.type === "html") {
-        const frame = el("iframe", { class: "pdf-frame w-100 border-0", sandbox: "allow-scripts" });
+        const frame = el("iframe", { class: "pdf-frame w-100 border-0", sandbox: "allow-scripts", title: "HTML output preview" });
         frame.srcdoc = file.content;
         container.append(frame);
       } else if (file.type === "text") {
         const lines = (file.content || "").split("\n").length;
-        const pre = el("pre", { class: "output-text mb-0 bg-body-tertiary border rounded p-3 small lh-base overflow-auto", text: file.content });
-        const wrap = el("div", { class: "code-block-wrap position-relative" });
-        const copyBtn = el("button", {
-          class: "btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-2",
-          type: "button",
-          text: "Copy",
-          onclick: (e) => copyText(file.content, e.currentTarget),
-        });
-        if (lines > 30) {
+        const pre = el("pre", { class: "output-text p-3 small lh-base overflow-auto", text: file.content });
+        const wrap = el("div", { class: "position-relative" });
+        if (includeActions) {
+          const btnGroup = el("div", { class: "position-absolute top-0 end-0 m-2 d-flex gap-1" });
+          btnGroup.append(
+            el("button", {
+              class: "btn btn-outline-secondary btn-sm",
+              type: "button", text: "Copy",
+              "aria-label": "Copy " + file.name,
+              onclick: (e) => copyText(file.content, e.currentTarget),
+            }),
+            el("a", {
+              class: "btn btn-outline-secondary btn-sm",
+              href: downloadUri(file), download: file.name,
+              title: "Download " + file.name, "aria-label": "Download " + file.name,
+              text: "↓",
+            })
+          );
+          wrap.append(btnGroup);
+        }
+        if (lines > COLLAPSE_LINE_THRESHOLD) {
           pre.classList.add("output-collapsed");
           const expandBtn = el("button", {
             class: "btn btn-link small d-block w-100 text-center py-1 mt-1",
             type: "button",
             text: `▼ Show all ${lines} lines`,
-            onclick: (e) => { pre.classList.remove("output-collapsed"); e.currentTarget.remove(); },
+            "aria-expanded": "false",
+            onclick: (e) => {
+              const btn = e.currentTarget;
+              const isCollapsed = pre.classList.toggle("output-collapsed");
+              btn.textContent = isCollapsed ? `▼ Show all ${lines} lines` : "▲ Collapse";
+              btn.setAttribute("aria-expanded", String(!isCollapsed));
+            },
           });
-          wrap.append(copyBtn, pre, expandBtn);
+          wrap.append(pre, expandBtn);
         } else {
-          wrap.append(copyBtn, pre);
+          wrap.append(pre);
         }
         container.append(wrap);
       } else if (file.type === "image") {
@@ -536,93 +866,160 @@
       }
     }
 
+    // Single-file card: filename in card-header + Copy + Download; no floating buttons.
     function fileCard(file) {
-      const body = el("div", { class: "card-body" });
-      buildFileContentInto(body, file);
-      const header = el("div", { class: "card-header d-flex justify-content-between align-items-center" }, [
-        el("span", { class: "font-monospace small", text: file.name }),
-        el("a", { class: "small", href: downloadUri(file), download: file.name, text: "Download" }),
+      const body = el("div", { class: "card-body p-0" });
+      buildFileContentInto(body, file, false);
+      const actions = [];
+      if (file.type === "text" && file.content != null) {
+        actions.push(el("button", {
+          class: "btn btn-outline-secondary btn-sm",
+          type: "button", text: "Copy",
+          "aria-label": "Copy " + file.name,
+          onclick: (e) => copyText(file.content, e.currentTarget),
+        }));
+      }
+      if (file.type !== "error") {
+        actions.push(el("a", {
+          class: "btn btn-outline-secondary btn-sm",
+          href: downloadUri(file), download: file.name,
+          title: "Download " + file.name, text: "↓",
+        }));
+      }
+      const header = el("div", { class: "file-header d-flex align-items-center justify-content-between gap-3 px-3 py-2 border-bottom" }, [
+        el("span", { class: "font-monospace file-name text-body-emphasis text-truncate", text: file.name }),
+        actions.length ? el("div", { class: "d-flex gap-2 flex-shrink-0" }, actions) : null,
       ]);
-      return el("div", { class: "card rounded-0 mb-3" }, [header, body]);
+      return el("div", { class: "card mb-3 overflow-hidden" }, [header, body]);
     }
 
     function renderOutputs(container, outputs) {
       container.replaceChildren();
       if (!outputs.length) {
-        container.append(el("div", { class: "text-muted fst-italic p-3 text-center", text: "No output files" }));
+        container.append(el("div", { class: "text-secondary fst-italic p-3 text-center", text: "No output files" }));
         return;
       }
 
-      // Single file: plain card (no tabs overhead)
       if (outputs.length === 1) {
         container.append(fileCard(outputs[0]));
         return;
       }
 
-      // Multiple files: Bootstrap tab strip so long outputs don't stack
-      const uid = "ft-" + Math.random().toString(36).slice(2);
-      const tabList = el("ul", { class: "nav nav-tabs mt-3 flex-wrap", role: "tablist" });
-      const tabContent = el("div", { class: "tab-content border border-top-0" });
+      // Multi-file: same card structure as single-file.
+      // File switcher lives in the header bar alongside Copy + Download.
+      // No nav-tabs — consistent visual language in all cases.
+      let activeFile = outputs[0];
 
-      outputs.forEach((f, i) => {
-        const tid = uid + i;
-        const active = i === 0;
-        const tabBtn = el("button", {
-          class: "nav-link d-flex align-items-center gap-2" + (active ? " active" : ""),
-          type: "button",
-          role: "tab",
-          "data-bs-toggle": "tab",
-          "data-bs-target": "#" + tid,
-          "aria-selected": String(active),
-          title: f.name,
-        }, [
-          el("span", { class: "font-monospace small", text: f.name }),
-          el("a", {
-            class: "badge bg-secondary bg-opacity-75 text-decoration-none ms-1",
-            href: downloadUri(f),
-            download: f.name,
-            text: "↓",
-            title: "Download",
-            onclick: (e) => e.stopPropagation(),
-          }),
-        ]);
-        tabList.append(el("li", { class: "nav-item", role: "presentation" }, [tabBtn]));
-
-        const pane = el("div", {
-          id: tid,
-          class: "tab-pane fade p-3" + (active ? " show active" : ""),
-          role: "tabpanel",
-        });
-        buildFileContentInto(pane, f);
-        tabContent.append(pane);
+      const copyBtn = el("button", {
+        class: "btn btn-outline-secondary btn-sm",
+        type: "button",
+        text: "Copy",
+      });
+      copyBtn.addEventListener("click", (e) => {
+        if (activeFile.content != null) copyText(activeFile.content, e.currentTarget);
       });
 
-      container.append(tabList, tabContent);
+      const dlBtn = el("a", {
+        class: "btn btn-outline-secondary btn-sm",
+        href: downloadUri(activeFile),
+        download: activeFile.name,
+        title: "Download " + activeFile.name,
+        text: "↓",
+      });
+
+      // Content panels — all rendered, only active shown
+      const panels = outputs.map((f, i) => {
+        const panel = el("div", { class: i === 0 ? "" : "d-none" });
+        buildFileContentInto(panel, f, false);
+        return panel;
+      });
+
+      // Switcher buttons — same font/size as the filename in fileCard
+      let switchBtns;
+      switchBtns = outputs.map((f, i) => {
+        const btn = el("button", {
+          class: "file-switch-btn" + (i === 0 ? " is-active" : ""),
+          type: "button",
+          text: f.name,
+          title: f.name,
+          "aria-pressed": i === 0 ? "true" : "false",
+        });
+        btn.addEventListener("click", () => {
+          switchBtns.forEach((b, j) => {
+            b.classList.toggle("is-active", j === i);
+            b.setAttribute("aria-pressed", String(j === i));
+          });
+          panels.forEach((p, j) => p.classList.toggle("d-none", j !== i));
+          activeFile = f;
+          dlBtn.href = downloadUri(f);
+          dlBtn.download = f.name;
+          dlBtn.title = "Download " + f.name;
+          copyBtn.style.display = f.type === "text" ? "" : "none";
+        });
+        return btn;
+      });
+
+      if (activeFile.type !== "text") copyBtn.style.display = "none";
+
+      const header = el("div", { class: "file-header d-flex align-items-center gap-3 px-3 py-2 border-bottom" }, [
+        el("div", { class: "d-flex gap-3 flex-grow-1 min-width-0 overflow-hidden" }, switchBtns),
+        el("div", { class: "d-flex gap-2 flex-shrink-0" }, [copyBtn, dlBtn]),
+      ]);
+
+      const card = el("div", { class: "card mb-3 overflow-hidden" });
+      card.append(header);
+      panels.forEach((p) => card.append(p));
+      container.append(card);
+    }
+
+    function sanitizeXlsxWrap(wrap) {
+      wrap.querySelectorAll("*").forEach((node) => {
+        [...node.attributes].forEach((attr) => {
+          if (/^on/i.test(attr.name)) node.removeAttribute(attr.name);
+          if (attr.name === "href" && /^javascript:/i.test(attr.value)) node.removeAttribute(attr.name);
+        });
+        if (node.tagName === "SCRIPT") node.remove();
+      });
     }
 
     function renderXlsx(container, file) {
-      if (typeof XLSX === "undefined") {
+      const placeholder = el("div", { class: "text-secondary small p-2 fst-italic", text: "Loading spreadsheet…" });
+      container.append(placeholder);
+
+      loadXlsx().then((XLSXLib) => {
+        placeholder.remove();
+        try {
+          const raw = Uint8Array.from(atob(file.data_b64), (c) => c.charCodeAt(0));
+          const wb = XLSXLib.read(raw, { type: "array" });
+          const theme = document.documentElement.getAttribute("data-bs-theme");
+          const theadClass = theme === "dark" ? "table-dark" : "table-light";
+
+          wb.SheetNames.forEach((name) => {
+            if (wb.SheetNames.length > 1) {
+              container.append(el("div", { class: "fw-semibold small text-secondary mt-2", text: "Sheet: " + name }));
+            }
+            const html = XLSXLib.utils.sheet_to_html(wb.Sheets[name]);
+            const wrap = el("div", { class: "table-responsive" });
+            wrap.innerHTML = html;
+            sanitizeXlsxWrap(wrap);
+            wrap.querySelectorAll("table").forEach((t) => {
+              t.classList.add("table", "table-hover", "table-sm", "table-striped", "table-bordered", "align-middle");
+              const thead = t.querySelector("thead");
+              if (thead) thead.classList.add(theadClass);
+            });
+            container.append(wrap);
+          });
+        } catch (err) {
+          container.append(el("div", { class: "text-danger", text: "Error rendering spreadsheet: " + err.message }));
+        }
+      }).catch(() => {
+        placeholder.remove();
         container.append(el("a", {
           class: "btn btn-outline-secondary",
           href: downloadUri(file), download: file.name,
           text: "Download " + file.name + " (spreadsheet preview unavailable offline)",
         }));
-        return;
-      }
-      try {
-        const raw = Uint8Array.from(atob(file.data_b64), (c) => c.charCodeAt(0));
-        const wb = XLSX.read(raw, { type: "array" });
-        wb.SheetNames.forEach((name) => {
-          if (wb.SheetNames.length > 1) {
-            container.append(el("div", { class: "fw-semibold small text-secondary mt-2", text: "Sheet: " + name }));
-          }
-          const wrap = el("div", { class: "table-responsive", html: XLSX.utils.sheet_to_html(wb.Sheets[name]) });
-          wrap.querySelectorAll("table").forEach((t) => t.classList.add("table", "table-sm", "table-bordered"));
-          container.append(wrap);
-        });
-      } catch (err) {
-        container.append(el("div", { class: "text-danger", text: "Error rendering spreadsheet: " + err.message }));
-      }
+      });
     }
 
     function renderPrevOutputs(run) {
@@ -642,29 +1039,29 @@
 
       const g = run.grading, s = g.summary || {}, exps = g.expectations || [];
       const pct = s.pass_rate != null ? Math.round(s.pass_rate * 100) : null;
-      const badgeCls = pct == null ? "text-bg-secondary" : pct >= 80 ? "text-bg-success" : pct >= 50 ? "text-bg-warning" : "text-bg-danger";
-      const barCls = pct == null ? "bg-secondary" : pct >= 80 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-danger";
+      const progressPct = pct ?? 0;
 
       const badge = $("grades-badge");
-      badge.className = "badge rounded-pill " + badgeCls;
+      badge.className = "badge rounded-pill " + passBadgeClass(pct);
       badge.textContent = pct == null ? "?" : pct + "%";
 
       const bar = $("grades-progress");
-      const progressPct = pct == null ? 0 : pct;
       bar.style.width = progressPct + "%";
-      bar.textContent = pct == null ? "" : pct + "%";
-      bar.className = "progress-bar " + barCls;
+      bar.className = "progress-bar " + passBarClass(pct);
       bar.closest("[role='progressbar']").setAttribute("aria-valuenow", progressPct);
 
       $("grades-summary").textContent = `${s.passed || 0} passed, ${s.failed || 0} failed of ${s.total || 0}`;
 
       const list = $("grades-list");
+      list.className = "";
       list.replaceChildren();
       exps.forEach((e) => {
-        list.append(el("div", { class: "list-group-item" }, [
-          el("span", { class: "fw-bold me-2 " + (e.passed ? "text-success" : "text-danger"), text: e.passed ? "✓" : "✗" }),
-          el("span", { text: e.text }),
-          e.evidence ? el("div", { class: "text-muted small mt-1 ms-4", text: e.evidence }) : null,
+        list.append(el("div", { class: "d-flex gap-2 py-2 border-bottom" }, [
+          el("span", { class: "fw-bold flex-shrink-0 " + (e.passed ? "text-success" : "text-danger"), text: e.passed ? "✓" : "✗" }),
+          el("div", {}, [
+            el("span", { class: "small", text: e.text }),
+            e.evidence ? el("div", { class: "text-secondary small mt-1", text: e.evidence }) : null,
+          ]),
         ]));
       });
     }
@@ -680,7 +1077,9 @@
       }
     }
 
-    // ===================== (7) Benchmark =====================
+    // ═══════════════════════════════════════════════════════════════
+    // BENCHMARK
+    // ═══════════════════════════════════════════════════════════════
     function fmtStat(stat, pct) {
       if (!stat || stat.mean == null || stat.stddev == null) return "—";
       const u = pct ? "%" : "";
@@ -688,21 +1087,47 @@
       const sd = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
       return `${m}${u} ± ${sd}${u}`;
     }
+
     function deltaClass(v) {
       const n = parseFloat(v);
       if (!v || isNaN(n)) return "";
-      return n > 0 ? "text-success fw-bold" : n < 0 ? "text-danger fw-bold" : "";
+      return n > 0 ? "text-success" : n < 0 ? "text-danger" : "";
     }
-    function rowClassFor(cfg) {
-      return (cfg === "without_skill" || cfg === "old_skill") ? "table-warning" : "table-primary";
-    }
-    // Format a raw proportion delta as percentage-points string, e.g. 0.74 → "+74pp"
+
+    // Formats a raw proportion delta as percentage-points string, e.g. 0.74 → "+74pp"
     function fmtDeltaPp(v) {
       if (v == null) return "—";
       const n = parseFloat(v);
       if (isNaN(n)) return String(v);
       const pp = Math.round(n * 100);
       return (n > 0 ? "+" : "") + pp + "pp";
+    }
+
+    function makeStatCard(valueEl, label, contextText, highlightClass) {
+      return el("div", { class: "col-sm-6 col-lg-4" }, [
+        el("div", { class: "card bg-body-tertiary h-100 " + (highlightClass || "") }, [
+          el("div", { class: "card-body text-center py-4" }, [
+            valueEl,
+            el("div", { class: "eyebrow mt-2", text: label }),
+            contextText ? el("div", { class: "small text-secondary mt-1", text: contextText }) : null,
+          ]),
+        ]),
+      ]);
+    }
+
+    // Appends a numeric delta stat card (time, tokens) to heroRow.
+    // Pass rate uses a custom card because it has unique color logic.
+    function appendNumericStatCard(heroRow, aData, bData, deltaRaw, label, suffix, ca, cb) {
+      if (!aData && !bData) return;
+      const deltaN = deltaRaw != null ? parseFloat(deltaRaw) : NaN;
+      const sign = !isNaN(deltaN) && deltaN > 0 ? "+" : "";
+      const valueText = deltaRaw != null ? sign + deltaRaw + suffix : "—";
+      heroRow.append(makeStatCard(
+        el("div", { class: "hero-delta-value text-body-emphasis", text: valueText }),
+        label,
+        ca && cb ? `${titleCase(ca)}: ${fmtStat(aData, false)}  ·  ${titleCase(cb)}: ${fmtStat(bData, false)}` : null,
+        ""
+      ));
     }
 
     function renderBenchmark() {
@@ -712,97 +1137,62 @@
       c.replaceChildren();
 
       const summary = d.run_summary || {}, meta = d.metadata || {}, notes = d.notes || [];
-      c.append(el("h2", { class: "h4 mb-1", text: "Benchmark Results" }));
+      c.append(el("h2", { class: "h4 mt-3 mb-1", text: "Benchmark Results" }));
       const metaBits = [
         meta.skill_name, meta.timestamp,
         meta.evals_run ? "Evals: " + meta.evals_run.join(", ") : null,
         (meta.runs_per_configuration || "?") + " runs/config",
-      ].filter(Boolean).join("  —  ");
+      ].filter(Boolean).join(" · ");
       c.append(el("p", { class: "text-secondary small mb-3", text: metaBits }));
 
       const configs = Object.keys(summary).filter((k) => k !== "delta");
       const ca = configs[0], cb = configs[1];
       const a = summary[ca] || {}, b = summary[cb] || {}, delta = summary.delta || {};
 
-      // ── Stat hero cards (visual summary) ──
+      // ── Hero stat cards ──
       const heroRow = el("div", { class: "row g-3 mb-4" });
 
-      function makeStatCard(valueEl, label, contextText, highlightClass) {
-        return el("div", { class: "col-sm-6 col-lg-4" }, [
-          el("div", { class: "card bg-body-tertiary h-100 " + (highlightClass || "") }, [
-            el("div", { class: "card-body text-center py-4" }, [
-              valueEl,
-              el("div", { class: "eyebrow mt-2", text: label }),
-              contextText ? el("div", { class: "small text-secondary mt-1", text: contextText }) : null,
-            ]),
-          ]),
-        ]);
-      }
-
-      // Pass Rate delta
+      // Pass Rate: custom card — colored value, uses fmtDeltaPp, highlights border on win
       const prDeltaRaw = delta.pass_rate;
       const prDeltaN = prDeltaRaw != null ? parseFloat(prDeltaRaw) : NaN;
       const prA = a.pass_rate?.mean != null ? Math.round(a.pass_rate.mean * 100) + "%" : "—";
       const prB = b.pass_rate?.mean != null ? Math.round(b.pass_rate.mean * 100) + "%" : "—";
-      const prValueCls = !isNaN(prDeltaN) ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "") : "";
+      const prValueCls = !isNaN(prDeltaN)
+        ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "text-body-emphasis")
+        : "text-body-emphasis";
       heroRow.append(makeStatCard(
-        el("div", { class: "fs-1 fw-bold lh-1 " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
+        el("div", { class: "hero-delta-value " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
         "Pass Rate Delta",
         ca && cb ? `${titleCase(ca)}: ${prA}  ·  ${titleCase(cb)}: ${prB}` : null,
-        !isNaN(prDeltaN) && prDeltaN > 0 ? "border-success border-opacity-50" : ""
+        !isNaN(prDeltaN) && prDeltaN > 0 ? "stat-hero-win" : ""
       ));
 
-      // Time delta
-      if (a.time_seconds || b.time_seconds) {
-        const tDeltaRaw = delta.time_seconds;
-        const tDeltaN = tDeltaRaw != null ? parseFloat(tDeltaRaw) : NaN;
-        const tA = fmtStat(a.time_seconds, false);
-        const tB = fmtStat(b.time_seconds, false);
-        const tSign = !isNaN(tDeltaN) && tDeltaN > 0 ? "+" : "";
-        heroRow.append(makeStatCard(
-          el("div", { class: "fs-1 fw-bold lh-1 text-secondary", text: tDeltaRaw != null ? tSign + tDeltaRaw + "s" : "—" }),
-          "Time Delta (s)",
-          ca && cb ? `${titleCase(ca)}: ${tA}  ·  ${titleCase(cb)}: ${tB}` : null,
-          ""
-        ));
-      }
-
-      // Token delta
-      if (a.tokens || b.tokens) {
-        const tkDeltaRaw = delta.tokens;
-        const tkA = fmtStat(a.tokens, false);
-        const tkB = fmtStat(b.tokens, false);
-        heroRow.append(makeStatCard(
-          el("div", { class: "fs-1 fw-bold lh-1 text-secondary", text: tkDeltaRaw != null ? String(tkDeltaRaw) : "—" }),
-          "Token Delta",
-          ca && cb ? `${titleCase(ca)}: ${tkA}  ·  ${titleCase(cb)}: ${tkB}` : null,
-          ""
-        ));
-      }
+      appendNumericStatCard(heroRow, a.time_seconds, b.time_seconds, delta.time_seconds, "Time Delta (s)", "s", ca, cb);
+      appendNumericStatCard(heroRow, a.tokens, b.tokens, delta.tokens, "Token Delta", "", ca, cb);
 
       c.append(heroRow);
 
       // ── Detail metrics table ──
-      const rows = [["Pass Rate", fmtStat(a.pass_rate, true), fmtStat(b.pass_rate, true), delta.pass_rate]];
+      const rows = [["Pass Rate", fmtStat(a.pass_rate, true), fmtStat(b.pass_rate, true), delta.pass_rate != null ? fmtDeltaPp(delta.pass_rate) : null]];
       if (a.time_seconds || b.time_seconds) {
         rows.push(["Time (s)", fmtStat(a.time_seconds, false), fmtStat(b.time_seconds, false), delta.time_seconds ? delta.time_seconds + "s" : null]);
       }
       if (a.tokens || b.tokens) {
-        rows.push(["Tokens", fmtStat(a.tokens, false), fmtStat(b.tokens, false), delta.tokens]);
+        rows.push(["Tokens", fmtStat(a.tokens, false), fmtStat(b.tokens, false), delta.tokens != null ? String(delta.tokens) : null]);
       }
-      const tbody = el("tbody", {}, rows.map((r) => el("tr", {}, [
+      const tbody = el("tbody", { class: "table-group-divider" }, rows.map((r) => el("tr", {}, [
         el("td", {}, [el("strong", { text: r[0] })]),
-        el("td", { text: r[1] }),
-        el("td", { text: r[2] }),
-        el("td", { class: deltaClass(r[3]), text: r[3] || "—" }),
+        el("td", { class: "text-secondary num", text: r[1] }),
+        el("td", { class: "text-secondary num", text: r[2] }),
+        el("td", { class: "bm-delta text-end " + deltaClass(r[3]), text: r[3] || "—" }),
       ])));
       const summaryWrap = el("div", { class: "table-responsive mb-4" });
-      summaryWrap.append(el("table", { class: "table table-striped table-bordered table-hover align-middle" }, [
-        el("thead", {}, [el("tr", {}, [
-          el("th", { text: "Metric" }),
-          el("th", { text: titleCase(ca || "A") }),
-          el("th", { text: titleCase(cb || "B") }),
-          el("th", { text: "Delta" }),
+      summaryWrap.append(el("table", { class: "table align-middle" }, [
+      el("thead", {}, [el("tr", {}, [
+          el("th", { class: "text-secondary", text: "Metric" }),
+          el("th", { class: "text-secondary", text: titleCase(ca || "A") }),
+          el("th", { class: "text-secondary", text: titleCase(cb || "B") }),
+          el("th", { class: "text-secondary text-end", text: "Delta" }),
         ])]),
         tbody,
       ]));
@@ -811,14 +1201,14 @@
       renderBenchmarkPerEval(c, d);
 
       if (notes.length) {
-        c.append(el("div", { class: "card mt-2" }, [
-          el("div", { class: "card-header fw-semibold", text: "Analysis Notes" }),
-          el("div", { class: "card-body" }, [el("ul", { class: "mb-0" }, notes.map((n) => el("li", { text: n })))]),
+        const notesList = el("ul", { class: "mb-0 ps-3 d-flex flex-column gap-1" },
+          notes.map((n) => el("li", { class: "small text-secondary", text: n })));
+        c.append(el("div", { class: "bench-eval-card mt-2" }, [
+          el("div", { class: "bench-eval-head eyebrow", text: "Analysis Notes" }),
+          el("div", { class: "p-3" }, [notesList]),
         ]));
       }
     }
-
-    function isBaselineCfg(cfg) { return cfg === "without_skill" || cfg === "old_skill"; }
 
     function renderBenchmarkPerEval(c, d) {
       const runs = d.runs || [];
@@ -830,12 +1220,12 @@
       evalIds.forEach((id) => {
         const er = runs.filter((r) => r.eval_id === id);
         const name = (er[0] && er[0].eval_name) || ("Eval " + id);
-        // Order configs so the skill version leads and the baseline trails.
+        // Skill version leads, baseline trails
         const groups = [...new Set(er.map((r) => r.configuration))]
           .sort((a, b) => (isBaselineCfg(a) ? 1 : 0) - (isBaselineCfg(b) ? 1 : 0));
         const runsPer = Math.max(...groups.map((g) => er.filter((r) => r.configuration === g).length), 1);
 
-        const grid = el("div", { class: "vs-grid" });
+        const grid = el("div", { class: "row g-0" });
         groups.forEach((cfg) => {
           const cr = er.filter((r) => r.configuration === cfg);
           const rates = cr.map((r) => (r.result || {}).pass_rate || 0);
@@ -846,18 +1236,17 @@
           const avgTime = times.length ? times.reduce((s, v) => s + v, 0) / times.length : null;
           const pctNum = Math.round(avg * 100);
           const baseline = isBaselineCfg(cfg);
-          const bigCls = pctNum >= 80 ? "text-success" : pctNum < 50 ? "text-danger" : "text-warning";
           const metaBits = [`${passed} / ${total} assertions`];
           if (avgTime != null) metaBits.push(`${avgTime.toFixed(1)}s${runsPer > 1 ? " avg" : ""}`);
-          grid.append(el("div", { class: "vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
-            el("div", { class: "eyebrow mb-1 " + (baseline ? "text-warning" : "text-info"), text: titleCase(cfg) }),
-            el("div", { class: "fs-2 fw-bold lh-1 " + bigCls, text: pctNum + "%" }),
+        grid.append(el("div", { class: "col-12 col-sm-6 vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
+          el("div", { class: "cfg-chip " + (baseline ? "is-baseline" : "is-with") + " mb-2", text: titleCase(cfg) }),
+            el("div", { class: "fs-2 lh-1 " + passTextClass(pctNum), text: pctNum + "%" }),
             el("div", { class: "small text-secondary mt-1", text: metaBits.join(" · ") }),
           ]));
         });
 
-        const card = el("div", { class: "border rounded overflow-hidden mb-3" }, [
-          el("div", { class: "bg-body-tertiary px-3 py-2 border-bottom d-flex align-items-center justify-content-between" }, [
+        const card = el("div", { class: "bench-eval-card mb-3" }, [
+          el("div", { class: "bench-eval-head d-flex align-items-center justify-content-between" }, [
             el("span", { class: "font-monospace text-body-emphasis", text: name }),
             el("span", { class: "eyebrow", text: runsPer + (runsPer === 1 ? " run/config" : " runs/config") }),
           ]),
@@ -880,7 +1269,7 @@
         if (!seen.has(e.text)) { seen.add(e.text); assertions.push(e.text); }
       })));
 
-      const tbody = el("tbody", {}, assertions.map((text) => el("tr", {}, [
+      const tbody = el("tbody", { class: "table-group-divider" }, assertions.map((text) => el("tr", {}, [
         el("td", { class: "small", text }),
         ...groups.map((g) => {
           const results = withExp[g].map((run) => {
@@ -892,11 +1281,16 @@
 
           const allPass = results.every((r) => r.passed);
           const anyFail = results.some((r) => !r.passed);
-          const cellCls = allPass ? "table-success text-center" : anyFail ? "table-danger text-center" : "text-center";
+          const anyPass = results.some((r) => r.passed);
+          const cellCls = allPass
+            ? "assert-pass text-center"
+            : anyFail
+            ? "assert-fail text-center"
+            : "text-center";
 
           const children = results.flatMap((r, i) => {
             const span = el("span", {
-              class: r.passed ? "text-success fw-bold" : "text-danger fw-bold",
+              class: r.passed ? "text-success" : "text-danger",
               title: `Run ${r.runNum}${r.evidence ? ": " + r.evidence : ""}`,
               text: r.passed ? "✓" : "✗",
             });
@@ -907,28 +1301,28 @@
       ])));
 
       const matrixWrap = el("div", { class: "table-responsive" });
-      matrixWrap.append(el("table", { class: "table table-sm align-middle mb-0" }, [
+      matrixWrap.append(el("table", { class: "table align-middle mb-0" }, [
         el("thead", {}, [el("tr", {}, [
           el("th", { class: "small text-secondary", text: "Assertion" }),
-          ...groups.map((g) => el("th", { class: "text-center small text-secondary", style: "width:120px", text: titleCase(g) })),
+          ...groups.map((g) => el("th", { class: "text-center small text-secondary matrix-cfg-col", text: titleCase(g) })),
         ])]),
         tbody,
       ]));
       return matrixWrap;
     }
 
-    // ===================== (8) State + navigation =====================
-    const feedbackMap = {};   // run_id -> feedback text
-    const verdictMap = {};    // run_id -> "good" | "needs_work" | "skip"
-    const visited = new Set();
-    let currentIndex = 0;
-
+    // ═══════════════════════════════════════════════════════════════
+    // NAVIGATION
+    // ═══════════════════════════════════════════════════════════════
     function setVerdict(value) {
       const run = RUNS[currentIndex];
       if (!run) return;
       if (value) verdictMap[run.id] = value; else delete verdictMap[run.id];
       const dot = $("eval-list").querySelector('[data-dot="' + run.id + '"]');
-      if (dot) dot.className = "run-dot " + verdictDotClass(run.id);
+      if (dot) {
+        dot.className = "run-dot " + verdictDotClass(run.id);
+        dot.setAttribute("aria-label", "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"));
+      }
       updateNav();
       scheduleSave();
     }
@@ -937,27 +1331,32 @@
       const next = currentIndex + delta;
       if (next >= 0 && next < RUNS.length) { clearTimeout(saveTimer); saveFeedback(false); showRun(next); }
     }
+
     function updateNav() {
       $("prev-btn").disabled = currentIndex === 0;
       $("next-btn").disabled = RUNS.length === 0 || currentIndex === RUNS.length - 1;
-      const total = RUNS.length, reviewed = Object.keys(verdictMap).length;
+      const total = RUNS.length;
+      const pos = $("subbar-pos");
+      if (pos) pos.textContent = total ? (currentIndex + 1) + "\u2009/\u2009" + total : "";
+      const reviewed = visited.size;
       const pct = total ? Math.round(reviewed / total * 100) : 0;
       const bar = $("progress-bar");
       bar.style.width = pct + "%";
       bar.closest("[role='progressbar']").setAttribute("aria-valuenow", pct);
       const rc = $("reviewed-count");
       if (rc) rc.textContent = `${reviewed} / ${total}`;
-      if (total && reviewed >= total) {
-        $("submit-btn").classList.remove("btn-outline-secondary");
-        $("submit-btn").classList.add("btn-primary");
+      if (total && Object.keys(verdictMap).length >= total) {
+        $("submit-btn").classList.replace("btn-outline-secondary", "btn-primary");
       }
     }
 
-    // ===================== (9) Feedback persistence =====================
+    // ═══════════════════════════════════════════════════════════════
+    // PERSISTENCE
+    // ═══════════════════════════════════════════════════════════════
     async function prefillFeedback() {
-      // Fresh iteration: the on-disk feedback.json belongs to the prior iteration, so don't prefill from it.
-      const fresh = Object.keys(PREV_FB).length > 0 || Object.keys(PREV_OUT).length > 0;
-      if (fresh) return;
+      // If prior-iteration context is embedded, the on-disk feedback.json is stale — skip prefill.
+      const hasPriorContext = Object.keys(PREV_FB).length > 0 || Object.keys(PREV_OUT).length > 0;
+      if (hasPriorContext) return;
       try {
         const r = await fetch("/api/feedback");
         const d = await r.json();
@@ -965,51 +1364,44 @@
       } catch { /* static mode or first run — nothing to prefill */ }
     }
 
-    let saveTimer = null;
     function scheduleSave() {
       clearTimeout(saveTimer);
-      const st = $("feedback-status");
-      st.textContent = "Saving…";
-      st.className = "save-status small text-secondary mb-3";
+      setFeedbackStatus("Saving…");
       saveTimer = setTimeout(() => saveFeedback(true), 800);
     }
+
     function saveFeedback(showStatus) {
-      const run = RUNS[currentIndex];
-      if (!run) return;
-      const text = $("feedback").value;
-      if (text.trim()) feedbackMap[run.id] = text; else delete feedbackMap[run.id];
+      flushCurrentFeedback();
+      if (!RUNS[currentIndex]) return;
 
       const ids = new Set([...Object.keys(feedbackMap), ...Object.keys(verdictMap)]);
-      const reviews = [...ids]
-        .map((run_id) => ({ run_id, feedback: feedbackMap[run_id] || "", verdict: verdictMap[run_id] || "", timestamp: new Date().toISOString() }))
-        .filter((r) => r.feedback.trim() || r.verdict);
+      const reviews = [...ids].map((id) => buildReviewEntry(id)).filter((r) => r.feedback.trim() || r.verdict);
 
       fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reviews, status: "in_progress" }),
       }).then(() => {
-        if (showStatus) { const st = $("feedback-status"); st.textContent = "✓ Saved"; st.className = "save-status small text-success mb-3"; toast("Saved"); }
+        if (showStatus) { setFeedbackStatus("✓ Saved", "success"); toast("Saved"); }
       }).catch(() => {
-        if (showStatus) { const st = $("feedback-status"); st.textContent = "Will download on submit"; st.className = "save-status small text-secondary mb-3"; }
+        if (showStatus) { setFeedbackStatus("Will download on submit"); }
       });
     }
+
     function toast(msg) {
       const t = $("save-toast");
       t.querySelector(".toast-body").textContent = msg;
-      bootstrap.Toast.getOrCreateInstance(t, { delay: 1500 }).show();
+      bootstrap.Toast.getOrCreateInstance(t, { delay: 3000 }).show();
     }
 
     function submitAll() {
       clearTimeout(saveTimer);
       $("submit-btn").disabled = true;
-      const run = RUNS[currentIndex];
-      const text = $("feedback").value;
-      if (run) { if (text.trim()) feedbackMap[run.id] = text; else delete feedbackMap[run.id]; }
+      flushCurrentFeedback();
 
       const ts = new Date().toISOString();
-      // Include every run so the model can tell "no feedback" (looks good) from "not reviewed".
-      const reviews = RUNS.map((r) => ({ run_id: r.id, feedback: feedbackMap[r.id] || "", verdict: verdictMap[r.id] || "", timestamp: ts }));
+      // Include every run so the model can tell "no feedback" from "not reviewed"
+      const reviews = RUNS.map((r) => buildReviewEntry(r.id, ts));
       const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
       const done = () => bootstrap.Modal.getOrCreateInstance($("done-modal")).show();
 
@@ -1018,7 +1410,7 @@
         headers: { "Content-Type": "application/json" },
         body: payload,
       }).then(done).catch(() => {
-        // Static mode (no server) — download the file instead.
+        // Static mode (no server) — download the file instead
         const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
         const a = el("a", { href: url, download: "feedback.json" });
         a.click();
@@ -1027,12 +1419,15 @@
       });
     }
 
-    // ===================== (10) Events + init =====================
+    // ═══════════════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════════════
     function onKey(e) {
       if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); navigate(-1); }
-      else if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); navigate(1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); navigate(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); navigate(1); }
     }
+
     function init() {
       const skillNameEl = $("skill-name");
       skillNameEl.textContent = DATA.skill_name || "";
@@ -1045,9 +1440,18 @@
       document.querySelectorAll("input[name='verdict']").forEach((r) =>
         r.addEventListener("change", () => setVerdict(r.checked ? r.value : "")));
       document.addEventListener("keydown", onKey);
-      if (DATA.benchmark) { $("view-tabs").classList.remove("d-none"); renderBenchmark(); }
+      if (DATA.benchmark) {
+        $("view-tabs").classList.remove("d-none");
+        renderBenchmark();
+        $("view-tabs").addEventListener("shown.bs.tab", (e) => {
+          const targetId = e.target.getAttribute("data-bs-target");
+          const panel = document.querySelector(targetId);
+          if (panel) panel.focus();
+        });
+      }
       prefillFeedback().then(() => { if (RUNS.length) showRun(0); else updateNav(); });
     }
+
     document.addEventListener("DOMContentLoaded", init);
   })();
   </script>

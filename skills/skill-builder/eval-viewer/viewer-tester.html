@@ -6,77 +6,275 @@
   <title>Eval Review</title>
   <link rel="stylesheet" href="../assets/bootstrap.min.css">
   <style>
-    /* ════ D2 · Review Workbench — custom CSS only where Bootstrap has no equivalent ════ */
+    /* ════ Eval Viewer — CSS custom properties (single source of truth for every dimension) ════ */
+    :root {
+      /* ── Rail widths (static at lg / xl+; offcanvas below) ── */
+      --ev-nav-rail-w:         clamp(200px, 20%, 260px);
+      --ev-fb-rail-w:          clamp(300px, 24%, 360px);
+
+      /* ── Reading column ── */
+      --ev-read-col-max:       min(780px, 95vw);
+
+      /* ── Navbar ── */
+      --ev-navbar-min-h:       58px;
+      --ev-progress-meter-w:   clamp(110px, 12vw, 150px);
+      --ev-progress-bar-h:     5px;
+
+      /* ── Content panels ── */
+      --ev-pdf-h:              clamp(300px, 70vh, 900px);
+      --ev-img-thumb-max-h:    clamp(160px, 30vh, 260px);
+      --ev-collapse-h:         clamp(10rem, 22vh, 16rem);
+      --ev-matrix-col-w:       clamp(80px, 12vw, 120px);
+
+      /* ── Touch targets (WCAG 2.5.5 / Apple HIG 44 pt) ── */
+      --ev-touch-target:       44px;
+
+      /* ── Run indicator dot ── */
+      --ev-dot-sz:             8px;
+
+      /* ── Typography ── */
+      --ev-eyebrow-fs:         .75rem;
+      --ev-eyebrow-ls:         .08em;
+      --ev-seg-tab-fs:         .85rem;
+      --ev-file-name-fs:       .8125rem;
+      --ev-icon-fs:            1.1rem;
+      --ev-empty-icon-fs:      2.25rem;
+      --ev-save-status-min-h:  1.1rem;
+
+      /* ── Accent borders ── */
+      --ev-accent-w:           3px;
+    }
 
     /* ── Layout shell ── */
-    .app-shell   { height: 100vh; height: 100dvh; }
-    .scroll-pane { overflow-y: auto; min-height: 0; }
-    .output-text { white-space: pre-wrap; word-break: break-word; }
-    .pdf-frame   { height: 70vh; }
-    .skill-name  { max-width: 22ch; }
-    .read-col    { max-width: 780px; }
-    .label-flex  { flex: 1 1 0; min-width: 0; }
+    .app-shell    { height: 100vh; height: 100dvh; }
+    .scroll-pane  { overflow-y: auto; min-height: 0; }
+    .output-text  { white-space: pre-wrap; word-break: break-word; }
+    .pdf-frame    { height: var(--ev-pdf-h); }
+    .skill-name   { max-width: 22ch; }
+    .read-col     { max-width: var(--ev-read-col-max); }
+    .label-flex   { flex: 1 1 0; min-width: 0; }    .img-thumb    { max-height: var(--ev-img-thumb-max-h); object-fit: contain; }
+    .nav-hamburger { font-size: var(--ev-icon-fs); }
 
-    /* Shared typographic token: tiny uppercase section label. Replaces the old
-       kicker / brand-eyebrow / sidebar-group-header / stat-label / sec-title /
-       vs-tag rules — one source of truth, spacing/color via Bootstrap utilities. */
-    .eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bs-secondary-color); }
+    /* Shared typographic token: tiny uppercase section label */
+    .eyebrow {
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+    }
 
     /* ── Navbar: segmented tab control (no 1:1 Bootstrap component) ── */
     .seg-tabs { background: var(--bs-tertiary-bg); border-radius: 999px; padding: 3px; }
-    .seg-tabs .nav-link { border-radius: 999px; padding: .28rem .9rem; font-size: .85rem; color: var(--bs-secondary-color); border: 0; }
+    .seg-tabs .nav-link { border-radius: 999px; padding: .28rem .9rem; font-size: var(--ev-seg-tab-fs); color: var(--bs-secondary-color); border: 0; }
     .seg-tabs .nav-link.active { background: var(--bs-body-bg); color: var(--bs-body-emphasis); box-shadow: var(--bs-box-shadow-sm); }
-    .progress-meter { width: 132px; }
+    .progress-meter { width: var(--ev-progress-meter-w); }
 
     /* ── Nav rail: grouped eval list (static on lg+, offcanvas below) ── */
-    .nav-rail { width: 244px; }
-    @media (min-width: 992px) { .nav-rail { flex: 0 0 244px; border-right: 1px solid var(--bs-border-color); } }
+    .nav-rail { width: var(--ev-nav-rail-w); }
+    @media (min-width: 992px) { .nav-rail { flex: 0 0 var(--ev-nav-rail-w); border-right: 1px solid var(--bs-border-color); } }
     #eval-list .list-group-item-action {
-      border: 0; border-left: 3px solid transparent; background: transparent;
-      color: var(--bs-body-color); padding: .5rem .85rem .5rem .6rem;
+      border: 0;
+      border-left: var(--ev-accent-w) solid transparent;
+      background: transparent;
+      color: var(--bs-body-color);
+      padding: .5rem .85rem .5rem .6rem;
     }
     #eval-list .list-group-item-action:hover { background: var(--bs-secondary-bg); }
     #eval-list .list-group-item-action.active { background: var(--bs-secondary-bg); color: var(--bs-body-emphasis); border-left-color: var(--bs-primary); }
     #eval-list .list-group-item-action.active.is-baseline { border-left-color: var(--bs-warning); }
-    .run-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .run-dot { width: var(--ev-dot-sz); height: var(--ev-dot-sz); border-radius: 50%; flex-shrink: 0; }
     .run-dot.v-good { background: var(--bs-success); }
     .run-dot.v-bad  { background: var(--bs-danger); border-radius: 2px; }
     .run-dot.v-none { border: 1.5px solid var(--bs-secondary-color); }
 
-    /* Touch target minimums — Apple HIG 44 pt / Material 48 dp */
-    #prev-btn, #next-btn { min-height: 44px; min-width: 44px; }
-    #eval-list .list-group-item-action { min-height: 44px; }
+    /* Touch targets */
+    #prev-btn, #next-btn { min-height: var(--ev-touch-target); min-width: var(--ev-touch-target); }
+    #eval-list .list-group-item-action { min-height: var(--ev-touch-target); }
 
     /* ── Output files: collapsed long code ── */
-    .output-collapsed { max-height: 16rem; overflow: hidden; }
+    .output-collapsed { max-height: var(--ev-collapse-h); overflow: hidden; }
 
     /* ── Feedback rail (static on xl+, offcanvas below) ── */
-    .fb-rail { width: 344px; }
-    @media (min-width: 1200px) { .fb-rail { flex: 0 0 344px; border-left: 1px solid var(--bs-border-color); } }
+    .fb-rail { width: var(--ev-fb-rail-w); }
+    @media (min-width: 1200px) { .fb-rail { flex: 0 0 var(--ev-fb-rail-w); border-left: 1px solid var(--bs-border-color); } }
     .fb-rail .offcanvas-body { display: block; }
-    .save-status { min-height: 1.1rem; }
-    .navbar .container-fluid { min-height: 58px; }
+    .save-status { min-height: var(--ev-save-status-min-h); }
+    .navbar .container-fluid { min-height: var(--ev-navbar-min-h); }
 
-    /* ── Benchmark: versus scorecards (2-up grid + subtle config tints) ── */
-    .vs-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    /* ── Benchmark: versus scorecards (Bootstrap row/col + config tints) ── */
     .vs-col.is-with    { background: var(--bs-primary-bg-subtle); }
     .vs-col.is-without { background: var(--bs-warning-bg-subtle); }
     @media (min-width: 576px) { .vs-col.is-with { border-right: 1px solid var(--bs-border-color); } }
+
+    /* ── Assertion matrix: responsive column header width ── */
+    .matrix-cfg-col { width: var(--ev-matrix-col-w); }
+
+    /* ── Empty state ── */
+    .empty-state-icon { font-size: var(--ev-empty-icon-fs); line-height: 1; opacity: .2; }
+
+    /* ── File card: tinted header, stronger filename label ── */
+    .file-header { background: var(--bs-tertiary-bg); }
+    .file-header .file-name { font-size: var(--ev-file-name-fs); }
+
+    /* ── Verdict buttons: icon-aligned, consistent touch target height ── */
+    .verdict-stack label.btn { min-height: var(--ev-touch-target); display: flex; align-items: center; }
+
+    /* ════ Additions: surface, animation, and component consistency ════ */
+
+    /* Shared card radius token — applied everywhere a surface has rounding */
+    :root { --ev-card-radius: .45rem; }
+
+    /* Code pre: give it a background so it reads as a distinct surface */
+    pre.output-text {
+      background: var(--bs-tertiary-bg);
+      border: 1px solid var(--bs-border-color);
+      border-radius: var(--ev-card-radius);
+      margin-bottom: 0;
+    }
+
+    /* Code collapse: soft gradient fade at the cut-off point */
+    .output-collapsed {
+      mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+    }
+
+    /* Assertion matrix: full-cell pass/fail tinting */
+    td.assert-pass { background-color: rgba(25, 135, 84, .16); }
+    td.assert-fail  { background-color: rgba(220, 53, 69, .14); }
+
+    /* Benchmark hero: left-accent stripe on the winning card only */
+    .stat-hero-win {
+      border-left: var(--ev-accent-w) solid var(--bs-success) !important;
+    }
+
+    /* Per-eval breakdown: styled card shell */
+    .bench-eval-card {
+      border: 1px solid var(--bs-border-color);
+      border-radius: var(--ev-card-radius);
+      overflow: hidden;
+    }
+    .bench-eval-head {
+      background: var(--bs-tertiary-bg);
+      border-bottom: 1px solid var(--bs-border-color);
+      padding: .6rem 1rem;
+    }
+
+    /* Sticky reading subbar: opaque background + full-width (not .container) */
+    #reading-subbar {
+      background: var(--bs-body-bg);
+      border-bottom: 1px solid var(--bs-border-color);
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Sidebar group header: consistent spacing + visual divider between groups */
+    .sidebar-group-head {
+      padding: .5rem .85rem .3rem;
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+      user-select: none;
+    }
+    .sidebar-group-sep { border-top: 1px solid var(--bs-border-color); margin-top: .25rem; padding-top: .5rem; }
+
+    /* Multi-file switcher: plain monospace buttons in the same header bar as single-file */
+    .file-switch-btn {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font-family: var(--bs-font-monospace);
+      font-size: var(--ev-file-name-fs);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .file-switch-btn.is-active { color: var(--bs-body-emphasis); font-weight: 600; }
+    .file-switch-btn:not(.is-active) { color: var(--bs-secondary-color); }
+    .file-switch-btn:not(.is-active):hover { color: var(--bs-body-color); }
+    /* ensure switcher container can shrink in flex layouts */
+    .file-header > div:first-child { min-width: 0; }
+
+    /* Benchmark summary table delta column */
+    .bm-delta { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .num { font-variant-numeric: tabular-nums; font-family: var(--bs-font-monospace); font-size: .9em; }
+
+    /* Ensure eval-fade animation */
+    @keyframes eval-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    .eval-fade { animation: eval-fade-in .14s ease; }
+
+    /* Responsive hero delta number size */
+    :root { --ev-hero-delta-fs: clamp(1.7rem, 3.2vw, 2.4rem); }
+    .hero-delta-value { font-size: var(--ev-hero-delta-fs); line-height: 1; }
+
+    /* Benchmark: eyebrow-style table headers (all tables in benchmark panel) */
+    #benchmark-content table thead th {
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+      font-weight: 500;
+      white-space: nowrap;
+      border-bottom-width: 2px;
+    }
+
+    /* Benchmark container top/bottom breathing room */
+    #benchmark-content { padding-top: 1.5rem; padding-bottom: 4rem; }
+
+    /* Eval content: ensure last item never clips against viewport edge */
+    #eval-content { padding-bottom: 5rem !important; }
+
+    /* Config chip: dot + label in config color — replaces generic badge pills */
+    .cfg-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .7rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .cfg-chip::before {
+      content: "";
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .cfg-chip.is-with     { color: var(--bs-info); }
+    .cfg-chip.is-with::before    { background: var(--bs-primary); }
+    .cfg-chip.is-baseline { color: var(--bs-warning); }
+    .cfg-chip.is-baseline::before { background: var(--bs-warning); }
+
+    /* Subbar position counter */
+    #subbar-pos {
+      font-size: .75rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--bs-secondary-color);
+      min-width: 3.5ch;
+      text-align: center;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body class="d-flex flex-column app-shell">
 
   <!-- ============ Navbar: brand · tabs · progress · submit ============ -->
-  <nav class="navbar bg-body-tertiary border-bottom flex-shrink-0 py-0">
+  <nav class="navbar bg-body-tertiary border-bottom flex-shrink-0 py-1">
     <div class="container-fluid">
     <div class="d-flex align-items-center gap-2 me-auto">
-      <button class="btn btn-link text-body p-1 d-lg-none" type="button"
+      <button class="btn btn-link text-body d-lg-none" type="button"
               data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="Toggle eval list">
-        <span aria-hidden="true" style="font-size:1.1rem">&#9776;</span>
+        <span aria-hidden="true" class="nav-hamburger">&#9776;</span>
       </button>
-      <div class="lh-1">
-        <div class="eyebrow mb-1">Skill review</div>
-        <h1 id="skill-name" class="fw-semibold text-body-emphasis text-truncate skill-name d-inline-block align-bottom h6 mb-0" title=""></h1>
+      <div>
+        <div class="eyebrow">Skill review</div>
+        <div id="skill-name" class="skill-name d-inline-block align-bottom h5 mb-0" title=""></div>
       </div>
     </div>
     <ul class="nav seg-tabs d-none mx-2" id="view-tabs" role="tablist">
@@ -87,17 +285,17 @@
         <button id="tab-benchmark" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false" aria-controls="panel-benchmark">Benchmark</button>
       </li>
     </ul>
-    <div class="d-flex align-items-center gap-3 ms-auto">
+    <div class="d-flex align-items-center gap-5 ms-auto">
       <div class="progress-meter d-none d-sm-block">
-        <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span id="reviewed-count" class="text-body-emphasis fw-semibold">0 / 0</span></div>
-        <div class="progress" role="progressbar" style="height:5px"
+        <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span id="reviewed-count" class="text-body-emphasis">0 / 0</span></div>
+        <div class="progress" role="progressbar" style="--bs-progress-height: var(--ev-progress-bar-h)"
              aria-label="Review progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
           <div id="progress-bar" class="progress-bar bg-success"></div>
         </div>
       </div>
-      <button class="btn btn-outline-secondary d-xl-none" type="button"
+      <button class="btn btn-primary btn-sm d-xl-none" type="button"
               data-bs-toggle="offcanvas" data-bs-target="#feedback-rail" aria-label="Open review panel">Review</button>
-      <button class="btn btn-outline-secondary" id="submit-btn" type="button" data-action="submit">Submit All</button>
+      <button class="btn btn-primary btn-sm" id="submit-btn" type="button" data-action="submit">Submit All</button>
     </div>
     </div>
   </nav>
@@ -112,7 +310,7 @@
         <!-- Nav rail: grouped eval list (static on lg+, offcanvas below) -->
         <aside class="nav-rail offcanvas-start d-flex flex-column" id="sidebar"
                tabindex="-1" aria-labelledby="sidebar-title">
-          <div class="offcanvas-body p-0 scroll-pane flex-grow-1 bg-body-tertiary">
+          <div class="offcanvas-body p-0 scroll-pane flex-grow-1">
             <h2 id="sidebar-title" class="visually-hidden">Eval list</h2>
           <div id="eval-list" class="list-group list-group-flush"></div>
           </div>
@@ -120,20 +318,22 @@
 
         <!-- Reading column -->
         <div class="d-flex flex-column flex-grow-1 overflow-hidden">
-          <div class="d-flex align-items-center gap-2 px-3 py-2 flex-shrink-0">
-            <button id="prev-btn" class="btn btn-outline-secondary" type="button"
-                    aria-label="Previous eval">&#8592;</button>
-            <button id="next-btn" class="btn btn-outline-secondary" type="button"
-                    aria-label="Next eval">&#8594;</button>
-            <span id="current-config-label" class="fw-semibold text-body-emphasis text-truncate ms-1 label-flex"></span>
-            <span id="config-badge" class="badge d-none"></span>
-          </div>
+          <div id="main-scroll" class="scroll-pane flex-grow-1 d-flex flex-column">
 
-          <div id="main-scroll" class="scroll-pane flex-grow-1">
+            <div id="reading-subbar" class="d-flex align-items-center gap-2 px-3 py-2">
+              <button id="prev-btn" class="btn btn-dark btn-lg px-4" type="button"
+                      aria-label="Previous eval">&#8592;</button>
+              <span id="subbar-pos" aria-live="polite"></span>
+              <button id="next-btn" class="btn btn-dark btn-lg px-4" type="button"
+                      aria-label="Next eval">&#8594;</button>
+              <span id="current-config-label" class="ms-2 fw-semibold text-body-emphasis text-truncate label-flex"></span>
+              <span id="config-badge" class="cfg-chip d-none"></span>
+            </div>
 
             <!-- Empty state -->
-            <div id="no-eval-state" class="h-100 d-flex align-items-center justify-content-center">
-              <span class="text-secondary small fst-italic">No eval selected</span>
+            <div id="no-eval-state" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-2">
+              <div class="empty-state-icon" aria-hidden="true">&#9633;</div>
+              <span class="text-secondary small">Select an eval from the sidebar to begin reviewing</span>
             </div>
 
             <!-- Eval content -->
@@ -203,16 +403,16 @@
               <span class="fw-semibold text-body-emphasis">Your Review</span>
               <span id="rail-grade-badge" class="badge rounded-pill d-none"></span>
             </div>
-            <div id="rail-note" class="bg-body-secondary rounded small p-2 mb-3 text-secondary">Select an eval to review.</div>
+
 
             <div class="eyebrow mb-2">Verdict</div>
             <div class="d-grid gap-2 verdict-stack mb-3" role="group" aria-label="Verdict">
               <input type="radio" class="btn-check" name="verdict" id="verdict-good" value="good" autocomplete="off">
-              <label class="btn btn-outline-success text-start" for="verdict-good">Looks good</label>
+              <label class="btn btn-outline-success text-start" for="verdict-good"><span class="me-2" aria-hidden="true">✓</span>Looks good</label>
               <input type="radio" class="btn-check" name="verdict" id="verdict-needs_work" value="needs_work" autocomplete="off">
-              <label class="btn btn-outline-danger text-start" for="verdict-needs_work">Needs work</label>
+              <label class="btn btn-outline-danger text-start" for="verdict-needs_work"><span class="me-2" aria-hidden="true">✗</span>Needs work</label>
               <input type="radio" class="btn-check" name="verdict" id="verdict-skip" value="skip" autocomplete="off">
-              <label class="btn btn-outline-secondary text-start" for="verdict-skip">Skip for now</label>
+              <label class="btn btn-outline-secondary text-start" for="verdict-skip"><span class="me-2" aria-hidden="true">→</span>Skip for now</label>
             </div>
 
             <div class="eyebrow mb-2">Notes</div>
@@ -235,7 +435,7 @@
     <!-- ---- Benchmark panel (quantitative stats) ---- -->
     <div class="tab-pane fade h-100" id="panel-benchmark" role="tabpanel" aria-labelledby="tab-benchmark" tabindex="-1">
       <div class="scroll-pane h-100">
-        <div id="benchmark-content" class="container"></div>
+        <div id="benchmark-content" class="container-xl"></div>
       </div>
     </div>
   </main>
@@ -816,7 +1016,7 @@ def test_explain_uses_index_scan(db):
       });
       const badges = el("span", { class: "d-flex align-items-center gap-1 flex-shrink-0 ms-auto" }, [
         !isChild && cfg ? el("span", {
-          class: "badge rounded-pill " + (cfg.baseline ? "text-bg-warning" : "text-bg-primary"),
+          class: "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with"),
           text: cfg.label,
         }) : null,
         pct == null ? null : el("span", {
@@ -854,10 +1054,11 @@ def test_explain_uses_index_scan(db):
         });
         let first = true;
         for (const [gid, items] of groups) {
-          list.append(el("div", {
-            class: "eyebrow px-3 pb-1 user-select-none " + (first ? "pt-2" : "pt-3"),
+          const head = el("div", {
+            class: "sidebar-group-head" + (first ? "" : " sidebar-group-sep"),
             text: gid === "_" ? "Other" : `Eval ${gid}`,
-          }));
+          });
+          list.append(head);
           first = false;
           items.forEach(({ run, i }) => list.append(makeSidebarItem(run, i, true)));
         }
@@ -893,17 +1094,20 @@ def test_explain_uses_index_scan(db):
       $("no-eval-state").classList.add("d-none");
       const content = $("eval-content");
       content.classList.remove("d-none");
+      content.classList.remove("eval-fade");
+      void content.offsetWidth;
+      content.classList.add("eval-fade");
 
       const cfg = detectConfig(run);
-      $("current-config-label").textContent = evalTitle(run) + (cfg ? " · " + cfg.label : "");
+      $("current-config-label").textContent = evalTitle(run);
       $("prompt-text").textContent = run.prompt || "(No prompt found)";
 
       const badge = $("config-badge");
       if (cfg) {
-        badge.className = "badge rounded-pill " + (cfg.baseline ? "text-bg-warning" : "text-bg-primary");
+        badge.className = "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with");
         badge.textContent = cfg.label;
       } else {
-        badge.className = "badge d-none";
+        badge.className = "cfg-chip d-none";
         badge.textContent = "";
       }
 
@@ -911,13 +1115,6 @@ def test_explain_uses_index_scan(db):
       renderPrevOutputs(run);
       renderGrades(run);
       renderPrevFeedback(run);
-
-      // Feedback rail: context note + grade-at-a-glance badge
-      $("rail-note").replaceChildren(
-        document.createTextNode("Reviewing "),
-        el("strong", { class: "text-body-emphasis", text: evalTitle(run) + (cfg ? " · " + cfg.label : "") }),
-        document.createTextNode(". Your verdict and notes save automatically.")
-      );
       const pct = gradePct(run);
       const rgb = $("rail-grade-badge");
       if (pct == null) {
@@ -967,11 +1164,13 @@ def test_explain_uses_index_scan(db):
       return _xlsxPromise;
     }
 
-    // Populates `container` with the rendered file content (no card wrapper).
-    function buildFileContentInto(container, file) {
+    // Raw file content. Pass includeActions=true to overlay Copy+Download
+    // in the top-right corner of text blocks (used for multi-file tab panes).
+    // fileCard() handles its own actions in the card-header instead.
+    function buildFileContentInto(container, file, includeActions) {
       if (file.type === "image_url") {
         const imgWrap = el("div", { class: "bg-body-secondary rounded p-2" });
-        const thumb = el("img", { alt: file.name, class: "img-fluid d-block", style: "max-height:260px;object-fit:contain;" });
+        const thumb = el("img", { alt: file.name, class: "img-fluid d-block img-thumb" });
         thumb.src = file.src;
         imgWrap.append(
           thumb,
@@ -984,15 +1183,26 @@ def test_explain_uses_index_scan(db):
         container.append(frame);
       } else if (file.type === "text") {
         const lines = (file.content || "").split("\n").length;
-        const pre = el("pre", { class: "output-text mb-0 bg-body-tertiary border rounded p-3 small lh-base overflow-auto", text: file.content });
-        const wrap = el("div", { class: "code-block-wrap position-relative" });
-        const copyBtn = el("button", {
-          class: "btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-2",
-          type: "button",
-          text: "Copy",
-          "aria-label": "Copy code content",
-          onclick: (e) => copyText(file.content, e.currentTarget),
-        });
+        const pre = el("pre", { class: "output-text p-3 small lh-base overflow-auto", text: file.content });
+        const wrap = el("div", { class: "position-relative" });
+        if (includeActions) {
+          const btnGroup = el("div", { class: "position-absolute top-0 end-0 m-2 d-flex gap-1" });
+          btnGroup.append(
+            el("button", {
+              class: "btn btn-outline-secondary btn-sm",
+              type: "button", text: "Copy",
+              "aria-label": "Copy " + file.name,
+              onclick: (e) => copyText(file.content, e.currentTarget),
+            }),
+            el("a", {
+              class: "btn btn-outline-secondary btn-sm",
+              href: downloadUri(file), download: file.name,
+              title: "Download " + file.name, "aria-label": "Download " + file.name,
+              text: "↓",
+            })
+          );
+          wrap.append(btnGroup);
+        }
         if (lines > COLLAPSE_LINE_THRESHOLD) {
           pre.classList.add("output-collapsed");
           const expandBtn = el("button", {
@@ -1007,9 +1217,9 @@ def test_explain_uses_index_scan(db):
               btn.setAttribute("aria-expanded", String(!isCollapsed));
             },
           });
-          wrap.append(copyBtn, pre, expandBtn);
+          wrap.append(pre, expandBtn);
         } else {
-          wrap.append(copyBtn, pre);
+          wrap.append(pre);
         }
         container.append(wrap);
       } else if (file.type === "image") {
@@ -1025,71 +1235,110 @@ def test_explain_uses_index_scan(db):
       }
     }
 
+    // Single-file card: filename in card-header + Copy + Download; no floating buttons.
     function fileCard(file) {
-      const body = el("div", { class: "card-body" });
-      buildFileContentInto(body, file);
-      const header = el("div", { class: "card-header d-flex justify-content-between align-items-center" }, [
-        el("span", { class: "font-monospace small", text: file.name }),
-        el("a", { class: "small", href: downloadUri(file), download: file.name, text: "Download" }),
+      const body = el("div", { class: "card-body p-0" });
+      buildFileContentInto(body, file, false);
+      const actions = [];
+      if (file.type === "text" && file.content != null) {
+        actions.push(el("button", {
+          class: "btn btn-outline-secondary btn-sm",
+          type: "button", text: "Copy",
+          "aria-label": "Copy " + file.name,
+          onclick: (e) => copyText(file.content, e.currentTarget),
+        }));
+      }
+      if (file.type !== "error") {
+        actions.push(el("a", {
+          class: "btn btn-outline-secondary btn-sm",
+          href: downloadUri(file), download: file.name,
+          title: "Download " + file.name, text: "↓",
+        }));
+      }
+      const header = el("div", { class: "file-header d-flex align-items-center justify-content-between gap-3 px-3 py-2 border-bottom" }, [
+        el("span", { class: "font-monospace file-name text-body-emphasis text-truncate", text: file.name }),
+        actions.length ? el("div", { class: "d-flex gap-2 flex-shrink-0" }, actions) : null,
       ]);
-      return el("div", { class: "card rounded-0 mb-3" }, [header, body]);
+      return el("div", { class: "card mb-3 overflow-hidden" }, [header, body]);
     }
 
     function renderOutputs(container, outputs) {
       container.replaceChildren();
       if (!outputs.length) {
-        container.append(el("div", { class: "text-muted fst-italic p-3 text-center", text: "No output files" }));
+        container.append(el("div", { class: "text-secondary fst-italic p-3 text-center", text: "No output files" }));
         return;
       }
 
-      // Single file: plain card (no tab overhead)
       if (outputs.length === 1) {
         container.append(fileCard(outputs[0]));
         return;
       }
 
-      // Multiple files: Bootstrap tab strip so long outputs don't stack
-      const uid = "ft-" + Math.random().toString(36).slice(2);
-      const tabList = el("ul", { class: "nav nav-tabs mt-3 flex-wrap", role: "tablist" });
-      const tabContent = el("div", { class: "tab-content border border-top-0" });
+      // Multi-file: same card structure as single-file.
+      // File switcher lives in the header bar alongside Copy + Download.
+      // No nav-tabs — consistent visual language in all cases.
+      let activeFile = outputs[0];
 
-      outputs.forEach((f, i) => {
-        const tid = uid + i;
-        const active = i === 0;
-        const tabBtn = el("button", {
-          class: "nav-link d-flex align-items-center gap-2" + (active ? " active" : ""),
-          type: "button",
-          id: tid + "-tab",
-          role: "tab",
-          "data-bs-toggle": "tab",
-          "data-bs-target": "#" + tid,
-          "aria-selected": String(active),
-          "aria-controls": tid,
-          title: f.name,
-        }, [
-          el("span", { class: "font-monospace small", text: f.name }),
-        ]);
-        const dlLink = el("a", {
-          class: "badge bg-secondary bg-opacity-75 text-decoration-none align-self-center ms-1 me-1 flex-shrink-0",
-          href: downloadUri(f),
-          download: f.name,
-          text: "↓",
-          title: "Download " + f.name,
-          "aria-label": "Download " + f.name,
-        });
-        tabList.append(el("li", { class: "nav-item d-flex align-items-center", role: "presentation" }, [tabBtn, dlLink]));
-
-        const pane = el("div", {
-          id: tid,
-          class: "tab-pane fade p-3" + (active ? " show active" : ""),
-          role: "tabpanel",
-          "aria-labelledby": tid + "-tab",
-        });
-        buildFileContentInto(pane, f);
-        tabContent.append(pane);
+      const copyBtn = el("button", {
+        class: "btn btn-outline-secondary btn-sm",
+        type: "button",
+        text: "Copy",
+      });
+      copyBtn.addEventListener("click", (e) => {
+        if (activeFile.content != null) copyText(activeFile.content, e.currentTarget);
       });
 
-      container.append(tabList, tabContent);
+      const dlBtn = el("a", {
+        class: "btn btn-outline-secondary btn-sm",
+        href: downloadUri(activeFile),
+        download: activeFile.name,
+        title: "Download " + activeFile.name,
+        text: "↓",
+      });
+
+      // Content panels — all rendered, only active shown
+      const panels = outputs.map((f, i) => {
+        const panel = el("div", { class: i === 0 ? "" : "d-none" });
+        buildFileContentInto(panel, f, false);
+        return panel;
+      });
+
+      // Switcher buttons — same font/size as the filename in fileCard
+      let switchBtns;
+      switchBtns = outputs.map((f, i) => {
+        const btn = el("button", {
+          class: "file-switch-btn" + (i === 0 ? " is-active" : ""),
+          type: "button",
+          text: f.name,
+          title: f.name,
+          "aria-pressed": i === 0 ? "true" : "false",
+        });
+        btn.addEventListener("click", () => {
+          switchBtns.forEach((b, j) => {
+            b.classList.toggle("is-active", j === i);
+            b.setAttribute("aria-pressed", String(j === i));
+          });
+          panels.forEach((p, j) => p.classList.toggle("d-none", j !== i));
+          activeFile = f;
+          dlBtn.href = downloadUri(f);
+          dlBtn.download = f.name;
+          dlBtn.title = "Download " + f.name;
+          copyBtn.style.display = f.type === "text" ? "" : "none";
+        });
+        return btn;
+      });
+
+      if (activeFile.type !== "text") copyBtn.style.display = "none";
+
+      const header = el("div", { class: "file-header d-flex align-items-center gap-3 px-3 py-2 border-bottom" }, [
+        el("div", { class: "d-flex gap-3 flex-grow-1 min-width-0 overflow-hidden" }, switchBtns),
+        el("div", { class: "d-flex gap-2 flex-shrink-0" }, [copyBtn, dlBtn]),
+      ]);
+
+      const card = el("div", { class: "card mb-3 overflow-hidden" });
+      card.append(header);
+      panels.forEach((p) => card.append(p));
+      container.append(card);
     }
 
     function sanitizeXlsxWrap(wrap) {
@@ -1167,19 +1416,21 @@ def test_explain_uses_index_scan(db):
 
       const bar = $("grades-progress");
       bar.style.width = progressPct + "%";
-      bar.textContent = pct == null ? "" : pct + "%";
       bar.className = "progress-bar " + passBarClass(pct);
       bar.closest("[role='progressbar']").setAttribute("aria-valuenow", progressPct);
 
       $("grades-summary").textContent = `${s.passed || 0} passed, ${s.failed || 0} failed of ${s.total || 0}`;
 
       const list = $("grades-list");
+      list.className = "";
       list.replaceChildren();
       exps.forEach((e) => {
-        list.append(el("div", { class: "list-group-item" }, [
-          el("span", { class: "fw-bold me-2 " + (e.passed ? "text-success" : "text-danger"), text: e.passed ? "✓" : "✗" }),
-          el("span", { text: e.text }),
-          e.evidence ? el("div", { class: "text-muted small mt-1 ms-4", text: e.evidence }) : null,
+        list.append(el("div", { class: "d-flex gap-2 py-2 border-bottom" }, [
+          el("span", { class: "fw-bold flex-shrink-0 " + (e.passed ? "text-success" : "text-danger"), text: e.passed ? "✓" : "✗" }),
+          el("div", {}, [
+            el("span", { class: "small", text: e.text }),
+            e.evidence ? el("div", { class: "text-secondary small mt-1", text: e.evidence }) : null,
+          ]),
         ]));
       });
     }
@@ -1209,7 +1460,7 @@ def test_explain_uses_index_scan(db):
     function deltaClass(v) {
       const n = parseFloat(v);
       if (!v || isNaN(n)) return "";
-      return n > 0 ? "text-success fw-bold" : n < 0 ? "text-danger fw-bold" : "";
+      return n > 0 ? "text-success" : n < 0 ? "text-danger" : "";
     }
 
     // Formats a raw proportion delta as percentage-points string, e.g. 0.74 → "+74pp"
@@ -1241,7 +1492,7 @@ def test_explain_uses_index_scan(db):
       const sign = !isNaN(deltaN) && deltaN > 0 ? "+" : "";
       const valueText = deltaRaw != null ? sign + deltaRaw + suffix : "—";
       heroRow.append(makeStatCard(
-        el("div", { class: "fs-1 fw-bold lh-1 text-secondary", text: valueText }),
+        el("div", { class: "hero-delta-value text-body-emphasis", text: valueText }),
         label,
         ca && cb ? `${titleCase(ca)}: ${fmtStat(aData, false)}  ·  ${titleCase(cb)}: ${fmtStat(bData, false)}` : null,
         ""
@@ -1255,12 +1506,12 @@ def test_explain_uses_index_scan(db):
       c.replaceChildren();
 
       const summary = d.run_summary || {}, meta = d.metadata || {}, notes = d.notes || [];
-      c.append(el("h2", { class: "h4 mb-1", text: "Benchmark Results" }));
+      c.append(el("h2", { class: "h4 mt-3 mb-1", text: "Benchmark Results" }));
       const metaBits = [
         meta.skill_name, meta.timestamp,
         meta.evals_run ? "Evals: " + meta.evals_run.join(", ") : null,
         (meta.runs_per_configuration || "?") + " runs/config",
-      ].filter(Boolean).join("  —  ");
+      ].filter(Boolean).join(" · ");
       c.append(el("p", { class: "text-secondary small mb-3", text: metaBits }));
 
       const configs = Object.keys(summary).filter((k) => k !== "delta");
@@ -1275,12 +1526,14 @@ def test_explain_uses_index_scan(db):
       const prDeltaN = prDeltaRaw != null ? parseFloat(prDeltaRaw) : NaN;
       const prA = a.pass_rate?.mean != null ? Math.round(a.pass_rate.mean * 100) + "%" : "—";
       const prB = b.pass_rate?.mean != null ? Math.round(b.pass_rate.mean * 100) + "%" : "—";
-      const prValueCls = !isNaN(prDeltaN) ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "") : "";
+      const prValueCls = !isNaN(prDeltaN)
+        ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "text-body-emphasis")
+        : "text-body-emphasis";
       heroRow.append(makeStatCard(
-        el("div", { class: "fs-1 fw-bold lh-1 " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
+        el("div", { class: "hero-delta-value " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
         "Pass Rate Delta",
         ca && cb ? `${titleCase(ca)}: ${prA}  ·  ${titleCase(cb)}: ${prB}` : null,
-        !isNaN(prDeltaN) && prDeltaN > 0 ? "border-success border-opacity-50" : ""
+        !isNaN(prDeltaN) && prDeltaN > 0 ? "stat-hero-win" : ""
       ));
 
       appendNumericStatCard(heroRow, a.time_seconds, b.time_seconds, delta.time_seconds, "Time Delta (s)", "s", ca, cb);
@@ -1298,17 +1551,17 @@ def test_explain_uses_index_scan(db):
       }
       const tbody = el("tbody", { class: "table-group-divider" }, rows.map((r) => el("tr", {}, [
         el("td", {}, [el("strong", { text: r[0] })]),
-        el("td", { text: r[1] }),
-        el("td", { text: r[2] }),
-        el("td", { class: deltaClass(r[3]), text: r[3] || "—" }),
+        el("td", { class: "text-secondary num", text: r[1] }),
+        el("td", { class: "text-secondary num", text: r[2] }),
+        el("td", { class: "bm-delta text-end " + deltaClass(r[3]), text: r[3] || "—" }),
       ])));
       const summaryWrap = el("div", { class: "table-responsive mb-4" });
-      summaryWrap.append(el("table", { class: "table table-striped table-hover align-middle" }, [
-        el("thead", {}, [el("tr", {}, [
-          el("th", { text: "Metric" }),
-          el("th", { text: titleCase(ca || "A") }),
-          el("th", { text: titleCase(cb || "B") }),
-          el("th", { text: "Delta" }),
+      summaryWrap.append(el("table", { class: "table align-middle" }, [
+      el("thead", {}, [el("tr", {}, [
+          el("th", { class: "text-secondary", text: "Metric" }),
+          el("th", { class: "text-secondary", text: titleCase(ca || "A") }),
+          el("th", { class: "text-secondary", text: titleCase(cb || "B") }),
+          el("th", { class: "text-secondary text-end", text: "Delta" }),
         ])]),
         tbody,
       ]));
@@ -1317,9 +1570,11 @@ def test_explain_uses_index_scan(db):
       renderBenchmarkPerEval(c, d);
 
       if (notes.length) {
-        c.append(el("div", { class: "card mt-2" }, [
-          el("div", { class: "card-header fw-semibold", text: "Analysis Notes" }),
-          el("div", { class: "card-body" }, [el("ul", { class: "mb-0" }, notes.map((n) => el("li", { text: n })))]),
+        const notesList = el("ul", { class: "mb-0 ps-3 d-flex flex-column gap-1" },
+          notes.map((n) => el("li", { class: "small text-secondary", text: n })));
+        c.append(el("div", { class: "bench-eval-card mt-2" }, [
+          el("div", { class: "bench-eval-head eyebrow", text: "Analysis Notes" }),
+          el("div", { class: "p-3" }, [notesList]),
         ]));
       }
     }
@@ -1339,7 +1594,7 @@ def test_explain_uses_index_scan(db):
           .sort((a, b) => (isBaselineCfg(a) ? 1 : 0) - (isBaselineCfg(b) ? 1 : 0));
         const runsPer = Math.max(...groups.map((g) => er.filter((r) => r.configuration === g).length), 1);
 
-        const grid = el("div", { class: "vs-grid" });
+        const grid = el("div", { class: "row g-0" });
         groups.forEach((cfg) => {
           const cr = er.filter((r) => r.configuration === cfg);
           const rates = cr.map((r) => (r.result || {}).pass_rate || 0);
@@ -1352,15 +1607,15 @@ def test_explain_uses_index_scan(db):
           const baseline = isBaselineCfg(cfg);
           const metaBits = [`${passed} / ${total} assertions`];
           if (avgTime != null) metaBits.push(`${avgTime.toFixed(1)}s${runsPer > 1 ? " avg" : ""}`);
-          grid.append(el("div", { class: "vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
-            el("div", { class: "eyebrow mb-1 " + (baseline ? "text-warning" : "text-info"), text: titleCase(cfg) }),
-            el("div", { class: "fs-2 fw-bold lh-1 " + passTextClass(pctNum), text: pctNum + "%" }),
+        grid.append(el("div", { class: "col-12 col-sm-6 vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
+          el("div", { class: "cfg-chip " + (baseline ? "is-baseline" : "is-with") + " mb-2", text: titleCase(cfg) }),
+            el("div", { class: "fs-2 lh-1 " + passTextClass(pctNum), text: pctNum + "%" }),
             el("div", { class: "small text-secondary mt-1", text: metaBits.join(" · ") }),
           ]));
         });
 
-        const card = el("div", { class: "mb-3" }, [
-          el("div", { class: "bg-body-tertiary px-3 py-2 d-flex align-items-center justify-content-between" }, [
+        const card = el("div", { class: "bench-eval-card mb-3" }, [
+          el("div", { class: "bench-eval-head d-flex align-items-center justify-content-between" }, [
             el("span", { class: "font-monospace text-body-emphasis", text: name }),
             el("span", { class: "eyebrow", text: runsPer + (runsPer === 1 ? " run/config" : " runs/config") }),
           ]),
@@ -1396,14 +1651,15 @@ def test_explain_uses_index_scan(db):
           const allPass = results.every((r) => r.passed);
           const anyFail = results.some((r) => !r.passed);
           const anyPass = results.some((r) => r.passed);
-          const cellCls = allPass ? "table-success text-center"
-            : (anyFail && anyPass) ? "table-warning text-center"
-            : anyFail ? "table-danger text-center"
+          const cellCls = allPass
+            ? "assert-pass text-center"
+            : anyFail
+            ? "assert-fail text-center"
             : "text-center";
 
           const children = results.flatMap((r, i) => {
             const span = el("span", {
-              class: r.passed ? "text-success fw-bold" : "text-danger fw-bold",
+              class: r.passed ? "text-success" : "text-danger",
               title: `Run ${r.runNum}${r.evidence ? ": " + r.evidence : ""}`,
               text: r.passed ? "✓" : "✗",
             });
@@ -1417,7 +1673,7 @@ def test_explain_uses_index_scan(db):
       matrixWrap.append(el("table", { class: "table align-middle mb-0" }, [
         el("thead", {}, [el("tr", {}, [
           el("th", { class: "small text-secondary", text: "Assertion" }),
-          ...groups.map((g) => el("th", { class: "text-center small text-secondary", style: "width:120px", text: titleCase(g) })),
+          ...groups.map((g) => el("th", { class: "text-center small text-secondary matrix-cfg-col", text: titleCase(g) })),
         ])]),
         tbody,
       ]));
@@ -1449,6 +1705,8 @@ def test_explain_uses_index_scan(db):
       $("prev-btn").disabled = currentIndex === 0;
       $("next-btn").disabled = RUNS.length === 0 || currentIndex === RUNS.length - 1;
       const total = RUNS.length;
+      const pos = $("subbar-pos");
+      if (pos) pos.textContent = total ? (currentIndex + 1) + "\u2009/\u2009" + total : "";
       const reviewed = visited.size;
       const pct = total ? Math.round(reviewed / total * 100) : 0;
       const bar = $("progress-bar");
