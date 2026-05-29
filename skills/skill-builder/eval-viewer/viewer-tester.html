@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eval Review</title>
   <link rel="stylesheet" href="../assets/bootstrap.min.css">
-  <!-- SheetJS is optional: if it fails to load (e.g. offline), xlsx outputs fall back to a download link. -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
-          integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT"
-          crossorigin="anonymous"></script>
   <style>
     /* ════ D2 · Review Workbench — custom CSS only where Bootstrap has no equivalent ════ */
 
@@ -951,6 +947,26 @@ def test_explain_uses_index_scan(db):
     // FILE RENDERING
     // ═══════════════════════════════════════════════════════════════
 
+    // SheetJS — load on demand (only when an xlsx file type is encountered)
+    const XLSX_CDN = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
+    const XLSX_SRI = "sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT";
+    let _xlsxPromise = null;
+
+    function loadXlsx() {
+      if (typeof XLSX !== "undefined") return Promise.resolve(XLSX);
+      if (_xlsxPromise) return _xlsxPromise;
+      _xlsxPromise = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = XLSX_CDN;
+        s.integrity = XLSX_SRI;
+        s.crossOrigin = "anonymous";
+        s.onload = () => resolve(XLSX);
+        s.onerror = () => { _xlsxPromise = null; reject(new Error("SheetJS load failed")); };
+        document.head.appendChild(s);
+      });
+      return _xlsxPromise;
+    }
+
     // Populates `container` with the rendered file content (no card wrapper).
     function buildFileContentInto(container, file) {
       if (file.type === "image_url") {
@@ -1076,38 +1092,54 @@ def test_explain_uses_index_scan(db):
       container.append(tabList, tabContent);
     }
 
+    function sanitizeXlsxWrap(wrap) {
+      wrap.querySelectorAll("*").forEach((node) => {
+        [...node.attributes].forEach((attr) => {
+          if (/^on/i.test(attr.name)) node.removeAttribute(attr.name);
+          if (attr.name === "href" && /^javascript:/i.test(attr.value)) node.removeAttribute(attr.name);
+        });
+        if (node.tagName === "SCRIPT") node.remove();
+      });
+    }
+
     function renderXlsx(container, file) {
-      if (typeof XLSX === "undefined") {
+      const placeholder = el("div", { class: "text-secondary small p-2 fst-italic", text: "Loading spreadsheet…" });
+      container.append(placeholder);
+
+      loadXlsx().then((XLSXLib) => {
+        placeholder.remove();
+        try {
+          const raw = Uint8Array.from(atob(file.data_b64), (c) => c.charCodeAt(0));
+          const wb = XLSXLib.read(raw, { type: "array" });
+          const theme = document.documentElement.getAttribute("data-bs-theme");
+          const theadClass = theme === "dark" ? "table-dark" : "table-light";
+
+          wb.SheetNames.forEach((name) => {
+            if (wb.SheetNames.length > 1) {
+              container.append(el("div", { class: "fw-semibold small text-secondary mt-2", text: "Sheet: " + name }));
+            }
+            const html = XLSXLib.utils.sheet_to_html(wb.Sheets[name]);
+            const wrap = el("div", { class: "table-responsive" });
+            wrap.innerHTML = html;
+            sanitizeXlsxWrap(wrap);
+            wrap.querySelectorAll("table").forEach((t) => {
+              t.classList.add("table", "table-hover", "table-sm", "table-striped", "table-bordered", "align-middle");
+              const thead = t.querySelector("thead");
+              if (thead) thead.classList.add(theadClass);
+            });
+            container.append(wrap);
+          });
+        } catch (err) {
+          container.append(el("div", { class: "text-danger", text: "Error rendering spreadsheet: " + err.message }));
+        }
+      }).catch(() => {
+        placeholder.remove();
         container.append(el("a", {
           class: "btn btn-outline-secondary",
           href: downloadUri(file), download: file.name,
           text: "Download " + file.name + " (spreadsheet preview unavailable offline)",
         }));
-        return;
-      }
-      try {
-        const raw = Uint8Array.from(atob(file.data_b64), (c) => c.charCodeAt(0));
-        const wb = XLSX.read(raw, { type: "array" });
-        const theme = document.documentElement.getAttribute("data-bs-theme");
-        const theadClass = theme === "dark" ? "table-dark" : "table-light";
-
-        wb.SheetNames.forEach((name) => {
-          if (wb.SheetNames.length > 1) {
-            container.append(el("div", { class: "fw-semibold small text-secondary mt-2", text: "Sheet: " + name }));
-          }
-          const html = XLSX.utils.sheet_to_html(wb.Sheets[name]);
-          const wrap = el("div", { class: "table-responsive" });
-          wrap.innerHTML = html;
-          wrap.querySelectorAll("table").forEach((t) => {
-            t.classList.add("table", "table-hover", "table-sm", "table-striped", "table-bordered", "align-middle");
-            const thead = t.querySelector("thead");
-            if (thead) thead.classList.add(theadClass);
-          });
-          container.append(wrap);
-        });
-      } catch (err) {
-        container.append(el("div", { class: "text-danger", text: "Error rendering spreadsheet: " + err.message }));
-      }
+      });
     }
 
     function renderPrevOutputs(run) {
