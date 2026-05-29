@@ -984,7 +984,12 @@ def test_explain_uses_index_scan(db):
             type: "button",
             text: `▼ Show all ${lines} lines`,
             "aria-expanded": "false",
-            onclick: (e) => { pre.classList.remove("output-collapsed"); e.currentTarget.remove(); },
+            onclick: (e) => {
+              const btn = e.currentTarget;
+              const isCollapsed = pre.classList.toggle("output-collapsed");
+              btn.textContent = isCollapsed ? `▼ Show all ${lines} lines` : "▲ Collapse";
+              btn.setAttribute("aria-expanded", String(!isCollapsed));
+            },
           });
           wrap.append(copyBtn, pre, expandBtn);
         } else {
@@ -1358,7 +1363,11 @@ def test_explain_uses_index_scan(db):
 
           const allPass = results.every((r) => r.passed);
           const anyFail = results.some((r) => !r.passed);
-          const cellCls = allPass ? "table-success text-center" : anyFail ? "table-danger text-center" : "text-center";
+          const anyPass = results.some((r) => r.passed);
+          const cellCls = allPass ? "table-success text-center"
+            : (anyFail && anyPass) ? "table-warning text-center"
+            : anyFail ? "table-danger text-center"
+            : "text-center";
 
           const children = results.flatMap((r, i) => {
             const span = el("span", {
@@ -1461,7 +1470,7 @@ def test_explain_uses_index_scan(db):
     function toast(msg) {
       const t = $("save-toast");
       t.querySelector(".toast-body").textContent = msg;
-      bootstrap.Toast.getOrCreateInstance(t, { delay: 1500 }).show();
+      bootstrap.Toast.getOrCreateInstance(t, { delay: 3000 }).show();
     }
 
     function submitAll() {
