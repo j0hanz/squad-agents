@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="stylesheet" href="../assets/bootstrap.min.css">
+  <!-- SheetJS is optional: if it fails to load (e.g. offline), xlsx outputs fall back to a download link. -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+          integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT"
+          crossorigin="anonymous"></script>
+  <style>
+    /* ════ D2 · Review Workbench — custom CSS only where Bootstrap has no equivalent ════ */
+
+    /* ── Layout shell ── */
+    .app-shell   { height: 100vh; height: 100dvh; }
+    .scroll-pane { overflow-y: auto; min-height: 0; }
+    .output-text { white-space: pre-wrap; word-break: break-word; }
+    .pdf-frame   { height: 70vh; }
+    .skill-name  { max-width: 22ch; }
+    .read-col    { max-width: 780px; }
+    .label-flex  { flex: 1 1 0; min-width: 0; }
+
+    /* Shared typographic token: tiny uppercase section label. Replaces the old
+       kicker / brand-eyebrow / sidebar-group-header / stat-label / sec-title /
+       vs-tag rules — one source of truth, spacing/color via Bootstrap utilities. */
+    .eyebrow { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bs-secondary-color); }
+
+    /* ── Navbar: segmented tab control (no 1:1 Bootstrap component) ── */
+    .seg-tabs { background: var(--bs-tertiary-bg); border-radius: 999px; padding: 3px; }
+    .seg-tabs .nav-link { border-radius: 999px; padding: .28rem .9rem; font-size: .85rem; color: var(--bs-secondary-color); border: 0; }
+    .seg-tabs .nav-link.active { background: var(--bs-body-bg); color: var(--bs-body-emphasis); box-shadow: var(--bs-box-shadow-sm); }
+    .progress-meter { width: 132px; }
+
+    /* ── Nav rail: grouped eval list (static on lg+, offcanvas below) ── */
+    .nav-rail { width: 244px; }
+    @media (min-width: 992px) { .nav-rail { flex: 0 0 244px; border-right: 1px solid var(--bs-border-color); } }
+    #eval-list .list-group-item-action {
+      border: 0; border-left: 3px solid transparent; background: transparent;
+      color: var(--bs-body-color); padding: .5rem .85rem .5rem .6rem;
+    }
+    #eval-list .list-group-item-action:hover { background: var(--bs-secondary-bg); }
+    #eval-list .list-group-item-action.active { background: var(--bs-secondary-bg); color: var(--bs-body-emphasis); border-left-color: var(--bs-primary); }
+    #eval-list .list-group-item-action.active.is-baseline { border-left-color: var(--bs-warning); }
+    .run-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .run-dot.v-good { background: var(--bs-success); }
+    .run-dot.v-bad  { background: var(--bs-danger); }
+    .run-dot.v-none { border: 1.5px solid var(--bs-secondary-color); }
+
+    /* ── Output files: collapsed long code ── */
+    .output-collapsed { max-height: 16rem; overflow: hidden; }
+
+    /* ── Feedback rail (static on xl+, offcanvas below) ── */
+    .fb-rail { width: 344px; }
+    @media (min-width: 1200px) { .fb-rail { flex: 0 0 344px; border-left: 1px solid var(--bs-border-color); } }
+    .fb-rail .offcanvas-body { display: block; }
+    .save-status { min-height: 1.1rem; }
+
+    /* ── Benchmark: versus scorecards (2-up grid + subtle config tints) ── */
+    .vs-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .vs-col.is-with    { background: var(--bs-primary-bg-subtle); }
+    .vs-col.is-without { background: var(--bs-warning-bg-subtle); }
+    @media (min-width: 576px) { .vs-col.is-with { border-right: 1px solid var(--bs-border-color); } }
+  </style>
+</head>
+<body class="d-flex flex-column app-shell">
+
+  <!-- ============ Navbar: brand · tabs · progress · submit ============ -->
+  <nav class="navbar bg-body-tertiary border-bottom flex-shrink-0 py-0">
+    <div class="container-fluid" style="min-height:58px">
+    <div class="d-flex align-items-center gap-2 me-auto">
+      <button class="btn btn-link text-body p-1 d-lg-none" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="Toggle eval list">
+        <span aria-hidden="true" style="font-size:1.1rem">&#9776;</span>
+      </button>
+      <div class="lh-1">
+        <div class="eyebrow mb-1">Skill review</div>
+        <span id="skill-name" class="fw-semibold text-body-emphasis text-truncate skill-name d-inline-block align-bottom" title=""></span>
+      </div>
+    </div>
+    <ul class="nav seg-tabs d-none mx-2" id="view-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-outputs" aria-selected="true" aria-label="Outputs">Outputs</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false">Benchmark</button>
+      </li>
+    </ul>
+    <div class="d-flex align-items-center gap-3 ms-auto">
+      <div class="progress-meter d-none d-sm-block">
+        <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span id="reviewed-count" class="text-body-emphasis fw-semibold">0 / 0</span></div>
+        <div class="progress" role="progressbar" style="height:5px"
+             aria-label="Review progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div id="progress-bar" class="progress-bar bg-success"></div>
+        </div>
+      </div>
+      <button class="btn btn-outline-secondary d-xl-none" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#feedback-rail" aria-label="Open review panel">Review</button>
+      <button class="btn btn-outline-secondary" id="submit-btn" type="button" data-action="submit">Submit All</button>
+    </div>
+    </div>
+  </nav>
+
+  <!-- ============ Tab content ============ -->
+  <main class="tab-content flex-grow-1 overflow-hidden">
+
+    <!-- ---- Outputs panel (qualitative review) — three-column workbench ---- -->
+    <div class="tab-pane fade show active h-100" id="panel-outputs">
+      <div class="d-flex h-100 overflow-hidden">
+
+        <!-- Nav rail: grouped eval list (static on lg+, offcanvas below) -->
+        <aside class="nav-rail offcanvas-start d-flex flex-column" id="sidebar"
+               tabindex="-1" aria-labelledby="sidebar-title">
+          <div class="offcanvas-body p-0 scroll-pane flex-grow-1 bg-body-tertiary">
+            <div id="eval-list" class="list-group list-group-flush"></div>
+          </div>
+        </aside>
+
+        <!-- Reading column -->
+        <div class="d-flex flex-column flex-grow-1 overflow-hidden">
+          <div class="d-flex align-items-center gap-2 px-3 py-2 flex-shrink-0">
+            <button id="prev-btn" class="btn btn-outline-secondary" type="button"
+                    aria-label="Previous eval">&#8592;</button>
+            <button id="next-btn" class="btn btn-outline-secondary" type="button"
+                    aria-label="Next eval">&#8594;</button>
+            <span id="current-config-label" class="fw-semibold text-body-emphasis text-truncate ms-1 label-flex"></span>
+            <span id="config-badge" class="badge d-none"></span>
+          </div>
+
+          <div id="main-scroll" class="scroll-pane flex-grow-1">
+
+            <!-- Empty state -->
+            <div id="no-eval-state" class="h-100 d-flex align-items-center justify-content-center">
+              <span class="text-secondary small fst-italic">No eval selected</span>
+            </div>
+
+            <!-- Eval content -->
+            <div id="eval-content" class="d-none py-4 px-3">
+              <div class="read-col mx-auto">
+
+                <!-- Prompt -->
+                <div class="eyebrow mb-2">Prompt</div>
+                <div id="prompt-text" class="output-text small mb-4 border-start border-3 border-primary ps-3 py-1 lh-base"></div>
+
+                <!-- Output files -->
+                <div class="eyebrow mb-2">Output</div>
+                <div id="outputs-body"></div>
+
+                <!-- Collapsible extras -->
+                <div class="accordion accordion-flush mt-3" id="extras-accordion">
+                  <div class="accordion-item d-none" id="prev-outputs-item">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button"
+                              data-bs-toggle="collapse" data-bs-target="#prev-outputs-collapse"
+                              aria-expanded="false" aria-controls="prev-outputs-collapse">
+                        Previous Output
+                      </button>
+                    </h2>
+                    <div id="prev-outputs-collapse" class="accordion-collapse collapse">
+                      <div class="accordion-body" id="prev-outputs-body"></div>
+                    </div>
+                  </div>
+                  <div class="accordion-item d-none" id="grades-item">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button collapsed gap-3" type="button"
+                              data-bs-toggle="collapse" data-bs-target="#grades-collapse"
+                              aria-expanded="false" aria-controls="grades-collapse">
+                        <span>Formal Grades</span>
+                        <span id="grades-badge" class="badge"></span>
+                      </button>
+                    </h2>
+                    <div id="grades-collapse" class="accordion-collapse collapse">
+                      <div class="accordion-body">
+                        <div class="progress mb-2" role="progressbar" aria-label="Grade pass rate"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                          <div id="grades-progress" class="progress-bar"></div>
+                        </div>
+                        <p id="grades-summary" class="small text-secondary mb-2"></p>
+                        <div id="grades-list" class="list-group list-group-flush"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div><!-- /#eval-content -->
+          </div>
+        </div>
+
+        <!-- Feedback rail (static on xl+, offcanvas-end below) -->
+        <aside class="fb-rail offcanvas-xl offcanvas-end" id="feedback-rail"
+               tabindex="-1" aria-labelledby="fb-rail-title">
+          <div class="offcanvas-header border-bottom d-xl-none">
+            <h6 class="offcanvas-title" id="fb-rail-title">Your Review</h6>
+            <button class="btn-close" type="button" data-bs-dismiss="offcanvas"
+                    data-bs-target="#feedback-rail" aria-label="Close review panel"></button>
+          </div>
+          <div class="offcanvas-body scroll-pane p-3 bg-body-tertiary">
+            <div class="d-flex align-items-center justify-content-between mb-3 d-none d-xl-flex">
+              <span class="fw-semibold text-body-emphasis">Your Review</span>
+              <span id="rail-grade-badge" class="badge rounded-pill d-none"></span>
+            </div>
+            <div id="rail-note" class="bg-body-secondary rounded small p-2 mb-3 text-secondary">Select an eval to review.</div>
+
+            <div class="eyebrow mb-2">Verdict</div>
+            <div class="d-grid gap-2 verdict-stack mb-3" role="group" aria-label="Verdict">
+              <input type="radio" class="btn-check" name="verdict" id="verdict-good" value="good" autocomplete="off">
+              <label class="btn btn-outline-success text-start" for="verdict-good">Looks good</label>
+              <input type="radio" class="btn-check" name="verdict" id="verdict-needs_work" value="needs_work" autocomplete="off">
+              <label class="btn btn-outline-danger text-start" for="verdict-needs_work">Needs work</label>
+              <input type="radio" class="btn-check" name="verdict" id="verdict-skip" value="skip" autocomplete="off">
+              <label class="btn btn-outline-secondary text-start" for="verdict-skip">Skip for now</label>
+            </div>
+
+            <div class="eyebrow mb-2">Notes</div>
+            <textarea id="feedback" class="form-control mb-1" rows="6"
+              placeholder="What worked, what didn't… (optional)"
+              aria-label="Notes"
+              aria-describedby="feedback-status"></textarea>
+            <div id="feedback-status" class="save-status small text-secondary mb-3" aria-live="polite"></div>
+
+            <div id="prev-feedback" class="p-2 ps-3 d-none border-start border-3 border-primary bg-body-secondary rounded-end">
+              <div class="eyebrow mb-1">Previous feedback</div>
+              <div id="prev-feedback-text" class="small"></div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+
+    <!-- ---- Benchmark panel (quantitative stats) ---- -->
+    <div class="tab-pane fade h-100" id="panel-benchmark">
+      <div class="scroll-pane h-100">
+        <div id="benchmark-content" class="container"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ Done modal ============ -->
+  <div class="modal fade" id="done-modal" tabindex="-1" aria-labelledby="done-modal-title" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="done-modal-title">Review Complete</h5>
+          <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="button" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Toast ============ -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="save-toast" class="toast align-items-center text-bg-success border-0" role="status"
+         aria-live="polite" aria-atomic="true">
+      <div class="toast-body">Saved</div>
+    </div>
+  </div>
+
+  <script src="../assets/bootstrap.bundle.min.js"></script>
+  <script>
+  (() => {
+    "use strict";
+
+    // ═══════════════════════════════════════════════════════════════
+    // TEST FIXTURE
+    // Exercises every viewer UI feature:
+    // Grouped sidebar | 2-file & 3-file tabs | Code collapse (>30 lines)
+    // Copy button     | Grades accordion      | Prev feedback + prev outputs
+    // Benchmark hero  | Assertion matrix (colored cells, mixed pass/fail)
+    // ═══════════════════════════════════════════════════════════════
+
+    // Long Python file — triggers collapse (57 lines)
+    const _fixPy = `# orders.py — patched
+# Hypotheses tested:
+#   H1: guard condition too broad — any truthy dict passes the check
+#   H2: promo_code key absent from metadata in ~10% of orders
+#   H3: discount_pct field missing from some promo_code dicts
+#
+# [DEBUG-a1b2] Phase 4 instrumentation — targeted probes at decision boundaries
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+def calculate_total(order, subtotal):
+    """Calculate order total applying any promo discount. Fixed version."""
+    metadata = order.get("metadata", {})
+
+    # [DEBUG-a1b2] Probe 1: log what keys metadata actually contains
+    logger.debug("[DEBUG-a1b2] metadata keys: %s", list(metadata.keys()))
+
+    # Safe nested access — avoids KeyError when promo_code key is absent
+    promo = metadata.get("promo_code", {})
+    discount_pct = promo.get("discount_pct", 0)
+
+    # [DEBUG-a1b2] Probe 2: confirm discount resolved without error
+    logger.debug("[DEBUG-a1b2] discount_pct=%s order_id=%s", discount_pct, order.get("id"))
+
+    if discount_pct:
+        return subtotal * (1 - discount_pct / 100)
+    return subtotal
+
+
+# Regression tests — written BEFORE fix was applied
+import unittest
+
+
+class TestCalculateTotal(unittest.TestCase):
+    def test_no_metadata(self):
+        self.assertEqual(calculate_total({}, 100.0), 100.0)
+
+    def test_metadata_missing_promo_code(self):
+        """Reproduces the original KeyError: metadata present but no promo_code."""
+        order = {"metadata": {"source": "email_campaign"}}
+        self.assertEqual(calculate_total(order, 100.0), 100.0)
+
+    def test_valid_discount_applied(self):
+        order = {"metadata": {"promo_code": {"discount_pct": 10}}}
+        self.assertAlmostEqual(calculate_total(order, 100.0), 90.0)
+
+    def test_empty_promo_code_dict(self):
+        order = {"metadata": {"promo_code": {}}}
+        self.assertEqual(calculate_total(order, 100.0), 100.0)
+
+
+if __name__ == "__main__":
+    unittest.main()`;
+
+    // Long counter instrumentation file — triggers collapse (~50 lines)
+    const _counterPy = `"""
+Phase 4 Instrumentation — targeted probes at decision boundaries.
+Tag: [DEBUG-a7c3]
+Goal: confirm H1 (TOCTOU race) by logging read value, thread ID, and write value.
+"""
+
+import threading
+import time
+
+_counter = 0
+_counter_log = []
+_log_lock = threading.Lock()
+
+
+def instrumented_increment():
+    """Wrap increment to expose the TOCTOU window."""
+    global _counter
+    tid = threading.current_thread().name
+
+    # [DEBUG-a7c3] Probe 1: value this thread sees at READ time
+    read_val = _counter
+    with _log_lock:
+        _counter_log.append(f"[DEBUG-a7c3] READ  tid={tid:>10} counter={read_val}")
+
+    time.sleep(0.0005)  # same latency as original module
+
+    # [DEBUG-a7c3] Probe 2: value this thread writes
+    write_val = read_val + 1
+    _counter = write_val
+    with _log_lock:
+        _counter_log.append(f"[DEBUG-a7c3] WRITE tid={tid:>10} counter={write_val}")
+
+
+def run_concurrent(n=50):
+    global _counter
+    _counter = 0
+    threads = [threading.Thread(target=instrumented_increment, name=f"T-{i:03}") for i in range(n)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    return _counter, list(_counter_log)
+
+
+if __name__ == "__main__":
+    final, log = run_concurrent(50)
+    print(f"Expected: 50  Got: {final}  Lost updates: {50 - final}")
+    for line in log[:20]:
+        print(line)`;
+
+    // Long performance benchmark test file — triggers collapse (~62 lines)
+    const _benchPy = `"""Performance regression test for orders.user_id lookup.
+
+Ensures query latency stays under 100ms after the missing index is added.
+Written as part of systematic-debugging diagnosis — before the migration ran.
+"""
+
+import time
+import statistics
+import psycopg2
+import pytest
+
+DSN = "postgresql://localhost/testdb"
+WARMUP_RUNS = 3
+MEASURED_RUNS = 10
+LATENCY_BUDGET_MS = 100
+
+
+@pytest.fixture(scope="module")
+def db():
+    conn = psycopg2.connect(DSN)
+    yield conn
+    conn.close()
+
+
+def measure_latency(conn, user_id=42, n=MEASURED_RUNS):
+    """Run the target query n times and return latency samples in ms."""
+    samples = []
+    with conn.cursor() as cur:
+        for _ in range(n):
+            t0 = time.perf_counter()
+            cur.execute("SELECT id, total FROM orders WHERE user_id = %s", (user_id,))
+            cur.fetchall()
+            samples.append((time.perf_counter() - t0) * 1000)
+    return samples
+
+
+def test_index_exists(db):
+    """Assert the index was created before measuring latency."""
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT 1 FROM pg_indexes "
+            "WHERE tablename='orders' AND indexname='idx_orders_user_id'"
+        )
+        assert cur.fetchone() is not None, "Index idx_orders_user_id not found"
+
+
+def test_p95_latency_under_budget(db):
+    """p95 query latency must stay under LATENCY_BUDGET_MS after index is added."""
+    measure_latency(db, n=WARMUP_RUNS)
+    samples = measure_latency(db)
+    p95 = statistics.quantiles(samples, n=20)[18]
+    mean = statistics.mean(samples)
+    print(f"  mean={mean:.1f}ms  p95={p95:.1f}ms  budget={LATENCY_BUDGET_MS}ms")
+    assert p95 < LATENCY_BUDGET_MS, (
+        f"p95 {p95:.1f}ms exceeds {LATENCY_BUDGET_MS}ms — "
+        "check index presence and run VACUUM ANALYZE"
+    )
+
+
+def test_explain_uses_index_scan(db):
+    """EXPLAIN must show Index Scan, not Seq Scan."""
+    with db.cursor() as cur:
+        cur.execute("EXPLAIN SELECT * FROM orders WHERE user_id = %s", (42,))
+        plan = " ".join(row[0] for row in cur.fetchall())
+    assert "Index Scan" in plan, f"Expected Index Scan, got: {plan}"`;
+
+    // Shared assertion arrays — reused in both run.grading and benchmark.runs
+    const _e1ws = [
+      { text: "Agent creates a test script that reproduces the KeyError before attempting any fix", passed: true,  evidence: "reproduce_keyerror.py created in outputs/" },
+      { text: "Agent generates at least 3 explicitly stated hypotheses before testing them",        passed: true,  evidence: "H1, H2, H3 listed in diagnosis_report.md" },
+      { text: "Agent uses [DEBUG-XXXX] prefixed log statements for instrumentation",                passed: true,  evidence: "[DEBUG-a1b2] tags found in fix.py" },
+      { text: "Agent writes a regression test before or as part of applying the fix",               passed: true,  evidence: "TestCalculateTotal written before applying patch" },
+      { text: "Agent correctly identifies root cause: metadata dict present but missing promo_code key", passed: true, evidence: "Root Cause section explicitly names the missing key" },
+      { text: "Output contains a Diagnosis Summary section with Root Cause field",                  passed: true,  evidence: "## Diagnosis Summary present in diagnosis_report.md" },
+      { text: "Output contains a Post-Mortem section with Prevention field",                        passed: true,  evidence: "## Post-Mortem section present with Prevention bullet" },
+      { text: "Agent reads references/feedback-loops.md (with_skill only)",                        passed: true,  evidence: "File read detected in transcript" },
+    ];
+    const _e1wos = [
+      { text: "Agent creates a test script that reproduces the KeyError before attempting any fix", passed: false, evidence: "No reproduce script found in outputs/" },
+      { text: "Agent generates at least 3 explicitly stated hypotheses before testing them",        passed: false, evidence: "Only 1 informal hypothesis in attempt.md" },
+      { text: "Agent uses [DEBUG-XXXX] prefixed log statements for instrumentation",                passed: false, evidence: "No [DEBUG-XXXX] tags found" },
+      { text: "Agent writes a regression test before or as part of applying the fix",               passed: true,  evidence: "Basic test found, though written after fix" },
+      { text: "Agent correctly identifies root cause: metadata dict present but missing promo_code key", passed: true, evidence: "Root cause identified correctly in prose" },
+      { text: "Output contains a Diagnosis Summary section with Root Cause field",                  passed: false, evidence: "No structured Diagnosis Summary section" },
+      { text: "Output contains a Post-Mortem section with Prevention field",                        passed: false, evidence: "No Post-Mortem section present" },
+      { text: "Agent reads references/feedback-loops.md (with_skill only)",                        passed: false, evidence: "Not applicable — baseline config" },
+    ];
+    const _e2ws = [
+      { text: "Agent creates a test script that reproduces the race condition before attempting any fix", passed: true,  evidence: "instrumented_counter.py reproduces lost updates" },
+      { text: "Agent generates at least 3 explicitly stated hypotheses before testing them",              passed: true,  evidence: "H1 (TOCTOU), H2 (GIL assumption), H3 (sleep window) in diagnosis.md" },
+      { text: "Agent uses [DEBUG-XXXX] prefixed log statements during instrumentation phase",             passed: true,  evidence: "[DEBUG-a7c3] tags confirm TOCTOU window" },
+      { text: "Agent writes a concurrency regression test before applying the fix",                       passed: true,  evidence: "test_counter_thread_safety.py in outputs/" },
+      { text: "Agent correctly identifies root cause: TOCTOU race in counter increment",                  passed: true,  evidence: "Root cause: non-atomic read-modify-write without lock" },
+      { text: "Output contains a Diagnosis Summary section with Root Cause field",                        passed: true,  evidence: "## Diagnosis Summary present" },
+      { text: "Output contains a Post-Mortem section with Prevention field",                              passed: true,  evidence: "## Post-Mortem present with threading.Lock recommendation" },
+    ];
+    const _e2wos = [
+      { text: "Agent creates a test script that reproduces the race condition before attempting any fix", passed: false, evidence: "No reproduction script found" },
+      { text: "Agent generates at least 3 explicitly stated hypotheses before testing them",              passed: false, evidence: "No explicit hypotheses stated" },
+      { text: "Agent uses [DEBUG-XXXX] prefixed log statements during instrumentation phase",             passed: false, evidence: "No [DEBUG-XXXX] tags found" },
+      { text: "Agent writes a concurrency regression test before applying the fix",                       passed: false, evidence: "No concurrency test present" },
+      { text: "Agent correctly identifies root cause: TOCTOU race in counter increment",                  passed: true,  evidence: "Race condition identified but without proof" },
+      { text: "Output contains a Diagnosis Summary section with Root Cause field",                        passed: false, evidence: "No structured Diagnosis Summary" },
+      { text: "Output contains a Post-Mortem section with Prevention field",                              passed: false, evidence: "No Post-Mortem section" },
+    ];
+    const _e3ws = [
+      { text: "Agent creates a timing measurement harness (perf_counter), not regular print logging",     passed: true,  evidence: "time.perf_counter() used in benchmark_test.py" },
+      { text: "Agent uses EXPLAIN or equivalent query analysis to confirm full table scan root cause",    passed: true,  evidence: "EXPLAIN ANALYZE output in diagnosis.md confirms Seq Scan" },
+      { text: "Agent generates at least 3 explicitly stated hypotheses",                                  passed: true,  evidence: "H1 (missing index), H2 (no stats), H3 (bloat) in diagnosis.md" },
+      { text: "Agent does NOT use print/log statements as the primary performance measurement tool",      passed: true,  evidence: "perf_counter used; print only for summary output" },
+      { text: "Agent identifies missing index as the root cause",                                         passed: true,  evidence: "CREATE INDEX recommendation matches EXPLAIN output" },
+      { text: "Agent writes a performance regression test before applying the fix",                       passed: true,  evidence: "benchmark_test.py written before migration.sql applied" },
+      { text: "Output contains a Diagnosis Summary section with Root Cause field",                        passed: true,  evidence: "## Diagnosis Summary present in diagnosis.md" },
+      { text: "Output contains a Post-Mortem section with Prevention field",                              passed: true,  evidence: "## Post-Mortem present with schema review checklist item" },
+    ];
+    const _e3wos = [
+      { text: "Agent creates a timing measurement harness (perf_counter), not regular print logging",     passed: true,  evidence: "time.perf_counter() used, though no dedicated harness" },
+      { text: "Agent uses EXPLAIN or equivalent query analysis to confirm full table scan root cause",    passed: false, evidence: "No EXPLAIN output found" },
+      { text: "Agent generates at least 3 explicitly stated hypotheses",                                  passed: false, evidence: "Only 1 hypothesis mentioned" },
+      { text: "Agent does NOT use print/log statements as the primary performance measurement tool",      passed: true,  evidence: "Correct measurement approach used" },
+      { text: "Agent identifies missing index as the root cause",                                         passed: true,  evidence: "Missing index identified correctly" },
+      { text: "Agent writes a performance regression test before applying the fix",                       passed: false, evidence: "No performance regression test found" },
+      { text: "Output contains a Diagnosis Summary section with Root Cause field",                        passed: false, evidence: "No structured Diagnosis Summary" },
+      { text: "Output contains a Post-Mortem section with Prevention field",                              passed: false, evidence: "No Post-Mortem section" },
+    ];
+
+    const EMBEDDED_DATA = {
+      skill_name: "systematic-debugging",
+
+      runs: [
+        // ── Eval 1: python-keyerror ─────────────────────────────────────────
+        // with_skill → 2 output files (tabs) + long fix.py (collapse) + prev feedback
+        {
+          id: "e1-keyerror-with_skill",
+          eval_id: 1,
+          prompt: "I have a Python bug in my order processing module. It crashes in production with a KeyError about 10% of the time.\n\nTraceback:\n  File \"orders.py\", line 5, in calculate_total\n    discount = order['metadata']['promo_code']['discount_pct']\nKeyError: 'promo_code'\n\nThe file is at C:\\agent-dev\\eval-workspace\\eval-1-python-keyerror\\input\\orders.py\n\nPlease diagnose and fix this bug.",
+          outputs: [
+            { name: "diagnosis_report.md", type: "text", content: "## Diagnosis Summary\n\n- Symptom: KeyError 'promo_code' raised in calculate_total() on ~10% of orders\n- Root Cause: Guard condition `if order.get(\"metadata\")` passes for any non-empty dict; promo_code key absent in some orders\n- Fix: Use .get() chain at every nesting level with safe defaults\n\n## Post-Mortem\n\n- Prevention: Enforce .get() chains in code review checklist; add mypy strict-optional checks\n- Next Steps: Add regression tests to CI pipeline; audit similar nested dict-access patterns across codebase" },
+            { name: "fix.py", type: "text", content: _fixPy },
+          ],
+          grading: { summary: { pass_rate: 1.0, passed: 8, failed: 0, total: 8 }, expectations: _e1ws },
+        },
+        // without_skill → 1 output file (plain card) + prev outputs + mixed grades
+        {
+          id: "e1-keyerror-without_skill",
+          eval_id: 1,
+          prompt: "I have a Python bug in my order processing module. It crashes in production with a KeyError about 10% of the time.\n\nTraceback:\n  File \"orders.py\", line 5, in calculate_total\n    discount = order['metadata']['promo_code']['discount_pct']\nKeyError: 'promo_code'\n\nThe file is at C:\\agent-dev\\eval-workspace\\eval-1-python-keyerror\\input\\orders.py\n\nPlease diagnose and fix this bug.",
+          outputs: [
+            { name: "attempt.md", type: "text", content: "## Fix Attempt\n\nThe error occurs because `promo_code` is sometimes not present in the metadata dict.\n\nFix: add a guard check before accessing the key:\n\n```python\nif 'promo_code' in order.get('metadata', {}):\n    discount = order['metadata']['promo_code']['discount_pct']\n    return subtotal * (1 - discount / 100)\nreturn subtotal\n```\n\nThis should prevent the KeyError from occurring in most cases." },
+          ],
+          grading: { summary: { pass_rate: 0.25, passed: 2, failed: 6, total: 8 }, expectations: _e1wos },
+        },
+
+        // ── Eval 2: race-condition ──────────────────────────────────────────
+        // with_skill → 2 output files (tabs) + long instrumented_counter.py (collapse)
+        {
+          id: "e2-race-with_skill",
+          eval_id: 2,
+          prompt: "My Python counter module is losing updates under concurrent load. When 50 threads each call increment() once, the final count is sometimes 43-48 instead of 50.\n\nFile: counter.py\n  _counter = 0\n  def increment():\n      global _counter\n      val = _counter\n      time.sleep(0.0005)\n      _counter = val + 1\n\nPlease diagnose and fix the race condition.",
+          outputs: [
+            { name: "diagnosis.md", type: "text", content: "## Diagnosis Summary\n\n- Symptom: Counter loses 2-7 updates per 50-thread run\n- Root Cause: Non-atomic read-modify-write confirmed via [DEBUG-a7c3] probes — threads read the same value before any write completes (TOCTOU)\n- Fix: Wrap increment in threading.Lock() to make it atomic\n\n## Post-Mortem\n\n- Prevention: Audit all shared mutable state; prefer threading.Lock() or queue.Queue for thread-safe counters\n- Next Steps: Add concurrency regression test to CI pipeline" },
+            { name: "instrumented_counter.py", type: "text", content: _counterPy },
+          ],
+          grading: { summary: { pass_rate: 1.0, passed: 7, failed: 0, total: 7 }, expectations: _e2ws },
+        },
+        // without_skill → 1 file, low pass rate
+        {
+          id: "e2-race-without_skill",
+          eval_id: 2,
+          prompt: "My Python counter module is losing updates under concurrent load. When 50 threads each call increment() once, the final count is sometimes 43-48 instead of 50.\n\nFile: counter.py\n  _counter = 0\n  def increment():\n      global _counter\n      val = _counter\n      time.sleep(0.0005)\n      _counter = val + 1\n\nPlease diagnose and fix the race condition.",
+          outputs: [
+            { name: "attempt.md", type: "text", content: "## Analysis\n\nThe counter is losing updates because multiple threads are reading the same value before any write happens. This is a race condition.\n\n## Fix\n\n```python\nimport threading\n_lock = threading.Lock()\n\ndef increment():\n    global _counter\n    with _lock:\n        val = _counter\n        time.sleep(0.0005)\n        _counter = val + 1\n```\n\nAdding a lock around the critical section should fix the race condition." },
+          ],
+          grading: { summary: { pass_rate: 0.143, passed: 1, failed: 6, total: 7 }, expectations: _e2wos },
+        },
+
+        // ── Eval 3: performance-regression ─────────────────────────────────
+        // with_skill → 3 output files (3-tab strip) + long benchmark_test.py (collapse)
+        {
+          id: "e3-perf-with_skill",
+          eval_id: 3,
+          prompt: "Our orders query has degraded from ~50ms to ~8s over the past month as the table grew to 500k rows.\n\nQuery: SELECT * FROM orders WHERE user_id = ?\n\nThe table has no index on user_id. Please diagnose the performance regression and provide a fix with a regression test.",
+          outputs: [
+            { name: "diagnosis.md", type: "text", content: "## Diagnosis Summary\n\n- Symptom: SELECT by user_id degrades from 50ms to 8s at 500k rows\n- Root Cause: Full table scan (Seq Scan) confirmed via EXPLAIN ANALYZE; no index on orders.user_id\n- Fix: CREATE INDEX CONCURRENTLY idx_orders_user_id ON orders(user_id)\n\n## EXPLAIN ANALYZE Output\n\n  Before index:\n  Seq Scan on orders  (cost=0.00..14823.60 rows=486120)  Execution time: 8241ms\n\n  After index:\n  Index Scan using idx_orders_user_id  (cost=0.43..8.46 rows=1)  Execution time: 0.8ms\n\n## Post-Mortem\n\n- Prevention: Schema change review must include index audit for all FK/query columns\n- Next Steps: Add performance regression test to CI; monitor p95 after deploy" },
+            { name: "migration.sql", type: "text", content: "-- Migration: add missing index on orders.user_id\n-- Root cause confirmed via EXPLAIN ANALYZE: Seq Scan on 486k rows\n-- CONCURRENTLY avoids table lock — safe for production deployment\n\nBEGIN;\n\nCREATE INDEX CONCURRENTLY IF NOT EXISTS idx_orders_user_id\n  ON orders (user_id);\n\n-- Verify planner switches to index scan post-creation\nEXPLAIN SELECT * FROM orders WHERE user_id = 42;\n-- Expected output: Index Scan using idx_orders_user_id on orders\n\nCOMMIT;" },
+            { name: "benchmark_test.py", type: "text", content: _benchPy },
+          ],
+          grading: { summary: { pass_rate: 1.0, passed: 8, failed: 0, total: 8 }, expectations: _e3ws },
+        },
+        // without_skill → 1 file, medium pass rate (3/8 = 38%)
+        {
+          id: "e3-perf-without_skill",
+          eval_id: 3,
+          prompt: "Our orders query has degraded from ~50ms to ~8s over the past month as the table grew to 500k rows.\n\nQuery: SELECT * FROM orders WHERE user_id = ?\n\nThe table has no index on user_id. Please diagnose the performance regression and provide a fix with a regression test.",
+          outputs: [
+            { name: "attempt.md", type: "text", content: "## Analysis\n\nThe query is slow because there is no index on user_id. With 500k rows the database performs a full sequential scan on every request.\n\n## Timing\n\nUsing time.perf_counter() I measured the query at ~8100ms average.\n\n## Fix\n\n```sql\nCREATE INDEX ON orders (user_id);\n```\n\nThis should allow the database to use an index scan and bring the query back under 10ms.\n\nNote: the index should be created during a maintenance window to avoid locking." },
+          ],
+          grading: { summary: { pass_rate: 0.375, passed: 3, failed: 5, total: 8 }, expectations: _e3wos },
+        },
+      ],
+
+      // Previous feedback shows in the feedback panel for the first run
+      previous_feedback: {
+        "e1-keyerror-with_skill": "Excellent structured approach — hypothesis generation and instrumentation phase were both thorough. The [DEBUG-a1b2] probes precisely confirmed H1 and ruled out H3. Consider adding more detail to the Prevention section of Post-Mortem: specifically, what mypy config flag enables strict-optional checking.",
+      },
+
+      // Previous outputs show in the 'Previous Output' accordion for the second run
+      previous_outputs: {
+        "e1-keyerror-without_skill": [
+          { name: "old_attempt.md", type: "text", content: "Previous iteration attempt: jumped directly to the fix without reproducing or instrumenting the bug. Wrote a guard check using 'in' operator but missed the nested .get() pattern — if promo_code exists but lacks discount_pct, a different KeyError would still occur. Root cause partially correct but fix incomplete." },
+        ],
+      },
+
+      benchmark: {
+        metadata: {
+          skill_name: "systematic-debugging",
+          timestamp: "2026-05-29T14:34:28Z",
+          evals_run: [1, 2, 3],
+          runs_per_configuration: 1,
+        },
+        run_summary: {
+          with_skill: {
+            pass_rate:    { mean: 1.0,    stddev: 0.0  },
+            time_seconds: { mean: 266.3,  stddev: 77.0 },
+            tokens:       { mean: 37000,  stddev: 5200 },
+          },
+          without_skill: {
+            pass_rate:    { mean: 0.26,   stddev: 0.12 },
+            time_seconds: { mean: 93.6,   stddev: 40.1 },
+            tokens:       { mean: 20200,  stddev: 3100 },
+          },
+          delta: {
+            pass_rate:    0.74,
+            time_seconds: 172.7,
+            tokens:       16800,
+          },
+        },
+        runs: [
+          { eval_id: 1, eval_name: "python-keyerror",        configuration: "with_skill",    run_number: 1, result: { pass_rate: 1.0,   passed: 8, total: 8, time_seconds: 251.7 }, expectations: _e1ws  },
+          { eval_id: 1, eval_name: "python-keyerror",        configuration: "without_skill", run_number: 1, result: { pass_rate: 0.25,  passed: 2, total: 8, time_seconds:  67.0 }, expectations: _e1wos },
+          { eval_id: 2, eval_name: "race-condition",         configuration: "with_skill",    run_number: 1, result: { pass_rate: 1.0,   passed: 7, total: 7, time_seconds: 197.4 }, expectations: _e2ws  },
+          { eval_id: 2, eval_name: "race-condition",         configuration: "without_skill", run_number: 1, result: { pass_rate: 0.143, passed: 1, total: 7, time_seconds:  82.3 }, expectations: _e2wos },
+          { eval_id: 3, eval_name: "performance-regression", configuration: "with_skill",    run_number: 1, result: { pass_rate: 1.0,   passed: 8, total: 8, time_seconds: 349.7 }, expectations: _e3ws  },
+          { eval_id: 3, eval_name: "performance-regression", configuration: "without_skill", run_number: 1, result: { pass_rate: 0.375, passed: 3, total: 8, time_seconds: 139.7 }, expectations: _e3wos },
+        ],
+        notes: [
+          "All with_skill runs score 100% (23/23 assertions) — skill produces consistent, disciplined methodology across all 3 bug types",
+          "Without_skill pass rates vary: Eval 2 race-condition scored lowest (14%) — hypothesis generation and phase discipline most absent for concurrency bugs; Eval 3 performance scored highest (38%) — baseline already used timing harness and identified root cause",
+          "Assertions 'Diagnosis Summary' and 'Post-Mortem' discriminate perfectly: 0% baseline vs 100% with_skill — the skill's required output format is the clearest differentiator",
+          "With_skill agents take ~2.85x longer on average (266s vs 94s) and use ~1.8x more tokens (37k vs 20k) — cost of thorough 6-phase methodology",
+          "Single run per configuration — no variance data available. Recommend 3 runs per config in iteration 2 for reliable stddev estimates.",
+        ],
+      },
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // DATA
+    // ═══════════════════════════════════════════════════════════════
+    const DATA = (typeof EMBEDDED_DATA !== "undefined") ? EMBEDDED_DATA : { skill_name: "", runs: [] };
+    const RUNS = DATA.runs || [];
+    const PREV_FB = DATA.previous_feedback || {};
+    const PREV_OUT = DATA.previous_outputs || {};
+
+    // ═══════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════
+    const feedbackMap = {};   // run_id → feedback text
+    const verdictMap = {};    // run_id → "good" | "needs_work" | "skip"
+    const visited = new Set();
+    let currentIndex = 0;
+    let saveTimer = null;
+
+    const COLLAPSE_LINE_THRESHOLD = 30;
+
+    // ═══════════════════════════════════════════════════════════════
+    // DOM UTILS
+    // el(tag, attrs, children): attrs supports class, text (textContent, safe),
+    // on<event> handlers, and any other key as an attribute.
+    // Children may be nodes or strings.
+    // ═══════════════════════════════════════════════════════════════
+    function el(tag, attrs = {}, children = []) {
+      const node = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        if (v == null) continue;
+        if (k === "class") node.className = v;
+        else if (k === "text") node.textContent = v;
+        else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
+        else node.setAttribute(k, v);
+      }
+      for (const c of [].concat(children)) {
+        if (c == null) continue;
+        node.append(c.nodeType ? c : document.createTextNode(c));
+      }
+      return node;
+    }
+    const $ = (id) => document.getElementById(id);
+
+    // ═══════════════════════════════════════════════════════════════
+    // CONFIG UTILS
+    // ═══════════════════════════════════════════════════════════════
+    const BASELINE_CONFIGS = new Set(["without_skill", "old_skill"]);
+
+    function isBaselineCfg(cfg) { return BASELINE_CONFIGS.has(cfg); }
+
+    function detectConfig(runOrId) {
+      const isRun = runOrId && typeof runOrId === "object";
+      const explicit = isRun ? runOrId.configuration : null;
+      if (explicit) {
+        return { config: explicit, label: explicit.replace(/_/g, " "), baseline: isBaselineCfg(explicit) };
+      }
+      const id = isRun ? (runOrId.id || "") : (runOrId || "");
+      const m = id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (!m) return null;
+      const config = m[1];
+      return { config, label: config.replace(/_/g, " "), baseline: isBaselineCfg(config) };
+    }
+
+    function downloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content || "");
+      if (file.type === "html") return "data:text/html;charset=utf-8," + encodeURIComponent(file.content || "");
+      if (file.type === "image_url") return file.src;
+      return "#";
+    }
+
+    function titleCase(s) {
+      return (s || "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+
+    function evalTitle(run) {
+      return run.eval_id != null ? `Eval ${run.eval_id}` : run.id;
+    }
+
+    function gradePct(run) {
+      const s = run.grading && run.grading.summary;
+      return (s && s.pass_rate != null) ? Math.round(s.pass_rate * 100) : null;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // COLOR HELPERS
+    // Pass-rate → Bootstrap class mapping. Thresholds (80% / 50%) are
+    // defined once here so all badge, bar, and text uses stay in sync.
+    // ═══════════════════════════════════════════════════════════════
+    function passBadgeClass(pct) {   // → text-bg-* for badges
+      if (pct == null) return "text-bg-secondary";
+      return pct >= 80 ? "text-bg-success" : pct < 50 ? "text-bg-danger" : "text-bg-warning";
+    }
+    function passBarClass(pct) {     // → bg-* for progress bars
+      if (pct == null) return "bg-secondary";
+      return pct >= 80 ? "bg-success" : pct < 50 ? "bg-danger" : "bg-warning";
+    }
+    function passTextClass(pct) {    // → text-* for inline text
+      if (pct == null) return "text-secondary";
+      return pct >= 80 ? "text-success" : pct < 50 ? "text-danger" : "text-warning";
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FEEDBACK UTILS
+    // ═══════════════════════════════════════════════════════════════
+
+    function setFeedbackStatus(msg, variant = "secondary") {
+      const st = $("feedback-status");
+      st.textContent = msg;
+      st.className = `save-status small text-${variant} mb-3`;
+    }
+
+    function buildReviewEntry(run_id, ts = new Date().toISOString()) {
+      return { run_id, feedback: feedbackMap[run_id] || "", verdict: verdictMap[run_id] || "", timestamp: ts };
+    }
+
+    // Syncs the feedback textarea into feedbackMap for the current run.
+    function flushCurrentFeedback() {
+      const run = RUNS[currentIndex];
+      if (!run) return;
+      const text = $("feedback").value;
+      if (text.trim()) feedbackMap[run.id] = text; else delete feedbackMap[run.id];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // COPY HELPER
+    // ═══════════════════════════════════════════════════════════════
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.classList.replace("btn-outline-secondary", "btn-success");
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.classList.replace("btn-success", "btn-outline-secondary");
+          btn.classList.remove("copied");
+        }, 1800);
+      }).catch(() => {
+        const orig = btn.textContent;
+        btn.textContent = "Failed";
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SIDEBAR
+    // ═══════════════════════════════════════════════════════════════
+    function verdictDotClass(runId) {
+      const v = verdictMap[runId];
+      return v === "good" ? "v-good" : v === "needs_work" ? "v-bad" : "v-none";
+    }
+
+    function makeSidebarItem(run, i, isChild) {
+      const cfg = detectConfig(run);
+      const pct = gradePct(run);
+      // In grouped mode the config name IS the label; in flat mode show "Eval N"
+      const labelText = isChild ? (cfg ? cfg.label : evalTitle(run)) : evalTitle(run);
+      const dot = el("span", {
+        class: "run-dot " + verdictDotClass(run.id),
+        "data-dot": run.id,
+        title: "Your review state",
+        "aria-label": "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"),
+      });
+      const badges = el("span", { class: "d-flex align-items-center gap-1 flex-shrink-0 ms-auto" }, [
+        !isChild && cfg ? el("span", {
+          class: "badge rounded-pill " + (cfg.baseline ? "text-bg-warning" : "text-bg-primary"),
+          text: cfg.label,
+        }) : null,
+        pct == null ? null : el("span", {
+          class: "badge rounded-pill " + passBadgeClass(pct),
+          text: pct + "%",
+        }),
+      ]);
+      return el("button", {
+        class: "list-group-item list-group-item-action d-flex align-items-center gap-2" + (cfg && cfg.baseline ? " is-baseline" : ""),
+        type: "button",
+        "data-index": String(i),
+        onclick: () => { clearTimeout(saveTimer); saveFeedback(false); showRun(i); closeSidebarOnMobile(); },
+      }, [dot, el("span", { class: "text-truncate small flex-grow-1", text: labelText }), badges]);
+    }
+
+    function buildSidebar() {
+      const list = $("eval-list");
+      list.replaceChildren();
+
+      // Group by eval_id when multiple runs share the same eval_id
+      const seenEvalIds = new Set();
+      const grouped = RUNS.some((r) => {
+        if (r.eval_id == null) return false;
+        if (seenEvalIds.has(r.eval_id)) return true;
+        seenEvalIds.add(r.eval_id);
+        return false;
+      });
+
+      if (grouped) {
+        const groups = new Map();
+        RUNS.forEach((run, i) => {
+          const gid = run.eval_id != null ? run.eval_id : "_";
+          if (!groups.has(gid)) groups.set(gid, []);
+          groups.get(gid).push({ run, i });
+        });
+        let first = true;
+        for (const [gid, items] of groups) {
+          list.append(el("div", {
+            class: "eyebrow px-3 pb-1 user-select-none " + (first ? "pt-2" : "pt-3"),
+            text: gid === "_" ? "Other" : `Eval ${gid}`,
+          }));
+          first = false;
+          items.forEach(({ run, i }) => list.append(makeSidebarItem(run, i, true)));
+        }
+      } else {
+        RUNS.forEach((run, i) => list.append(makeSidebarItem(run, i, false)));
+      }
+    }
+
+    function setActiveSidebar(i) {
+      $("eval-list").querySelectorAll("[data-index]").forEach((b) => {
+        const active = +b.dataset.index === i;
+        b.classList.toggle("active", active);
+        if (active) b.setAttribute("aria-current", "true");
+        else b.removeAttribute("aria-current");
+        if (active) b.scrollIntoView({ block: "nearest" });
+      });
+    }
+
+    function closeSidebarOnMobile() {
+      const inst = window.bootstrap && bootstrap.Offcanvas.getInstance($("sidebar"));
+      if (inst) inst.hide();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // EVAL DETAIL
+    // ═══════════════════════════════════════════════════════════════
+    function showRun(index) {
+      const run = RUNS[index];
+      if (!run) return;
+      currentIndex = index;
+      setActiveSidebar(index);
+
+      $("no-eval-state").classList.add("d-none");
+      const content = $("eval-content");
+      content.classList.remove("d-none");
+
+      const cfg = detectConfig(run);
+      $("current-config-label").textContent = evalTitle(run) + (cfg ? " · " + cfg.label : "");
+      $("prompt-text").textContent = run.prompt || "(No prompt found)";
+
+      const badge = $("config-badge");
+      if (cfg) {
+        badge.className = "badge rounded-pill " + (cfg.baseline ? "text-bg-warning" : "text-bg-primary");
+        badge.textContent = cfg.label;
+      } else {
+        badge.className = "badge d-none";
+        badge.textContent = "";
+      }
+
+      renderOutputs($("outputs-body"), run.outputs || []);
+      renderPrevOutputs(run);
+      renderGrades(run);
+      renderPrevFeedback(run);
+
+      // Feedback rail: context note + grade-at-a-glance badge
+      $("rail-note").replaceChildren(
+        document.createTextNode("Reviewing "),
+        el("strong", { class: "text-body-emphasis", text: evalTitle(run) + (cfg ? " · " + cfg.label : "") }),
+        document.createTextNode(". Your verdict and notes save automatically.")
+      );
+      const pct = gradePct(run);
+      const rgb = $("rail-grade-badge");
+      if (pct == null) {
+        rgb.className = "badge rounded-pill d-none";
+        rgb.textContent = "";
+      } else {
+        rgb.className = "badge rounded-pill " + passBadgeClass(pct);
+        rgb.textContent = "Grade " + pct + "%";
+      }
+
+      // Restore saved verdict for this run
+      const v = verdictMap[run.id] || "";
+      ["good", "needs_work", "skip"].forEach((k) => {
+        const r = $("verdict-" + k);
+        if (r) r.checked = (k === v);
+      });
+
+      $("feedback").value = feedbackMap[run.id] || "";
+      $("feedback-status").textContent = "";
+
+      visited.add(index);
+      updateNav();
+      $("main-scroll").scrollTop = 0;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FILE RENDERING
+    // ═══════════════════════════════════════════════════════════════
+
+    // Populates `container` with the rendered file content (no card wrapper).
+    function buildFileContentInto(container, file) {
+      if (file.type === "image_url") {
+        const imgWrap = el("div", { class: "bg-body-secondary rounded p-2" });
+        const thumb = el("img", { alt: file.name, class: "img-fluid d-block", style: "max-height:260px;object-fit:contain;" });
+        thumb.src = file.src;
+        imgWrap.append(
+          thumb,
+          el("a", { href: file.src, target: "_blank", rel: "noopener noreferrer", class: "small mt-2 d-inline-block", text: "Open full size ↗" })
+        );
+        container.append(imgWrap);
+      } else if (file.type === "html") {
+        const frame = el("iframe", { class: "pdf-frame w-100 border-0", sandbox: "allow-scripts", title: "HTML output preview" });
+        frame.srcdoc = file.content;
+        container.append(frame);
+      } else if (file.type === "text") {
+        const lines = (file.content || "").split("\n").length;
+        const pre = el("pre", { class: "output-text mb-0 bg-body-tertiary border rounded p-3 small lh-base overflow-auto", text: file.content });
+        const wrap = el("div", { class: "code-block-wrap position-relative" });
+        const copyBtn = el("button", {
+          class: "btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-2",
+          type: "button",
+          text: "Copy",
+          "aria-label": "Copy code content",
+          onclick: (e) => copyText(file.content, e.currentTarget),
+        });
+        if (lines > COLLAPSE_LINE_THRESHOLD) {
+          pre.classList.add("output-collapsed");
+          const expandBtn = el("button", {
+            class: "btn btn-link small d-block w-100 text-center py-1 mt-1",
+            type: "button",
+            text: `▼ Show all ${lines} lines`,
+            "aria-expanded": "false",
+            onclick: (e) => { pre.classList.remove("output-collapsed"); e.currentTarget.remove(); },
+          });
+          wrap.append(copyBtn, pre, expandBtn);
+        } else {
+          wrap.append(copyBtn, pre);
+        }
+        container.append(wrap);
+      } else if (file.type === "image") {
+        container.append(el("img", { class: "img-fluid", src: file.data_uri, alt: file.name }));
+      } else if (file.type === "pdf") {
+        container.append(el("iframe", { class: "pdf-frame w-100 border-0", src: file.data_uri }));
+      } else if (file.type === "xlsx") {
+        renderXlsx(container, file);
+      } else if (file.type === "binary") {
+        container.append(el("a", { class: "btn btn-outline-secondary", href: file.data_uri, download: file.name, text: "Download " + file.name }));
+      } else if (file.type === "error") {
+        container.append(el("pre", { class: "output-text text-danger mb-0", text: file.content }));
+      }
+    }
+
+    function fileCard(file) {
+      const body = el("div", { class: "card-body" });
+      buildFileContentInto(body, file);
+      const header = el("div", { class: "card-header d-flex justify-content-between align-items-center" }, [
+        el("span", { class: "font-monospace small", text: file.name }),
+        el("a", { class: "small", href: downloadUri(file), download: file.name, text: "Download" }),
+      ]);
+      return el("div", { class: "card rounded-0 mb-3" }, [header, body]);
+    }
+
+    function renderOutputs(container, outputs) {
+      container.replaceChildren();
+      if (!outputs.length) {
+        container.append(el("div", { class: "text-muted fst-italic p-3 text-center", text: "No output files" }));
+        return;
+      }
+
+      // Single file: plain card (no tab overhead)
+      if (outputs.length === 1) {
+        container.append(fileCard(outputs[0]));
+        return;
+      }
+
+      // Multiple files: Bootstrap tab strip so long outputs don't stack
+      const uid = "ft-" + Math.random().toString(36).slice(2);
+      const tabList = el("ul", { class: "nav nav-tabs mt-3 flex-wrap", role: "tablist" });
+      const tabContent = el("div", { class: "tab-content border border-top-0" });
+
+      outputs.forEach((f, i) => {
+        const tid = uid + i;
+        const active = i === 0;
+        const tabBtn = el("button", {
+          class: "nav-link d-flex align-items-center gap-2" + (active ? " active" : ""),
+          type: "button",
+          id: tid + "-tab",
+          role: "tab",
+          "data-bs-toggle": "tab",
+          "data-bs-target": "#" + tid,
+          "aria-selected": String(active),
+          "aria-controls": tid,
+          title: f.name,
+        }, [
+          el("span", { class: "font-monospace small", text: f.name }),
+        ]);
+        const dlLink = el("a", {
+          class: "badge bg-secondary bg-opacity-75 text-decoration-none align-self-center ms-1 me-1 flex-shrink-0",
+          href: downloadUri(f),
+          download: f.name,
+          text: "↓",
+          title: "Download " + f.name,
+          "aria-label": "Download " + f.name,
+        });
+        tabList.append(el("li", { class: "nav-item d-flex align-items-center", role: "presentation" }, [tabBtn, dlLink]));
+
+        const pane = el("div", {
+          id: tid,
+          class: "tab-pane fade p-3" + (active ? " show active" : ""),
+          role: "tabpanel",
+          "aria-labelledby": tid + "-tab",
+        });
+        buildFileContentInto(pane, f);
+        tabContent.append(pane);
+      });
+
+      container.append(tabList, tabContent);
+    }
+
+    function renderXlsx(container, file) {
+      if (typeof XLSX === "undefined") {
+        container.append(el("a", {
+          class: "btn btn-outline-secondary",
+          href: downloadUri(file), download: file.name,
+          text: "Download " + file.name + " (spreadsheet preview unavailable offline)",
+        }));
+        return;
+      }
+      try {
+        const raw = Uint8Array.from(atob(file.data_b64), (c) => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+        const theme = document.documentElement.getAttribute("data-bs-theme");
+        const theadClass = theme === "dark" ? "table-dark" : "table-light";
+
+        wb.SheetNames.forEach((name) => {
+          if (wb.SheetNames.length > 1) {
+            container.append(el("div", { class: "fw-semibold small text-secondary mt-2", text: "Sheet: " + name }));
+          }
+          const html = XLSX.utils.sheet_to_html(wb.Sheets[name]);
+          const wrap = el("div", { class: "table-responsive" });
+          wrap.innerHTML = html;
+          wrap.querySelectorAll("table").forEach((t) => {
+            t.classList.add("table", "table-hover", "table-sm", "table-striped", "table-bordered", "align-middle");
+            const thead = t.querySelector("thead");
+            if (thead) thead.classList.add(theadClass);
+          });
+          container.append(wrap);
+        });
+      } catch (err) {
+        container.append(el("div", { class: "text-danger", text: "Error rendering spreadsheet: " + err.message }));
+      }
+    }
+
+    function renderPrevOutputs(run) {
+      const item = $("prev-outputs-item");
+      const body = $("prev-outputs-body");
+      const prev = PREV_OUT[run.id];
+      if (!prev || !prev.length) { item.classList.add("d-none"); return; }
+      item.classList.remove("d-none");
+      body.replaceChildren();
+      prev.forEach((f) => body.append(fileCard(f)));
+    }
+
+    function renderGrades(run) {
+      const item = $("grades-item");
+      if (!run.grading) { item.classList.add("d-none"); return; }
+      item.classList.remove("d-none");
+
+      const g = run.grading, s = g.summary || {}, exps = g.expectations || [];
+      const pct = s.pass_rate != null ? Math.round(s.pass_rate * 100) : null;
+      const progressPct = pct ?? 0;
+
+      const badge = $("grades-badge");
+      badge.className = "badge rounded-pill " + passBadgeClass(pct);
+      badge.textContent = pct == null ? "?" : pct + "%";
+
+      const bar = $("grades-progress");
+      bar.style.width = progressPct + "%";
+      bar.textContent = pct == null ? "" : pct + "%";
+      bar.className = "progress-bar " + passBarClass(pct);
+      bar.closest("[role='progressbar']").setAttribute("aria-valuenow", progressPct);
+
+      $("grades-summary").textContent = `${s.passed || 0} passed, ${s.failed || 0} failed of ${s.total || 0}`;
+
+      const list = $("grades-list");
+      list.replaceChildren();
+      exps.forEach((e) => {
+        list.append(el("div", { class: "list-group-item" }, [
+          el("span", { class: "fw-bold me-2 " + (e.passed ? "text-success" : "text-danger"), text: e.passed ? "✓" : "✗" }),
+          el("span", { text: e.text }),
+          e.evidence ? el("div", { class: "text-muted small mt-1 ms-4", text: e.evidence }) : null,
+        ]));
+      });
+    }
+
+    function renderPrevFeedback(run) {
+      const box = $("prev-feedback");
+      const txt = PREV_FB[run.id];
+      if (txt) {
+        $("prev-feedback-text").textContent = txt;
+        box.classList.remove("d-none");
+      } else {
+        box.classList.add("d-none");
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // BENCHMARK
+    // ═══════════════════════════════════════════════════════════════
+    function fmtStat(stat, pct) {
+      if (!stat || stat.mean == null || stat.stddev == null) return "—";
+      const u = pct ? "%" : "";
+      const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+      const sd = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+      return `${m}${u} ± ${sd}${u}`;
+    }
+
+    function deltaClass(v) {
+      const n = parseFloat(v);
+      if (!v || isNaN(n)) return "";
+      return n > 0 ? "text-success fw-bold" : n < 0 ? "text-danger fw-bold" : "";
+    }
+
+    // Formats a raw proportion delta as percentage-points string, e.g. 0.74 → "+74pp"
+    function fmtDeltaPp(v) {
+      if (v == null) return "—";
+      const n = parseFloat(v);
+      if (isNaN(n)) return String(v);
+      const pp = Math.round(n * 100);
+      return (n > 0 ? "+" : "") + pp + "pp";
+    }
+
+    function makeStatCard(valueEl, label, contextText, highlightClass) {
+      return el("div", { class: "col-sm-6 col-lg-4" }, [
+        el("div", { class: "card bg-body-tertiary h-100 " + (highlightClass || "") }, [
+          el("div", { class: "card-body text-center py-4" }, [
+            valueEl,
+            el("div", { class: "eyebrow mt-2", text: label }),
+            contextText ? el("div", { class: "small text-secondary mt-1", text: contextText }) : null,
+          ]),
+        ]),
+      ]);
+    }
+
+    // Appends a numeric delta stat card (time, tokens) to heroRow.
+    // Pass rate uses a custom card because it has unique color logic.
+    function appendNumericStatCard(heroRow, aData, bData, deltaRaw, label, suffix, ca, cb) {
+      if (!aData && !bData) return;
+      const deltaN = deltaRaw != null ? parseFloat(deltaRaw) : NaN;
+      const sign = !isNaN(deltaN) && deltaN > 0 ? "+" : "";
+      const valueText = deltaRaw != null ? sign + deltaRaw + suffix : "—";
+      heroRow.append(makeStatCard(
+        el("div", { class: "fs-1 fw-bold lh-1 text-secondary", text: valueText }),
+        label,
+        ca && cb ? `${titleCase(ca)}: ${fmtStat(aData, false)}  ·  ${titleCase(cb)}: ${fmtStat(bData, false)}` : null,
+        ""
+      ));
+    }
+
+    function renderBenchmark() {
+      const d = DATA.benchmark;
+      if (!d) return;
+      const c = $("benchmark-content");
+      c.replaceChildren();
+
+      const summary = d.run_summary || {}, meta = d.metadata || {}, notes = d.notes || [];
+      c.append(el("h2", { class: "h4 mb-1", text: "Benchmark Results" }));
+      const metaBits = [
+        meta.skill_name, meta.timestamp,
+        meta.evals_run ? "Evals: " + meta.evals_run.join(", ") : null,
+        (meta.runs_per_configuration || "?") + " runs/config",
+      ].filter(Boolean).join("  —  ");
+      c.append(el("p", { class: "text-secondary small mb-3", text: metaBits }));
+
+      const configs = Object.keys(summary).filter((k) => k !== "delta");
+      const ca = configs[0], cb = configs[1];
+      const a = summary[ca] || {}, b = summary[cb] || {}, delta = summary.delta || {};
+
+      // ── Hero stat cards ──
+      const heroRow = el("div", { class: "row g-3 mb-4" });
+
+      // Pass Rate: custom card — colored value, uses fmtDeltaPp, highlights border on win
+      const prDeltaRaw = delta.pass_rate;
+      const prDeltaN = prDeltaRaw != null ? parseFloat(prDeltaRaw) : NaN;
+      const prA = a.pass_rate?.mean != null ? Math.round(a.pass_rate.mean * 100) + "%" : "—";
+      const prB = b.pass_rate?.mean != null ? Math.round(b.pass_rate.mean * 100) + "%" : "—";
+      const prValueCls = !isNaN(prDeltaN) ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "") : "";
+      heroRow.append(makeStatCard(
+        el("div", { class: "fs-1 fw-bold lh-1 " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
+        "Pass Rate Delta",
+        ca && cb ? `${titleCase(ca)}: ${prA}  ·  ${titleCase(cb)}: ${prB}` : null,
+        !isNaN(prDeltaN) && prDeltaN > 0 ? "border-success border-opacity-50" : ""
+      ));
+
+      appendNumericStatCard(heroRow, a.time_seconds, b.time_seconds, delta.time_seconds, "Time Delta (s)", "s", ca, cb);
+      appendNumericStatCard(heroRow, a.tokens, b.tokens, delta.tokens, "Token Delta", "", ca, cb);
+
+      c.append(heroRow);
+
+      // ── Detail metrics table ──
+      const rows = [["Pass Rate", fmtStat(a.pass_rate, true), fmtStat(b.pass_rate, true), delta.pass_rate != null ? fmtDeltaPp(delta.pass_rate) : null]];
+      if (a.time_seconds || b.time_seconds) {
+        rows.push(["Time (s)", fmtStat(a.time_seconds, false), fmtStat(b.time_seconds, false), delta.time_seconds ? delta.time_seconds + "s" : null]);
+      }
+      if (a.tokens || b.tokens) {
+        rows.push(["Tokens", fmtStat(a.tokens, false), fmtStat(b.tokens, false), delta.tokens != null ? String(delta.tokens) : null]);
+      }
+      const tbody = el("tbody", { class: "table-group-divider" }, rows.map((r) => el("tr", {}, [
+        el("td", {}, [el("strong", { text: r[0] })]),
+        el("td", { text: r[1] }),
+        el("td", { text: r[2] }),
+        el("td", { class: deltaClass(r[3]), text: r[3] || "—" }),
+      ])));
+      const summaryWrap = el("div", { class: "table-responsive mb-4" });
+      summaryWrap.append(el("table", { class: "table table-striped table-hover align-middle" }, [
+        el("thead", {}, [el("tr", {}, [
+          el("th", { text: "Metric" }),
+          el("th", { text: titleCase(ca || "A") }),
+          el("th", { text: titleCase(cb || "B") }),
+          el("th", { text: "Delta" }),
+        ])]),
+        tbody,
+      ]));
+      c.append(summaryWrap);
+
+      renderBenchmarkPerEval(c, d);
+
+      if (notes.length) {
+        c.append(el("div", { class: "card mt-2" }, [
+          el("div", { class: "card-header fw-semibold", text: "Analysis Notes" }),
+          el("div", { class: "card-body" }, [el("ul", { class: "mb-0" }, notes.map((n) => el("li", { text: n })))]),
+        ]));
+      }
+    }
+
+    function renderBenchmarkPerEval(c, d) {
+      const runs = d.runs || [];
+      if (!runs.length) return;
+      const evalIds = [...new Set(runs.map((r) => r.eval_id))].sort((x, y) => x - y);
+
+      c.append(el("div", { class: "eyebrow mb-2 mt-4", text: "Per-Eval Breakdown" }));
+
+      evalIds.forEach((id) => {
+        const er = runs.filter((r) => r.eval_id === id);
+        const name = (er[0] && er[0].eval_name) || ("Eval " + id);
+        // Skill version leads, baseline trails
+        const groups = [...new Set(er.map((r) => r.configuration))]
+          .sort((a, b) => (isBaselineCfg(a) ? 1 : 0) - (isBaselineCfg(b) ? 1 : 0));
+        const runsPer = Math.max(...groups.map((g) => er.filter((r) => r.configuration === g).length), 1);
+
+        const grid = el("div", { class: "vs-grid" });
+        groups.forEach((cfg) => {
+          const cr = er.filter((r) => r.configuration === cfg);
+          const rates = cr.map((r) => (r.result || {}).pass_rate || 0);
+          const avg = rates.reduce((s, v) => s + v, 0) / (rates.length || 1);
+          const total = (cr[0] && cr[0].result && cr[0].result.total) || 0;
+          const passed = cr.length === 1 ? ((cr[0].result || {}).passed || 0) : Math.round(avg * total);
+          const times = cr.map((r) => (r.result || {}).time_seconds).filter((t) => t != null);
+          const avgTime = times.length ? times.reduce((s, v) => s + v, 0) / times.length : null;
+          const pctNum = Math.round(avg * 100);
+          const baseline = isBaselineCfg(cfg);
+          const metaBits = [`${passed} / ${total} assertions`];
+          if (avgTime != null) metaBits.push(`${avgTime.toFixed(1)}s${runsPer > 1 ? " avg" : ""}`);
+          grid.append(el("div", { class: "vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
+            el("div", { class: "eyebrow mb-1 " + (baseline ? "text-warning" : "text-info"), text: titleCase(cfg) }),
+            el("div", { class: "fs-2 fw-bold lh-1 " + passTextClass(pctNum), text: pctNum + "%" }),
+            el("div", { class: "small text-secondary mt-1", text: metaBits.join(" · ") }),
+          ]));
+        });
+
+        const card = el("div", { class: "mb-3" }, [
+          el("div", { class: "bg-body-tertiary px-3 py-2 d-flex align-items-center justify-content-between" }, [
+            el("span", { class: "font-monospace text-body-emphasis", text: name }),
+            el("span", { class: "eyebrow", text: runsPer + (runsPer === 1 ? " run/config" : " runs/config") }),
+          ]),
+          grid,
+        ]);
+        const matrix = buildAssertionMatrix(er, groups);
+        if (matrix) card.append(matrix);
+        c.append(card);
+      });
+    }
+
+    // Returns a table element (assertion × configuration), or null if no expectations.
+    function buildAssertionMatrix(evalRuns, groups) {
+      const withExp = {};
+      groups.forEach((g) => { withExp[g] = evalRuns.filter((r) => r.configuration === g && (r.expectations || []).length); });
+      if (!Object.values(withExp).some((a) => a.length)) return null;
+
+      const seen = new Set(), assertions = [];
+      groups.forEach((g) => withExp[g].forEach((run) => (run.expectations || []).forEach((e) => {
+        if (!seen.has(e.text)) { seen.add(e.text); assertions.push(e.text); }
+      })));
+
+      const tbody = el("tbody", { class: "table-group-divider" }, assertions.map((text) => el("tr", {}, [
+        el("td", { class: "small", text }),
+        ...groups.map((g) => {
+          const results = withExp[g].map((run) => {
+            const e = (run.expectations || []).find((x) => x.text === text);
+            return e ? { passed: e.passed, evidence: e.evidence, runNum: run.run_number } : null;
+          }).filter(Boolean);
+
+          if (!results.length) return el("td", { class: "text-center text-secondary", text: "—" });
+
+          const allPass = results.every((r) => r.passed);
+          const anyFail = results.some((r) => !r.passed);
+          const cellCls = allPass ? "table-success text-center" : anyFail ? "table-danger text-center" : "text-center";
+
+          const children = results.flatMap((r, i) => {
+            const span = el("span", {
+              class: r.passed ? "text-success fw-bold" : "text-danger fw-bold",
+              title: `Run ${r.runNum}${r.evidence ? ": " + r.evidence : ""}`,
+              text: r.passed ? "✓" : "✗",
+            });
+            return i > 0 ? [" ", span] : [span];
+          });
+          return el("td", { class: cellCls }, children);
+        }),
+      ])));
+
+      const matrixWrap = el("div", { class: "table-responsive" });
+      matrixWrap.append(el("table", { class: "table align-middle mb-0" }, [
+        el("thead", {}, [el("tr", {}, [
+          el("th", { class: "small text-secondary", text: "Assertion" }),
+          ...groups.map((g) => el("th", { class: "text-center small text-secondary", style: "width:120px", text: titleCase(g) })),
+        ])]),
+        tbody,
+      ]));
+      return matrixWrap;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // NAVIGATION
+    // ═══════════════════════════════════════════════════════════════
+    function setVerdict(value) {
+      const run = RUNS[currentIndex];
+      if (!run) return;
+      if (value) verdictMap[run.id] = value; else delete verdictMap[run.id];
+      const dot = $("eval-list").querySelector('[data-dot="' + run.id + '"]');
+      if (dot) {
+        dot.className = "run-dot " + verdictDotClass(run.id);
+        dot.setAttribute("aria-label", "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"));
+      }
+      updateNav();
+      scheduleSave();
+    }
+
+    function navigate(delta) {
+      const next = currentIndex + delta;
+      if (next >= 0 && next < RUNS.length) { clearTimeout(saveTimer); saveFeedback(false); showRun(next); }
+    }
+
+    function updateNav() {
+      $("prev-btn").disabled = currentIndex === 0;
+      $("next-btn").disabled = RUNS.length === 0 || currentIndex === RUNS.length - 1;
+      const total = RUNS.length;
+      const reviewed = visited.size;
+      const pct = total ? Math.round(reviewed / total * 100) : 0;
+      const bar = $("progress-bar");
+      bar.style.width = pct + "%";
+      bar.closest("[role='progressbar']").setAttribute("aria-valuenow", pct);
+      const rc = $("reviewed-count");
+      if (rc) rc.textContent = `${reviewed} / ${total}`;
+      if (total && Object.keys(verdictMap).length >= total) {
+        $("submit-btn").classList.replace("btn-outline-secondary", "btn-primary");
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PERSISTENCE
+    // ═══════════════════════════════════════════════════════════════
+    async function prefillFeedback() {
+      // If prior-iteration context is embedded, the on-disk feedback.json is stale — skip prefill.
+      const hasPriorContext = Object.keys(PREV_FB).length > 0 || Object.keys(PREV_OUT).length > 0;
+      if (hasPriorContext) return;
+      try {
+        const r = await fetch("/api/feedback");
+        const d = await r.json();
+        (d.reviews || []).forEach((x) => { feedbackMap[x.run_id] = x.feedback; if (x.verdict) verdictMap[x.run_id] = x.verdict; });
+      } catch { /* static mode or first run — nothing to prefill */ }
+    }
+
+    function scheduleSave() {
+      clearTimeout(saveTimer);
+      setFeedbackStatus("Saving…");
+      saveTimer = setTimeout(() => saveFeedback(true), 800);
+    }
+
+    function saveFeedback(showStatus) {
+      flushCurrentFeedback();
+      if (!RUNS[currentIndex]) return;
+
+      const ids = new Set([...Object.keys(feedbackMap), ...Object.keys(verdictMap)]);
+      const reviews = [...ids].map((id) => buildReviewEntry(id)).filter((r) => r.feedback.trim() || r.verdict);
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        if (showStatus) { setFeedbackStatus("✓ Saved", "success"); toast("Saved"); }
+      }).catch(() => {
+        if (showStatus) { setFeedbackStatus("Will download on submit"); }
+      });
+    }
+
+    function toast(msg) {
+      const t = $("save-toast");
+      t.querySelector(".toast-body").textContent = msg;
+      bootstrap.Toast.getOrCreateInstance(t, { delay: 1500 }).show();
+    }
+
+    function submitAll() {
+      clearTimeout(saveTimer);
+      $("submit-btn").disabled = true;
+      flushCurrentFeedback();
+
+      const ts = new Date().toISOString();
+      // Include every run so the model can tell "no feedback" from "not reviewed"
+      const reviews = RUNS.map((r) => buildReviewEntry(r.id, ts));
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      const done = () => bootstrap.Modal.getOrCreateInstance($("done-modal")).show();
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(done).catch(() => {
+        // Static mode (no server) — download the file instead
+        const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
+        const a = el("a", { href: url, download: "feedback.json" });
+        a.click();
+        URL.revokeObjectURL(url);
+        done();
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════════════
+    function onKey(e) {
+      if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.key === "ArrowLeft") { e.preventDefault(); navigate(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); navigate(1); }
+    }
+
+    function init() {
+      const skillNameEl = $("skill-name");
+      skillNameEl.textContent = DATA.skill_name || "";
+      skillNameEl.title = DATA.skill_name || "";
+      buildSidebar();
+      $("prev-btn").addEventListener("click", () => navigate(-1));
+      $("next-btn").addEventListener("click", () => navigate(1));
+      document.querySelectorAll("[data-action='submit']").forEach((b) => b.addEventListener("click", submitAll));
+      $("feedback").addEventListener("input", scheduleSave);
+      document.querySelectorAll("input[name='verdict']").forEach((r) =>
+        r.addEventListener("change", () => setVerdict(r.checked ? r.value : "")));
+      document.addEventListener("keydown", onKey);
+      if (DATA.benchmark) { $("view-tabs").classList.remove("d-none"); renderBenchmark(); }
+      prefillFeedback().then(() => { if (RUNS.length) showRun(0); else updateNav(); });
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  })();
+  </script>
+</body>
+</html>

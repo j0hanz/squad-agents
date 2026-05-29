@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+import sys
+import argparse
+import os
+from pathlib import Path
+
+# Add lib to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
+from spec_parser import parse_spec
+
+VAGUE_ADJECTIVES = [
+    "lightweight",
+    "clean",
+    "robust",
+    "fast",
+    "performant",
+    "easy",
+    "simple",
+]
+
+
+def validate(spec):
+    errors = []
+    warnings = []
+
+    # 1. Structural Checks
+    mandatory_sections = [
+        "Goal",
+        "Requirements",
+        "Constraints",
+        "Interfaces",
+        "Context",
+        "Acceptance Criteria & Validation",
+        "Examples & Edge Cases",
+    ]
+    # Notes & Risks is optional according to SKILL.md for Sketch/Contract, but good to check
+
+    for section in mandatory_sections:
+        if section not in spec.sections or not spec.sections[section]:
+            errors.append(f"Missing mandatory section: {section}")
+
+    # 2. Requirement Linter
+    req_lines = [
+        line
+        for line in spec.raw_lines
+        if any(tag in line for tag in ["REQ-", "SEC-", "PERF-", "COMP-"])
+    ]
+    for line in req_lines:
+        # Atomicity check
+        if " and " in line.lower() and not re_contains_code_block(line):
+            warnings.append(
+                f"Requirement might not be atomic (contains 'and'): {line.strip()}"
+            )
+
+        # Active voice hint (very basic check)
+        if "be " in line.lower() and (
+            "ed " in line.lower() or line.lower().endswith("ed")
+        ):
+            warnings.append(f"Requirement might be in passive voice: {line.strip()}")
+
+        # Vague adjectives
+        for adj in VAGUE_ADJECTIVES:
+            if adj in line.lower():
+                warnings.append(
+                    f"Requirement contains vague adjective '{adj}': {line.strip()}"
+                )
+
+    # 3. Traceability Checks
+    if spec.reqs:
+        if not spec.acs:
+            errors.append(
+                "Requirements found but no Acceptance Criteria (AC-###) defined."
+            )
+        if not spec.vals:
+            errors.append(
+                "Requirements found but no Validation steps (VAL-###) defined."
+            )
+
+        # Check if every REQ is mentioned in AC/VAL (Basic mapping check)
+        # Note: SKILL.md doesn't strictly require REQ-001 in AC-001,
+        # but self-check says "At least one AC per core requirement".
+        # We'll just check if the counts are reasonable for now.
+        if len(spec.acs) < len(spec.reqs) * 0.5:  # Heuristic
+            warnings.append(
+                f"Low AC density: {len(spec.acs)} ACs for {len(spec.reqs)} Requirements."
+            )
+
+    # 4. Constraints
+    if not spec.cons:
+        warnings.append(
+            "No constraints (CON-###) defined. SKILL.md recommends defining what the solution does NOT do."
+        )
+
+    return errors, warnings
+
+
+def re_contains_code_block(line):
+    return "`" in line or "```" in line
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Validate a specification Markdown file."
+    )
+    parser.add_argument("file", help="Path to the spec.md file")
+    args = parser.parse_args()
+
+    if not os.path.exists(args.file):
+        print(f"Error: File {args.file} not found.")
+        sys.exit(1)
+
+    try:
+        spec = parse_spec(args.file)
+        errors, warnings = validate(spec)
+
+        print(f"Audit Results for: {args.file}\n")
+
+        if warnings:
+            print("WARNINGS:")
+            for w in warnings:
+                print(f"  [!] {w}")
+            print()
+
+        if errors:
+            print("ERRORS:")
+            for e in errors:
+                print(f"  [X] {e}")
+            print("\nSpec is INVALID.")
+            sys.exit(1)
+        else:
+            print("Spec is VALID.")
+            sys.exit(0)
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

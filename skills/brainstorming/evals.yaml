@@ -1,0 +1,173 @@
+cases:
+  - id: "discovery-phase-basic"
+    name: "Phase 1 Discovery - Basic Feature"
+    description: "Validates that skill reads existing context before asking questions and states understanding before proceeding"
+    input: |
+      I want to add a caching layer to our API responses. We have a request handler that takes 2-3 seconds per call and we get repeated requests for the same data.
+    assertions:
+      - type: "contains"
+        text: "understand"
+        description: "Skill should summarize understanding before asking clarifying questions (Phase 1 step 4)"
+      - type: "contains"
+        text: "confirm"
+        description: "Skill should ask user to confirm the stated understanding"
+      - type: "not_contains"
+        text: "Redis"
+        description: "Should NOT assume implementation details like Redis in discovery phase"
+      - type: "not_contains"
+        text: "leading"
+        description: "Should avoid leading questions that assume design (e.g., 'So this is a caching layer, right?')"
+
+  - id: "domain-terminology-conflict"
+    name: "Phase 2 Domain Clarity - Terminology Conflict"
+    description: "Tests ability to surface and resolve ambiguous terminology (Account vs Tenant scenario)"
+    input: |
+      We're building multi-tenant support. Some of our code calls it Account, some calls it Organization, and the legal team calls it Customer. It's causing confusion.
+    assertions:
+      - type: "contains"
+        text: "define"
+        description: "Skill should ask user to define each term, not lead with definitions"
+      - type: "contains"
+        text: "where"
+        description: "Should ask where each term appears (code, docs, discussions)"
+      - type: "contains"
+        text: "boundary"
+        description: "Should document boundaries between overlapping usages instead of forcing one term"
+      - type: "not_contains"
+        text: "obviously"
+        description: "Should not assume terms have obvious meanings"
+
+  - id: "hidden-constraints-premortem"
+    name: "Phase 3 Expert Clarification - Premortem"
+    description: "Tests ability to surface hidden risks through premortem technique"
+    input: |
+      We need to implement real-time notifications. Users expect to see updates instantly when other users make changes.
+    assertions:
+      - type: "contains"
+        text: "disaster"
+        description: "Should use premortem technique asking what could go wrong"
+      - type: "contains"
+        text: "success"
+        description: "Should ask how success is measured without just saying 'functional'"
+      - type: "contains"
+        text: "why"
+        description: "Should dig into root problem with why questions"
+      - type: "not_contains"
+        text: "WebSocket"
+        description: "Should not assume implementation technology during discovery"
+
+  - id: "design-proposals-tradeoffs"
+    name: "Phase 4 Design - Multiple Approaches with Tradeoffs"
+    description: "Validates that skill proposes 2-3 approaches with clear tradeoffs"
+    input: |
+      We want to add search to our product. Users complain they can't find data quickly. We're considering Elasticsearch vs building our own search index vs using database full-text search.
+    assertions:
+      - type: "contains"
+        text: "approach"
+        description: "Should explicitly propose multiple design approaches"
+      - type: "count_at_least"
+        text: "trade"
+        count: 2
+        description: "Should list trade-offs for at least 2 approaches (costs/gains)"
+      - type: "contains"
+        text: "recommend"
+        description: "Should provide a recommendation with reasoning"
+      - type: "not_contains"
+        text: "YAGNI"
+        description: "Should apply YAGNI principle implicitly by not over-scoping features"
+
+  - id: "hard-gate-no-code"
+    name: "HARD-GATE - Prevents Code Before Design Approval"
+    description: "Ensures skill enforces hard gate preventing implementation before design is approved"
+    input: |
+      Let's build a feature for user authentication. I'm thinking we should just start coding and iterate based on feedback.
+    assertions:
+      - type: "contains"
+        text: "design"
+        description: "Should reference the design/brainstorming process that must complete first"
+      - type: "contains"
+        text: "approve"
+        description: "Should require design approval before implementation"
+      - type: "not_contains"
+        text: "scaffold"
+        description: "Should not offer to create scaffolding or boilerplate"
+      - type: "not_contains"
+        text: "let's start"
+        description: "Should not agree to jump into implementation prematurely"
+
+  - id: "ambiguous-scope-handling"
+    name: "Scope Assessment - Ambiguous Features"
+    description: "Tests handling of features that might be too large or need splitting"
+    input: |
+      We need to revamp our admin dashboard. It should have user management, analytics, reporting, settings, audit logs, and performance metrics all in one place.
+    assertions:
+      - type: "contains"
+        text: "scope"
+        description: "Should explicitly assess scope"
+      - type: "contains"
+        text: "split"
+        description: "Should flag if this should be broken into smaller sub-projects"
+      - type: "contains"
+        text: "priorit"
+        description: "Should help identify what's truly critical vs nice-to-have"
+
+  - id: "transition-to-next-skill"
+    name: "Phase 5 Transition - Hands Off to Next Skill"
+    description: "Validates proper handoff to implementation when design is approved"
+    input: |
+      We've completed the design for our new payment integration feature. It needs to support Stripe, PayPal, and Apple Pay. The user flow is clear. Can we start implementing now?
+    assertions:
+      - type: "contains"
+        text: "summary"
+        description: "Should summarize the approved approach"
+      - type: "not_contains"
+        text: "scaffold"
+        description: "Should not write implementation code in brainstorm skill"
+      - type: "not_contains"
+        text: "implement"
+        description: "Should not start implementation details"
+
+  - id: "red-flag-assumptions"
+    name: "Red Flag Detection - Obvious Requirements Assumption"
+    description: "Tests that skill challenges overconfident 'obvious' assumptions"
+    input: |
+      The requirements are obvious - we just need to add email notifications. Everyone knows how email works, so let's not overthink this.
+    assertions:
+      - type: "contains"
+        text: "question"
+        description: "Should challenge the assumption that requirements are obvious"
+      - type: "contains"
+        text: "clarif"
+        description: "Should ask clarifying questions despite seeming simplicity"
+      - type: "not_contains"
+        text: "fine, let's code"
+        description: "Should not accept face-value acceptance of 'obvious' requirements"
+
+  - id: "glossary-documentation"
+    name: "Glossary Capture and Documentation"
+    description: "Tests offering to document discovered terminology in glossary.md or CONTEXT.md"
+    input: |
+      We've identified that 'session', 'connection', and 'channel' mean slightly different things in our codebase. Can we document this somewhere?
+    assertions:
+      - type: "contains"
+        text: "glossary"
+        description: "Should offer to document findings in glossary.md or CONTEXT.md"
+      - type: "contains"
+        text: "context"
+        description: "Should reference CONTEXT.md as a place to capture domain clarity"
+
+  - id: "anti-scope-technique"
+    name: "Anti-Scope Technique - What Not to Build"
+    description: "Tests using anti-scope questioning to clarify boundaries"
+    input: |
+      We're adding a notification system. We want email, SMS, and push notifications all working well. But I'm not sure what's out of scope.
+    assertions:
+      - type: "contains"
+        text: "NOT"
+        description: "Should use anti-scope technique asking what's explicitly NOT being built"
+      - type: "contains"
+        text: "choose"
+        description: "Should frame it as 'strictly choosing NOT to build' rather than asking generic out-of-scope"
+      - type: "not_contains"
+        text: "could also"
+        description: "Should not suggest related features that bloat scope"

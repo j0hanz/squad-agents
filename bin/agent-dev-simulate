@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Runs the hook simulation harness for recording realistic hook inputs.
+# Usage: agent-dev-simulate [--config path/to/config.json]
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+exec python "${PLUGIN_ROOT}/skills/agent-development/scripts/simulate.py" \
+  --config "${PLUGIN_ROOT}/.simulate/hooks-config.json" "$@"

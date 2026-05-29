@@ -1,0 +1,11 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Recorded test harness inputs — ephemeral runtime data, not source
+.simulate
+
+# Content files — intentional formatting, not source code
+skills
+agents
+commands

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "agent-dev",
+  "displayName": "Agent Dev",
+  "version": "0.1.0",
+  "description": "A plugin to help with agent development and testing.",
+  "license": "MIT",
+  "author": {
+    "name": "j0hanz"
+  },
+  "repository": "https://github.com/j0hanz/agent-dev",
+  "homepage": "https://github.com/j0hanz/agent-dev#readme",
+  "keywords": ["agent-dev", "claude", "plugin", "agent", "development", "testing"],
+  "hooks": "./hooks/hooks.json",
+  "experimental": {
+    "monitors": "./monitors/monitors.json"
+  },
+  "userConfig": {
+    "format_on_save": {
+      "type": "boolean",
+      "title": "Format on save",
+      "description": "Auto-format files after Write/Edit hooks (runs Prettier, Black, or ruff depending on file type)",
+      "default": true
+    },
+    "brainstorm_nudge": {
+      "type": "boolean",
+      "title": "Brainstorm nudge",
+      "description": "Remind to brainstorm before implementing on UserPromptSubmit",
+      "default": true
+    },
+    "telemetry_enabled": {
+      "type": "boolean",
+      "title": "Hook telemetry",
+      "description": "Write hook execution timings to .claude/telemetry.log",
+      "default": true
+    }
+  }
+}

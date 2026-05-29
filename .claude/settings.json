@@ -1,0 +1,17 @@
+{
+  "alwaysThinkingEnabled": true,
+  "cleanupPeriodDays": 7,
+  "defaultShell": "powershell",
+  "spinnerTipsEnabled": true,
+  "permissions": {
+    "allow": ["Bash", "Edit", "Read", "Write", "PowerShell"],
+    "additionalDirectories": ["c:\\agent-dev"],
+    "defaultMode": "acceptEdits"
+  },
+  "sandbox": {
+    "enabled": true
+  },
+  "env": {
+    "MAX_THINKING_TOKENS": "16000"
+  }
+}

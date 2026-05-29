@@ -1,0 +1,353 @@
+---
+name: create-plan
+description: Comprehensive evaluation of the create-plan skill
+version: "1.0"
+metadata:
+  author: Claude
+  created: "2026-05-29"
+  purpose: Measure planning quality, file discovery, task decomposition, and output format
+
+variance:
+  min_runs: 1
+  seed: 42
+
+cases:
+  - id: simple-feature-no-flags
+    description: "Add a simple feature without flags (default --atomic)"
+    prompt:
+      content: |
+        Create an implementation plan for adding JWT authentication to an Express API.
+        The API currently has basic user endpoints at src/api/users.ts.
+        You need to add JWT token generation and validation middleware.
+        Component: auth-middleware
+        Context: Single Express repository, existing user model at src/models/User.ts, tests at src/tests/
+    files: []
+    assertions:
+      - id: plan-file-created
+        text: "Plan file created with correct naming (feature-auth-middleware-1.md)"
+        check: programmatic
+        kind: file_exists
+        path: "plan-feature-auth-middleware-1.md"
+
+      - id: has-executable-tasks
+        text: "Plan contains atomic tasks with Action and Validate fields"
+        check: programmatic
+        kind: regex
+        pattern: "Action:.*\n.*Validate:.*npm test|node scripts"
+
+      - id: has-file-paths
+        text: "Plan includes markdown-linked file paths"
+        check: programmatic
+        kind: regex
+        pattern: "\\[.*\\.ts\\]\\(.*\\.ts\\)"
+
+      - id: has-phases
+        text: "Plan includes structured phases (Phase, Task format)"
+        check: programmatic
+        kind: regex
+        pattern: "#{2,3}\\s+(Phase|Task)\\s+-"
+
+      - id: has-dependencies
+        text: "Tasks include Depends on: references for ordering"
+        check: programmatic
+        kind: regex
+        pattern: "Depends on:.*(?:none|TASK-)"
+
+      - id: effort-estimate
+        text: "Plan includes effort estimation in hours"
+        check: programmatic
+        kind: regex
+        pattern: "\\d+\\s*(?:hour|hr)"
+
+  - id: compact-flag-test
+    description: "Create plan with --compact flag for executive summary"
+    prompt:
+      content: |
+        Create a compact implementation plan (--compact) for upgrading a React component library from v4 to v5.
+        Component: react-components-upgrade
+        Context: Monorepo with multiple component files, existing tests, breaking API changes in v5
+    files: []
+    assertions:
+      - id: plan-file-created-compact
+        text: "Compact plan file created"
+        check: programmatic
+        kind: file_exists
+        path: "plan-feature-react-components-upgrade-1.md"
+
+      - id: compact-format
+        text: "Plan uses compact format with 6-8 phases, not detailed tasks"
+        check: programmatic
+        kind: regex
+        pattern: "#{2}\\s+Phase|#{3}\\s+Phase"
+
+      - id: no-verbose-tasks
+        text: "Compact plan avoids excessive atomic task breakdowns"
+        check: programmatic
+        kind: regex
+        pattern: "(?!.*TASK-(?:0[1-9]|[12]\\d|3[0-5]))"
+
+      - id: has-summary
+        text: "Compact plan includes executive summary or high-level overview"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)(overview|summary|executive|outline|high.level)"
+
+  - id: multi-repo-assume-paths
+    description: "Plan for multi-repo scenario with --assume-paths"
+    prompt:
+      content: |
+        Create a plan with --assume-paths for adding a shared authentication service across 3 microservices.
+        Services: auth-service, user-service, api-gateway (separate repos)
+        Context: Cannot discover paths across repos; assume they follow standard structure
+    files: []
+    assertions:
+      - id: plan-file-created-multi
+        text: "Multi-repo plan file created"
+        check: programmatic
+        kind: file_exists
+        path: "plan-feature-auth-service-1.md"
+
+      - id: documents-assumptions
+        text: "Plan documents path assumptions for multi-repo setup"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)(assumption|assume|path:|expected|structure)"
+
+      - id: links-services
+        text: "Plan references dependencies between services"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)(service|repo|depend|link)"
+
+  - id: refactoring-task
+    description: "Create plan for a refactoring task (not a new feature)"
+    prompt:
+      content: |
+        Create a plan for refactoring a callback-heavy Node.js middleware system to use async/await.
+        Component: middleware-modernization
+        Context: Existing middleware files use nested callbacks; need systematic conversion
+    files: []
+    assertions:
+      - id: plan-file-created-refactor
+        text: "Refactor plan file created with correct purpose (refactor-middleware-modernization-1.md)"
+        check: programmatic
+        kind: file_exists
+        path: "plan-refactor-middleware-modernization-1.md"
+
+      - id: has-conversion-steps
+        text: "Plan includes conversion steps from callbacks to async/await"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)(async|await|callback|convert|transform)"
+
+      - id: includes-validation
+        text: "Plan includes regression testing/validation steps"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)(test|validate|regression|verify)"
+
+  - id: vague-input-handling
+    description: "Test handling of vague/unclear requirements"
+    prompt:
+      content: |
+        I want to improve the system performance and make things faster.
+    files: []
+    assertions:
+      - id: asks-clarifying-questions
+        text: "Response clarifies scope (asks about component, which system, current bottlenecks)"
+        check: grader_passes
+        rubric: |
+          The response should ask clarifying questions instead of guessing. Look for:
+          - Question about which component/system is being improved
+          - Question about current performance metrics or constraints
+          - Question about acceptable trade-offs or constraints
+          - NOT a fabricated plan based on guesses
+
+  - id: plan-validation-quality
+    description: "Test plan validation and error detection"
+    prompt:
+      content: |
+        Create a plan for adding a database migration system to a Node.js application.
+        The app uses Prisma ORM. Include validation that checks for proper migration naming and execution order.
+        Component: db-migrations
+    files: []
+    assertions:
+      - id: plan-has-validation-steps
+        text: "Plan includes executable validation commands for migrations"
+        check: programmatic
+        kind: regex
+        pattern: "Validate:.*(?:prisma|migrate|npm|node)"
+
+      - id: no-placeholder-paths
+        text: "All paths are verified, no placeholders like [your-file] or TODO"
+        check: programmatic
+        kind: regex
+        pattern: "^(?!.*\\[(?:your|TODO|FIXME|placeholder|path/to))"
+
+      - id: links-are-markdown
+        text: "File references use proper markdown link format"
+        check: programmatic
+        kind: regex
+        pattern: "\\[.*\\]\\(.*\\)"
+
+  - id: quick-flag-test
+    description: "Test --quick flag skips discovery on well-known patterns"
+    prompt:
+      content: |
+        Create a plan with --quick for adding basic form validation to a React form component.
+        This is a standard React patterns task; assume src/components/Form.tsx exists.
+        Component: form-validation
+    files: []
+    assertions:
+      - id: plan-created-quickly
+        text: "Plan created without extensive path discovery"
+        check: programmatic
+        kind: file_exists
+        path: "plan-feature-form-validation-1.md"
+
+      - id: assumes-standard-paths
+        text: "Plan assumes standard React directory structure without discovery"
+        check: programmatic
+        kind: regex
+        pattern: "src/components|src/tests"
+
+  - id: effort-estimation-accuracy
+    description: "Test effort estimation aligns with task complexity"
+    prompt:
+      content: |
+        Create a plan for a large infrastructure migration: moving from EC2 instances to Kubernetes.
+        Component: infra-k8s-migration
+        Context: Multi-service application, complex networking, persistent storage
+    files: []
+    assertions:
+      - id: high-effort-estimate
+        text: "Large migration task includes effort estimate of 10+ hours"
+        check: programmatic
+        kind: regex
+        pattern: "(?:10|1[0-9]|[2-9]\\d)\\s*(?:hour|hr)"
+
+      - id: effort-increases-with-scope
+        text: "Plan complexity reflects scale (30+ tasks for major migration)"
+        check: programmatic
+        kind: regex
+        pattern: "TASK-(?:0[1-9]|[12]\\d|3[0-9])"
+
+  - id: output-format-correctness
+    description: "Test that output follows the required plan template"
+    prompt:
+      content: |
+        Create a plan for adding comprehensive logging to a web server application.
+        Component: logging-system
+    files: []
+    assertions:
+      - id: has-goal-section
+        text: "Plan includes Goal section (2-3 sentences)"
+        check: programmatic
+        kind: regex
+        pattern: "#+\\s+Goal|#+\\s+Purpose"
+
+      - id: has-requirements-section
+        text: "Plan includes Requirements section with REQ-001 format"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)requirement|REQ-"
+
+      - id: has-acceptance-criteria
+        text: "Plan includes Acceptance Criteria section"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)acceptance|criteria"
+
+      - id: has-testing-section
+        text: "Plan includes Testing & Validation section"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)test|validat"
+
+  - id: symbol-discovery-quality
+    description: "Test symbol discovery and linking"
+    prompt:
+      content: |
+        Create a plan for refactoring database query functions to use a new abstraction layer.
+        Component: db-query-abstraction
+        Context: Existing query functions are scattered across multiple files; need to centralize
+    files: []
+    assertions:
+      - id: includes-symbol-references
+        text: "Plan includes symbol-level references (functions, classes) with line anchors"
+        check: programmatic
+        kind: regex
+        pattern: "Symbols:|#L\\d+"
+
+      - id: symbols-are-linked
+        text: "Symbols are markdown-linked with line numbers"
+        check: programmatic
+        kind: regex
+        pattern: "\\[.*\\]\\(.*#L\\d+\\)"
+
+  - id: dependency-tracking
+    description: "Test task dependency tracking and ordering"
+    prompt:
+      content: |
+        Create a plan for implementing a feature flag system for feature gradual rollout.
+        Component: feature-flags
+        Context: Needs flag definitions, SDK integration, dashboard
+    files: []
+    assertions:
+      - id: dependencies-form-dag
+        text: "Task dependencies form a valid DAG (no circular references)"
+        check: programmatic
+        kind: regex
+        pattern: "Depends on:.*(?:none|TASK-)"
+
+      - id: tasks-ordered-logically
+        text: "Earlier tasks are prerequisites for later tasks"
+        check: grader_passes
+        rubric: |
+          Review the task ordering:
+          - Setup/configuration tasks come before feature integration
+          - Tests come after implementation
+          - Deployments come last
+          Tasks should be ordered so dependencies are satisfied
+
+  - id: anti-pattern-detection
+    description: "Test that plans avoid anti-patterns (vague validation, bundled tasks)"
+    prompt:
+      content: |
+        Create a plan for adding email notification support to a web application.
+        Component: email-notifications
+    files: []
+    assertions:
+      - id: no-vague-validation
+        text: "Validation steps are executable commands, not prose"
+        check: programmatic
+        kind: regex
+        pattern: "Validate:.*(?:npm|node|python|sh|bash|curl)"
+
+      - id: single-outcome-per-task
+        text: "Tasks don't bundle multiple outcomes (no task ends with 'and')"
+        check: programmatic
+        kind: regex
+        pattern: "Expected result:.*(?:and|,\\s*(?:also|plus|additionally))"
+        negate: true
+
+  - id: narrative-format-test
+    description: "Test --narrative flag for ops/infrastructure context"
+    prompt:
+      content: |
+        Create a narrative-format plan (--narrative) for setting up a new production monitoring system.
+        Component: prod-monitoring
+        Context: Need runbooks, team training materials, operational handoff
+    files: []
+    assertions:
+      - id: plan-created-narrative
+        text: "Narrative plan file created"
+        check: programmatic
+        kind: file_exists
+        path: "plan-infrastructure-prod-monitoring-1.md"
+
+      - id: includes-runbook
+        text: "Plan includes operational runbook or team training content"
+        check: programmatic
+        kind: regex
+        pattern: "(?i)(runbook|procedure|team|train|operation|manual)"

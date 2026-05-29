@@ -1,0 +1,358 @@
+suite:
+  name: architecture-skill-comprehensive
+  description: >
+    Comprehensive eval suite for architecture skill testing both MODE A (DIAGNOSE)
+    and MODE B (DESIGN) workflows. Tests skill's ability to identify architectural
+    issues, propose deepening opportunities, and design new system structures.
+
+axes:
+  - name: mode
+    values: [diagnose, design]
+    description: Architecture skill mode (existing codebase vs new design)
+  - name: complexity
+    values: [simple, moderate, complex]
+    description: Problem complexity level
+
+variants: []
+
+cases:
+  # MODE A — DIAGNOSE CASES
+
+  - id: diagnose-god-module
+    mode: diagnose
+    complexity: moderate
+    title: Identify God Module with High Fan-Out
+    description: >
+      Test MODE A's ability to detect God modules and high fan-out patterns
+      using the locality check heuristic. Should identify opportunities to
+      extract domain logic into specialized modules.
+    prompt:
+      content: |
+        I'm analyzing an existing Node.js codebase with architectural issues.
+        Here's the structure I'm seeing:
+
+        - src/user.ts: 450 lines, handles user creation, validation, authentication,
+          password hashing, JWT token generation, email notifications, database queries,
+          and admin role logic. Imported by 12+ files.
+        - src/routes/auth.ts: Just calls user.ts functions
+        - src/routes/users.ts: Just calls user.ts functions
+        - src/middleware/auth.ts: Just calls user.ts token validation
+
+        When I need to change password validation, I have to touch user.ts and
+        update 3 different route handlers. Testing feels impossible without
+        mocking the database.
+
+        Can you analyze this and tell me where the architectural problems are?
+    expected_output:
+      includes:
+        - "identify.*god.*module"
+        - "scattered.*logic"
+        - "testability"
+        - "seam"
+      case_sensitive: false
+    grader: rule-based
+    assertions:
+      - check: substring_present
+        text: "Identifies God module pattern in user.ts"
+        substring: "user"
+      - check: substring_present
+        text: "Mentions scattered responsibility (auth, validation, notification)"
+        substring: "scatter|split|responsibility"
+        case_sensitive: false
+      - check: substring_present
+        text: "References testability barrier or seam issue"
+        substring: "test|seam|database|mock"
+        case_sensitive: false
+      - check: substring_present
+        text: "Proposes concrete refactoring opportunities (not just philosophy)"
+        substring: "extract|consolidate|module|boundary"
+        case_sensitive: false
+
+  - id: diagnose-circular-dependency
+    mode: diagnose
+    complexity: moderate
+    title: Detect Circular Dependencies and Tangled Logic
+    description: >
+      Test MODE A's ability to identify circular dependencies and tangled
+      dependency chains that impede understanding and testing.
+    prompt:
+      content: |
+        I have a payment processing system with these interdependencies:
+
+        - src/billing/invoice.ts imports src/payments/processor.ts
+        - src/payments/processor.ts imports src/billing/events.ts
+        - src/billing/events.ts imports src/payments/processor.ts
+
+        Additionally:
+        - Changing one line in invoice.ts requires understanding 5 other modules
+        - I can't test payment logic without instantiating the billing module
+        - A single feature change touches files in 3 different directories
+
+        The code works, but it's getting harder to reason about. What's happening?
+    expected_output:
+      includes:
+        - "circular"
+        - "coupling"
+        - "locality"
+      case_sensitive: false
+    grader: rule-based
+    assertions:
+      - check: substring_present
+        text: "Identifies circular dependency issue"
+        substring: "circular"
+        case_sensitive: false
+      - check: substring_present
+        text: "Recognizes tight coupling problem"
+        substring: "coupling|tangled|depend"
+        case_sensitive: false
+      - check: substring_present
+        text: "References locality or navigability impact"
+        substring: "locality|navigate|understand"
+        case_sensitive: false
+
+  - id: diagnose-infrastructure-bleed
+    mode: diagnose
+    complexity: moderate
+    title: Detect Infrastructure Leaking into Domain Logic
+    description: >
+      Test MODE A's ability to identify mechanism bleeding into policy
+      (e.g., Express types in domain logic, database imports in business rules).
+    prompt:
+      content: |
+        My domain logic has these imports:
+
+        src/domain/billing.ts:
+        - import { Request, Response } from 'express';
+        - import { PrismaClient } from '@prisma/client';
+        - export function calculateBill(req: Request) { ... }
+
+        src/domain/auth.ts:
+        - import database from '../infrastructure/db';
+        - Uses database.findUser() directly in business logic
+
+        Everything works fine, but I'm concerned about testing and moving
+        this to a different framework later.
+    expected_output:
+      includes:
+        - "infrastructure"
+        - "bleed"
+        - "mechanism"
+        - "domain"
+      case_sensitive: false
+    grader: rule-based
+    assertions:
+      - check: substring_present
+        text: "Identifies infrastructure imports in domain layer"
+        substring: "express|prisma|database|framework"
+        case_sensitive: false
+      - check: substring_present
+        text: "Recognizes boundary violation (mechanism vs policy)"
+        substring: "boundary|mechanism|policy|layer"
+        case_sensitive: false
+      - check: substring_present
+        text: "Suggests extracting infrastructure into adapters"
+        substring: "extract|adapter|interface|separate"
+        case_sensitive: false
+
+  - id: diagnose-fragmented-feature
+    mode: diagnose
+    complexity: complex
+    title: Analyze Scattered Feature Logic Across Multiple Files
+    description: >
+      Test MODE A's ability to recognize when a single feature requires
+      modifying many files, indicating poor cohesion and locality.
+    prompt:
+      content: |
+        Adding a "subscription renewal" feature requires touching:
+        - src/models/subscription.ts (DB entity)
+        - src/models/payment.ts (payment method)
+        - src/utils/helpers.ts (date calculations)
+        - src/utils/validators.ts (renewal rules)
+        - src/routes/subscriptions.ts (API endpoint)
+        - src/middleware/auth.ts (permission check)
+        - src/background-jobs/renewal.ts (batch processing)
+        - src/notifications/mailer.ts (email notification)
+
+        Each change is small, but I have to understand and modify 8 files.
+        Testing one aspect requires mocking multiple external systems.
+    expected_output:
+      includes:
+        - "scatter"
+        - "cohesion"
+        - "locality"
+        - "consolidate"
+      case_sensitive: false
+    grader: rule-based
+    assertions:
+      - check: substring_present
+        text: "Identifies scattered logic pattern"
+        substring: "scatter|spread|dispersed|across"
+        case_sensitive: false
+      - check: substring_present
+        text: "Recognizes cohesion or locality problem"
+        substring: "cohesion|locality|concentrate"
+        case_sensitive: false
+      - check: substring_present
+        text: "Proposes consolidating logic into coherent module"
+        substring: "module|consolidate|extract|boundary"
+        case_sensitive: false
+
+  # MODE B — DESIGN CASES
+
+  - id: design-new-payment-system
+    mode: design
+    complexity: moderate
+    title: Design Architecture for New Payment Processing Module
+    description: >
+      Test MODE B's ability to design clean architecture for a new payment
+      system with clear domain/infrastructure boundaries.
+    prompt:
+      content: |
+        I'm building a new payment processing module from scratch. It needs to:
+        - Accept payment requests (credit card, PayPal, crypto)
+        - Validate payment information
+        - Process transactions
+        - Record transaction history
+        - Send notifications on success/failure
+        - Integrate with multiple payment gateways (Stripe, PayPal)
+
+        How should I structure this so that:
+        - Core payment logic doesn't depend on which gateway we use
+        - It's easy to add new payment methods
+        - I can test payment validation without mocking external APIs
+        - Business rules stay separate from integration details
+    expected_output:
+      includes:
+        - "domain|core"
+        - "adapter|infrastructure"
+        - "interface|boundary"
+      case_sensitive: false
+    grader: rule-based
+    assertions:
+      - check: substring_present
+        text: "Proposes separating domain logic from infrastructure"
+        substring: "domain|core|business.*rule"
+        case_sensitive: false
+      - check: substring_present
+        text: "Suggests adapter pattern or interface-based design"
+        substring: "adapter|interface|abstract|contract"
+        case_sensitive: false
+      - check: substring_present
+        text: "Addresses testability (unit test domain without APIs)"
+        substring: "test|mock|unit|integration"
+        case_sensitive: false
+      - check: substring_present
+        text: "Explains how to add new payment method without changing core"
+        substring: "extend|new|add|plug|gateway"
+        case_sensitive: false
+
+  - id: design-microservice-boundary
+    mode: design
+    complexity: complex
+    title: Design Boundaries for Microservice Decomposition
+    description: >
+      Test MODE B's ability to identify and propose clean boundaries when
+      splitting a monolith into services based on domain concepts.
+    prompt:
+      content: |
+        I have a monolithic e-commerce system handling:
+        - Product catalog (inventory, search, pricing)
+        - Shopping cart (user items, persistence)
+        - Orders (creation, fulfillment, tracking)
+        - Payments (processing, refunds)
+        - Notifications (email, SMS)
+        - User accounts (profile, auth, preferences)
+
+        We're growing and want to split this into microservices. How should
+        I identify clean boundaries? Which services should talk to which?
+        What should be shared vs. separated?
+    expected_output:
+      includes:
+        - "service|boundary|domain"
+        - "responsibility"
+        - "coupling|cohesion"
+      case_sensitive: false
+    grader: rule-based
+    assertions:
+      - check: substring_present
+        text: "Identifies domain concepts as service boundaries"
+        substring: "domain|concept|service|boundary"
+        case_sensitive: false
+      - check: substring_present
+        text: "Discusses inter-service communication pattern"
+        substring: "api|event|message|communication|interface"
+        case_sensitive: false
+      - check: substring_present
+        text: "Addresses data ownership and consistency"
+        substring: "data|ownership|database|consistency|schema"
+        case_sensitive: false
+      - check: substring_present
+        text: "Mentions avoiding shared utils/common libraries"
+        substring: "avoid|utils|shared|common|duplication"
+        case_sensitive: false
+
+  - id: design-plugin-architecture
+    mode: design
+    complexity: complex
+    title: Design Extensible Plugin Architecture
+    description: >
+      Test MODE B's ability to design systems that allow pluggable behavior
+      without core logic knowing about specific implementations.
+    prompt:
+      content: |
+        I'm building a data processing pipeline that needs to support
+        multiple input formats (CSV, JSON, XML, Parquet) and output
+        destinations (S3, PostgreSQL, Elasticsearch, HTTP endpoint).
+
+        Currently, I'd have if/else statements routing to different handlers.
+        I want to design this so new formats and destinations can be added
+        without modifying the core pipeline code.
+
+        What architecture pattern should I use? How do I structure interfaces
+        and implementations?
+    expected_output:
+      includes:
+        - "plugin|extensible|interface|adapter"
+        - "registry|factory"
+      case_sensitive: false
+    grader: rule-based
+    assertions:
+      - check: substring_present
+        text: "Proposes plugin/extensible architecture pattern"
+        substring: "plugin|extensible|extend|interface"
+        case_sensitive: false
+      - check: substring_present
+        text: "Suggests registry or factory pattern for discovery"
+        substring: "registry|factory|loader|discovery"
+        case_sensitive: false
+      - check: substring_present
+        text: "Shows interface design for input and output adapters"
+        substring: "interface|contract|adapter|abstract"
+        case_sensitive: false
+      - check: substring_present
+        text: "Explains how to add new format without modifying core"
+        substring: "new.*format|add|implement|extend"
+        case_sensitive: false
+
+variance:
+  min_runs: 1
+  max_runs: 1
+
+runner:
+  use_skill: architecture
+  model: claude-haiku-4-5-20251001
+  timeout_seconds: 300
+
+grader:
+  model: claude-haiku-4-5-20251001
+  timeout_seconds: 300
+
+notes: |
+  Architecture skill should excel at:
+  1. Identifying real architectural problems (God modules, circular deps, infrastructure bleed)
+  2. Using domain language and concrete examples (not generic philosophy)
+  3. Proposing actionable refactoring opportunities with clear impacts
+  4. Designing clean boundaries for new systems
+  5. Teaching architectural thinking, not just listing patterns
+
+  These cases test whether the skill changes behavior vs. baseline.

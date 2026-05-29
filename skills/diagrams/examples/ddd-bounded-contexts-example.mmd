@@ -1,0 +1,196 @@
+classDiagram
+    %% ========== ORDER BOUNDED CONTEXT ==========
+    namespace OrderContext {
+        class Order {
+            <<entity>>
+            <<aggregate root>>
+            -orderId: UUID
+            -customerId: UUID
+            -items: OrderLine[]
+            -totalPrice: Money
+            -status: OrderStatus
+            --
+            +placeOrder()
+            +cancel()
+            +getOrderDetails()
+        }
+
+        class OrderLine {
+            <<entity>>
+            -lineId: UUID
+            -productId: UUID
+            -quantity: int
+            -unitPrice: Money
+        }
+
+        class OrderStatus {
+            <<value object>>
+            -status: enum
+            -createdAt: DateTime
+        }
+
+        class Money {
+            <<value object>>
+            -amount: Decimal
+            -currency: string
+        }
+
+        Order *-- OrderLine
+        Order *-- OrderStatus
+        Order *-- Money
+        OrderLine *-- Money
+
+        Order : Invariant: status always valid
+        Order : Invariant: items non-empty
+        Order : Boundary: Only Order accessed from outside
+    }
+
+    %% ========== PAYMENT BOUNDED CONTEXT ==========
+    namespace PaymentContext {
+        class Payment {
+            <<entity>>
+            <<aggregate root>>
+            -paymentId: UUID
+            -orderId: UUID
+            -amount: Money
+            -status: PaymentStatus
+            --
+            +chargeCard()
+            +refund()
+            +getStatus()
+        }
+
+        class PaymentStatus {
+            <<value object>>
+            -status: enum
+            -processedAt: DateTime
+        }
+
+        class PaymentMethod {
+            <<value object>>
+            -type: enum
+            -last4: string
+        }
+
+        Payment *-- PaymentStatus
+        Payment *-- Money
+        Payment *-- PaymentMethod
+
+        Payment : Invariant: amount > 0
+        Payment : Boundary: Only Payment accessed from outside
+    }
+
+    %% ========== INVENTORY BOUNDED CONTEXT ==========
+    namespace InventoryContext {
+        class Inventory {
+            <<entity>>
+            <<aggregate root>>
+            -inventoryId: UUID
+            -productId: UUID
+            -quantity: int
+            -warehouse: string
+            --
+            +reserve(qty)
+            +release(qty)
+            +updateStock()
+        }
+
+        class Stock {
+            <<value object>>
+            -quantity: int
+            -sku: string
+        }
+
+        Inventory *-- Stock
+
+        Inventory : Invariant: quantity >= 0
+        Inventory : Boundary: Only Inventory accessed from outside
+    }
+
+    %% ========== SHIPPING BOUNDED CONTEXT ==========
+    namespace ShippingContext {
+        class Shipment {
+            <<entity>>
+            <<aggregate root>>
+            -shipmentId: UUID
+            -orderId: UUID
+            -address: Address
+            -status: ShipmentStatus
+            --
+            +createShipment()
+            +updateTrackingInfo()
+            +markDelivered()
+        }
+
+        class Address {
+            <<value object>>
+            -street: string
+            -city: string
+            -zipCode: string
+            -country: string
+        }
+
+        class ShipmentStatus {
+            <<value object>>
+            -status: enum
+            -estimatedDelivery: Date
+        }
+
+        Shipment *-- Address
+        Shipment *-- ShipmentStatus
+
+        Shipment : Boundary: Only Shipment accessed from outside
+    }
+
+    %% ========== CROSS-CONTEXT COMMUNICATION ==========
+    Order -.publish.-> OrderPlacedEvent : async event
+    Payment -.publish.-> PaymentProcessedEvent : async event
+    Inventory -.publish.-> InventoryReservedEvent : async event
+    Shipment -.publish.-> ShipmentCreatedEvent : async event
+
+    Order --> Payment : references by orderId
+    Order --> Inventory : references by productId
+    Order --> Shipment : references by orderId
+
+    Payment -.consumes.-> OrderPlacedEvent : event subscription
+    Inventory -.consumes.-> OrderPlacedEvent : event subscription
+    Shipment -.consumes.-> PaymentProcessedEvent : event subscription
+
+    %% ========== DOMAIN EVENTS ==========
+    namespace DomainEvents {
+        class OrderPlacedEvent {
+            <<domain event>>
+            -orderId: UUID
+            -customerId: UUID
+            -timestamp: DateTime
+        }
+
+        class PaymentProcessedEvent {
+            <<domain event>>
+            -paymentId: UUID
+            -orderId: UUID
+            -status: enum
+            -timestamp: DateTime
+        }
+
+        class InventoryReservedEvent {
+            <<domain event>>
+            -inventoryId: UUID
+            -quantity: int
+            -timestamp: DateTime
+        }
+
+        class ShipmentCreatedEvent {
+            <<domain event>>
+            -shipmentId: UUID
+            -orderId: UUID
+            -timestamp: DateTime
+        }
+    }
+
+    %% Styling
+    style OrderContext fill:#e8e8ff,stroke:#6b6bff,stroke-width:3px
+    style PaymentContext fill:#ffe8e8,stroke:#ff6b6b,stroke-width:3px
+    style InventoryContext fill:#e8ffe8,stroke:#6bff6b,stroke-width:3px
+    style ShippingContext fill:#fff8e8,stroke:#ffb366,stroke-width:3px
+    style DomainEvents fill:#f0f0f0,stroke:#999,stroke-width:2px

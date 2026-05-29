@@ -1,0 +1,246 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" session start",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer context",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "WebFetch|WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer prefetch",
+            "timeout": 8
+          }
+        ]
+      },
+      {
+        "matcher": "Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer searchEnrich",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer readIntercept",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" format run",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolBatch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer breadcrumbBatch",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" diagnose-nudge nudge",
+            "timeout": 2
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" brainstorm-nudge nudge",
+            "timeout": 2
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer promptPreload",
+            "timeout": 12
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer subagentStop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer subagentStart",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer compactFlush",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer compactRestore",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer cwdWatch",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": "AGENTS.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" session contextRefresh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "hooks/hooks.json",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" debug hookChanged",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/agents-maintainer/scripts/run.py\" lint-agents-md \"${CLAUDE_PROJECT_DIR}/AGENTS.md\" 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" debug check",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer stop",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" session end",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/runner.mjs\" explorer sessionEnd",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}

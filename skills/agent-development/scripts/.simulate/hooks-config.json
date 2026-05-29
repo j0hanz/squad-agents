@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe .simulate\\observer.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe .simulate\\observer.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:\\Users\\PC\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe .simulate\\observer.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+[
+  {
+    "name": "telemetry-watcher",
+    "command": "tail -F \"${CLAUDE_PROJECT_DIR}/.claude/telemetry.log\"",
+    "description": "Hook execution telemetry — surfaces errors and slow hooks in real time"
+  },
+  {
+    "name": "node-test-watcher",
+    "command": "node --test --watch \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/*.test.mjs\"",
+    "description": "Hook handler unit tests — live feedback during hook development",
+    "when": "on-skill-invoke:hook-development"
+  },
+  {
+    "name": "python-test-watcher",
+    "command": "python -m pytest \"${CLAUDE_PLUGIN_ROOT}/skills/agent-development/scripts/tests/\" -v --tb=short -f",
+    "description": "Skill script tests — live feedback during skill development",
+    "when": "on-skill-invoke:skill-builder"
+  }
+]

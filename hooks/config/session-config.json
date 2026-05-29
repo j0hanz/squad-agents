@@ -1,0 +1,15 @@
+{
+  "envCandidates": [".env.local", ".env.staging", ".env.prod", ".env.production"],
+  "artifactCandidates": [
+    "jest-results.json",
+    ".pytest_cache/lastfailed",
+    "test-results.xml",
+    ".vitest/results.json"
+  ],
+  "serviceMarkers": [
+    { "file": "docker-compose.yml", "label": "Docker Compose" },
+    { "file": "docker-compose.yaml", "label": "Docker Compose" },
+    { "file": "Procfile", "label": "Procfile (Foreman/Heroku)" },
+    { "file": ".dev.vars", "label": "Cloudflare Workers dev vars" }
+  ]
+}
