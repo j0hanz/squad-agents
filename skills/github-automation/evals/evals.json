@@ -1,0 +1,38 @@
+{
+  "skill_name": "github-automation",
+  "evals": [
+    {
+      "id": 0,
+      "name": "scaffold-ci-hardened",
+      "prompt": "Set up a CI workflow for this project. It should run on push to main and pull requests. I'm using Node.js. Make sure it's secure and follows best practices.",
+      "assertions": [
+        "Workflow file created in .github/workflows/",
+        "permissions block present with contents: read",
+        "Actions are pinned to SHAs (e.g., @[a-f0-9]{40})",
+        "scripts/lint.sh was called to validate the workflow"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "release-oidc-aws",
+      "prompt": "Create a release workflow that deploys to AWS S3 when a tag is pushed. Use OIDC for authentication.",
+      "assertions": [
+        "Workflow file created",
+        "permissions includes id-token: write",
+        "Uses OIDC action pinned to SHA",
+        "scripts/lint.sh was called"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "batch-close-issues",
+      "prompt": "I need a script that closes all open issues in this repo that have the 'stale' label. It should be safe to run in CI.",
+      "assertions": [
+        "Script file created",
+        "Sets GH_PROMPT_DISABLED=1",
+        "Uses gh api --paginate",
+        "Includes rate-limit-safe loop (sleep or jitter)"
+      ]
+    }
+  ]
+}

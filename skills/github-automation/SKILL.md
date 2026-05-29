@@ -61,16 +61,18 @@ If the user pointed at a specific file, read it first. If they're scaffolding fr
 
 Pick one. The classification drives which reference to load:
 
-| Intent                               | Load this reference                                                                                      |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Build/test on push or PR             | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § CI                                  |
-| Release on tag / version bump        | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Release                             |
-| Deploy to cloud                      | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Deploy + `references/oidc-cloud.md` |
-| Matrix / cross-version testing       | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Matrix                              |
-| Reusable workflow / composite action | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Reuse                               |
-| Harden existing workflow             | **MANDATORY — READ ENTIRE FILE**: `references/security-hardening.md`                                     |
-| Diagnose a misbehaving workflow      | **MANDATORY — READ ENTIRE FILE**: `references/troubleshooting.md`                                        |
-| Pure docs / conceptual question      | **MANDATORY — READ ENTIRE FILE**: `references/topic-map.md` → live `docs.github.com`                     |
+| Intent                               | Load this reference                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Build/test on push or PR             | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § CI                                                  |
+| Release on tag / version bump        | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Release                                             |
+| Deploy to cloud (AWS)                | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Deploy + `references/oidc-cloud.md` § AWS           |
+| Deploy to cloud (GCP)                | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Deploy + `references/oidc-cloud.md` § GCP           |
+| Deploy to cloud (Azure)              | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Deploy + `references/oidc-cloud.md` § Azure         |
+| Matrix / cross-version testing       | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Matrix                                              |
+| Reusable workflow / composite action | **MANDATORY — READ ENTIRE FILE**: `references/workflow-recipes.md` § Reuse                                               |
+| Harden existing workflow             | **MANDATORY — READ ENTIRE FILE**: `references/security-hardening.md`                                                     |
+| Diagnose a misbehaving workflow      | **MANDATORY — READ ENTIRE FILE**: `references/troubleshooting.md`                                                        |
+| Pure docs / conceptual question      | **MANDATORY — READ ENTIRE FILE**: `references/topic-map.md` → live `docs.github.com`                                     |
 
 You don't have to read the whole reference — jump to the section. **Do NOT load** references for intents you didn't select.
 
@@ -85,6 +87,8 @@ Write the workflow file using the recipe as a starting point, then adapt to the 
    ```yaml
    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
    ```
+
+   **IMPORTANT:** Verify `gh auth status` before running pinning scripts. If not authenticated, explain this to the user as pinning requires API access.
 
    Use `scripts/pin_actions.py` to resolve tags → SHAs in bulk.
 
@@ -108,12 +112,12 @@ Write the workflow file using the recipe as a starting point, then adapt to the 
 #### 4. Validate before claiming done
 
 ```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/lint.sh .github/workflows/<file>.yml
+python ${CLAUDE_SKILL_DIR}/scripts/lint.py .github/workflows/<file>.yml
 ```
 
-`lint.sh` prefers `actionlint` when installed (catches expression errors, unknown keys, shellcheck issues inside `run:`). If not installed, it falls back to a minimal YAML + critical-rule check.
+`lint.py` is the cross-platform linter. It prefers `actionlint` when installed, otherwise performs built-in Python-based checks for expression injection, SHA pinning, and permissions.
 
-**Do not report the task complete until lint passes.**
+**Do not report the task complete until lint passes. ALWAYS report which linter tier was used (e.g., "actionlint" or "built-in Python checks").**
 
 #### 5. Verify the trigger fires
 
@@ -125,21 +129,21 @@ bash ${CLAUDE_SKILL_DIR}/scripts/lint.sh .github/workflows/<file>.yml
 
 #### `scripts/pin_actions.py`
 
-Resolves every `uses: org/repo@<ref>` in a workflow to a full commit SHA, rewrites in place, appends the original tag as a comment. Requires `gh` authenticated. Idempotent.
+Resolves every `uses: org/repo@<ref>` in a workflow to a full commit SHA, rewrites in place, appends the original tag as a comment. Requires `gh` authenticated or `git` installed. Idempotent.
 
 ```bash
 python ${CLAUDE_SKILL_DIR}/scripts/pin_actions.py .github/workflows/ci.yml
 python ${CLAUDE_SKILL_DIR}/scripts/pin_actions.py .github/workflows/   # whole directory
 ```
 
-#### `scripts/lint.sh`
+#### `scripts/lint.py` (Preferred over `lint.sh`)
 
 ```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/lint.sh .github/workflows/ci.yml
-bash ${CLAUDE_SKILL_DIR}/scripts/lint.sh .github/workflows/   # whole directory
+python ${CLAUDE_SKILL_DIR}/scripts/lint.py .github/workflows/ci.yml
+python ${CLAUDE_SKILL_DIR}/scripts/lint.py .github/workflows/   # whole directory
 ```
 
-Tries: `actionlint` → `yamllint` → built-in YAML parse + critical-rule check. Tell the user which tier ran.
+Cross-platform linter. Tries: `actionlint` → `yamllint` → built-in Python check.
 
 ### Answer shape (Path A)
 

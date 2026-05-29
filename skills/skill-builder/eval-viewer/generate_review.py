@@ -190,8 +190,12 @@ def embed_file(path: Path) -> dict:
             content = "(Error reading file)"
         # If the HTML is just a single-image wrapper (e.g. a Kroki diagram preview),
         # extract the src and render it as a plain image — cleaner than an iframe.
-        img_matches = re.findall(r'<img\b[^>]*\bsrc=["\']([^"\']+)["\']', content, re.IGNORECASE)
-        if len(img_matches) == 1 and img_matches[0].startswith(("http://", "https://", "data:")):
+        img_matches = re.findall(
+            r'<img\b[^>]*\bsrc=["\']([^"\']+)["\']', content, re.IGNORECASE
+        )
+        if len(img_matches) == 1 and img_matches[0].startswith(
+            ("http://", "https://", "data:")
+        ):
             return {
                 "name": path.name,
                 "type": "image_url",
@@ -551,7 +555,7 @@ def main() -> None:
         html = generate_html(runs, skill_name, previous, benchmark)
         abs_static = args.static.resolve()
         abs_static.parent.mkdir(parents=True, exist_ok=True)
-        abs_static.write_text(html, encoding='utf-8')
+        abs_static.write_text(html, encoding="utf-8")
         file_url = abs_static.as_uri()
         print("\n  Static Eval Viewer")
         print("  ---------------------------------")
