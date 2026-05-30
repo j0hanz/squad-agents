@@ -1,0 +1,86 @@
+{
+  "skill_name": "create-specs",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write a contract-level spec for adding JWT-based user authentication to our Node.js Express app. Users need to be able to sign up with email and password, log in, and access protected routes using Bearer tokens. We're using PostgreSQL and our existing users table already has id (UUID), email (VARCHAR unique), and password_hash (VARCHAR) columns. Tokens should expire after 15 minutes, with refresh tokens lasting 7 days.",
+      "expected_output": "A full 8-section Contract spec with REQ/SEC/PERF/CON prefixed labels, interface definitions for /auth/signup, /auth/login, /auth/refresh endpoints (with error cases), AC and VAL steps, and the spec passes validate_spec.py.",
+      "files": [],
+      "expectations": [
+        "The spec contains all 8 required sections: Goal, Requirements, Constraints, Interfaces, Context, Acceptance Criteria & Validation, Examples & Edge Cases, and Notes & Risks",
+        "Requirements use prefixed labels: at minimum REQ-### and SEC-###",
+        "At least one CON-### constraint is defined",
+        "The Interfaces section defines input, output, AND error cases for at least one endpoint",
+        "The spec includes AC-### acceptance criteria and VAL-### validation steps",
+        "The spec does not contain unmeasured adjectives like 'lightweight', 'robust', or 'fast' without measurable thresholds",
+        "validate_spec.py was run and passed (0 errors), OR the spec is structurally complete enough it would pass",
+        "The spec was saved as a .md file in the outputs directory"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We need to add a real-time inventory sync system. It receives inventory update events from our warehouse management system via webhooks, validates and deduplicates them, then updates our e-commerce PostgreSQL database. This is mission-critical — we process around 500k events per day and any data loss would be catastrophic for our business. We need a production-ready spec with rollback procedures and migration steps. Please write a blueprint-level spec.",
+      "expected_output": "A full Blueprint spec containing all 8 sections plus rollback strategy, migration steps, and a Mermaid architecture diagram in Notes & Risks. PERF requirements with measurable thresholds given the 500k/day volume. SEC requirements. Detailed error cases including downstream failures.",
+      "files": [],
+      "expectations": [
+        "The spec is explicitly at Blueprint level (mentions Blueprint or has all Blueprint-required content)",
+        "Notes & Risks contains a ROLLBACK procedure",
+        "Notes & Risks contains MIGRATION steps",
+        "A Mermaid diagram (```mermaid) is included",
+        "PERF-### requirements exist with measurable thresholds (not vague adjectives)",
+        "SEC-### security requirements are defined",
+        "The Interfaces section covers the webhook input contract AND database output",
+        "Error cases include at minimum: invalid payload, duplicate event, database unavailable"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "we need to add notifications to our app",
+      "expected_output": "The agent should either: (a) ask clarifying Spec Interview questions before writing anything, or (b) produce a Sketch-level spec with heavy UNKNOWN labels for missing information. It should NOT silently guess at a full Contract spec without acknowledging what's unknown.",
+      "files": [],
+      "expectations": [
+        "The response asks clarifying questions (Goal, Scope, Interface, Success criteria) OR produces a Sketch with UNKNOWN: markers",
+        "The spec maturity level chosen is Sketch or the agent explicitly acknowledges insufficient information",
+        "The response does not produce a full Contract spec with invented requirements without flagging them as assumptions or UNKNOWNs",
+        "If a spec is produced, it uses UNKNOWN: [what and why] for missing information rather than guessing"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Write a spec for our session management feature. The security team says: the API must be stateless — no server-side sessions, use short-lived JWT tokens with 15-minute expiry. The product team says: users should stay logged in permanently and never have to re-authenticate, it should feel seamless. These are both hard requirements we can't negotiate. Write the spec.",
+      "expected_output": "The spec documents both conflicting requirements with CONFLICT: tags. It does NOT silently resolve the conflict by choosing one side. The conflict is flagged in Notes & Risks. Both the security team's and product team's requirements are represented.",
+      "files": [],
+      "expectations": [
+        "The spec uses CONFLICT: tags to document the contradictory requirements",
+        "The conflict is mentioned or flagged in the Notes & Risks section",
+        "BOTH requirements are documented in the spec (security team's AND product team's)",
+        "The spec does not silently resolve the conflict by choosing one interpretation"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Just add a search endpoint to our products API. It should accept a query string and search product name and description. Don't write any docs or specs, just implement it — we're in a hurry.",
+      "expected_output": "The agent pauses and offers a 2-minute Sketch spec before proceeding with implementation, explaining the value concisely. It does not immediately jump to code. If the user declines, it may proceed without a spec.",
+      "files": [],
+      "expectations": [
+        "The agent offers a 2-minute Sketch spec or equivalent before writing any implementation code",
+        "The agent does not immediately produce code or implementation steps without acknowledging the spec offer",
+        "If a Sketch is offered, it takes less than 5 requirements and rough interface — not a full Contract"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Write a contract spec for a Python CLI tool called csv-transformer. It reads CSV files from an input directory, applies configurable transformations (filter rows by column value, rename columns, add computed columns based on formulas), and outputs the transformed CSV files to an output directory. It needs to support piping from stdin and piping to stdout, plus be scriptable in CI pipelines with proper exit codes and JSON output mode.",
+      "expected_output": "A Contract spec with CLI interface definitions for each command/flag (filter, rename, compute), standard CLI requirements (non-zero exit on failure, --json flag for machine-readable output, POSIX shell compatibility), proper edge cases for malformed CSV and empty files, and the spec is saved as a file.",
+      "files": [],
+      "expectations": [
+        "The spec defines the CLI interface with input/output/error specifications for the main commands",
+        "Standard CLI requirements are present: non-zero exit on failure, machine-readable output option (--json flag)",
+        "The Interfaces section covers filter, rename, and computed column operations",
+        "Edge cases include: malformed CSV, empty input file, missing columns referenced in filter/rename",
+        "The spec is saved as a .md file in the outputs directory",
+        "validate_spec.py was run and the spec passes structural validation"
+      ]
+    }
+  ]
+}

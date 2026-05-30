@@ -206,21 +206,6 @@
       min-height: var(--ev-navbar-min-h);
     }
 
-    /* ── Benchmark: versus scorecards (Bootstrap row/col + config tints) ── */
-    .vs-col.is-with {
-      background: var(--bs-primary-bg-subtle);
-    }
-
-    .vs-col.is-without {
-      background: var(--bs-warning-bg-subtle);
-    }
-
-    @media (min-width: 576px) {
-      .vs-col.is-with {
-        border-right: 1px solid var(--bs-border-color);
-      }
-    }
-
     /* ── Assertion matrix: responsive column header width ── */
     .matrix-cfg-col {
       width: var(--ev-matrix-col-w);
@@ -277,24 +262,6 @@
 
     td.assert-fail {
       background-color: rgba(220, 53, 69, .14);
-    }
-
-    /* Benchmark hero: left-accent stripe on the winning card only */
-    .stat-hero-win {
-      border-left: var(--ev-accent-w) solid var(--bs-success) !important;
-    }
-
-    /* Per-eval breakdown: styled card shell */
-    .bench-eval-card {
-      border: 1px solid var(--bs-border-color);
-      border-radius: var(--ev-card-radius);
-      overflow: hidden;
-    }
-
-    .bench-eval-head {
-      background: var(--bs-tertiary-bg);
-      border-bottom: 1px solid var(--bs-border-color);
-      padding: .6rem 1rem;
     }
 
     /* Sticky reading subbar: opaque background + full-width (not .container) */
@@ -392,12 +359,6 @@
       min-width: 0;
     }
 
-    /* Benchmark summary table delta column */
-    .bm-delta {
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-    }
-
     .num {
       font-variant-numeric: tabular-nums;
       font-family: var(--bs-font-monospace);
@@ -419,16 +380,6 @@
 
     .eval-fade {
       animation: eval-fade-in .14s ease;
-    }
-
-    /* Responsive hero delta number size */
-    :root {
-      --ev-hero-delta-fs: clamp(1.7rem, 3.2vw, 2.4rem);
-    }
-
-    .hero-delta-value {
-      font-size: var(--ev-hero-delta-fs);
-      line-height: 1;
     }
 
     /* Benchmark: eyebrow-style table headers (all tables in benchmark panel) */
@@ -575,64 +526,6 @@
     .ev-meter-reviewed {
       gap: .55rem;
       padding: .15rem 0;
-    }
-
-    /* Benchmark per-eval vs-col gauge — large donut + percent.
-       display:flex (not inline-flex) so it owns its own row beneath
-       the cfg-chip above and the meta line below. */
-    .ev-meter-vs {
-      display: flex;
-      gap: .75rem;
-    }
-
-    .ev-meter-vs .vs-num {
-      font-size: clamp(1.4rem, 2.6vw, 2rem);
-      line-height: 1;
-      font-weight: 600;
-      color: var(--ev-meter-fg);
-      letter-spacing: -.01em;
-    }
-
-    /* Per-eval vs-col: chip + stats share the top row; gauge sits below.
-       Uses the previously empty card width to surface assertions + time
-       as first-class labelled stats. */
-    .vs-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: .9rem;
-    }
-
-    .vs-stats {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .vs-stat {
-      display: flex;
-      flex-direction: column;
-      gap: .25rem;
-      min-width: 0;
-    }
-
-    .vs-stat-label {
-      font-size: var(--ev-eyebrow-fs);
-      letter-spacing: var(--ev-eyebrow-ls);
-      text-transform: uppercase;
-      color: var(--bs-secondary-color);
-      font-weight: 500;
-      line-height: 1;
-    }
-
-    .vs-stat-val {
-      font-size: 1rem;
-      color: var(--bs-body-emphasis);
-      font-variant-numeric: tabular-nums;
-      font-weight: 600;
-      line-height: 1.1;
     }
   </style>
 </head>
@@ -1419,7 +1312,7 @@ def test_explain_uses_index_scan(db):
       // PASS-RATE THRESHOLDS — see passToneClass() above
       // 80% → success · 50–79% → warning · <50% → danger. Single source
       // of truth for every donut meter (sidebar, subbar, navbar Reviewed,
-      // Formal Grades, benchmark vs-col).
+      // Formal Grades, benchmark scorecard bars).
       // ═══════════════════════════════════════════════════════════════
       // (passToneClass + meterRow defined above next to donutSvg.)
 
@@ -1950,31 +1843,73 @@ def test_explain_uses_index_scan(db):
         return (n > 0 ? "+" : "") + pp + "pp";
       }
 
-      function makeStatCard(valueEl, label, contextText, highlightClass) {
-        return el("div", { class: "col-sm-6 col-lg-4" }, [
-          el("div", { class: "card bg-body-tertiary h-100 " + (highlightClass || "") }, [
-            el("div", { class: "card-body text-center py-4" }, [
-              valueEl,
-              el("div", { class: "eyebrow mt-2", text: label }),
-              contextText ? el("div", { class: "small text-secondary mt-1", text: contextText }) : null,
+      // ═══ Benchmark Scorecard helpers (Bootstrap-native) ═══
+      function benchPctStr(rate) { return rate == null ? "—" : Math.round(rate * 100) + "%"; }
+      // Tone → Bootstrap contextual classes (same 80/50 thresholds as the donut meters)
+      function benchBg(rate) { return rate == null ? "bg-secondary" : rate >= 0.8 ? "bg-success" : rate < 0.5 ? "bg-danger" : "bg-warning"; }
+      function benchText(rate) { return rate == null ? "text-secondary" : rate >= 0.8 ? "text-success" : rate < 0.5 ? "text-danger" : "text-warning"; }
+      function benchFmtTime(s) {
+        if (s == null) return "—";
+        return s >= 60 ? Math.floor(s / 60) + "m " + Math.round(s % 60) + "s" : s.toFixed(0) + "s";
+      }
+      function benchFmtTok(n) {
+        if (n == null) return "—";
+        return n >= 1000 ? (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + "k" : String(n);
+      }
+      function benchMult(x, y) {
+        if (!x || !y) return "—";
+        const r = x / y;
+        return (r >= 10 ? r.toFixed(0) : r.toFixed(1)) + "×";
+      }
+      // Bootstrap progress bar
+      function progressBar(rate, bgClass, h) {
+        return el("div", {
+          class: "progress", role: "progressbar", style: "height:" + (h || 8) + "px",
+          "aria-valuenow": Math.round((rate || 0) * 100), "aria-valuemin": "0", "aria-valuemax": "100",
+        }, [el("div", { class: "progress-bar " + bgClass, style: "width:" + Math.max((rate || 0) * 100, 2) + "%" })]);
+      }
+      // Labelled pass-rate row: name + value over a progress bar
+      function passRateRow(label, sub, rate) {
+        return el("div", { class: "mb-1" }, [
+          el("div", { class: "d-flex justify-content-between align-items-baseline mb-1" }, [
+            el("span", {}, [
+              el("span", { class: "fw-semibold text-body-emphasis", text: label }),
+              sub ? el("span", { class: "small text-secondary ms-2", text: sub }) : null,
+            ]),
+            el("span", { class: "fw-bold num " + benchText(rate), text: benchPctStr(rate) }),
+          ]),
+          progressBar(rate, benchBg(rate), 14),
+        ]);
+      }
+      // Trade-off (cost) tile — Bootstrap card
+      function benchCostTile(kind, withMean, baseMean) {
+        if (withMean == null || baseMean == null) return null;
+        const isTokens = kind === "tokens";
+        const costlier = withMean >= baseMean;
+        const accent = isTokens ? "info" : "warning";
+        const fmt = isTokens ? benchFmtTok : benchFmtTime;
+        const multTxt = costlier ? benchMult(withMean, baseMean) : benchMult(baseMean, withMean);
+        const word = isTokens ? (costlier ? "more" : "fewer") : (costlier ? "slower" : "faster");
+        const lo = Math.min(withMean, baseMean), hi = Math.max(withMean, baseMean);
+        return el("div", { class: "col-sm-6" }, [
+          el("div", { class: "card h-100" }, [
+            el("div", { class: "card-body" }, [
+              el("div", { class: "eyebrow mb-2", text: isTokens ? "Tokens per eval" : "Time per eval" }),
+              el("div", { class: "d-flex align-items-end gap-2 mb-2" }, [
+                el("span", { class: "fs-3 fw-bold lh-1 num text-" + accent, text: multTxt }),
+                el("span", { class: "small text-secondary", text: word + " than baseline" }),
+              ]),
+              el("div", { class: "progress", role: "progressbar", style: "height:8px" }, [
+                el("div", { class: "progress-bar bg-secondary", style: "width:" + (lo / hi * 100) + "%" }),
+                el("div", { class: "progress-bar bg-" + accent + " opacity-50", style: "width:" + ((hi - lo) / hi * 100) + "%" }),
+              ]),
+              el("div", { class: "d-flex justify-content-between small text-secondary mt-2" }, [
+                el("span", { text: "Baseline " + fmt(baseMean) }),
+                el("span", { class: "text-body-emphasis", text: "With skill " + fmt(withMean) }),
+              ]),
             ]),
           ]),
         ]);
-      }
-
-      // Appends a numeric delta stat card (time, tokens) to heroRow.
-      // Pass rate uses a custom card because it has unique color logic.
-      function appendNumericStatCard(heroRow, aData, bData, deltaRaw, label, suffix, ca, cb) {
-        if (!aData && !bData) return;
-        const deltaN = deltaRaw != null ? parseFloat(deltaRaw) : NaN;
-        const sign = !isNaN(deltaN) && deltaN > 0 ? "+" : "";
-        const valueText = deltaRaw != null ? sign + deltaRaw + suffix : "—";
-        heroRow.append(makeStatCard(
-          el("div", { class: "hero-delta-value text-body-emphasis", text: valueText }),
-          label,
-          ca && cb ? `${titleCase(ca)}: ${fmtStat(aData, false)}  ·  ${titleCase(cb)}: ${fmtStat(bData, false)}` : null,
-          ""
-        ));
       }
 
       function renderBenchmark() {
@@ -1984,75 +1919,99 @@ def test_explain_uses_index_scan(db):
         c.replaceChildren();
 
         const summary = d.run_summary || {}, meta = d.metadata || {}, notes = d.notes || [];
-        c.append(el("h2", { class: "h4 mt-3 mb-1", text: "Benchmark Results" }));
-        const metaBits = [
-          meta.skill_name, meta.timestamp,
-          meta.evals_run ? "Evals: " + meta.evals_run.join(", ") : null,
-          (meta.runs_per_configuration || "?") + " runs/config",
-        ].filter(Boolean).join(" · ");
-        c.append(el("p", { class: "text-secondary small mb-3", text: metaBits }));
-
         const configs = Object.keys(summary).filter((k) => k !== "delta");
-        const ca = configs[0], cb = configs[1];
-        const a = summary[ca] || {}, b = summary[cb] || {}, delta = summary.delta || {};
+        const withCfg = configs.find((k) => !isBaselineCfg(k)) || configs[0];
+        const baseCfg = configs.find((k) => isBaselineCfg(k)) || configs.find((k) => k !== withCfg);
+        const a = summary[withCfg] || {}, b = summary[baseCfg] || {}, delta = summary.delta || {};
+        const hasBase = !!baseCfg && !!(b.pass_rate && b.pass_rate.mean != null);
 
-        // ── Hero stat cards ──
-        const heroRow = el("div", { class: "row g-3 mb-4" });
+        const withPR = a.pass_rate ? a.pass_rate.mean : null;
+        const basePR = b.pass_rate ? b.pass_rate.mean : null;
+        const prDelta = delta.pass_rate != null ? parseFloat(delta.pass_rate)
+          : (withPR != null && basePR != null ? withPR - basePR : null);
+        const nEvals = d.runs ? new Set(d.runs.map((r) => r.eval_id)).size : (meta.evals_run || []).length;
+        const runsN = meta.runs_per_configuration || 1;
+        const runsLabel = runsN + (runsN === 1 ? " run / config" : " runs / config");
 
-        // Pass Rate: custom card — colored value, uses fmtDeltaPp, highlights border on win
-        const prDeltaRaw = delta.pass_rate;
-        const prDeltaN = prDeltaRaw != null ? parseFloat(prDeltaRaw) : NaN;
-        const prA = a.pass_rate?.mean != null ? Math.round(a.pass_rate.mean * 100) + "%" : "—";
-        const prB = b.pass_rate?.mean != null ? Math.round(b.pass_rate.mean * 100) + "%" : "—";
-        const prValueCls = !isNaN(prDeltaN)
-          ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "text-body-emphasis")
-          : "text-body-emphasis";
-        heroRow.append(makeStatCard(
-          el("div", { class: "hero-delta-value " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
-          "Pass Rate Delta",
-          ca && cb ? `${titleCase(ca)}: ${prA}  ·  ${titleCase(cb)}: ${prB}` : null,
-          !isNaN(prDeltaN) && prDeltaN > 0 ? "stat-hero-win" : ""
-        ));
-
-        appendNumericStatCard(heroRow, a.time_seconds, b.time_seconds, delta.time_seconds, "Time Delta (s)", "s", ca, cb);
-        appendNumericStatCard(heroRow, a.tokens, b.tokens, delta.tokens, "Token Delta", "", ca, cb);
-
-        c.append(heroRow);
-
-        // ── Detail metrics table ──
-        const rows = [["Pass Rate", fmtStat(a.pass_rate, true), fmtStat(b.pass_rate, true), delta.pass_rate != null ? fmtDeltaPp(delta.pass_rate) : null]];
-        if (a.time_seconds || b.time_seconds) {
-          rows.push(["Time (s)", fmtStat(a.time_seconds, false), fmtStat(b.time_seconds, false), delta.time_seconds ? delta.time_seconds + "s" : null]);
+        // ── 1. Verdict (Bootstrap alert) ──
+        let variant = "secondary", title = "Benchmark results", pill = null, vIcon = _SVG_DOT;
+        if (hasBase && prDelta != null) {
+          if (prDelta >= 0.05) { variant = "success"; title = "Skill recommended"; pill = "Keep"; vIcon = _SVG_CHECK; }
+          else if (prDelta <= -0.05) { variant = "danger"; title = "Skill regressed"; pill = "Revisit"; vIcon = _SVG_X; }
+          else { variant = "secondary"; title = "No clear change"; pill = "Inconclusive"; }
         }
-        if (a.tokens || b.tokens) {
-          rows.push(["Tokens", fmtStat(a.tokens, false), fmtStat(b.tokens, false), delta.tokens != null ? String(delta.tokens) : null]);
+        let sub;
+        if (hasBase && prDelta != null) {
+          const pts = Math.abs(Math.round(prDelta * 100));
+          sub = (prDelta >= 0 ? "Lifts" : "Drops") + " pass rate from " + benchPctStr(basePR) + " to " +
+            benchPctStr(withPR) + " across " + nEvals + (nEvals === 1 ? " eval — " : " evals — ") +
+            pts + " points " + (prDelta >= 0 ? "higher" : "lower") + ".";
+          if (a.time_seconds && b.time_seconds && a.time_seconds.mean != null && b.time_seconds.mean != null) {
+            const tMore = a.time_seconds.mean >= b.time_seconds.mean;
+            sub += " Runs take ~" + benchMult(Math.max(a.time_seconds.mean, b.time_seconds.mean), Math.min(a.time_seconds.mean, b.time_seconds.mean)) +
+              (tMore ? " longer" : " less time");
+            if (a.tokens && b.tokens && a.tokens.mean != null && b.tokens.mean != null) {
+              sub += " and use ~" + benchMult(Math.max(a.tokens.mean, b.tokens.mean), Math.min(a.tokens.mean, b.tokens.mean)) +
+                (a.tokens.mean >= b.tokens.mean ? " the tokens" : " fewer tokens");
+            }
+            sub += ".";
+          }
+        } else {
+          sub = benchPctStr(withPR) + " pass rate across " + nEvals + (nEvals === 1 ? " eval." : " evals.");
         }
-        const tbody = el("tbody", { class: "table-group-divider" }, rows.map((r) => el("tr", {}, [
-          el("td", {}, [el("strong", { text: r[0] })]),
-          el("td", { class: "text-secondary num", text: r[1] }),
-          el("td", { class: "text-secondary num", text: r[2] }),
-          el("td", { class: "bm-delta text-end " + deltaClass(r[3]), text: r[3] || "—" }),
-        ])));
-        const summaryWrap = el("div", { class: "table-responsive mb-4" });
-        summaryWrap.append(el("table", { class: "table align-middle" }, [
-          el("thead", {}, [el("tr", {}, [
-            el("th", { class: "text-secondary", text: "Metric" }),
-            el("th", { class: "text-secondary", text: titleCase(ca || "A") }),
-            el("th", { class: "text-secondary", text: titleCase(cb || "B") }),
-            el("th", { class: "text-secondary text-end", text: "Delta" }),
-          ])]),
-          tbody,
+        c.append(el("div", { class: "alert alert-" + variant + " d-flex align-items-center gap-3", role: "alert" }, [
+          el("span", { class: "fs-3 lh-1 flex-shrink-0", "aria-hidden": "true" }, [iconEl(vIcon)]),
+          el("div", { class: "flex-grow-1" }, [
+            el("div", { class: "d-flex align-items-center gap-2 mb-1 flex-wrap" }, [
+              el("h2", { class: "h5 alert-heading mb-0", text: title }),
+              pill ? el("span", { class: "badge rounded-pill text-bg-" + variant, text: pill }) : null,
+            ]),
+            el("p", { class: "mb-0 small", text: sub }),
+          ]),
+          (hasBase && prDelta != null) ? el("div", { class: "text-center flex-shrink-0 d-none d-md-block ps-3" }, [
+            el("div", { class: "display-6 fw-bold lh-1 num", text: (prDelta > 0 ? "+" : "") + Math.round(prDelta * 100) }),
+            el("div", { class: "eyebrow", text: "points" }),
+          ]) : null,
         ]));
-        c.append(summaryWrap);
 
+        // ── 2. Pass-rate comparison (Bootstrap card + progress) ──
+        const hero = el("div", { class: "card mb-4" }, [
+          el("div", { class: "card-body" }, [
+            el("div", { class: "d-flex justify-content-between align-items-center mb-3" }, [
+              el("span", { class: "eyebrow", text: "Pass rate — overall" }),
+              el("span", { class: "eyebrow", text: runsLabel }),
+            ]),
+            passRateRow("With skill", null, withPR),
+            hasBase ? el("div", { class: "text-center small fw-bold my-2 " + (prDelta >= 0 ? "text-success" : "text-danger") },
+              [iconEl(prDelta >= 0 ? _SVG_CHEVRON_UP : _SVG_CHEVRON_DOWN), " " + (prDelta > 0 ? "+" : "") + Math.round(prDelta * 100) + " pp"]) : null,
+            hasBase ? passRateRow("Baseline", "no skill", basePR) : null,
+          ].filter(Boolean)),
+        ]);
+        c.append(hero);
+
+        // ── 3. The trade-off ──
+        if (hasBase) {
+          const tiles = [
+            benchCostTile("time", a.time_seconds && a.time_seconds.mean, b.time_seconds && b.time_seconds.mean),
+            benchCostTile("tokens", a.tokens && a.tokens.mean, b.tokens && b.tokens.mean),
+          ].filter(Boolean);
+          if (tiles.length) {
+            c.append(el("div", { class: "eyebrow mb-2", text: "The trade-off" }));
+            c.append(el("div", { class: "row g-3 mb-4" }, tiles));
+          }
+        }
+
+        // ── 4. Per-eval ──
         renderBenchmarkPerEval(c, d);
 
+        // ── 5. Notes ──
         if (notes.length) {
-          const notesList = el("ul", { class: "mb-0 ps-3 d-flex flex-column gap-1" },
-            notes.map((n) => el("li", { class: "small text-secondary", text: n })));
-          c.append(el("div", { class: "bench-eval-card mt-2" }, [
-            el("div", { class: "bench-eval-head eyebrow", text: "Analysis Notes" }),
-            el("div", { class: "p-3" }, [notesList]),
+          c.append(el("div", { class: "card mt-2" }, [
+            el("div", { class: "card-header eyebrow", text: "Analysis Notes" }),
+            el("div", { class: "card-body" }, [
+              el("ul", { class: "mb-0 ps-3 small text-secondary d-flex flex-column gap-1" },
+                notes.map((n) => el("li", { text: n }))),
+            ]),
           ]));
         }
       }
@@ -2062,17 +2021,17 @@ def test_explain_uses_index_scan(db):
         if (!runs.length) return;
         const evalIds = [...new Set(runs.map((r) => r.eval_id))].sort((x, y) => x - y);
 
-        c.append(el("div", { class: "eyebrow mb-2 mt-4", text: "Per-Eval Breakdown" }));
+        c.append(el("div", { class: "eyebrow mb-2 mt-4", text: "By eval" }));
 
         evalIds.forEach((id) => {
           const er = runs.filter((r) => r.eval_id === id);
           const name = (er[0] && er[0].eval_name) || ("Eval " + id);
           // Skill version leads, baseline trails
           const groups = [...new Set(er.map((r) => r.configuration))]
-            .sort((a, b) => (isBaselineCfg(a) ? 1 : 0) - (isBaselineCfg(b) ? 1 : 0));
+            .sort((x, y) => (isBaselineCfg(x) ? 1 : 0) - (isBaselineCfg(y) ? 1 : 0));
           const runsPer = Math.max(...groups.map((g) => er.filter((r) => r.configuration === g).length), 1);
 
-          const grid = el("div", { class: "row g-0" });
+          const agg = {};
           groups.forEach((cfg) => {
             const cr = er.filter((r) => r.configuration === cfg);
             const rates = cr.map((r) => (r.result || {}).pass_rate || 0);
@@ -2081,38 +2040,32 @@ def test_explain_uses_index_scan(db):
             const passed = cr.length === 1 ? ((cr[0].result || {}).passed || 0) : Math.round(avg * total);
             const times = cr.map((r) => (r.result || {}).time_seconds).filter((t) => t != null);
             const avgTime = times.length ? times.reduce((s, v) => s + v, 0) / times.length : null;
-            const pctNum = Math.round(avg * 100);
-            const baseline = isBaselineCfg(cfg);
-            const gauge = el("div", { class: "ev-meter ev-meter-vs " + passToneClass(pctNum) }, [
-              donutSvg(pctNum, 52, 4.5),
-              el("div", { class: "vs-num", text: String(pctNum) }),
-            ]);
-            const stats = el("div", { class: "vs-stats" }, [
-              el("div", { class: "vs-stat" }, [
-                el("div", { class: "vs-stat-label", text: "Assertions" }),
-                el("div", { class: "vs-stat-val", text: `${passed} / ${total}` }),
-              ]),
-              avgTime == null ? null : el("div", { class: "vs-stat" }, [
-                el("div", { class: "vs-stat-label", text: runsPer > 1 ? "Time avg" : "Time" }),
-                el("div", { class: "vs-stat-val", text: avgTime.toFixed(1) + "s" }),
-              ]),
-            ]);
-            grid.append(el("div", { class: "col-12 col-sm-6 vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
-              el("div", { class: "vs-head" }, [
-                el("div", { class: "cfg-chip " + (baseline ? "is-baseline" : "is-with") }, [iconEl(baseline ? _SVG_LIGHTBULB_OFF : _SVG_LIGHTBULB), titleCase(cfg)]),
-                stats,
-              ]),
-              gauge,
-            ]));
+            agg[cfg] = { avg, total, passed, avgTime };
           });
 
-          const card = el("div", { class: "bench-eval-card mb-3" }, [
-            el("div", { class: "bench-eval-head d-flex align-items-center justify-content-between" }, [
-              el("span", { class: "font-monospace text-body-emphasis", text: name }),
+          const withCfg = groups.find((g) => !isBaselineCfg(g));
+          const baseCfg = groups.find((g) => isBaselineCfg(g));
+          const dPp = (withCfg && baseCfg) ? Math.round((agg[withCfg].avg - agg[baseCfg].avg) * 100) : null;
+
+          const header = el("div", { class: "card-header d-flex align-items-center justify-content-between" }, [
+            el("span", { class: "font-monospace text-body-emphasis", text: name }),
+            el("span", { class: "d-flex align-items-center gap-2" }, [
+              dPp != null ? el("span", { class: "badge rounded-pill text-bg-" + (dPp < 0 ? "danger" : "success"), text: (dPp > 0 ? "+" : "") + dPp + " pp" }) : null,
               el("span", { class: "eyebrow", text: runsPer + (runsPer === 1 ? " run/config" : " runs/config") }),
             ]),
-            grid,
           ]);
+
+          const body = el("div", { class: "card-body" }, groups.map((cfg) => {
+            const A = agg[cfg];
+            return el("div", { class: "row align-items-center g-2" + (cfg === groups[0] ? "" : " mt-1") }, [
+              el("div", { class: "col-4 col-sm-3 small fw-semibold text-truncate " + benchText(A.avg), title: titleCase(cfg), text: titleCase(cfg) }),
+              el("div", { class: "col" }, [progressBar(A.avg, benchBg(A.avg), 8)]),
+              el("div", { class: "col-2 text-end small fw-bold num " + benchText(A.avg), text: Math.round(A.avg * 100) + "%" }),
+              el("div", { class: "col-auto small text-secondary num d-none d-sm-block", text: A.passed + "/" + A.total + (A.avgTime != null ? "  ·  " + A.avgTime.toFixed(0) + "s" : "") }),
+            ]);
+          }));
+
+          const card = el("div", { class: "card mb-3 overflow-hidden" }, [header, body]);
           const matrix = buildAssertionMatrix(er, groups);
           if (matrix) card.append(matrix);
           c.append(card);

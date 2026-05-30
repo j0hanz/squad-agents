@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import re
 import sys
 import argparse
 import os
@@ -40,11 +41,12 @@ def validate(spec):
             errors.append(f"Missing mandatory section: {section}")
 
     # 2. Requirement Linter
-    req_lines = [
-        line
-        for line in spec.raw_lines
-        if any(tag in line for tag in ["REQ-", "SEC-", "PERF-", "COMP-"])
-    ]
+    # Match only actual requirement statements (label at line start), not prose
+    # references to requirement IDs that appear mid-line in analysis text.
+    # Pattern: optional whitespace, dash, optional whitespace, optional backtick,
+    # then the label (e.g. REQ-001, SEC-002), optional backtick, then a colon.
+    _REQ_STMT_RE = re.compile(r"^\s*-\s*`?(REQ|SEC|PERF|COMP)-\d+`?\s*:")
+    req_lines = [line for line in spec.raw_lines if _REQ_STMT_RE.match(line)]
     for line in req_lines:
         # Atomicity check
         if " and " in line.lower() and not re_contains_code_block(line):

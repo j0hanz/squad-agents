@@ -12,6 +12,9 @@ TEMPLATES = {
 - REQ-001: [Requirement]
 - REQ-002: [Requirement]
 
+## 3. Constraints
+- CON-001: [Optional — what the solution does NOT do. Remove section if none apply.]
+
 ## 4. Interfaces
 - [Rough description of inputs/outputs]
 """,
@@ -87,22 +90,26 @@ TEMPLATES = {
 }
 
 DOMAIN_SNIPPETS = {
-    "api": """
-### Standard API Requirements
+    "api": {
+        "requirements": """
 - SEC-101: All requests MUST include a valid Bearer token in the Authorization header.
 - REQ-101: The API MUST return JSON payloads for all successful and error responses.
-
-### Standard API Errors
+""",
+        "interfaces": """
+**Standard error cases (include in every endpoint):**
 - `400 Bad Request`: Invalid schema or missing required fields.
 - `401 Unauthorized`: Missing or invalid authentication token.
 - `503 Service Unavailable`: Downstream dependency failure or timeout.
 """,
-    "cli": """
-### Standard CLI Requirements
+    },
+    "cli": {
+        "requirements": """
 - REQ-201: The tool MUST support a `--json` flag for machine-readable output.
 - REQ-202: The tool MUST exit with a non-zero code on failure.
 - COMP-201: The tool MUST be compatible with POSIX-compliant shells.
 """,
+        "interfaces": "",
+    },
 }
 
 
@@ -130,14 +137,16 @@ def main():
         )
 
     if args.domain:
-        snippet = DOMAIN_SNIPPETS[args.domain]
-        if "## 4. Interfaces" in template:
+        snippets = DOMAIN_SNIPPETS[args.domain]
+        req_snippet = snippets.get("requirements", "")
+        iface_snippet = snippets.get("interfaces", "")
+        if req_snippet and "## 2. Requirements" in template:
             template = template.replace(
-                "## 4. Interfaces", f"## 4. Interfaces\n{snippet}"
+                "## 2. Requirements", f"## 2. Requirements\n{req_snippet}"
             )
-        elif "## 2. Requirements" in template:
+        if iface_snippet and "## 4. Interfaces" in template:
             template = template.replace(
-                "## 2. Requirements", f"## 2. Requirements\n{snippet}"
+                "## 4. Interfaces", f"## 4. Interfaces\n{iface_snippet}"
             )
 
     print(template)

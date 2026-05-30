@@ -233,10 +233,12 @@ Use these scripts to automate spec creation and validation:
 2. **Write the spec** following the generated template.
 3. **MANDATORY - VALIDATE**: Run `python ${CLAUDE_SKILL_DIR}/scripts/validate_spec.py <your_spec.md>`.
    > **GATEKEEPER**: Implementation planning MUST NOT begin until `validate_spec.py` returns 0 errors. You MUST resolve all **ERRORS** before proceeding. Address **WARNINGS** where possible to improve quality.
+   >
+   > **Parser note**: The validator requires at least one line of body text directly under each `##` section heading before any `###` sub-headings. If `## 4. Interfaces` is followed immediately by `### POST /endpoint` with no intervening text, the parser will report a false "Missing mandatory section: Interfaces" error. Fix by adding one introductory sentence (e.g., "The system exposes the following endpoints:") before the first sub-heading.
 4. **MANDATORY - READ ENTIRE FILE**: Run through `references/self-check.md` for a final manual quality pass.
 5. **Review with stakeholder** (if applicable).
 6. **Export as a file** (e.g., `spec-auth-jwt.md`).
-7. **Use the `create-plan` skill** — the validated spec becomes the primary input.
+7. **Use the `create-plan` skill** — pass the validated spec file as primary input. Highlight any `UNKNOWN:` items and `CONFLICT:` items that remain unresolved; create-plan will produce a task list keyed to the spec's REQ-### identifiers and will stall on any unresolved ambiguities.
 
 The spec + plan together form a complete work package: spec says _what_ and _why_, plan says _how_ and _in what order_.
 
@@ -257,7 +259,10 @@ See `references/domain-examples.md` for complete worked examples in these domain
 - **REST API specification** — Order creation API with full interfaces, error handling, and edge cases
 - **Database schema specification** — User authentication schema with table definitions and constraints
 - **CLI tool specification** — Migration management tool with command interfaces
+- **Blueprint (distributed system)** — High-throughput event pipeline with Mermaid diagram, rollback, and migration steps
 - **Template** — Blank structure you can copy for your own domain
+
+**Blueprint Mermaid diagrams**: For the canonical format, see Example 4 in `references/domain-examples.md`. Use `graph TD` for data-flow diagrams (webhook → processor → database); use `sequenceDiagram` for request/response interaction flows. The diagram goes in the Notes & Risks section.
 
 Use these as reference when writing specs for similar systems in your domain.
 
