@@ -37,12 +37,36 @@ def check_file(path: Path) -> list[str]:
     except ImportError:
         pass  # Skip if pyyaml is missing
 
-    # 2. Expression injection
+    # 2. Expression injection — including multi-line run: block scalars
     # github.event.(pull_request|issue|comment|review|head_commit).(title|body|message)
     # github.head_ref
     injection_pattern = r"\$\{\{\s*github\.(event\.(pull_request|issue|comment|review|head_commit)\.(title|body|message)|head_ref|event\.head_commit\.message)"
+    in_run_block = False
+    run_block_indent: int | None = None
+
     for i, line in enumerate(lines):
-        if "run:" in line and re.search(injection_pattern, line):
+        stripped = line.lstrip()
+        current_indent = len(line) - len(stripped)
+
+        run_match = re.match(r'^(\s*)run:\s*[|>-]?\s*$', line)
+        if run_match:
+            in_run_block = True
+            run_block_indent = len(run_match.group(1)) + 1
+        elif re.match(r'^\s*run:\s+\S', line):
+            # Inline run: value (no block scalar)
+            in_run_block = False
+            run_block_indent = None
+            if re.search(injection_pattern, line):
+                errors.append(
+                    f"L{i + 1}: Possible expression injection — untrusted github.event field inside run:. Use env: instead."
+                )
+            continue
+        elif in_run_block:
+            if stripped and current_indent <= run_block_indent:
+                in_run_block = False
+                run_block_indent = None
+
+        if in_run_block and re.search(injection_pattern, line):
             errors.append(
                 f"L{i + 1}: Possible expression injection — untrusted github.event field inside run:. Use env: instead."
             )
