@@ -66,6 +66,7 @@ async function main() {
 }
 
 function logTelemetry(domain, action, duration, status, error = '') {
+  if (process.env.CLAUDE_USER_CONFIG_TELEMETRY_ENABLED === 'false') return;
   try {
     const claudeDir = join(projectDir, '.claude');
     if (!existsSync(claudeDir)) {
