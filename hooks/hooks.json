@@ -193,7 +193,7 @@
           {
             "type": "command",
             "async": true,
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/skills/agents-maintainer/scripts/run.py\" lint-agents-md \"${CLAUDE_PROJECT_DIR}/AGENTS.md\" 2>/dev/null || true",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/skills/agents-maintainer/scripts/run_lint.sh\" ${CLAUDE_PLUGIN_ROOT}/skills/agents-maintainer/scripts/run_lint.sh",
             "timeout": 10
           }
         ]

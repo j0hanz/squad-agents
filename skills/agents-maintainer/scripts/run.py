@@ -8,12 +8,11 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import json
-import os
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Set, Any
+from typing import Any
 
 # --- Constants & Configuration ---
 DEPENDENCY_DIRS: dict[str, str] = {
@@ -80,26 +79,47 @@ class DependencyInfo:
     size_mb: float | str
 
 
+@dataclass
+class AuditResults:
+    """Consolidated results of the plugin audit."""
+
+    structure: list[str] = field(default_factory=list)
+    env: ProjectEnvironment = field(default_factory=ProjectEnvironment)
+    dependencies: list[DependencyInfo] = field(default_factory=list)
+    skills_valid: bool = True
+    skills_errors: list[str] = field(default_factory=list)
+    agents_md_valid: bool = True
+    agents_md_errors: list[str] = field(default_factory=list)
+    hooks_valid: bool = True
+    hooks_errors: list[str] = field(default_factory=list)
+    manifest_valid: bool = True
+    manifest_errors: list[str] = field(default_factory=list)
+
+
 # --- Utility Functions ---
 
 
-def load_gitignore(target_dir: Path) -> Set[str]:
-    patterns: Set[str] = set()
+def load_gitignore(target_dir: Path) -> set[str]:
+    """Load ignore patterns from .gitignore file."""
+    patterns: set[str] = set()
     gitignore_file = target_dir / ".gitignore"
 
     if gitignore_file.exists():
         try:
-            for line in gitignore_file.read_text(encoding="utf-8").splitlines():
+            content = gitignore_file.read_text(encoding="utf-8")
+            for line in content.splitlines():
                 line = line.strip()
                 if line and not line.startswith("#"):
                     patterns.add(line.rstrip("/"))
         except (OSError, UnicodeDecodeError):
+            # Log specific error if needed, but don't crash
             pass
 
     return patterns
 
 
-def should_ignore(path: Path, patterns: Set[str], root: Path) -> bool:
+def should_ignore(path: Path, patterns: set[str], root: Path) -> bool:
+    """Check if a path should be ignored based on patterns."""
     try:
         rel_path = path.relative_to(root)
     except ValueError:
@@ -119,6 +139,7 @@ def should_ignore(path: Path, patterns: Set[str], root: Path) -> bool:
 
 
 def _parse_frontmatter(content: str) -> dict[str, str]:
+    """Simple parser for YAML frontmatter."""
     if not content.startswith("---"):
         return {}
     end = content.find("\n---", 3)
@@ -133,18 +154,19 @@ def _parse_frontmatter(content: str) -> dict[str, str]:
     return result
 
 
-# --- Core Commands ---
+# --- Core Logic (Discovery/Analysis) ---
 
 
-def scan_structure(target_dir: Path, max_depth: int = 3) -> int:
-    target_dir = target_dir.resolve()
-    patterns = load_gitignore(target_dir) | DEFAULT_IGNORE_PATTERNS
-
+def get_tree_lines(
+    target_dir: Path, patterns: set[str], max_depth: int = 3
+) -> list[str]:
+    """Generate directory tree lines without printing."""
+    lines: list[str] = []
     use_unicode = True
     encoding = sys.stdout.encoding or "utf-8"
     try:
         "└".encode(encoding)
-    except Exception:
+    except (UnicodeEncodeError, LookupError):
         use_unicode = False
 
     branch_last = "└── " if use_unicode else "+-- "
@@ -152,13 +174,13 @@ def scan_structure(target_dir: Path, max_depth: int = 3) -> int:
     spacer_last = "    "
     spacer_mid = "│   " if use_unicode else "|   "
 
-    def print_tree(path: Path, prefix: str = "", depth: int = 0) -> None:
+    def build_tree(path: Path, prefix: str = "", depth: int = 0) -> None:
         if depth > max_depth:
             return
 
         try:
             entries = sorted(path.iterdir(), key=lambda x: (not x.is_dir(), x.name))
-        except PermissionError:
+        except (PermissionError, OSError):
             return
 
         non_ignored = [
@@ -171,22 +193,22 @@ def scan_structure(target_dir: Path, max_depth: int = 3) -> int:
             extension = spacer_last if is_last else spacer_mid
 
             if entry.is_dir():
-                print(f"{prefix}{current}{entry.name}/")
-                print_tree(entry, prefix + extension, depth + 1)
+                lines.append(f"{prefix}{current}{entry.name}/")
+                build_tree(entry, prefix + extension, depth + 1)
             else:
-                print(f"{prefix}{current}{entry.name}")
+                lines.append(f"{prefix}{current}{entry.name}")
 
-    display_name = target_dir.name or target_dir.resolve().name
-    print(f"### Directory Structure ({display_name})")
-    print("```")
-    print_tree(target_dir)
-    print("```")
-    return 0
+    build_tree(target_dir)
+    return lines
 
 
-def analyze_env(target_dir: Path) -> int:
+def analyze_project_env(target_dir: Path) -> ProjectEnvironment:
+    """Analyze the project environment files."""
     env = ProjectEnvironment()
-    files = [entry.name for entry in target_dir.iterdir() if entry.is_file()]
+    try:
+        files = [entry.name for entry in target_dir.iterdir() if entry.is_file()]
+    except (PermissionError, OSError):
+        return env
 
     for lockfile, pm in PACKAGE_MANAGERS.items():
         if lockfile in files:
@@ -223,18 +245,19 @@ def analyze_env(target_dir: Path) -> int:
         except (json.JSONDecodeError, OSError):
             pass
 
-    print("### Project Environment")
-    print(f"- **Package Manager:** {env.package_manager}")
-    print(f"- **Test Runner:** {env.test_runner}")
-    print(f"- **Linter/Formatter:** {env.linter}")
-    print(f"- **Monorepo:** {'Yes' if env.is_monorepo else 'No'}")
-    return 0
+    return env
 
 
-def find_dependencies(target_dir: Path) -> int:
+def get_dependencies(target_dir: Path) -> list[DependencyInfo]:
+    """Find and measure installed dependencies."""
     found: list[DependencyInfo] = []
 
-    for entry in (e for e in target_dir.iterdir() if e.is_dir()):
+    try:
+        dirs = [e for e in target_dir.iterdir() if e.is_dir()]
+    except (PermissionError, OSError):
+        return found
+
+    for entry in dirs:
         if entry.name in DEPENDENCY_DIRS:
             try:
                 size_mb = 0.0
@@ -267,134 +290,112 @@ def find_dependencies(target_dir: Path) -> int:
                     )
                 )
 
-    if found:
-        print("### Installed Dependencies")
-        for dep in found:
-            size_str = (
-                f"{dep.size_mb} MB"
-                if isinstance(dep.size_mb, (int, float))
-                else dep.size_mb
-            )
-            print(f"- **{dep.name}** ({dep.type}) → `{dep.path}` [{size_str}]")
-    else:
-        print("### Installed Dependencies")
-        print("- None detected in root directory.")
-
-    return 0
+    return found
 
 
-def lint_agents_md(file_path: Path) -> int:
-    if not file_path.exists():
-        print(f"FAIL: File not found at {file_path}", file=sys.stderr)
-        return 1
-
-    content = file_path.read_text(encoding="utf-8")
-    lines = content.splitlines()
-    has_errors = False
-
-    print(f"### Linting {file_path}")
-
-    if len(lines) > 100:
-        print(f"FAIL: File is {len(lines)} lines. Must be under 100.", file=sys.stderr)
-        has_errors = True
-
-    if not lines or not lines[0].startswith("# "):
-        print("FAIL: File must start with an H1 header.", file=sys.stderr)
-        has_errors = True
-
-    filler_regex = re.compile(
-        r"(welcome to|this document explains|you should)", re.IGNORECASE
-    )
-    auto_discovery_regex = re.compile(
-        r"(\d+\s+(tools|resources|prompts)|MCP server)", re.IGNORECASE
-    )
-    generic_advice_regex = re.compile(
-        r"\b(always|be sure|remember|carefully|thoroughly|best practice|make sure|important|test thoroughly|be careful)\b",
-        re.IGNORECASE,
-    )
-
-    for index, line in enumerate(lines):
-        if filler_regex.search(line):
-            print(
-                f'FAIL: Line {index + 1} contains filler text: "{line.strip()}"',
-                file=sys.stderr,
-            )
-            has_errors = True
-        if auto_discovery_regex.search(line):
-            print(
-                f'FAIL: Line {index + 1} lists auto-discovered tools: "{line.strip()}"',
-                file=sys.stderr,
-            )
-            has_errors = True
-        if generic_advice_regex.search(line):
-            print(
-                f'WARN: Line {index + 1} contains generic advice: "{line.strip()}"',
-                file=sys.stderr,
-            )
-
-    if "Co-Authored-By:" not in content:
-        print('FAIL: Missing "Co-Authored-By:" attribution.', file=sys.stderr)
-        has_errors = True
-
-    if not has_errors:
-        print(f"PASS: {file_path} looks correct.")
-    return 1 if has_errors else 0
-
-
-def validate_skills(skills_dir: Path) -> int:
+def validate_skill_files(skills_dir: Path) -> tuple[bool, list[str]]:
+    """Validate all SKILL.md files in the skills directory."""
     if not skills_dir.exists():
-        print(f"FAIL: Skills directory not found: {skills_dir}", file=sys.stderr)
-        return 1
+        return False, [f"Skills directory not found: {skills_dir}"]
 
-    print(f"### Validating Skills in {skills_dir}")
-    has_errors = False
+    errors: list[str] = []
     REQUIRED_KEYS = ("name", "description", "disable-model-invocation")
 
-    for skill_dir in sorted(skills_dir.iterdir()):
-        if not skill_dir.is_dir():
-            continue
+    try:
+        skill_dirs = [d for d in skills_dir.iterdir() if d.is_dir()]
+    except (PermissionError, OSError) as e:
+        return False, [f"Failed to list skills directory: {e}"]
 
+    for skill_dir in sorted(skill_dirs):
         skill_file = skill_dir / "SKILL.md"
         if not skill_file.exists():
-            print(f"FAIL: {skill_dir.name}/ has no SKILL.md", file=sys.stderr)
-            has_errors = True
+            errors.append(f"{skill_dir.name}/ has no SKILL.md")
             continue
 
-        content = skill_file.read_text(encoding="utf-8")
-        fm = _parse_frontmatter(content)
+        try:
+            content = skill_file.read_text(encoding="utf-8")
+            fm = _parse_frontmatter(content)
 
-        for key in REQUIRED_KEYS:
-            if key not in fm:
-                print(
-                    f"FAIL: {skill_dir.name}/SKILL.md missing frontmatter key: '{key}'",
-                    file=sys.stderr,
-                )
-                has_errors = True
+            for key in REQUIRED_KEYS:
+                if key not in fm:
+                    errors.append(
+                        f"{skill_dir.name}/SKILL.md missing frontmatter key: '{key}'"
+                    )
 
-        if len(content.splitlines()) > 150:
-            print(
-                f"WARN: {skill_dir.name}/SKILL.md is long (>150 lines). Consider splitting to references/.",
-                file=sys.stderr,
-            )
+            if len(content.splitlines()) > 150:
+                # Using a pseudo-error/warn list
+                errors.append(f"WARN: {skill_dir.name}/SKILL.md is long (>150 lines)")
+        except (OSError, UnicodeDecodeError) as e:
+            errors.append(f"Failed to read {skill_file}: {e}")
 
-    if not has_errors:
-        print("PASS: All skills have valid frontmatter.")
-    return 1 if has_errors else 0
+    return len([e for e in errors if not e.startswith("WARN")]) == 0, errors
 
 
-def check_hooks(hooks_file: Path) -> int:
-    if not hooks_file.exists():
-        print(f"FAIL: hooks.json not found at {hooks_file}", file=sys.stderr)
-        return 1
+def validate_agents_md_file(file_path: Path) -> tuple[bool, list[str]]:
+    """Validate the AGENTS.md file."""
+    if not file_path.exists():
+        return False, [f"File not found at {file_path}"]
 
-    print(f"### Validating Hooks in {hooks_file}")
-    has_errors = False
+    errors: list[str] = []
     try:
-        with open(hooks_file, "r", encoding="utf-8") as f:
-            hooks_data = json.load(f)
-    except Exception as e:
-        print(f"FAIL: Failed to parse hooks.json: {e}", file=sys.stderr)
-        return 1
+        content = file_path.read_text(encoding="utf-8")
+        lines = content.splitlines()
+
+        if len(lines) > 100:
+            errors.append(f"File is {len(lines)} lines. Must be under 100.")
+
+        if not lines or not lines[0].startswith("# "):
+            errors.append("File must start with an H1 header.")
+
+        filler_regex = re.compile(
+            r"(welcome to|this document explains|you should)", re.IGNORECASE
+        )
+        auto_discovery_regex = re.compile(
+            r"(\d+\s+(tools|resources|prompts)|MCP server)", re.IGNORECASE
+        )
+        generic_advice_regex = re.compile(
+            r"\b(always|be sure|remember|carefully|thoroughly|best practice|make sure|important|test thoroughly|be careful)\b",
+            re.IGNORECASE,
+        )
+
+        for index, line in enumerate(lines):
+            if filler_regex.search(line):
+                errors.append(
+                    f'Line {index + 1} contains filler text: "{line.strip()}"'
+                )
+            if auto_discovery_regex.search(line):
+                errors.append(
+                    f'Line {index + 1} lists auto-discovered tools: "{line.strip()}"'
+                )
+            if generic_advice_regex.search(line):
+                errors.append(
+                    f'WARN: Line {index + 1} contains generic advice: "{line.strip()}"'
+                )
+
+        if "Co-Authored-By:" not in content:
+            errors.append('Missing "Co-Authored-By:" attribution.')
+
+        if (
+            "## File-scoped commands" not in content
+            and "| Tool | File | Command |" not in content
+        ):
+            errors.append('Missing mandatory "File-scoped commands" table.')
+    except (OSError, UnicodeDecodeError) as e:
+        errors.append(f"Failed to read {file_path}: {e}")
+
+    return len([e for e in errors if not e.startswith("WARN")]) == 0, errors
+
+
+def validate_hooks_config(hooks_file: Path) -> tuple[bool, list[str]]:
+    """Validate hooks.json and existence of handlers."""
+    if not hooks_file.exists():
+        return False, [f"hooks.json not found at {hooks_file}"]
+
+    errors: list[str] = []
+    try:
+        hooks_data = json.loads(hooks_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as e:
+        return False, [f"Failed to parse hooks.json: {e}"]
 
     plugin_root = hooks_file.parent.parent
 
@@ -405,7 +406,6 @@ def check_hooks(hooks_file: Path) -> int:
                 if not cmd:
                     continue
 
-                # Check for handler existence if using runner.mjs
                 if "runner.mjs" in cmd:
                     parts = cmd.split()
                     try:
@@ -415,72 +415,153 @@ def check_hooks(hooks_file: Path) -> int:
                             plugin_root / "hooks" / "handlers" / f"{domain}.mjs"
                         )
                         if not handler_path.exists():
-                            print(
-                                f"FAIL: Missing handler for hook '{event}': {handler_path}",
-                                file=sys.stderr,
+                            errors.append(
+                                f"Missing handler for hook '{event}': {handler_path}"
                             )
-                            has_errors = True
                     except (ValueError, IndexError):
                         pass
 
-                # Check for direct script existence
                 elif "scripts" in cmd:
-                    script_path = cmd.split()[-1].replace(
+                    script_path_str = cmd.split()[-1].replace(
                         "${CLAUDE_PLUGIN_ROOT}", str(plugin_root)
                     )
-                    if not os.path.exists(script_path):
-                        print(
-                            f"FAIL: Missing script for hook '{event}': {script_path}",
-                            file=sys.stderr,
+                    if not Path(script_path_str).exists():
+                        errors.append(
+                            f"Missing script for hook '{event}': {script_path_str}"
                         )
-                        has_errors = True
 
-    if not has_errors:
-        print("PASS: Hook configuration and handlers are valid.")
-    return 1 if has_errors else 0
+    return len(errors) == 0, errors
 
 
-def check_manifest(manifest_file: Path) -> int:
+def validate_manifest_file(manifest_file: Path) -> tuple[bool, list[str]]:
+    """Validate plugin.json manifest."""
     if not manifest_file.exists():
-        print(f"FAIL: plugin.json not found at {manifest_file}", file=sys.stderr)
-        return 1
+        return False, [f"plugin.json not found at {manifest_file}"]
 
-    print(f"### Validating Manifest in {manifest_file}")
+    errors: list[str] = []
     try:
-        with open(manifest_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception as e:
-        print(f"FAIL: Failed to parse plugin.json: {e}", file=sys.stderr)
-        return 1
+        data = json.loads(manifest_file.read_text(encoding="utf-8"))
+        required = ["name", "version", "description"]
+        for key in required:
+            if key not in data:
+                errors.append(f"Manifest missing required key: '{key}'")
+    except (json.JSONDecodeError, OSError) as e:
+        return False, [f"Failed to parse plugin.json: {e}"]
 
-    required = ["name", "version", "description"]
-    has_errors = False
-    for key in required:
-        if key not in data:
-            print(f"FAIL: Manifest missing required key: '{key}'", file=sys.stderr)
-            has_errors = True
-
-    if not has_errors:
-        print("PASS: Manifest is valid.")
-    return 1 if has_errors else 0
+    return len(errors) == 0, errors
 
 
-def check_all(root_dir: Path) -> int:
+# --- Reporting ---
+
+
+def print_audit_report(root_dir: Path, results: AuditResults) -> int:
+    """Print the final formatted audit report."""
     print(f"## Full Plugin Health Audit: {root_dir.name}\n")
-    exit_codes = [
-        scan_structure(root_dir, max_depth=2),
-        analyze_env(root_dir),
-        validate_skills(root_dir / "skills"),
-        lint_agents_md(root_dir / "AGENTS.md"),
-        check_hooks(root_dir / "hooks" / "hooks.json"),
-        check_manifest(root_dir / ".claude-plugin" / "plugin.json"),
-    ]
+
+    print(f"### Directory Structure ({root_dir.name})")
+    print("```")
+    for line in results.structure:
+        print(line)
+    print("```\n")
+
+    print("### Project Environment")
+    print(f"- **Package Manager:** {results.env.package_manager}")
+    print(f"- **Test Runner:** {results.env.test_runner}")
+    print(f"- **Linter/Formatter:** {results.env.linter}")
+    print(f"- **Monorepo:** {'Yes' if results.env.is_monorepo else 'No'}\n")
+
+    if results.dependencies:
+        print("### Installed Dependencies")
+        for dep in results.dependencies:
+            size_str = (
+                f"{dep.size_mb} MB"
+                if isinstance(dep.size_mb, (int, float))
+                else dep.size_mb
+            )
+            print(f"- **{dep.name}** ({dep.type}) → `{dep.path}` [{size_str}]")
+    else:
+        print("### Installed Dependencies")
+        print("- None detected in root directory.")
+    print("")
+
+    # Skill validation
+    print(f"### Validating Skills in {root_dir / 'skills'}")
+    if not results.skills_errors:
+        print("PASS: All skills have valid frontmatter.")
+    else:
+        for err in results.skills_errors:
+            print(
+                f"{'WARN' if err.startswith('WARN') else 'FAIL'}: {err}",
+                file=sys.stderr,
+            )
+    print("")
+
+    # AGENTS.md validation
+    print(f"### Linting {root_dir / 'AGENTS.md'}")
+    if not results.agents_md_errors:
+        print(f"PASS: {root_dir / 'AGENTS.md'} looks correct.")
+    else:
+        for err in results.agents_md_errors:
+            print(
+                f"{'WARN' if err.startswith('WARN') else 'FAIL'}: {err}",
+                file=sys.stderr,
+            )
+    print("")
+
+    # Hooks validation
+    print(f"### Validating Hooks in {root_dir / 'hooks' / 'hooks.json'}")
+    if not results.hooks_errors:
+        print("PASS: Hook configuration and handlers are valid.")
+    else:
+        for err in results.hooks_errors:
+            print(f"FAIL: {err}", file=sys.stderr)
+    print("")
+
+    # Manifest validation
+    print(f"### Validating Manifest in {root_dir / '.claude-plugin' / 'plugin.json'}")
+    if not results.manifest_errors:
+        print("PASS: Manifest is valid.")
+    else:
+        for err in results.manifest_errors:
+            print(f"FAIL: {err}", file=sys.stderr)
+
     print("\n## Audit Summary")
-    if any(code != 0 for code in exit_codes):
+    if any(
+        [
+            not results.skills_valid,
+            not results.agents_md_valid,
+            not results.hooks_valid,
+            not results.manifest_valid,
+        ]
+    ):
         print("❌ Audit failed with one or more errors.")
         return 1
     print("✅ Audit passed. Plugin is healthy.")
     return 0
+
+
+def run_full_audit(root_dir: Path) -> int:
+    """Orchestrate the full audit process."""
+    results = AuditResults()
+    patterns = load_gitignore(root_dir) | DEFAULT_IGNORE_PATTERNS
+
+    results.structure = get_tree_lines(root_dir, patterns)
+    results.env = analyze_project_env(root_dir)
+    results.dependencies = get_dependencies(root_dir)
+    results.skills_valid, results.skills_errors = validate_skill_files(
+        root_dir / "skills"
+    )
+    results.agents_md_valid, results.agents_md_errors = validate_agents_md_file(
+        root_dir / "AGENTS.md"
+    )
+    results.hooks_valid, results.hooks_errors = validate_hooks_config(
+        root_dir / "hooks" / "hooks.json"
+    )
+    results.manifest_valid, results.manifest_errors = validate_manifest_file(
+        root_dir / ".claude-plugin" / "plugin.json"
+    )
+
+    return print_audit_report(root_dir, results)
 
 
 def main() -> int:
@@ -508,19 +589,47 @@ def main() -> int:
 
     match args.command:
         case "check-all":
-            return check_all(root)
+            return run_full_audit(root)
         case "check-hooks":
-            return check_hooks(root / "hooks" / "hooks.json")
+            valid, errors = validate_hooks_config(root / "hooks" / "hooks.json")
+            for err in errors:
+                print(f"FAIL: {err}", file=sys.stderr)
+            if valid:
+                print("PASS: Hooks are valid.")
+            return 0 if valid else 1
         case "check-manifest":
-            return check_manifest(root / ".claude-plugin" / "plugin.json")
+            valid, errors = validate_manifest_file(
+                root / ".claude-plugin" / "plugin.json"
+            )
+            for err in errors:
+                print(f"FAIL: {err}", file=sys.stderr)
+            if valid:
+                print("PASS: Manifest is valid.")
+            return 0 if valid else 1
         case "validate-skills":
-            return validate_skills(root / "skills")
+            valid, errors = validate_skill_files(root / "skills")
+            for err in errors:
+                print(f"FAIL: {err}", file=sys.stderr)
+            if valid:
+                print("PASS: Skills are valid.")
+            return 0 if valid else 1
         case "lint-agents-md":
-            return lint_agents_md(args.file_path)
+            valid, errors = validate_agents_md_file(args.file_path)
+            for err in errors:
+                print(f"FAIL: {err}", file=sys.stderr)
+            if valid:
+                print("PASS: AGENTS.md is valid.")
+            return 0 if valid else 1
         case "analyze-env":
-            return analyze_env(root)
+            env = analyze_project_env(root)
+            print(f"Env: {env}")
+            return 0
         case "scan-structure":
-            return scan_structure(root)
+            patterns = load_gitignore(root) | DEFAULT_IGNORE_PATTERNS
+            lines = get_tree_lines(root, patterns)
+            for line in lines:
+                print(line)
+            return 0
         case _:
             return 1
 

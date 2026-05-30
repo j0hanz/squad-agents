@@ -6,18 +6,21 @@ All scripts emit Finding objects; this module renders them.
 from __future__ import annotations
 import json
 from dataclasses import dataclass, asdict
-from typing import List
+from typing import List, Literal, Optional
 
 
-@dataclass
+@dataclass(frozen=True)
 class Finding:
-    severity: str  # 'error' | 'warn' | 'info'
+    """Represents a single audit finding."""
+
+    severity: Literal["error", "warn", "info"]
     code: str
     message: str
     path: str
 
 
-def render_human(findings: List[Finding], title: str = "") -> str:
+def render_human(findings: List[Finding], title: Optional[str] = "") -> str:
+    """Render findings into a human-readable string."""
     lines = [title, ""] if title else []
     if not findings:
         lines.append("OK No findings.")
@@ -34,11 +37,14 @@ def render_human(findings: List[Finding], title: str = "") -> str:
 
 
 def render_json(findings: List[Finding]) -> str:
+    """Render findings into a JSON string."""
     return json.dumps([asdict(f) for f in findings], indent=2)
 
 
 def compute_exit_code(findings: List[Finding], strict: bool = False) -> int:
     """
+    Compute the exit code based on the findings.
+
     0 = clean or info-only
     1 = warnings present (and not strict)
     2 = any error present (or any warn in strict mode)

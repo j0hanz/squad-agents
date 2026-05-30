@@ -2,6 +2,7 @@
 name: diagrams
 description: |
   Expert heuristics for architectural modeling and visual communication using Mermaid. Use when asked to design systems, untangle complex architectures, map out distributed workflows, or generate C4/DDD/ERD/Sequence diagrams. Triggers on phrases like 'visualize architecture', 'draw a diagram', 'C4 model', 'sequence flow', 'database schema', 'spot architectural coupling', 'simplify complex architecture', 'untangle microservice design', 'data model design'. Do NOT use for basic Mermaid syntax help.
+disable-model-invocation: false
 ---
 
 # Architectural Diagrams

@@ -7,17 +7,21 @@ import json
 import re
 import statistics
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Dict, List, Union
 
 
 @dataclass(frozen=True)
 class ToolCall:
+    """Represents a single tool call captured during simulation."""
+
     tool_name: str
-    tool_input: dict[str, Any]
+    tool_input: Dict[str, Any]
 
 
 @dataclass(frozen=True)
 class AssertionResult:
+    """Represents the result of a single assertion."""
+
     name: str
     passed: bool
     reason: str
@@ -25,13 +29,17 @@ class AssertionResult:
 
 @dataclass
 class CaseEvaluation:
+    """Represents the full evaluation of a test case."""
+
     passed: bool
-    failures: list[AssertionResult] = field(default_factory=list)
-    successes: list[AssertionResult] = field(default_factory=list)
+    failures: List[AssertionResult] = field(default_factory=list)
+    successes: List[AssertionResult] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
 class RunResult:
+    """Represents the results of a single execution run."""
+
     passed: bool
     duration_ms: int
     tokens_in: int
@@ -42,13 +50,13 @@ class RunResult:
 _PATTERN_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\((.*)\)$")
 
 
-def match_tool_pattern(pattern: str, call: dict | ToolCall) -> bool:
+def match_tool_pattern(pattern: str, call: Union[Dict[str, Any], ToolCall]) -> bool:
     """Check if a tool call matches a Tool(arg-glob) pattern."""
     if isinstance(call, ToolCall):
         tool_name = call.tool_name
         tool_input = call.tool_input
     else:
-        tool_name = call.get("tool_name", "")
+        tool_name = str(call.get("tool_name", ""))
         tool_input = call.get("tool_input", {})
 
     m = _PATTERN_RE.match(pattern)
@@ -71,22 +79,22 @@ def match_tool_pattern(pattern: str, call: dict | ToolCall) -> bool:
     return fnmatch.fnmatchcase(str(primary_arg), arg_glob)
 
 
-def parse_tool_calls_jsonl(text: str) -> list[ToolCall]:
+def parse_tool_calls_jsonl(text: str) -> List[ToolCall]:
     """Parse the observer JSONL into ToolCall list (PreToolUse entries only)."""
-    out: list[ToolCall] = []
+    out: List[ToolCall] = []
     for line in text.splitlines():
         line = line.strip()
         if not line:
             continue
         try:
-            obj = json.loads(line)
+            obj: Dict[str, Any] = json.loads(line)
         except json.JSONDecodeError:
             continue
         if obj.get("hook_event_name") != "PreToolUse":
             continue
         out.append(
             ToolCall(
-                tool_name=obj.get("tool_name", ""),
+                tool_name=str(obj.get("tool_name", "")),
                 tool_input=obj.get("tool_input", {}),
             )
         )
@@ -94,15 +102,16 @@ def parse_tool_calls_jsonl(text: str) -> list[ToolCall]:
 
 
 def evaluate_assertions(
-    calls: list[ToolCall],
+    calls: List[ToolCall],
     final_response: str,
-    expect: dict,
+    expect: Dict[str, Any],
     duration_s: float,
 ) -> CaseEvaluation:
-    successes: list[AssertionResult] = []
-    failures: list[AssertionResult] = []
+    """Evaluate a set of assertions against captured tool calls and response."""
+    successes: List[AssertionResult] = []
+    failures: List[AssertionResult] = []
 
-    def _record(name: str, ok: bool, reason: str):
+    def _record(name: str, ok: bool, reason: str) -> None:
         (successes if ok else failures).append(AssertionResult(name, ok, reason))
 
     # must_not_call
@@ -120,7 +129,7 @@ def evaluate_assertions(
         _record("must_call", seen, f"must_call({pat}) — {'ok' if seen else 'missing'}")
 
     # must_call_one_of
-    pats = expect.get("must_call_one_of", [])
+    pats: List[str] = expect.get("must_call_one_of", [])
     if pats:
         any_seen = any(match_tool_pattern(p, c) for p in pats for c in calls)
         _record(
@@ -131,13 +140,13 @@ def evaluate_assertions(
 
     # max_tool_calls
     if "max_tool_calls" in expect:
-        cap = expect["max_tool_calls"]
+        cap = int(expect["max_tool_calls"])
         ok = len(calls) <= cap
         _record("max_tool_calls", ok, f"{len(calls)} calls (cap {cap})")
 
     # max_duration_s
     if "max_duration_s" in expect:
-        cap = expect["max_duration_s"]
+        cap = float(expect["max_duration_s"])
         ok = duration_s <= cap
         _record("max_duration_s", ok, f"{duration_s:.1f}s (cap {cap})")
 
@@ -175,7 +184,7 @@ def evaluate_assertions(
         for c in calls:
             if c.tool_name != tool_name:
                 continue
-            url = c.tool_input.get("url", "")
+            url = str(c.tool_input.get("url", ""))
             domain_ok = any(d in url for d in allowed)
             _record(
                 "domain_allowlist",
@@ -190,7 +199,8 @@ def evaluate_assertions(
     )
 
 
-def aggregate_runs(runs: list[RunResult]) -> dict:
+def aggregate_runs(runs: List[RunResult]) -> Dict[str, Any]:
+    """Aggregate results from multiple simulation runs."""
     if not runs:
         return {"pass_rate": 0.0, "flakiness": 1.0, "n": 0}
     n = len(runs)

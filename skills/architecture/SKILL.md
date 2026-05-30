@@ -8,6 +8,9 @@ description: >-
   touches 5 files", "can't test without a database", "too many dependencies", "utils folder is
   chaos", "file is 300+ lines". MODE B (DESIGN): Design NEW architecture or advise on how to
   structure code that doesn't yet have a clear shape. Use when the user asks: how to organize a
+disable-model-invocation: false
+---
+
   new feature or module, where business logic should live, which architectural pattern to choose,
   how to design a system with clear responsibilities, or how to evolve existing boundaries toward
   a better design.

@@ -3,6 +3,18 @@ type: agent
 name: explorer
 description: |
   Research-focused agent for exploring codebases and documentation.
+
+  Use this agent when you need to:
+  - Explore a new codebase and understand its structure and dependencies.
+  - Research documentation for libraries, frameworks, or external APIs.
+  - Search for specific symbols, patterns, or file usages across a project.
+  - Gather information before starting a complex task.
+
+  <example>
+  "Explore the hook handling logic and find all places where PreToolUse is emitted."
+  </example>
+
+  *Note: This agent requires the `managed-agents-2026-04-01` beta header.*
 color: "#8B4513"
 model: claude-sonnet-4-6
 effort: high
@@ -23,6 +35,7 @@ tools:
   - mcp__plugin_context7_context7__resolve-library-id
 skills:
   - name: research
+    version: "1.0.0"
 ---
 
 # Explorer Agent

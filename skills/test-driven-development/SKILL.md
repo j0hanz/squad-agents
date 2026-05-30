@@ -2,6 +2,7 @@
 name: test-driven-development
 description: |
   Use this skill when the user asks to implement a feature or bugfix using TDD, asks to write tests first, or requests to add behaviors incrementally. Triggers on "TDD", "red-green-refactor", "test-first", or when asked to write tests before implementation. MANDATORY for any non-trivial logic implementation where correctness is prioritized. Defines strict rules for how an LLM agent should navigate the TDD loop without hallucinating tests or getting stuck in broken environments. Also invoked as the implementation sub-skill of `spec-driven-development` — each plan task is executed using this skill's red-green-refactor loop.
+disable-model-invocation: false
 ---
 
 # Test-Driven Development (TDD)

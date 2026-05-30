@@ -21,9 +21,15 @@ Design for a reader who is skimming at 200 words per second.
 
 This is a three-phase Process. Do not skip phases.
 
-### Phase 1 — Analyze the project
+### Express Mode (Skip Phases)
 
-**MANDATORY — READ HELP:** Run `python ${CLAUDE_SKILL_DIR}/scripts/run.py --help` to verify the tool environment and command arguments.
+If the project environment is already well-understood (e.g., standard Node.js/TypeScript project, standard layout), you may skip the full 3-phase analysis:
+
+1. Draft `AGENTS.md` directly using the appropriate template.
+2. Run automated validation (Pass 1).
+3. Finalize and wire (Phase 3).
+
+*Note: If you skip Phase 1 and 1.5, you MUST explicitly ask the user to confirm the project stack (package manager, test runner) before finalizing.*
 
 Run the analysis subcommands to instantly discover the project structure, tooling, and conventions.
 

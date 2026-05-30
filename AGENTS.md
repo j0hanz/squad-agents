@@ -33,14 +33,14 @@ Claude Code plugin workspace for authoring and maintaining skills, hooks, and ag
 - Prefer `command` hooks for deterministic checks; use `prompt` hooks only when reasoning is needed
 - Session-start hooks run on every conversation — keep them fast (< 10s)
 
-## File-Scoped Checks
+## File-scoped commands
 
 No build toolchain. Validate skills manually:
 
-| Task           | Command                                                                         |
-| -------------- | ------------------------------------------------------------------------------- |
-| Lint AGENTS.md | `python skills/agents-maintainer/scripts/run.py lint-agents-md AGENTS.md`       |
-| Scan structure | `python skills/agents-maintainer/scripts/run.py scan-structure . --max-depth 2` |
+| Tool           | File      | Command                                                                         |
+| :------------- | :-------- | :------------------------------------------------------------------------------ |
+| Lint AGENTS.md | AGENTS.md | `python skills/agents-maintainer/scripts/run.py lint-agents-md AGENTS.md`       |
+| Scan structure | .         | `python skills/agents-maintainer/scripts/run.py scan-structure . --max-depth 2` |
 
 ## Hook Debugging
 
@@ -71,3 +71,5 @@ Use this to capture realistic inputs before writing unit tests for a new handler
 
 AI commits MUST include a `Co-Authored-By:` trailer.
 Example: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+
+Co-Authored-By: Gemini CLI <noreply@google.com>

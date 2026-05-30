@@ -6,6 +6,7 @@ description: |
   Stop validators, or any hook-driven automation. Trigger on: "add a hook", "block this tool",
   "auto-format on save", "run tests before stop", "intercept file writes", or any mention of
   hooks.json. Key mindset: every hook adds latency — only hook when the risk reduction is worth it.
+disable-model-invocation: false
 ---
 
 # Hook Development for Claude Code Plugins

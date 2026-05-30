@@ -3,13 +3,26 @@ type: agent
 name: coder
 description: |
   Autonomous code execution agent. Executes tasks, refactors code, and applies improvements to any codebase you're pointed at.
+
+  Use this agent when you need to:
+  - Implement a specific feature or fix a bug in a codebase.
+  - Refactor or clean up existing code for better maintainability.
+  - Run diagnostic scripts or tests to identify issues.
+  - Perform batch updates or automated changes across multiple files.
+
+  <example>
+  "Fix the memory leak in the parser and refactor the main loop for clarity."
+  </example>
+
+  *Note: This agent requires the `managed-agents-2026-04-01` beta header.*
 color: "#2E8B57"
 model: claude-sonnet-4-6
 effort: high
 maxTurns: 40
 isolation: "worktree"
 tools:
-  - Bash
+  - name: Bash
+    permission: always_ask
   - Read
   - Write
   - Edit
@@ -19,7 +32,9 @@ tools:
   - TodoWrite
 skills:
   - name: refactor
+    version: "1.0.0"
   - name: diagnose
+    version: "1.0.0"
 ---
 
 # Coder Agent

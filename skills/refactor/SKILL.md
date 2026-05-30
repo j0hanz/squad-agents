@@ -8,6 +8,7 @@ description: >-
   copy-pasted logic, god classes, magic numbers, tangled conditionals, or
   misleading names. Use for targeted, behavior-preserving improvements to
   existing code. Not for full rewrites.
+disable-model-invocation: false
 ---
 
 # Refactor

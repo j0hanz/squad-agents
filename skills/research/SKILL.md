@@ -6,6 +6,7 @@ description: |
   library/framework API help, modern code examples, Context7 setup, or skill management.
   Trigger on queries like "how do I use React hooks", "find the latest AWS SDK docs",
   "install a Context7 skill", "set up ctx7", or any mention of Context7 / ctx7.
+disable-model-invocation: false
 ---
 
 ## Research & Context7

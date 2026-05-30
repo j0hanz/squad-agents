@@ -2,6 +2,7 @@
 name: skill-builder
 description: |
   Create new skills, optimize skill descriptions for accurate triggering, and systematically measure/improve skill performance. Use when users want to create a skill from scratch, optimize a skill's description to trigger reliably on the right requests, run evals to test a skill, iterate based on benchmarking data with variance analysis, or improve an existing skill based on user feedback.
+disable-model-invocation: false
 ---
 
 # Skill builder

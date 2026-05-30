@@ -6,6 +6,7 @@ description: |
 when_to_use: |
   Triggers when the user says: "done", "finished", "looks good", "ready to review",
   "ready to merge", "it should work", or "I think this is complete".
+disable-model-invocation: false
 ---
 
 # Verification Before Completion

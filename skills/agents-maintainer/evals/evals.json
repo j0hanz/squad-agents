@@ -1,0 +1,41 @@
+{
+  "skill_name": "agents-maintainer",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Create agent instructions for this project. I want it to be lean and follow our standards. There's no AGENTS.md yet.",
+      "expected_output": "A lean AGENTS.md file following the skill's standards, with symlinks to CLAUDE.md and GEMINI.md.",
+      "expectations": [
+        "The output file AGENTS.md starts with # Agent Instructions",
+        "The AGENTS.md file is under 100 lines",
+        "The output contains a 'Co-Authored-By:' attribution",
+        "The output uses a table for file-scoped commands",
+        "No prose paragraphs are used in the generated instructions",
+        "Symlinks (or hardlinks/copies) for CLAUDE.md and GEMINI.md are created"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Our AGENTS.md is way too long (over 200 lines!) and full of generic advice like 'write clean code'. Please refactor it using the agents-maintainer skill to be high-signal and follow the 100-line limit.",
+      "expected_output": "A refactored AGENTS.md that is much shorter and high-signal, with anti-patterns removed.",
+      "expectations": [
+        "The refactored AGENTS.md is under 100 lines",
+        "Generic advice like 'write clean code' or 'test thoroughly' is removed",
+        "Prose paragraphs are replaced with lists or tables",
+        "The output contains a 'Co-Authored-By:' attribution",
+        "The skill's automated linter was run and passed"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I'm new here. Help me understand this repo and then audit our instructions file to make sure it matches the actual project state (dependencies, scripts, etc.).",
+      "expected_output": "An onboarding guide in chat and an audit/update of the agent instructions.",
+      "expectations": [
+        "An 'Onboarding Guide' is provided in the chat response",
+        "The agent instructions are audited against the real project state",
+        "The instructions accurately reflect the project's dependency manager and scripts",
+        "The instructions mention where dependencies are stored (e.g. node_modules or .venv)"
+      ]
+    }
+  ]
+}

@@ -5,19 +5,21 @@ Usage: python scripts/audit.py <agent.md> [--json] [--strict]
 Exit: 0=clean, 1=warnings, 2=errors
 """
 
+from __future__ import annotations
 import argparse
 import re
 import sys
 from pathlib import Path
+from typing import List, Dict, Any
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from lib.agent_parser import parse_agent, ParseError, detect_agent_kind
+from lib.agent_parser import parse_agent, ParseError, detect_agent_kind, AgentSpec
 from lib.report import Finding, render_human, render_json, compute_exit_code
 from lib.constants import SHELL_TOOLS
 
-_MUST_NOT = ["never", "must not", "do not", "don't", "cannot", "prohibited"]
-_ERR_HANDLING = [
+_MUST_NOT: List[str] = ["never", "must not", "do not", "don't", "cannot", "prohibited"]
+_ERR_HANDLING: List[str] = [
     "if you encounter",
     "if there is an error",
     "if the tool",
@@ -26,7 +28,7 @@ _ERR_HANDLING = [
     "if it fails",
 ]
 
-_SKILL_TASK_HINTS = {
+_SKILL_TASK_HINTS: Dict[str, List[str]] = {
     "code-review": [
         r"review\s+(?:my\s+|the\s+|this\s+)?(?:pr|pull request|diff|code)",
         r"code\s+review",
@@ -52,20 +54,22 @@ _SKILL_TASK_HINTS = {
 }
 
 
-def check_skill_composition(frontmatter: dict, body: str) -> list:
+def check_skill_composition(frontmatter: Dict[str, Any], body: str) -> List[Finding]:
     """Detect strong task-phrase hints without matching pinned skills.
     Returns a list of Finding objects.
     Suppressible via `skill_composition: declined` frontmatter flag.
     """
     if frontmatter.get("skill_composition") == "declined":
         return []
-    pinned = set()
+
+    pinned: set[str] = set()
     for s in frontmatter.get("skills") or []:
         if isinstance(s, dict):
-            pinned.add(s.get("name"))
+            pinned.add(s.get("name", ""))
         elif isinstance(s, str):
             pinned.add(s)
-    findings: list = []
+
+    findings: List[Finding] = []
     text = body.lower()
     for skill_name, patterns in _SKILL_TASK_HINTS.items():
         if skill_name in pinned:
@@ -87,9 +91,9 @@ def check_skill_composition(frontmatter: dict, body: str) -> list:
     return findings
 
 
-def check_cc_subagent_specific(frontmatter: dict, body: str) -> list:
+def check_cc_subagent_specific(frontmatter: Dict[str, Any], body: str) -> List[Finding]:
     """CC subagent-specific validation (CCSA001, CCSA002)."""
-    findings: list = []
+    findings: List[Finding] = []
     tools = frontmatter.get("tools") or []
     if not all(isinstance(t, str) for t in tools):
         findings.append(
@@ -118,8 +122,8 @@ def check_cc_subagent_specific(frontmatter: dict, body: str) -> list:
     return findings
 
 
-def audit(spec, strict: bool = False):
-    findings = []
+def audit(spec: AgentSpec, strict: bool = False) -> List[Finding]:
+    findings: List[Finding] = []
     p = spec.path
 
     for tool in spec.tools:
