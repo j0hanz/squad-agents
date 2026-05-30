@@ -206,11 +206,3 @@ If a task doesn't fit any skill above, use `skill-builder` to:
 - Improve an existing skill that's incomplete
 - Extend the skill ecosystem
 
----
-
-## Skill Priority Summary
-
-1. **Start with a process skill** — brainstorming, diagnose, TDD, or spec-driven-dev determine HOW you'll work
-2. **Choose domain skills next** — architecture, refactor, research, etc. guide the details
-3. **Follow rigid discipline** — diagnose, test-driven-development, and spec-driven-development are non-negotiable
-4. **Use decision trees** — for overlapping triggers (refactor vs. architecture, diagnose vs. TDD)

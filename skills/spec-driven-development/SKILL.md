@@ -1,7 +1,11 @@
 ---
 name: spec-driven-development
 description: |
-  Use this skill to implement features or fixes using Spec-Driven Development (SDD). Follow the mandatory workflow: clarify scope → create spec → create plan → implement with governance → validate acceptance. Do not skip steps or sub-skills. This skill ensures implementation serves the spec, maintaining alignment and traceability from requirements to code.
+  Implement features or fixes using Spec-Driven Development — spec → plan → code, in that order.
+  Use when the user says "build X", "add X", "implement X", "let's design X", or any time
+  implementation is on the horizon. Even for "just build it" requests: offer a Sketch spec (15
+  min) first. Mandatory workflow: clarify scope → create-specs → create-plan → implement with
+  TDD → validate acceptance criteria. Do not skip sub-skills or gates.
 disable-model-invocation: false
 ---
 

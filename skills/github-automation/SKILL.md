@@ -1,19 +1,13 @@
 ---
 name: github-automation
 description: >-
-  GitHub automation skill — two paths. PATH A (ACTIONS): Use when writing, editing, scaffolding,
-  linting, hardening, debugging, or migrating a GitHub Actions workflow — anything touching
-  `.github/workflows/*.yml`, `action.yml`, reusable workflows, composite/JavaScript/Docker
-  actions, OIDC for cloud deploys, runner choice (GitHub-hosted, larger, self-hosted, ARC),
-  matrices, caching, artifacts, concurrency, `permissions:`, pinning actions to SHAs,
-  GITHUB_TOKEN scopes, environments and deployment protection, artifact attestations, or migrating
-  from Jenkins/CircleCI/GitLab/Travis/Azure Pipelines. Trigger even if the user says "add CI",
-  "set up a release workflow", "make this faster", "fix this YAML", "pin these actions", "deploy
-  to AWS from GitHub". PATH B (CLI): Use when building CI/CD scripts, headless `gh` workflows,
-  cross-repo bot automation, or batch GitHub API operations — `gh api`, auth token orchestration,
-  pagination, rate-limit-safe batching, and production-ready gh scripting. Do NOT use for one-off
-  terminal commands or basic YAML authoring unless the task explicitly calls for gh script
-  automation.
+  GitHub automation — two paths. PATH A (ACTIONS): Writing, editing, linting, hardening, or
+  debugging GitHub Actions workflows (.github/workflows/*.yml), reusable workflows,
+  composite/JS/Docker actions, OIDC cloud deploys, SHA pinning, GITHUB_TOKEN scopes, matrices,
+  caching, concurrency, environments, or migrating from Jenkins/CircleCI/GitLab/Travis. Triggers
+  on "add CI", "set up release", "pin these actions", "fix this YAML", "deploy to AWS from
+  GitHub". PATH B (CLI): Building `gh` CLI scripts, headless automation, cross-repo bots, `gh
+  api` batch operations, pagination, rate-limit-safe workflows, or production-grade gh scripting.
 disable-model-invocation: true
 allowed-tools: Bash(python *) Bash(python3 *)
 ---

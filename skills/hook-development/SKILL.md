@@ -56,6 +56,8 @@ Claude Code hooks are a powerful event system that allows you to intercept and c
 - **NEVER** assume hooks see each other (they run in parallel).
 - **NEVER** use `eval` on tool inputs (security risk).
 - **NEVER** use hardcoded absolute paths (use `${CLAUDE_PLUGIN_ROOT}`).
+- **NEVER** configure a hook that prompts the user or blocks execution — `-p` and `/loop` flows run headless; interactive prompts silently stall automation.
+- **NEVER** write a blocking hook when a non-blocking one solves it; prefer exit-0 (allow) or exit-2 (block) patterns over prompt hooks for deterministic rules.
 
 ---
 

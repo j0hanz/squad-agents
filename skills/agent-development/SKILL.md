@@ -1,7 +1,7 @@
 ---
 name: agent-development
 description: |
-  Use when building, testing, auditing, or debugging agents — Managed Agents, Claude Code subagents, agent teams, or skill+hooks behavior shaping.
+  Use when building, testing, auditing, or debugging agents — Managed Agents, Claude Code subagents, agent teams, skill composition, or behavior shaping. Triggers on: "build an agent", "create a subagent", "multi-agent pipeline", "agent prompt", "agent permissions", "agent toolset", "agent system prompt", "spawn an agent", or any mention of Managed Agents, Claude API agents, or designing agent workflows.
 disable-model-invocation: true
 allowed-tools: Bash(python *) Bash(python3 *)
 ---

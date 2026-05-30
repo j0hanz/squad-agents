@@ -116,11 +116,11 @@ Offer to write findings to `glossary.md` or `CONTEXT.md` at Phase 5 transition.
 
 Avoid the "checklist trap" — don't ask all four techniques as a script. Pick 1-2 based on signals from discovery. **Ask questions INDIVIDUALLY — wait for each answer before asking the next.**
 
-**Depth Check:** After using 1-2 techniques, ask: "Are there other risks or unknowns that could derail this?"
-- If yes → use another technique
-- If no → document any TBD items and proceed to Phase 4
+**Depth Check:** After 1-2 techniques, ask the user: "Are there other risks or unknowns that could derail this?"
+- Yes → apply one more technique, then move on regardless
+- No → document TBD items and proceed to Phase 4
 
-**Limit to 4 questions total across all techniques.** If critical questions remain unanswered after 4, document them as TBD and proceed to Phase 4.
+**Hard limit: 4 questions total** across all techniques. Unresolved questions become TBD items with an owner — don't loop indefinitely.
 
 1. **The "Why" (Five Whys)**: Drill down to the root problem. "Why is this needed _now_? What fails if we don't do this?"
 2. **The Premortem**: Ask the user: "Imagine we've implemented this and it's a disaster. What's the most likely thing that went wrong?" (Surfaces hidden technical or organizational risks).
@@ -168,20 +168,3 @@ When the user approves a design:
    - **Do NOT backtrack** through requirements clarification — that costs more than accepting minor unknowns
    - **Do NOT write implementation code** in this session; hand off to planning/implementation
 
----
-
-## Glossary
-
-**YAGNI** (You Aren't Gonna Need It) — Don't add features, infrastructure, or complexity that isn't justified by stated requirements. Every feature you add has a maintenance cost.
-
-**Premortem** — A technique where you imagine the feature shipped and failed catastrophically, then work backward to identify what went wrong. Surfaces hidden risks.
-
-**Anti-Scope** — Explicitly defining what you are choosing NOT to build. Clarifies boundaries and prevents feature creep.
-
-**Domain Clarity** — Having consistent terminology across team communication, code, and documentation. Prevents miscommunication bugs.
-
-**Red Flags** — Thoughts that indicate you're rationalizing away discipline (e.g., "This is too small to need design," "Everyone knows what X means," "The requirements are obvious"). These signal time to slow down and follow the process.
-
-**Hard-Gate** — A checkpoint that must be passed before proceeding. In brainstorming, the hard-gate is design approval before implementation.
-
-**Transition Guard** — Rules to prevent backtracking once a design is approved. Respects that reopening discovery has a high cost in time and team energy.

@@ -1,16 +1,12 @@
 ---
 name: architecture
 description: >-
-  Software architecture skill — two modes. MODE A (DIAGNOSE): Analyze an EXISTING codebase to
-  surface structural improvement opportunities. Invoke when the user mentions: circular
-  dependencies, God modules, infrastructure leaking into domain logic, scattered logic across
-  files, utils folders, "code is a mess", "hard to test", "hard to understand", "one change
-  touches 5 files", "can't test without a database", "too many dependencies", "utils folder is
-  chaos", "file is 300+ lines". MODE B (DESIGN): Design NEW architecture or advise on how to
-  structure code that doesn't yet have a clear shape. Use when the user asks: how to organize a
-  new feature or module, where business logic should live, which architectural pattern to choose,
-  how to design a system with clear responsibilities, or how to evolve existing boundaries toward
-  a better design.
+  Software architecture — two modes. MODE A (DIAGNOSE existing codebase): circular dependencies,
+  God modules, infra leaking into domain, "code is a mess", "hard to test", "one change touches
+  5 files", "utils folder chaos", "can't test without a database", files 300+ lines, tangled
+  dependencies, scattered logic. MODE B (DESIGN new systems or modules): how to organize a
+  feature, where business logic should live, which architectural pattern to choose, how to design
+  clear module boundaries, or evolving existing boundaries toward a better design.
 disable-model-invocation: false
 allowed-tools: Bash(node *)
 ---
