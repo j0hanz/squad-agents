@@ -89,25 +89,14 @@
       color: var(--bs-secondary-color);
     }
 
-    /* ── Navbar: segmented tab control (no 1:1 Bootstrap component) ── */
-    .seg-tabs {
-      background: var(--bs-tertiary-bg);
-      border-radius: 999px;
-      padding: 3px;
-    }
-
     .seg-tabs .nav-link {
-      border-radius: 999px;
-      padding: .28rem .9rem;
-      font-size: var(--ev-seg-tab-fs);
       color: var(--bs-secondary-color);
-      border: 0;
+      opacity: .5;
     }
 
     .seg-tabs .nav-link.active {
-      background: var(--bs-body-bg);
+      opacity: 1;
       color: var(--bs-body-emphasis);
-      box-shadow: var(--bs-box-shadow-sm);
     }
 
     /* ── Nav rail: grouped eval list (static on lg+, offcanvas below) ── */
@@ -557,15 +546,15 @@
           </svg>
         </button>
         <div>
-          <div class="eyebrow">Skill review</div>
+          <div class="eyebrow">Skill Builder</div>
           <div id="skill-name" class="skill-name d-inline-block align-bottom h5 mb-0" title=""></div>
         </div>
       </div>
-      <ul class="nav seg-tabs d-none mx-2" id="view-tabs" role="tablist">
+      <ul class="nav seg-tabs d-none gap-3" id="view-tabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button id="tab-outputs" class="nav-link active d-inline-flex align-items-center gap-1" type="button"
+          <button id="tab-outputs" class="nav-link active d-inline-flex align-items-center gap-2" type="button"
             role="tab" data-bs-toggle="tab" data-bs-target="#panel-outputs" aria-selected="true"
-            aria-controls="panel-outputs"><svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em"
+            aria-controls="panel-outputs"><svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em"
               fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
               <path
                 d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
@@ -574,9 +563,9 @@
             </svg>Outputs</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button id="tab-benchmark" class="nav-link d-inline-flex align-items-center gap-1" type="button" role="tab"
+          <button id="tab-benchmark" class="nav-link d-inline-flex align-items-center gap-2" type="button" role="tab"
             data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false"
-            aria-controls="panel-benchmark"><svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em"
+            aria-controls="panel-benchmark"><svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em"
               fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
               <path
                 d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z" />
@@ -592,14 +581,14 @@
             <span id="reviewed-count" class="ev-meter-frac"><strong>0</strong><span class="ev-slash">/</span>0</span>
           </div>
         </div>
-        <button class="btn btn-primary  d-xl-none" type="button" data-bs-toggle="offcanvas"
+        <button class="btn btn-primary btn-sm d-xl-none" type="button" data-bs-toggle="offcanvas"
           data-bs-target="#feedback-rail" aria-label="Open review panel">Review</button>
-        <button class="btn btn-primary  d-inline-flex align-items-center gap-2" id="submit-btn" type="button"
+        <button class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2" id="submit-btn" type="button"
           data-action="submit"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
             viewBox="0 0 16 16" aria-hidden="true">
             <path
               d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z" />
-          </svg>Submit All</button>
+          </svg>Submit</button>
       </div>
     </div>
   </nav>
