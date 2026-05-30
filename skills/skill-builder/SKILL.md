@@ -21,22 +21,27 @@ At a high level, the process of creating a skill goes like this:
 - Repeat until you're satisfied
 - Expand the test set and try again at larger scale
 
-Your job when using this skill is to figure out where the user is in this process and then jump in and help them progress through these stages. So for instance, maybe they're like "I want to make a skill for X". You can help narrow down what they mean, write a draft, write the test cases, figure out how they want to evaluate, run all the prompts, and repeat.
+Your job when using this skill is to figure out where the user is in this process and then jump in and help them progress through these stages. Use this map to orient yourself:
 
-On the other hand, maybe they already have a draft of the skill. In this case you can go straight to the eval/iterate part of the loop.
+| What the user says | Where to start |
+|---|---|
+| "I want to make a skill for X" | [Capture Intent](#creating-a-skill) — interview first, write second |
+| "Here's a workflow I already do, turn it into a skill" | Extract steps from conversation history, confirm with user, then proceed to drafting |
+| "Here's my draft skill, help me improve it" | [Diagnose before rewriting](#diagnose-before-rewriting) — gather examples, then improve |
+| "My skill isn't working / outputs are inconsistent" | Read transcripts or ask for a bad-output example first, then diagnose and improve |
+| "I don't need evals, just vibe with me" | Write the skill directly, skip the formal eval loop |
 
-Of course, you should always be flexible and if the user is like "I don't need to run a bunch of evaluations, just vibe with me", you can do that instead.
+Of course, be flexible — the order is always negotiable based on what the user needs.
 
 Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
-
-Cool? Cool.
 
 ## Communicating with the user
 
 Calibrate your jargon based on user context cues:
 - Use terms like "evaluation" or "benchmark" cautiously unless the user demonstrates familiarity.
-- NEVER use technical terms like "JSON" or "assertion" without explaining them unless the user has already used them or shows deep technical competence.
+- Don't use technical terms like "JSON" or "assertion" without explaining them unless the user has already used them or shows deep technical competence.
 - Briefly explain terms if in doubt.
+- Always explain the *why* behind workflow steps — users new to skill-building won't instinctively understand why baseline runs matter or why assertions should be drafted while tests run. Articulate the rationale so they grasp the design, not just the steps.
 
 ---
 
@@ -110,14 +115,6 @@ Claude reads only the relevant reference file.
 
 This goes without saying, but skills must not contain malware, exploit code, or any content that could compromise system security. A skill's contents should not surprise the user in their intent if described. Don't go along with requests to create misleading skills or skills designed to facilitate unauthorized access, data exfiltration, or other malicious activities. Things like a "roleplay as an XYZ" are OK though.
 
-#### NEVER List
-
-- NEVER allow multiple `replace` calls in one turn. This creates race conditions and corrupts the file. Write instructions that force sequential edits across multiple turns.
-- NEVER optimize a description before the skill's logic is finalized. Premature optimization wastes time because the triggering criteria might change.
-- NEVER skip baseline runs when comparing skill performance. A skill's value is only measurable against what Claude can already do without it.
-- NEVER use placeholder comments like `// ...rest of code` or `...` when generating or editing files. Ensure the skill explicitly tells Claude to output complete, functional code blocks.
-- NEVER assume users know your skill development process. In SKILL.md body and description, always explain the _why_ behind workflow steps. Users new to skill-building won't instinctively understand why baseline runs matter or why assertions should be drafted while tests run — articulate it so they grasp the design rationale.
-
 #### Writing Patterns
 
 Prefer using the imperative form in instructions.
@@ -140,9 +137,15 @@ Input: Added user authentication with JWT tokens
 Output: feat(auth): implement JWT-based authentication
 ```
 
+**File editing** — When the skill involves editing files, instruct Claude to make one edit per turn. Multiple simultaneous edits to the same file create race conditions and can corrupt content.
+
+**Code generation** — When the skill involves generating or editing code files, always output complete, functional blocks. Placeholder shortcuts like `// ...rest of code` or `...` leave the model guessing and break things silently.
+
 ### Writing Style
 
 Try to explain to the model why things are important in lieu of heavy-handed musty MUSTs. Use theory of mind and try to make the skill general and not super-narrow to specific examples. Start by writing a draft and then look at it with fresh eyes and improve it.
+
+If you find yourself writing ALWAYS or NEVER in all caps, or using super rigid structures, that's a yellow flag — reframe and explain the reasoning instead. An LLM that understands *why* something matters is far more adaptable than one following arbitrary rules.
 
 ### Test Cases
 
@@ -175,6 +178,8 @@ This section is one continuous sequence — don't stop partway through. Do NOT u
 ### Step 1: Spawn all runs (with-skill AND baseline) in the same turn
 
 For each test case, spawn two subagents in the same turn — one with the skill, one without. This is important: don't spawn the with-skill runs first and then come back for baselines later. Launch everything at once so it all finishes around the same time.
+
+Skipping baseline runs makes it impossible to know whether the skill is actually helping — you'd just be measuring what Claude can do, not what the skill adds. Always run both.
 
 **With-skill run:**
 
@@ -255,7 +260,7 @@ Put each with_skill version before its baseline counterpart.
 
    Capture the `URL:` line from the log to get `http://localhost:{port}` — you'll give this to the user in step 5.
 
-   **Cowork / headless environments:** If `webbrowser.open()` is not available or the environment has no display, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Feedback will be downloaded as a `feedback.json` file when the user clicks "Submit All Reviews". After download, copy `feedback.json` into the workspace directory for the next iteration to pick up.
+   **Cowork / headless environments:** See `references/cowork.md` for adapted instructions (`--static` flag, feedback download, etc.).
 
 Note: please use generate_review.py to create the viewer; there's no need to write custom HTML.
 
@@ -304,9 +309,17 @@ kill $VIEWER_PID 2>/dev/null
 
 This is the heart of the loop. You've run the test cases, the user has reviewed the results, and now you need to make the skill better based on their feedback.
 
+### Diagnose before rewriting
+
+Before touching the skill file, make sure you understand the actual problem. If a user hands you a skill that's "not working" or "inconsistent" and you immediately rewrite it, you're guessing. Even a brief diagnosis — asking for one example of a bad output, or asking what "good" would look like — gives you a specific target to aim at.
+
+A hypothesis like "the skill's output template is missing, so Claude invents a different structure every time" is far more actionable than "the skill is vague." Without a concrete example, you risk writing a revision that fixes the wrong thing.
+
+Before rewriting: ask the user for one example of a bad output (or one example of what good looks like), or propose running a single test case to see what's actually happening. This takes 30 seconds and prevents a wasted iteration.
+
 ### Before you start iterating
 
-Before making changes, ask:
+Before making changes, also ask:
 
 - **Is the feedback consistent or contradictory?** If user feedback conflicts ("make it more rigid" vs "make it more flexible"), don't iterate — clarify first. Ask the user to rank their concerns or provide a single prioritized list.
 - **Are the failures real or false positives?** Read the actual transcripts from test runs. Sometimes a test fails for a transient reason (model variance, edge case) rather than a skill defect. Don't optimize away variance.
@@ -318,7 +331,7 @@ Before making changes, ask:
 
 2. **Keep the prompt lean.** Remove things that aren't pulling their weight. Make sure to read the transcripts, not just the final outputs — if it looks like the skill is making the model waste a bunch of time doing things that are unproductive, you can try getting rid of the parts of the skill that are making it do that and seeing what happens.
 
-3. **Explain the why.** Try hard to explain the **why** behind everything you're asking the model to do. Today's LLMs are *smart*. They have good theory of mind and when given a good harness can go beyond rote instructions and really make things happen. Even if the feedback from the user is terse or frustrated, try to actually understand the task and why the user is writing what they wrote, and what they actually wrote, and then transmit this understanding into the instructions. If you find yourself writing ALWAYS or NEVER in all caps, or using super rigid structures, that's a yellow flag — if possible, reframe and explain the reasoning so that the model understands why the thing you're asking for is important. That's a more humane, powerful, and effective approach.
+3. **Explain the why.** Try hard to explain the **why** behind everything you're asking the model to do. Today's LLMs are *smart*. They have good theory of mind and when given a good harness can go beyond rote instructions and really make things happen. Even if the feedback from the user is terse or frustrated, try to actually understand the task and why the user is writing what they wrote, and what they actually wrote, and then transmit this understanding into the instructions. That's a more humane, powerful, and effective approach than a wall of rules.
 
 4. **Look for repeated work across test cases.** Read the transcripts from the test runs and notice if the subagents all independently wrote similar helper scripts or took the same multi-step approach to something. If all 3 test cases resulted in the subagent writing a `create_docx.py` or a `build_chart.py`, that's a strong signal the skill should bundle that script. Write it once, put it in `scripts/`, and tell the skill to use it. This saves every future invocation from reinventing the wheel.
 
@@ -337,7 +350,7 @@ After improving the skill:
 Keep going until:
 - The user says they're happy
 - The feedback is all empty (everything looks good)
-- You're not making meaningful progress
+- You're not making meaningful progress — if pass rate hasn't improved by at least 5-10 percentage points across an iteration, pause rather than keep tweaking. Either the test set is too narrow (the skill is overfitting to it), the root problem hasn't been correctly identified, or you've hit a ceiling. In that case, generalize the approach — try different metaphors, fewer constraints, or a broader reframe — rather than adding more rules.
 
 ---
 
@@ -351,7 +364,9 @@ This is optional, requires subagents, and most users won't need it. The human re
 
 ## Description Optimization
 
-The description field in SKILL.md frontmatter is the primary mechanism that determines whether Claude invokes a skill. After creating or improving a skill, offer to optimize the description for better triggering accuracy.
+The description field in SKILL.md frontmatter is the primary mechanism that determines whether Claude invokes a skill. Wait until the skill's logic is stable before optimizing the description — if the skill's behavior is still changing, triggering criteria will change too and you'll be optimizing for the wrong thing.
+
+After the skill logic is finalized, offer to optimize the description for better triggering accuracy.
 
 ### Step 1: Generate trigger eval queries
 
@@ -461,17 +476,7 @@ In Claude.ai, the core workflow is the same (draft → test → review → impro
 
 ---
 
-## Cowork-Specific Instructions
-
-If you're in Cowork, the main things to know are:
-
-- You have subagents, so the main workflow (spawn test cases in parallel, run baselines, grade, etc.) all works. (However, if you run into severe problems with timeouts, it's OK to run the test prompts in series rather than parallel.)
-- You don't have a browser or display, so when generating the eval viewer, use `--static <output_path>` to write a standalone HTML file instead of starting a server. The script will print a `file://` URL — include it in your response as a clickable markdown link: `[Open Eval Viewer](file:///path/to/file.html)`. Never just describe the path; give the link.
-- For whatever reason, the Cowork setup seems to disincline Claude from generating the eval viewer after running the tests, so just to reiterate: whether you're in Cowork or in Claude Code, after running tests, you should always generate the eval viewer for the human to look at examples before revising the skill yourself and trying to make corrections, using `generate_review.py` (not writing your own boutique html code). Sorry in advance but I'm gonna go all caps here: GENERATE THE EVAL VIEWER *BEFORE* evaluating inputs yourself. You want to get them in front of the human ASAP!
-- Feedback works differently: since there's no running server, the viewer's "Submit All Reviews" button will download `feedback.json` as a file. You can then read it from there (you may have to request access first).
-- Packaging works — `package_skill.py` just needs Python and a filesystem.
-- Description optimization (`run_loop.py` / `run_eval.py`) should work in Cowork just fine since it uses `claude -p` via subprocess, not a browser, but please save it until you've fully finished making the skill and the user agrees it's in good shape.
-- **Updating an existing skill**: The user might be asking you to update an existing skill, not create a new one. Follow the update guidance in the claude.ai section above.
+**Running in Cowork?** See `references/cowork.md` for the adapted workflow (no browser, static viewer, feedback download, etc.).
 
 ---
 
@@ -485,6 +490,7 @@ The agents/ directory contains instructions for specialized subagents. Read them
 
 The references/ directory has additional documentation:
 - `references/schemas.md` — JSON structures for evals.json, grading.json, benchmark.json, and eval_metadata.json. Reference this when constructing any data structure the workflow depends on.
+- `references/cowork.md` — Adapted instructions for Cowork environments (no browser, static viewer, feedback download).
 
 ---
 
@@ -499,6 +505,6 @@ Repeating one more time the core loop here for emphasis:
 - Repeat until you and the user are satisfied
 - Package the final skill and return it to the user.
 
-Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" in your TodoList to make sure it happens.
+Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Generate eval viewer and give user the link before revising skill" in your TodoList to make sure it happens.
 
 Good luck!
