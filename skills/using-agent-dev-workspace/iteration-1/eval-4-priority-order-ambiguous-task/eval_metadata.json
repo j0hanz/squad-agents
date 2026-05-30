@@ -1,0 +1,22 @@
+{
+  "eval_id": 4,
+  "eval_name": "priority-order-ambiguous-task",
+  "prompt": "I'm not sure if I should refactor the database layer or add new features first. Should I brainstorm this?",
+  "assertions": [
+    {
+      "text": "Recommends brainstorming to clarify intent first",
+      "type": "routing",
+      "weight": 1.0
+    },
+    {
+      "text": "Explains that brainstorming (process skill) should come before domain skills",
+      "type": "priority",
+      "weight": 0.9
+    },
+    {
+      "text": "Shows understanding that unclear scope → process skill first",
+      "type": "reasoning",
+      "weight": 0.8
+    }
+  ]
+}

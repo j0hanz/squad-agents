@@ -1,0 +1,22 @@
+{
+  "eval_id": 1,
+  "eval_name": "process-skill-feature-building",
+  "prompt": "I need to add a new authentication feature to our API. Should I use a specific skill to start?",
+  "assertions": [
+    {
+      "text": "Recommends brainstorming skill for feature development",
+      "type": "routing",
+      "weight": 1.0
+    },
+    {
+      "text": "Explains that brainstorming is a process skill (governs HOW to work)",
+      "type": "explanation",
+      "weight": 0.7
+    },
+    {
+      "text": "Establishes priority: process skill before domain skills",
+      "type": "priority",
+      "weight": 0.8
+    }
+  ]
+}

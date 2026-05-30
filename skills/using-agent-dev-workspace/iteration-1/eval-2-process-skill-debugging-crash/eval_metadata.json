@@ -1,0 +1,17 @@
+{
+  "eval_id": 2,
+  "eval_name": "process-skill-debugging-crash",
+  "prompt": "Our app keeps crashing when users upload large files. I've got error logs but don't know where to start.",
+  "assertions": [
+    {
+      "text": "Recommends diagnose skill for bug/crash investigation",
+      "type": "routing",
+      "weight": 1.0
+    },
+    {
+      "text": "Recognizes this as a debugging scenario (not just feature work)",
+      "type": "categorization",
+      "weight": 0.9
+    }
+  ]
+}
