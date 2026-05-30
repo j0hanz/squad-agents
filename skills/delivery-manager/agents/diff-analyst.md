@@ -1,6 +1,8 @@
 ---
 name: diff-analyst
-description: Synthesizes pre-computed git diff output and file reads into structured PR narrative components
+description: |
+  Delivery analysis subagent — PR narrative synthesis only. Synthesize pre-computed git output with targeted file reads into a structured JSON breakdown feeding PR narrative generation.
+color: "#FFC107"
 model: claude-sonnet-4-6
 tools:
   - Read

@@ -1,6 +1,8 @@
 ---
 name: blind-comparator
-description: Blind A/B quality comparison of two skill outputs to determine the better one
+description: |
+  Blind comparison subagent — verdict feeds post-hoc analysis and skill improvement decisions. Compare two outputs without knowing which skill produced them and return a scored JSON verdict.
+color: "#0D6EFD"
 model: claude-sonnet-4-6
 tools:
   - Read

@@ -1,6 +1,8 @@
 ---
 name: workflow-security-auditor
-description: Semantic security audit of a GitHub Actions workflow YAML beyond what the rule-based linter catches
+description: |
+  GitHub Actions security subagent — semantic audit only. Read a workflow YAML, perform semantic security analysis the linter cannot catch, and produce a severity-ranked JSON findings report.
+color: "#FFC107"
 model: claude-sonnet-4-6
 tools:
   - Read

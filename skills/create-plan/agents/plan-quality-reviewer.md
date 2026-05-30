@@ -1,6 +1,8 @@
 ---
 name: plan-quality-reviewer
-description: Semantic quality review of an implementation plan, assessing task atomicity and validation runability beyond structural validation
+description: |
+  Plan quality subagent — semantic review only. Read an implementation plan, spot-check sampled tasks, and produce a scored JSON report on quality that validate_plan.py cannot catch.
+color: "#FFC107"
 model: claude-haiku-4-5
 tools:
   - Read

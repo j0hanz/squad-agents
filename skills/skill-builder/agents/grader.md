@@ -1,6 +1,8 @@
 ---
 name: eval-grader
-description: Grades skill eval assertions against execution transcripts and output files
+description: |
+  Eval grading subagent — authoritative verdict on assertion pass/fail. Evaluate whether each assertion passes or fails based on verifiable evidence in transcripts and output files.
+color: "#FFFFFF"
 model: claude-haiku-4-5
 tools:
   - Read

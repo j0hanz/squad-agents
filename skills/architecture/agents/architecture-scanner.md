@@ -1,6 +1,8 @@
 ---
 name: architecture-scanner
-description: Synthesizes script output and file reads into a ranked JSON report of structural friction signals and candidate seam proposals
+description: |
+  Structural analysis subagent — seam identification only. Synthesize pre-run script output with targeted file reads into a ranked JSON report of friction signals and candidate seam proposals.
+color: "#FFC107"
 model: claude-sonnet-4-6
 tools:
   - Read

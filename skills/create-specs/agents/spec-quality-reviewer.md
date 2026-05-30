@@ -1,6 +1,8 @@
 ---
 name: spec-quality-reviewer
-description: Semantic quality review of a spec file, assessing requirement atomicity and interface completeness beyond structural validation
+description: |
+  Specification quality subagent — semantic review only. Read a spec file, evaluate sections that validate_spec.py cannot catch, and produce a per-section scored report with ranked improvement suggestions.
+color: "#FFC107"
 model: claude-sonnet-4-6
 tools:
   - Read

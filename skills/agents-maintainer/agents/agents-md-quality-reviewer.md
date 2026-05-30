@@ -1,6 +1,8 @@
 ---
 name: agents-md-quality-reviewer
-description: Semantic quality review of an AGENTS.md file, scoring signal density and actionability beyond structural linting
+description: |
+  Documentation quality subagent — semantic review only. Read an AGENTS.md file, score five quality dimensions, and return ranked improvement suggestions with direct quotes.
+color: "#FFC107"
 model: claude-sonnet-4-6
 tools:
   - Read
