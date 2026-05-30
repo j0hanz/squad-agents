@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -24,7 +25,6 @@ try:
 except ImportError:
     yaml = None
 
-import shutil
 from simulator import (
     evaluate_assertions,
     parse_tool_calls_jsonl,
@@ -111,12 +111,21 @@ def run_case(
 
         start_time = time.time()
 
-        cmd = ["claude", "-p", prompt, "--output-format", "json"]
         if agent_file:
-            # How to specify the agent? Usually by pointing to its instructions or using it.
-            # If it's a subagent file, we might need a specific CLI flag if available.
-            # For now, we assume the prompt includes "Use [agent]" if needed.
-            pass
+            # claude -p does not have a dedicated --agent-file flag.
+            # Inject the agent's system prompt as a preamble so the model
+            # runs with the intended persona during simulation.
+            try:
+                from lib.agent_parser import parse_agent, ParseError
+                agent_spec = parse_agent(agent_file)
+                system_preamble = f"[SYSTEM PROMPT]\n{agent_spec.system_prompt}\n[END SYSTEM PROMPT]\n\n"
+                effective_prompt = system_preamble + prompt
+            except Exception:
+                effective_prompt = prompt
+        else:
+            effective_prompt = prompt
+
+        cmd = ["claude", "-p", effective_prompt, "--output-format", "json"]
 
         try:
             res = subprocess.run(
