@@ -2,51 +2,62 @@
 name: verification-before-completion
 description: |
   Use before declaring any task, feature, or fix complete. Verifies actual behavior matches
-  expected through running code and tests — not code inspection alone.
-when_to_use: |
-  Triggers when the user says: "done", "finished", "looks good", "ready to review",
-  "ready to merge", "it should work", or "I think this is complete".
+  expected through running code and tests — not code inspection alone. Triggers when the
+  user says "done", "finished", "looks good", "ready to review", "ready to merge",
+  "it should work", or "I think this is complete". Also applies when evaluating whether
+  to commit, create a PR, or sign off on any change.
 disable-model-invocation: false
 ---
 
 # Verification Before Completion
 
-## The Rule
+## The Core Idea
 
-**Do NOT report success based on reading code.** Run the code and observe the behavior.
+**Do NOT confirm work is complete based on reading code.** Execution evidence must exist before reporting success. Code inspection tells you what the code says; only running it tells you what it does.
 
-**HARD-GATE: If any applicable checklist item below cannot be verified, the task is NOT complete. Do not report success.**
+Crucially: that execution evidence can come from the developer. When someone tells you "I ran the tests and they all pass" or "I confirmed the original bug is reproduced then gone," **that is the evidence.** Your job is to make sure verification actually happened — not to personally re-execute every command.
 
-## Checklist
+## Scenario A: Developer Has Already Verified
+
+If the developer confirms they've covered the relevant checklist items, accept it and move to the Transition step:
+
+> "All 847 tests pass. Debug artifacts check: clean. Diff review: all changes are intentional."
+> → **Verification complete.** Proceed to the Transition step below.
+
+Do not ask to re-run things yourself, and do not treat self-reported verification as insufficient. The skill's purpose is to ensure verification happened, not to be the agent performing it.
+
+## Scenario B: Verification Is Still Needed
+
+If the developer says "it should work" or "looks correct" without reporting actual execution — or is asking you to confirm completion on their behalf — work through this checklist:
+
+### Checklist
 
 Before declaring any task done, verify ALL that apply:
 
 - [ ] Run the specific tests for changed code — they must PASS
 - [ ] Run the full test suite — no regressions introduced
-- [ ] If there are no automated tests: exercise the feature manually and document what you tested
-- [ ] If fixing a bug: reproduce the original failure first, then confirm it is gone (not optional — without this you cannot distinguish "fix works" from "test was never catching the bug")
+- [ ] If there are no automated tests: exercise the feature manually and document what you tested (input given, expected behavior, actual behavior observed)
+- [ ] If fixing a bug: reproduce the original failure first, then confirm it is gone
+  - Not optional. Without seeing the failure, you cannot distinguish "fix works" from "test was never catching the bug in the first place."
 - [ ] Check the diff for debug artifacts: `console.log`, `debugger`, `print(`, `breakpoint()`, `pdb.set_trace()`
 - [ ] Review your diff — does every change match what was intended? Nothing extra, nothing missing.
 
-## NEVER
+### What isn't sufficient
 
-- Never report success based on reading code alone — "it looks correct" is not evidence
-- Never say "it should work" without running it
-- Never skip reproduction for bug fixes — if you can't show the original failure first, you can't show it's gone
-- Never report complete when tests can't run — state explicitly what couldn't be verified and why
+- "It looks correct" — code review shows what was written, not whether it works at runtime
+- "I'm confident" / "should work" — confidence is not evidence
+- "The new tests pass" — new tests passing does not confirm no regressions in existing code
+- "The CI failure is unrelated to my code" — you can't distinguish "my code is fine" from "my code is also broken" without seeing tests actually pass
 
-## If Verification Fails
+### If verification cannot complete
 
-Do NOT report success or move on. Either:
-
-- Fix the issue and re-verify from the top of the checklist, OR
-- Explicitly state what could not be verified and why, so the user can make an informed decision
-
-Never say "it should work" without evidence.
+State explicitly what could not be verified and why, so the user can decide how to proceed. Never silently declare success or let an untestable claim stand.
 
 ## Transition
 
-After verification passes:
+Once all applicable checklist items are confirmed (whether verified by you or reported by the developer):
 
-- For non-trivial changes: invoke `code-review` before finishing
-- When moving to PR or delivery: invoke `delivery-manager`
+- **For non-trivial changes:** invoke `code-review` before finishing
+- **When moving to PR or delivery:** invoke `delivery-manager`
+
+A clean test run is necessary but not sufficient for shipping. The transition steps exist to catch issues that verification alone doesn't surface.
