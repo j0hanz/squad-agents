@@ -48,11 +48,11 @@ def check_file(path: Path) -> list[str]:
         stripped = line.lstrip()
         current_indent = len(line) - len(stripped)
 
-        run_match = re.match(r'^(\s*)run:\s*[|>-]?\s*$', line)
+        run_match = re.match(r"^(\s*)run:\s*[|>-]?\s*$", line)
         if run_match:
             in_run_block = True
             run_block_indent = len(run_match.group(1)) + 1
-        elif re.match(r'^\s*run:\s+\S', line):
+        elif re.match(r"^\s*run:\s+\S", line):
             # Inline run: value (no block scalar)
             in_run_block = False
             run_block_indent = None

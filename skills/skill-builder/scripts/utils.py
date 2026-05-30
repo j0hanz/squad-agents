@@ -7,7 +7,9 @@ def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
     """Parse a SKILL.md file, returning (name, description, full_content)."""
     content = (skill_path / "SKILL.md").read_text(encoding="utf-8")
 
-    match = __import__("re").match(r"^---\n(.*?)\n---\n", content, __import__("re").DOTALL)
+    match = __import__("re").match(
+        r"^---\n(.*?)\n---\n", content, __import__("re").DOTALL
+    )
     if not match:
         raise ValueError("SKILL.md missing frontmatter")
 
@@ -15,6 +17,7 @@ def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
 
     try:
         import yaml
+
         fm = yaml.safe_load(frontmatter_text) or {}
         name = str(fm.get("name", "")).strip()
         description = fm.get("description", "")
@@ -30,9 +33,9 @@ def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
         while i < len(lines):
             line = lines[i]
             if line.startswith("name:"):
-                name = line[len("name:"):].strip().strip('"').strip("'")
+                name = line[len("name:") :].strip().strip('"').strip("'")
             elif line.startswith("description:"):
-                value = line[len("description:"):].strip()
+                value = line[len("description:") :].strip()
                 if value in (">", "|", ">-", "|-"):
                     continuation_lines: list[str] = []
                     i += 1

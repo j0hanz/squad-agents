@@ -18,37 +18,37 @@
 
 ## File Map
 
-| Action | Path | Reason |
-|--------|------|--------|
-| Modify | `skills/agent-development/scripts/audit.py` | FrozenInstanceError — replace `finding.path = p` |
-| Modify | `skills/agent-development/scripts/lib/agent_parser.py` | Let `FileNotFoundError` propagate |
-| Create | `skills/lib/__init__.py` | Package root for shared `spec_parser` |
-| Create | `skills/lib/spec_parser.py` | Missing module imported by create-plan / create-specs |
-| Modify | `skills/skill-builder/scripts/generate_report.py` | `encoding="utf-8"` + hoist nested fns |
-| Modify | `skills/skill-builder/scripts/run_loop.py` | `encoding="utf-8"` on 6 write_text calls |
-| Modify | `skills/skill-builder/scripts/improve_description.py` | `encoding="utf-8"` on write_text |
-| Modify | `skills/skill-builder/scripts/run_eval.py` | `encoding="utf-8"` on read_text |
-| Modify | `skills/skill-builder/scripts/aggregate_benchmark.py` | `encoding="utf-8"` on open() |
-| Modify | `skills/skill-builder/scripts/utils.py` | `encoding="utf-8"` on read_text |
-| Modify | `skills/skill-builder/scripts/quick_validate.py` | `encoding="utf-8"` on read_text |
-| Modify | `skills/skill-builder/scripts/package_skill.py` | sys.path fix + ASCII for emoji |
-| Modify | `skills/agents-maintainer/scripts/run.py` | ASCII for ❌/✅ + fix FAIL:WARN: |
-| Modify | `skills/agent-development/scripts/simulate.py` | ASCII for ✅/⚠️/❌ |
-| Modify | `skills/spec-driven-development/scripts/diagnose_dependencies.py` | ASCII for ✓/✗ |
-| Modify | `skills/agent-development/scripts/telemetry_dashboard.py` | `encoding="utf-8"` on open() |
-| Modify | `skills/agent-development/scripts/visualize_policy.py` | `encoding="utf-8"` on open() |
-| Modify | `skills/skill-builder/eval-viewer/generate_review.py` | `encoding="utf-8"` on bare read_text |
-| Modify | `skills/github-automation/scripts/lint.py` | Multi-line `run:` injection tracking |
-| Modify | `skills/agent-development/scripts/cost.py` | Import constants; add type hint |
-| Modify | `skills/agent-development/scripts/diff.py` | Import constants; add type hint |
-| Modify | `skills/agent-development/scripts/compile.py` | Add `AgentSpec` type hints |
-| Modify | `skills/agent-development/scripts/recommend.py` | Add `AgentSpec` type hint |
-| Create | `skills/skill-builder/tests/__init__.py` | Make pytest discover the package |
-| Create | `skills/skill-builder/tests/conftest.py` | sys.path for `from scripts.X import Y` |
-| Create | `skills/skill-builder/tests/test_aggregate_benchmark.py` | Smoke tests |
-| Create | `skills/skill-builder/tests/test_generate_report.py` | Smoke tests |
-| Modify | `.simulate/observer.py` | Wrap in main() + error handling |
-| Modify | `skills/agent-development/scripts/.simulate/observer.py` | Wrap in main() + error handling |
+| Action | Path                                                              | Reason                                                |
+| ------ | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| Modify | `skills/agent-development/scripts/audit.py`                       | FrozenInstanceError — replace `finding.path = p`      |
+| Modify | `skills/agent-development/scripts/lib/agent_parser.py`            | Let `FileNotFoundError` propagate                     |
+| Create | `skills/lib/__init__.py`                                          | Package root for shared `spec_parser`                 |
+| Create | `skills/lib/spec_parser.py`                                       | Missing module imported by create-plan / create-specs |
+| Modify | `skills/skill-builder/scripts/generate_report.py`                 | `encoding="utf-8"` + hoist nested fns                 |
+| Modify | `skills/skill-builder/scripts/run_loop.py`                        | `encoding="utf-8"` on 6 write_text calls              |
+| Modify | `skills/skill-builder/scripts/improve_description.py`             | `encoding="utf-8"` on write_text                      |
+| Modify | `skills/skill-builder/scripts/run_eval.py`                        | `encoding="utf-8"` on read_text                       |
+| Modify | `skills/skill-builder/scripts/aggregate_benchmark.py`             | `encoding="utf-8"` on open()                          |
+| Modify | `skills/skill-builder/scripts/utils.py`                           | `encoding="utf-8"` on read_text                       |
+| Modify | `skills/skill-builder/scripts/quick_validate.py`                  | `encoding="utf-8"` on read_text                       |
+| Modify | `skills/skill-builder/scripts/package_skill.py`                   | sys.path fix + ASCII for emoji                        |
+| Modify | `skills/agents-maintainer/scripts/run.py`                         | ASCII for ❌/✅ + fix FAIL:WARN:                      |
+| Modify | `skills/agent-development/scripts/simulate.py`                    | ASCII for ✅/⚠️/❌                                    |
+| Modify | `skills/spec-driven-development/scripts/diagnose_dependencies.py` | ASCII for ✓/✗                                         |
+| Modify | `skills/agent-development/scripts/telemetry_dashboard.py`         | `encoding="utf-8"` on open()                          |
+| Modify | `skills/agent-development/scripts/visualize_policy.py`            | `encoding="utf-8"` on open()                          |
+| Modify | `skills/skill-builder/eval-viewer/generate_review.py`             | `encoding="utf-8"` on bare read_text                  |
+| Modify | `skills/github-automation/scripts/lint.py`                        | Multi-line `run:` injection tracking                  |
+| Modify | `skills/agent-development/scripts/cost.py`                        | Import constants; add type hint                       |
+| Modify | `skills/agent-development/scripts/diff.py`                        | Import constants; add type hint                       |
+| Modify | `skills/agent-development/scripts/compile.py`                     | Add `AgentSpec` type hints                            |
+| Modify | `skills/agent-development/scripts/recommend.py`                   | Add `AgentSpec` type hint                             |
+| Create | `skills/skill-builder/tests/__init__.py`                          | Make pytest discover the package                      |
+| Create | `skills/skill-builder/tests/conftest.py`                          | sys.path for `from scripts.X import Y`                |
+| Create | `skills/skill-builder/tests/test_aggregate_benchmark.py`          | Smoke tests                                           |
+| Create | `skills/skill-builder/tests/test_generate_report.py`              | Smoke tests                                           |
+| Modify | `.simulate/observer.py`                                           | Wrap in main() + error handling                       |
+| Modify | `skills/agent-development/scripts/.simulate/observer.py`          | Wrap in main() + error handling                       |
 
 ---
 
@@ -226,6 +226,7 @@ Expected: both print `ModuleNotFoundError: No module named 'spec_parser'`
 Create `skills/lib/__init__.py` (empty file):
 
 ```python
+
 ```
 
 - [ ] **Step 3: Create `skills/lib/spec_parser.py`**

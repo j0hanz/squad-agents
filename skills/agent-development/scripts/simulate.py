@@ -116,7 +116,8 @@ def run_case(
             # Inject the agent's system prompt as a preamble so the model
             # runs with the intended persona during simulation.
             try:
-                from lib.agent_parser import parse_agent, ParseError
+                from lib.agent_parser import parse_agent
+
                 agent_spec = parse_agent(agent_file)
                 system_preamble = f"[SYSTEM PROMPT]\n{agent_spec.system_prompt}\n[END SYSTEM PROMPT]\n\n"
                 effective_prompt = system_preamble + prompt

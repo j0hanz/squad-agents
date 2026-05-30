@@ -1,5 +1,9 @@
 import pytest
-from scripts.aggregate_benchmark import calculate_stats, aggregate_results, generate_markdown
+from scripts.aggregate_benchmark import (
+    calculate_stats,
+    aggregate_results,
+    generate_markdown,
+)
 
 
 def test_calculate_stats_empty():
