@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,52 +10,83 @@
     /* ════ Eval Viewer — CSS custom properties (single source of truth for every dimension) ════ */
     :root {
       /* ── Rail widths (static at lg / xl+; offcanvas below) ── */
-      --ev-nav-rail-w:         clamp(200px, 20%, 260px);
-      --ev-fb-rail-w:          clamp(300px, 24%, 360px);
+      --ev-nav-rail-w: clamp(200px, 20%, 260px);
+      --ev-fb-rail-w: clamp(300px, 24%, 360px);
 
       /* ── Reading column ── */
-      --ev-read-col-max:       min(780px, 95vw);
+      --ev-read-col-max: min(780px, 95vw);
 
       /* ── Navbar ── */
-      --ev-navbar-min-h:       58px;
-      --ev-progress-meter-w:   clamp(110px, 12vw, 150px);
-      --ev-progress-bar-h:     5px;
+      --ev-navbar-min-h: 58px;
+      --ev-progress-meter-w: clamp(110px, 12vw, 150px);
+      --ev-progress-bar-h: 5px;
 
       /* ── Content panels ── */
-      --ev-pdf-h:              clamp(300px, 70vh, 900px);
-      --ev-img-thumb-max-h:    clamp(160px, 30vh, 260px);
-      --ev-collapse-h:         clamp(10rem, 22vh, 16rem);
-      --ev-matrix-col-w:       clamp(80px, 12vw, 120px);
+      --ev-pdf-h: clamp(300px, 70vh, 900px);
+      --ev-img-thumb-max-h: clamp(160px, 30vh, 260px);
+      --ev-collapse-h: clamp(10rem, 22vh, 16rem);
+      --ev-matrix-col-w: clamp(80px, 12vw, 120px);
 
       /* ── Touch targets (WCAG 2.5.5 / Apple HIG 44 pt) ── */
-      --ev-touch-target:       44px;
+      --ev-touch-target: 44px;
 
       /* ── Run indicator dot ── */
-      --ev-dot-sz:             8px;
+      --ev-dot-sz: 8px;
 
       /* ── Typography ── */
-      --ev-eyebrow-fs:         .75rem;
-      --ev-eyebrow-ls:         .08em;
-      --ev-seg-tab-fs:         .85rem;
-      --ev-file-name-fs:       .8125rem;
-      --ev-icon-fs:            1.1rem;
-      --ev-empty-icon-fs:      2.25rem;
-      --ev-save-status-min-h:  1.1rem;
+      --ev-eyebrow-fs: .75rem;
+      --ev-eyebrow-ls: .08em;
+      --ev-seg-tab-fs: .85rem;
+      --ev-file-name-fs: .8125rem;
+      --ev-icon-fs: 1.1rem;
+      --ev-empty-icon-fs: 2.25rem;
+      --ev-save-status-min-h: 1.1rem;
 
       /* ── Accent borders ── */
-      --ev-accent-w:           3px;
+      --ev-accent-w: 3px;
     }
 
     /* ── Layout shell ── */
-    .app-shell    { height: 100vh; height: 100dvh; }
-    .scroll-pane  { overflow-y: auto; min-height: 0; }
-    .output-text  { white-space: pre-wrap; word-break: break-word; }
-    .pdf-frame    { height: var(--ev-pdf-h); }
-    .skill-name   { max-width: 22ch; }
-    .read-col     { max-width: var(--ev-read-col-max); }
-    .label-flex   { flex: 1 1 0; min-width: 0; }
-    .img-thumb    { max-height: var(--ev-img-thumb-max-h); object-fit: contain; }
-    .nav-hamburger { font-size: var(--ev-icon-fs); }
+    .app-shell {
+      height: 100vh;
+      height: 100dvh;
+    }
+
+    .scroll-pane {
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .output-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .pdf-frame {
+      height: var(--ev-pdf-h);
+    }
+
+    .skill-name {
+      max-width: 22ch;
+    }
+
+    .read-col {
+      max-width: var(--ev-read-col-max);
+    }
+
+    .label-flex {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .img-thumb {
+      max-height: var(--ev-img-thumb-max-h);
+      object-fit: contain;
+    }
+
+    .nav-hamburger {
+      font-size: var(--ev-icon-fs);
+    }
 
     /* Shared typographic token: tiny uppercase section label */
     .eyebrow {
@@ -65,14 +97,42 @@
     }
 
     /* ── Navbar: segmented tab control (no 1:1 Bootstrap component) ── */
-    .seg-tabs { background: var(--bs-tertiary-bg); border-radius: 999px; padding: 3px; }
-    .seg-tabs .nav-link { border-radius: 999px; padding: .28rem .9rem; font-size: var(--ev-seg-tab-fs); color: var(--bs-secondary-color); border: 0; }
-    .seg-tabs .nav-link.active { background: var(--bs-body-bg); color: var(--bs-body-emphasis); box-shadow: var(--bs-box-shadow-sm); }
-    .progress-meter { width: var(--ev-progress-meter-w); }
+    .seg-tabs {
+      background: var(--bs-tertiary-bg);
+      border-radius: 999px;
+      padding: 3px;
+    }
+
+    .seg-tabs .nav-link {
+      border-radius: 999px;
+      padding: .28rem .9rem;
+      font-size: var(--ev-seg-tab-fs);
+      color: var(--bs-secondary-color);
+      border: 0;
+    }
+
+    .seg-tabs .nav-link.active {
+      background: var(--bs-body-bg);
+      color: var(--bs-body-emphasis);
+      box-shadow: var(--bs-box-shadow-sm);
+    }
+
+    .progress-meter {
+      width: var(--ev-progress-meter-w);
+    }
 
     /* ── Nav rail: grouped eval list (static on lg+, offcanvas below) ── */
-    .nav-rail { width: var(--ev-nav-rail-w); }
-    @media (min-width: 992px) { .nav-rail { flex: 0 0 var(--ev-nav-rail-w); border-right: 1px solid var(--bs-border-color); } }
+    .nav-rail {
+      width: var(--ev-nav-rail-w);
+    }
+
+    @media (min-width: 992px) {
+      .nav-rail {
+        flex: 0 0 var(--ev-nav-rail-w);
+        border-right: 1px solid var(--bs-border-color);
+      }
+    }
+
     #eval-list .list-group-item-action {
       border: 0;
       border-left: var(--ev-accent-w) solid transparent;
@@ -80,51 +140,131 @@
       color: var(--bs-body-color);
       padding: .5rem .85rem .5rem .6rem;
     }
-    #eval-list .list-group-item-action:hover { background: var(--bs-secondary-bg); }
-    #eval-list .list-group-item-action.active { background: var(--bs-secondary-bg); color: var(--bs-body-emphasis); border-left-color: var(--bs-primary); }
-    #eval-list .list-group-item-action.active.is-baseline { border-left-color: var(--bs-warning); }
 
-    .run-dot { width: var(--ev-dot-sz); height: var(--ev-dot-sz); border-radius: 50%; flex-shrink: 0; }
-    .run-dot.v-good { background: var(--bs-success); }
-    .run-dot.v-bad  { background: var(--bs-danger); border-radius: 2px; }
-    .run-dot.v-none { border: 1.5px solid var(--bs-secondary-color); }
+    #eval-list .list-group-item-action:hover {
+      background: var(--bs-secondary-bg);
+    }
+
+    #eval-list .list-group-item-action.active {
+      background: var(--bs-secondary-bg);
+      color: var(--bs-body-emphasis);
+      border-left-color: var(--bs-primary);
+    }
+
+    #eval-list .list-group-item-action.active.is-baseline {
+      border-left-color: var(--bs-warning);
+    }
+
+    .run-dot {
+      width: var(--ev-dot-sz);
+      height: var(--ev-dot-sz);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .run-dot.v-good {
+      background: var(--bs-success);
+    }
+
+    .run-dot.v-bad {
+      background: var(--bs-danger);
+      border-radius: 2px;
+    }
+
+    .run-dot.v-none {
+      border: 1.5px solid var(--bs-secondary-color);
+    }
 
     /* Touch targets */
-    #prev-btn, #next-btn { min-height: var(--ev-touch-target); min-width: var(--ev-touch-target); }
-    #eval-list .list-group-item-action { min-height: var(--ev-touch-target); }
+    #prev-btn,
+    #next-btn {
+      min-height: var(--ev-touch-target);
+      min-width: var(--ev-touch-target);
+    }
+
+    #eval-list .list-group-item-action {
+      min-height: var(--ev-touch-target);
+    }
 
     /* ── Output files: collapsed long code ── */
-    .output-collapsed { max-height: var(--ev-collapse-h); overflow: hidden; }
+    .output-collapsed {
+      max-height: var(--ev-collapse-h);
+      overflow: hidden;
+    }
 
     /* ── Feedback rail (static on xl+, offcanvas below) ── */
-    .fb-rail { width: var(--ev-fb-rail-w); }
-    @media (min-width: 1200px) { .fb-rail { flex: 0 0 var(--ev-fb-rail-w); border-left: 1px solid var(--bs-border-color); } }
-    .fb-rail .offcanvas-body { display: block; }
-    .save-status { min-height: var(--ev-save-status-min-h); }
-    .navbar .container-fluid { min-height: var(--ev-navbar-min-h); }
+    .fb-rail {
+      width: var(--ev-fb-rail-w);
+    }
+
+    @media (min-width: 1200px) {
+      .fb-rail {
+        flex: 0 0 var(--ev-fb-rail-w);
+        border-left: 1px solid var(--bs-border-color);
+      }
+    }
+
+    .fb-rail .offcanvas-body {
+      display: block;
+    }
+
+    .save-status {
+      min-height: var(--ev-save-status-min-h);
+    }
+
+    .navbar .container-fluid {
+      min-height: var(--ev-navbar-min-h);
+    }
 
     /* ── Benchmark: versus scorecards (Bootstrap row/col + config tints) ── */
-    .vs-col.is-with    { background: var(--bs-primary-bg-subtle); }
-    .vs-col.is-without { background: var(--bs-warning-bg-subtle); }
-    @media (min-width: 576px) { .vs-col.is-with { border-right: 1px solid var(--bs-border-color); } }
+    .vs-col.is-with {
+      background: var(--bs-primary-bg-subtle);
+    }
+
+    .vs-col.is-without {
+      background: var(--bs-warning-bg-subtle);
+    }
+
+    @media (min-width: 576px) {
+      .vs-col.is-with {
+        border-right: 1px solid var(--bs-border-color);
+      }
+    }
 
     /* ── Assertion matrix: responsive column header width ── */
-    .matrix-cfg-col { width: var(--ev-matrix-col-w); }
+    .matrix-cfg-col {
+      width: var(--ev-matrix-col-w);
+    }
 
     /* ── Empty state ── */
-    .empty-state-icon { font-size: var(--ev-empty-icon-fs); line-height: 1; opacity: .2; }
+    .empty-state-icon {
+      font-size: var(--ev-empty-icon-fs);
+      line-height: 1;
+      opacity: .2;
+    }
 
     /* ── File card: tinted header, stronger filename label ── */
-    .file-header { background: var(--bs-tertiary-bg); }
-    .file-header .file-name { font-size: var(--ev-file-name-fs); }
+    .file-header {
+      background: var(--bs-tertiary-bg);
+    }
+
+    .file-header .file-name {
+      font-size: var(--ev-file-name-fs);
+    }
 
     /* ── Verdict buttons: icon-aligned, consistent touch target height ── */
-    .verdict-stack label.btn { min-height: var(--ev-touch-target); display: flex; align-items: center; }
+    .verdict-stack label.btn {
+      min-height: var(--ev-touch-target);
+      display: flex;
+      align-items: center;
+    }
 
     /* ════ Additions: surface, animation, and component consistency ════ */
 
     /* Shared card radius token — applied everywhere a surface has rounding */
-    :root { --ev-card-radius: .45rem; }
+    :root {
+      --ev-card-radius: .45rem;
+    }
 
     /* Code pre: give it a background so it reads as a distinct surface */
     pre.output-text {
@@ -141,8 +281,13 @@
     }
 
     /* Assertion matrix: full-cell pass/fail tinting */
-    td.assert-pass { background-color: rgba(25, 135, 84, .16); }
-    td.assert-fail  { background-color: rgba(220, 53, 69, .14); }
+    td.assert-pass {
+      background-color: rgba(25, 135, 84, .16);
+    }
+
+    td.assert-fail {
+      background-color: rgba(220, 53, 69, .14);
+    }
 
     /* Benchmark hero: left-accent stripe on the winning card only */
     .stat-hero-win {
@@ -155,6 +300,7 @@
       border-radius: var(--ev-card-radius);
       overflow: hidden;
     }
+
     .bench-eval-head {
       background: var(--bs-tertiary-bg);
       border-bottom: 1px solid var(--bs-border-color);
@@ -180,7 +326,12 @@
       color: var(--bs-secondary-color);
       user-select: none;
     }
-    .sidebar-group-sep { border-top: 1px solid var(--bs-border-color); margin-top: .25rem; padding-top: .5rem; }
+
+    .sidebar-group-sep {
+      border-top: 1px solid var(--bs-border-color);
+      margin-top: .25rem;
+      padding-top: .5rem;
+    }
 
     /* Multi-file switcher: plain monospace buttons in the same header bar as single-file */
     .file-switch-btn {
@@ -193,23 +344,63 @@
       white-space: nowrap;
       line-height: 1;
     }
-    .file-switch-btn.is-active { color: var(--bs-body-emphasis); font-weight: 600; }
-    .file-switch-btn:not(.is-active) { color: var(--bs-secondary-color); }
-    .file-switch-btn:not(.is-active):hover { color: var(--bs-body-color); }
+
+    .file-switch-btn.is-active {
+      color: var(--bs-body-emphasis);
+      font-weight: 600;
+    }
+
+    .file-switch-btn:not(.is-active) {
+      color: var(--bs-secondary-color);
+    }
+
+    .file-switch-btn:not(.is-active):hover {
+      color: var(--bs-body-color);
+    }
+
     /* ensure switcher container can shrink in flex layouts */
-    .file-header > div:first-child { min-width: 0; }
+    .file-header>div:first-child {
+      min-width: 0;
+    }
 
     /* Benchmark summary table delta column */
-    .bm-delta { font-weight: 600; font-variant-numeric: tabular-nums; }
-    .num { font-variant-numeric: tabular-nums; font-family: var(--bs-font-monospace); font-size: .9em; }
+    .bm-delta {
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+      font-family: var(--bs-font-monospace);
+      font-size: .9em;
+    }
 
     /* Ensure eval-fade animation */
-    @keyframes eval-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-    .eval-fade { animation: eval-fade-in .14s ease; }
+    @keyframes eval-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .eval-fade {
+      animation: eval-fade-in .14s ease;
+    }
 
     /* Responsive hero delta number size */
-    :root { --ev-hero-delta-fs: clamp(1.7rem, 3.2vw, 2.4rem); }
-    .hero-delta-value { font-size: var(--ev-hero-delta-fs); line-height: 1; }
+    :root {
+      --ev-hero-delta-fs: clamp(1.7rem, 3.2vw, 2.4rem);
+    }
+
+    .hero-delta-value {
+      font-size: var(--ev-hero-delta-fs);
+      line-height: 1;
+    }
 
     /* Benchmark: eyebrow-style table headers (all tables in benchmark panel) */
     #benchmark-content table thead th {
@@ -223,10 +414,15 @@
     }
 
     /* Benchmark container top/bottom breathing room */
-    #benchmark-content { padding-top: 1.5rem; padding-bottom: 4rem; }
+    #benchmark-content {
+      padding-top: 1.5rem;
+      padding-bottom: 4rem;
+    }
 
     /* Eval content: ensure last item never clips against viewport edge */
-    #eval-content { padding-bottom: 5rem !important; }
+    #eval-content {
+      padding-bottom: 5rem !important;
+    }
 
     /* Config chip: dot + label in config color — replaces generic badge pills */
     .cfg-chip {
@@ -240,17 +436,14 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .cfg-chip::before {
-      content: "";
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
+
+    .cfg-chip.is-with {
+      color: var(--bs-info);
     }
-    .cfg-chip.is-with     { color: var(--bs-info); }
-    .cfg-chip.is-with::before    { background: var(--bs-primary); }
-    .cfg-chip.is-baseline { color: var(--bs-warning); }
-    .cfg-chip.is-baseline::before { background: var(--bs-warning); }
+
+    .cfg-chip.is-baseline {
+      color: var(--bs-warning);
+    }
 
     /* Subbar position counter */
     #subbar-pos {
@@ -263,41 +456,61 @@
     }
   </style>
 </head>
+
 <body class="d-flex flex-column app-shell">
 
   <!-- ============ Navbar: brand · tabs · progress · submit ============ -->
   <nav class="navbar bg-body-tertiary border-bottom flex-shrink-0 py-1">
     <div class="container-fluid">
-    <div class="d-flex align-items-center gap-2 me-auto">
-      <button class="btn btn-link text-body d-lg-none" type="button"
-              data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="Toggle eval list">
-        <span aria-hidden="true" class="nav-hamburger">&#9776;</span>
-      </button>
-      <div>
-        <div class="eyebrow">Skill review</div>
-        <div id="skill-name" class="skill-name d-inline-block align-bottom h5 mb-0" title=""></div>
-      </div>
-    </div>
-    <ul class="nav seg-tabs d-none mx-2" id="view-tabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button id="tab-outputs" class="nav-link active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-outputs" aria-selected="true" aria-controls="panel-outputs">Outputs</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button id="tab-benchmark" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false" aria-controls="panel-benchmark">Benchmark</button>
-      </li>
-    </ul>
-    <div class="d-flex align-items-center gap-5 ms-auto">
-      <div class="progress-meter d-none d-sm-block">
-        <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span id="reviewed-count" class="text-body-emphasis">0 / 0</span></div>
-        <div class="progress" role="progressbar" style="--bs-progress-height: var(--ev-progress-bar-h)"
-             aria-label="Review progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-          <div id="progress-bar" class="progress-bar bg-success"></div>
+      <div class="d-flex align-items-center gap-2 me-auto">
+        <button class="btn btn-link text-body d-lg-none" type="button" data-bs-toggle="offcanvas"
+          data-bs-target="#sidebar" aria-label="Toggle eval list">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"
+            aria-hidden="true">
+            <path fill-rule="evenodd"
+              d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+          </svg>
+        </button>
+        <div>
+          <div class="eyebrow">Skill review</div>
+          <div id="skill-name" class="skill-name d-inline-block align-bottom h5 mb-0" title=""></div>
         </div>
       </div>
-      <button class="btn btn-primary btn-sm d-xl-none" type="button"
-              data-bs-toggle="offcanvas" data-bs-target="#feedback-rail" aria-label="Open review panel">Review</button>
-      <button class="btn btn-primary btn-sm" id="submit-btn" type="button" data-action="submit">Submit All</button>
-    </div>
+      <ul class="nav seg-tabs d-none mx-2" id="view-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button id="tab-outputs" class="nav-link active d-inline-flex align-items-center gap-1" type="button"
+            role="tab" data-bs-toggle="tab" data-bs-target="#panel-outputs" aria-selected="true"
+            aria-controls="panel-outputs"><svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em"
+              fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
+              <path
+                d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />
+            </svg>Outputs</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button id="tab-benchmark" class="nav-link d-inline-flex align-items-center gap-1" type="button" role="tab"
+            data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false"
+            aria-controls="panel-benchmark"><svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em"
+              fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z" />
+            </svg>Benchmark</button>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center gap-5 ms-auto">
+        <div class="progress-meter d-none d-sm-block">
+          <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span
+              id="reviewed-count" class="text-body-emphasis">0 / 0</span></div>
+          <div class="progress" role="progressbar" style="--bs-progress-height: var(--ev-progress-bar-h)"
+            aria-label="Review progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="progress-bar" class="progress-bar bg-success"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary  d-xl-none" type="button" data-bs-toggle="offcanvas"
+          data-bs-target="#feedback-rail" aria-label="Open review panel">Review</button>
+        <button class="btn btn-primary " id="submit-btn" type="button" data-action="submit">Submit All</button>
+      </div>
     </div>
   </nav>
 
@@ -305,15 +518,16 @@
   <main class="tab-content flex-grow-1 overflow-hidden">
 
     <!-- ---- Outputs panel (qualitative review) — three-column workbench ---- -->
-    <div class="tab-pane fade show active h-100" id="panel-outputs" role="tabpanel" aria-labelledby="tab-outputs" tabindex="-1">
+    <div class="tab-pane fade show active h-100" id="panel-outputs" role="tabpanel" aria-labelledby="tab-outputs"
+      tabindex="-1">
       <div class="d-flex h-100 overflow-hidden">
 
         <!-- Nav rail: grouped eval list (static on lg+, offcanvas below) -->
-        <aside class="nav-rail offcanvas-start d-flex flex-column" id="sidebar"
-               tabindex="-1" aria-labelledby="sidebar-title">
+        <aside class="nav-rail offcanvas-start d-flex flex-column" id="sidebar" tabindex="-1"
+          aria-labelledby="sidebar-title">
           <div class="offcanvas-body p-0 scroll-pane flex-grow-1">
             <h2 id="sidebar-title" class="visually-hidden">Eval list</h2>
-          <div id="eval-list" class="list-group list-group-flush"></div>
+            <div id="eval-list" class="list-group list-group-flush"></div>
           </div>
         </aside>
 
@@ -322,18 +536,32 @@
           <div id="main-scroll" class="scroll-pane flex-grow-1 d-flex flex-column">
 
             <div id="reading-subbar" class="d-flex align-items-center gap-2 px-3 py-2">
-              <button id="prev-btn" class="btn btn-dark btn-lg px-4" type="button"
-                      aria-label="Previous eval">&#8592;</button>
+              <button id="prev-btn" class="btn btn-dark d-flex align-items-center justify-content-center" type="button"
+                aria-label="Previous eval"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                  fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                  <path fill-rule="evenodd"
+                    d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm11.5 5.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z" />
+                </svg></button>
               <span id="subbar-pos" aria-live="polite"></span>
-              <button id="next-btn" class="btn btn-dark btn-lg px-4" type="button"
-                      aria-label="Next eval">&#8594;</button>
-              <span id="current-config-label" class="ms-2 fw-semibold text-body-emphasis text-truncate label-flex"></span>
+              <button id="next-btn" class="btn btn-dark d-flex align-items-center justify-content-center" type="button"
+                aria-label="Next eval"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                  fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                  <path fill-rule="evenodd"
+                    d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
+                </svg></button>
+              <span id="current-config-label"
+                class="ms-2 fw-semibold text-body-emphasis text-truncate label-flex"></span>
               <span id="config-badge" class="cfg-chip d-none"></span>
             </div>
 
             <!-- Empty state -->
-            <div id="no-eval-state" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-2">
-              <div class="empty-state-icon" aria-hidden="true">&#9633;</div>
+            <div id="no-eval-state"
+              class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-2">
+              <div class="empty-state-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="48"
+                  height="48" fill="currentColor" viewBox="0 0 16 16">
+                  <path
+                    d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374z" />
+                </svg></div>
               <span class="text-secondary small">Select an eval from the sidebar to begin reviewing</span>
             </div>
 
@@ -343,7 +571,8 @@
 
                 <!-- Prompt -->
                 <div class="eyebrow mb-2">Prompt</div>
-                <div id="prompt-text" class="output-text small mb-4 border-start border-3 border-primary ps-3 py-1 lh-base"></div>
+                <div id="prompt-text"
+                  class="output-text small mb-4 border-start border-3 border-primary ps-3 py-1 lh-base"></div>
 
                 <!-- Output files -->
                 <div class="eyebrow mb-2">Output</div>
@@ -353,10 +582,14 @@
                 <div class="accordion accordion-flush mt-3" id="extras-accordion">
                   <div class="accordion-item d-none" id="prev-outputs-item">
                     <h2 class="accordion-header">
-                      <button class="accordion-button collapsed" type="button"
-                              data-bs-toggle="collapse" data-bs-target="#prev-outputs-collapse"
-                              aria-expanded="false" aria-controls="prev-outputs-collapse">
-                        Previous Output
+                      <button class="accordion-button collapsed gap-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#prev-outputs-collapse" aria-expanded="false"
+                        aria-controls="prev-outputs-collapse">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor"
+                          viewBox="0 0 16 16" aria-hidden="true">
+                          <path
+                            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                        </svg>Previous Output
                       </button>
                     </h2>
                     <div id="prev-outputs-collapse" class="accordion-collapse collapse">
@@ -365,17 +598,20 @@
                   </div>
                   <div class="accordion-item d-none" id="grades-item">
                     <h2 class="accordion-header">
-                      <button class="accordion-button collapsed gap-3" type="button"
-                              data-bs-toggle="collapse" data-bs-target="#grades-collapse"
-                              aria-expanded="false" aria-controls="grades-collapse">
-                        <span>Formal Grades</span>
+                      <button class="accordion-button collapsed gap-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#grades-collapse" aria-expanded="false" aria-controls="grades-collapse">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor"
+                          viewBox="0 0 16 16" aria-hidden="true">
+                          <path
+                            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                        </svg><span>Formal Grades</span>
                         <span id="grades-badge" class="badge"></span>
                       </button>
                     </h2>
                     <div id="grades-collapse" class="accordion-collapse collapse">
                       <div class="accordion-body">
-                        <div class="progress mb-2" role="progressbar" aria-label="Grade pass rate"
-                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress mb-2" role="progressbar" aria-label="Grade pass rate" aria-valuenow="0"
+                          aria-valuemin="0" aria-valuemax="100">
                           <div id="grades-progress" class="progress-bar"></div>
                         </div>
                         <p id="grades-summary" class="small text-secondary mb-2"></p>
@@ -391,12 +627,12 @@
         </div>
 
         <!-- Feedback rail (static on xl+, offcanvas-end below) -->
-        <aside class="fb-rail offcanvas-xl offcanvas-end" id="feedback-rail"
-               tabindex="-1" aria-labelledby="fb-rail-title">
+        <aside class="fb-rail offcanvas-xl offcanvas-end" id="feedback-rail" tabindex="-1"
+          aria-labelledby="fb-rail-title">
           <div class="offcanvas-header border-bottom d-xl-none">
             <h6 class="offcanvas-title">Your Review</h6>
-            <button class="btn-close" type="button" data-bs-dismiss="offcanvas"
-                    data-bs-target="#feedback-rail" aria-label="Close review panel"></button>
+            <button class="btn-close" type="button" data-bs-dismiss="offcanvas" data-bs-target="#feedback-rail"
+              aria-label="Close review panel"></button>
           </div>
           <div class="offcanvas-body scroll-pane p-3 bg-body-tertiary">
             <span id="fb-rail-title" class="visually-hidden">Your Review</span>
@@ -407,21 +643,36 @@
             <div class="eyebrow mb-2">Verdict</div>
             <div class="d-grid gap-2 verdict-stack mb-3" role="group" aria-label="Verdict">
               <input type="radio" class="btn-check" name="verdict" id="verdict-good" value="good" autocomplete="off">
-              <label class="btn btn-outline-success text-start" for="verdict-good"><span class="me-2" aria-hidden="true">✓</span>Looks good</label>
-              <input type="radio" class="btn-check" name="verdict" id="verdict-needs_work" value="needs_work" autocomplete="off">
-              <label class="btn btn-outline-danger text-start" for="verdict-needs_work"><span class="me-2" aria-hidden="true">✗</span>Needs work</label>
+              <label class="btn btn-outline-success text-start gap-2" for="verdict-good"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16"
+                  aria-hidden="true">
+                  <path
+                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                </svg>Looks good</label>
+              <input type="radio" class="btn-check" name="verdict" id="verdict-needs_work" value="needs_work"
+                autocomplete="off">
+              <label class="btn btn-outline-danger text-start gap-2" for="verdict-needs_work"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16"
+                  aria-hidden="true">
+                  <path
+                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
+                </svg>Needs work</label>
               <input type="radio" class="btn-check" name="verdict" id="verdict-skip" value="skip" autocomplete="off">
-              <label class="btn btn-outline-secondary text-start" for="verdict-skip"><span class="me-2" aria-hidden="true">→</span>Skip for now</label>
+              <label class="btn text-start gap-2" for="verdict-skip"><svg xmlns="http://www.w3.org/2000/svg" width="1.1em"
+                  height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                  <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8" />
+                </svg>Skip for now</label>
             </div>
 
             <div class="eyebrow mb-2">Notes</div>
             <textarea id="feedback" class="form-control mb-1" rows="6"
-              placeholder="What worked, what didn't… (optional)"
-              aria-label="Notes"
+              placeholder="What worked, what didn't… (optional)" aria-label="Notes"
               aria-describedby="feedback-status"></textarea>
             <div id="feedback-status" class="save-status small text-secondary mb-3" aria-live="polite"></div>
 
-            <div id="prev-feedback" class="p-2 ps-3 d-none border-start border-3 border-primary bg-body-secondary rounded-end">
+            <div id="prev-feedback"
+              class="p-2 ps-3 d-none border-start border-3 border-primary bg-body-secondary rounded-end">
               <div class="eyebrow mb-1">Previous feedback</div>
               <div id="prev-feedback-text" class="small"></div>
             </div>
@@ -447,7 +698,8 @@
           <h5 class="modal-title" id="done-modal-title">Review Complete</h5>
           <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</div>
+        <div class="modal-body">Your feedback has been saved. Go back to your Claude Code session and tell Claude you're
+          done reviewing.</div>
         <div class="modal-footer">
           <button class="btn btn-primary" type="button" data-bs-dismiss="modal">OK</button>
         </div>
@@ -457,8 +709,8 @@
 
   <!-- ============ Toast ============ -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="save-toast" class="toast align-items-center text-bg-success border-0" role="status"
-         aria-live="polite" aria-atomic="true">
+    <div id="save-toast" class="toast align-items-center text-bg-success border-0" role="status" aria-live="polite"
+      aria-atomic="true">
       <div class="toast-body">Saved</div>
     </div>
   </div>
@@ -467,993 +719,1000 @@
 
   <script src="../assets/bootstrap.bundle.min.js"></script>
   <script>
-  (() => {
-    "use strict";
+    (() => {
+      "use strict";
+
+      const _SVG_COPY = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/></svg>`;
+      const _SVG_DOWNLOAD = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/><path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/></svg>`;
+      const _SVG_CHEVRON_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/></svg>`;
+      const _SVG_CHEVRON_UP = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"/></svg>`;
+      const _SVG_BOX_UP_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg>`;
+      const _SVG_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/></svg>`;
+      const _SVG_X = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>`;
+      const _SVG_DOT = `<svg xmlns="http://www.w3.org/2000/svg" width="0.5em" height="0.5em" fill="currentColor" viewBox="6.5 6.5 3 3" aria-hidden="true"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/></svg>`;
+      function iconEl(svgStr) { const t = document.createElement("span"); t.innerHTML = svgStr; return t.firstElementChild; }
 
 
-    /*__EMBEDDED_DATA__*/
+      /*__EMBEDDED_DATA__*/
 
 
-    // ═══════════════════════════════════════════════════════════════
-    // DATA
-    // ═══════════════════════════════════════════════════════════════
-    const DATA = (typeof EMBEDDED_DATA !== "undefined") ? EMBEDDED_DATA : { skill_name: "", runs: [] };
-    const RUNS = DATA.runs || [];
-    const PREV_FB = DATA.previous_feedback || {};
-    const PREV_OUT = DATA.previous_outputs || {};
+      // ═══════════════════════════════════════════════════════════════
+      // DATA
+      // ═══════════════════════════════════════════════════════════════
+      const DATA = (typeof EMBEDDED_DATA !== "undefined") ? EMBEDDED_DATA : { skill_name: "", runs: [] };
+      const RUNS = DATA.runs || [];
+      const PREV_FB = DATA.previous_feedback || {};
+      const PREV_OUT = DATA.previous_outputs || {};
 
-    // ═══════════════════════════════════════════════════════════════
-    // STATE
-    // ═══════════════════════════════════════════════════════════════
-    const feedbackMap = {};   // run_id → feedback text
-    const verdictMap = {};    // run_id → "good" | "needs_work" | "skip"
-    const visited = new Set();
-    let currentIndex = 0;
-    let saveTimer = null;
+      // ═══════════════════════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════════════════════
+      const feedbackMap = {};   // run_id → feedback text
+      const verdictMap = {};    // run_id → "good" | "needs_work" | "skip"
+      const visited = new Set();
+      let currentIndex = 0;
+      let saveTimer = null;
 
-    const COLLAPSE_LINE_THRESHOLD = 30;
+      const COLLAPSE_LINE_THRESHOLD = 30;
 
-    // ═══════════════════════════════════════════════════════════════
-    // DOM UTILS
-    // el(tag, attrs, children): attrs supports class, text (textContent, safe),
-    // on<event> handlers, and any other key as an attribute.
-    // Children may be nodes or strings.
-    // ═══════════════════════════════════════════════════════════════
-    function el(tag, attrs = {}, children = []) {
-      const node = document.createElement(tag);
-      for (const [k, v] of Object.entries(attrs)) {
-        if (v == null) continue;
-        if (k === "class") node.className = v;
-        else if (k === "text") node.textContent = v;
-        else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
-        else node.setAttribute(k, v);
+      // ═══════════════════════════════════════════════════════════════
+      // DOM UTILS
+      // el(tag, attrs, children): attrs supports class, text (textContent, safe),
+      // on<event> handlers, and any other key as an attribute.
+      // Children may be nodes or strings.
+      // ═══════════════════════════════════════════════════════════════
+      function el(tag, attrs = {}, children = []) {
+        const node = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs)) {
+          if (v == null) continue;
+          if (k === "class") node.className = v;
+          else if (k === "text") node.textContent = v;
+          else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
+          else node.setAttribute(k, v);
+        }
+        for (const c of [].concat(children)) {
+          if (c == null) continue;
+          node.append(c.nodeType ? c : document.createTextNode(c));
+        }
+        return node;
       }
-      for (const c of [].concat(children)) {
-        if (c == null) continue;
-        node.append(c.nodeType ? c : document.createTextNode(c));
+      const $ = (id) => document.getElementById(id);
+
+      // ═══════════════════════════════════════════════════════════════
+      // CONFIG UTILS
+      // ═══════════════════════════════════════════════════════════════
+      const BASELINE_CONFIGS = new Set(["without_skill", "old_skill"]);
+
+      function isBaselineCfg(cfg) { return BASELINE_CONFIGS.has(cfg); }
+
+      function detectConfig(runOrId) {
+        const isRun = runOrId && typeof runOrId === "object";
+        const explicit = isRun ? runOrId.configuration : null;
+        if (explicit) {
+          return { config: explicit, label: explicit.replace(/_/g, " "), baseline: isBaselineCfg(explicit) };
+        }
+        const id = isRun ? (runOrId.id || "") : (runOrId || "");
+        const m = id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+        if (!m) return null;
+        const config = m[1];
+        return { config, label: config.replace(/_/g, " "), baseline: isBaselineCfg(config) };
       }
-      return node;
-    }
-    const $ = (id) => document.getElementById(id);
 
-    // ═══════════════════════════════════════════════════════════════
-    // CONFIG UTILS
-    // ═══════════════════════════════════════════════════════════════
-    const BASELINE_CONFIGS = new Set(["without_skill", "old_skill"]);
-
-    function isBaselineCfg(cfg) { return BASELINE_CONFIGS.has(cfg); }
-
-    function detectConfig(runOrId) {
-      const isRun = runOrId && typeof runOrId === "object";
-      const explicit = isRun ? runOrId.configuration : null;
-      if (explicit) {
-        return { config: explicit, label: explicit.replace(/_/g, " "), baseline: isBaselineCfg(explicit) };
+      function downloadUri(file) {
+        if (file.data_uri) return file.data_uri;
+        if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+        if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content || "");
+        if (file.type === "html") return "data:text/html;charset=utf-8," + encodeURIComponent(file.content || "");
+        if (file.type === "image_url") return file.src;
+        return "#";
       }
-      const id = isRun ? (runOrId.id || "") : (runOrId || "");
-      const m = id.match(/(with_skill|without_skill|new_skill|old_skill)/);
-      if (!m) return null;
-      const config = m[1];
-      return { config, label: config.replace(/_/g, " "), baseline: isBaselineCfg(config) };
-    }
 
-    function downloadUri(file) {
-      if (file.data_uri) return file.data_uri;
-      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
-      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content || "");
-      if (file.type === "html") return "data:text/html;charset=utf-8," + encodeURIComponent(file.content || "");
-      if (file.type === "image_url") return file.src;
-      return "#";
-    }
+      function titleCase(s) {
+        return (s || "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      }
 
-    function titleCase(s) {
-      return (s || "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-    }
+      function evalTitle(run) {
+        return run.eval_id != null ? `Eval ${run.eval_id}` : run.id;
+      }
 
-    function evalTitle(run) {
-      return run.eval_id != null ? `Eval ${run.eval_id}` : run.id;
-    }
+      function gradePct(run) {
+        const s = run.grading && run.grading.summary;
+        return (s && s.pass_rate != null) ? Math.round(s.pass_rate * 100) : null;
+      }
 
-    function gradePct(run) {
-      const s = run.grading && run.grading.summary;
-      return (s && s.pass_rate != null) ? Math.round(s.pass_rate * 100) : null;
-    }
+      // ═══════════════════════════════════════════════════════════════
+      // COLOR HELPERS
+      // Pass-rate → Bootstrap class mapping. Thresholds (80% / 50%) are
+      // defined once here so all badge, bar, and text uses stay in sync.
+      // ═══════════════════════════════════════════════════════════════
+      function passBadgeClass(pct) {   // → text-bg-* for badges
+        if (pct == null) return "text-bg-secondary";
+        return pct >= 80 ? "text-bg-success" : pct < 50 ? "text-bg-danger" : "text-bg-warning";
+      }
+      function passBarClass(pct) {     // → bg-* for progress bars
+        if (pct == null) return "bg-secondary";
+        return pct >= 80 ? "bg-success" : pct < 50 ? "bg-danger" : "bg-warning";
+      }
+      function passTextClass(pct) {    // → text-* for inline text
+        if (pct == null) return "text-secondary";
+        return pct >= 80 ? "text-success" : pct < 50 ? "text-danger" : "text-warning";
+      }
 
-    // ═══════════════════════════════════════════════════════════════
-    // COLOR HELPERS
-    // Pass-rate → Bootstrap class mapping. Thresholds (80% / 50%) are
-    // defined once here so all badge, bar, and text uses stay in sync.
-    // ═══════════════════════════════════════════════════════════════
-    function passBadgeClass(pct) {   // → text-bg-* for badges
-      if (pct == null) return "text-bg-secondary";
-      return pct >= 80 ? "text-bg-success" : pct < 50 ? "text-bg-danger" : "text-bg-warning";
-    }
-    function passBarClass(pct) {     // → bg-* for progress bars
-      if (pct == null) return "bg-secondary";
-      return pct >= 80 ? "bg-success" : pct < 50 ? "bg-danger" : "bg-warning";
-    }
-    function passTextClass(pct) {    // → text-* for inline text
-      if (pct == null) return "text-secondary";
-      return pct >= 80 ? "text-success" : pct < 50 ? "text-danger" : "text-warning";
-    }
+      // ═══════════════════════════════════════════════════════════════
+      // FEEDBACK UTILS
+      // ═══════════════════════════════════════════════════════════════
 
-    // ═══════════════════════════════════════════════════════════════
-    // FEEDBACK UTILS
-    // ═══════════════════════════════════════════════════════════════
+      function setFeedbackStatus(msg, variant = "secondary") {
+        const st = $("feedback-status");
+        st.innerHTML = msg;
+        st.className = `save-status small text-${variant} mb-3`;
+      }
 
-    function setFeedbackStatus(msg, variant = "secondary") {
-      const st = $("feedback-status");
-      st.textContent = msg;
-      st.className = `save-status small text-${variant} mb-3`;
-    }
+      function buildReviewEntry(run_id, ts = new Date().toISOString()) {
+        return { run_id, feedback: feedbackMap[run_id] || "", verdict: verdictMap[run_id] || "", timestamp: ts };
+      }
 
-    function buildReviewEntry(run_id, ts = new Date().toISOString()) {
-      return { run_id, feedback: feedbackMap[run_id] || "", verdict: verdictMap[run_id] || "", timestamp: ts };
-    }
+      // Syncs the feedback textarea into feedbackMap for the current run.
+      function flushCurrentFeedback() {
+        const run = RUNS[currentIndex];
+        if (!run) return;
+        const text = $("feedback").value;
+        if (text.trim()) feedbackMap[run.id] = text; else delete feedbackMap[run.id];
+      }
 
-    // Syncs the feedback textarea into feedbackMap for the current run.
-    function flushCurrentFeedback() {
-      const run = RUNS[currentIndex];
-      if (!run) return;
-      const text = $("feedback").value;
-      if (text.trim()) feedbackMap[run.id] = text; else delete feedbackMap[run.id];
-    }
+      // ═══════════════════════════════════════════════════════════════
+      // COPY HELPER
+      // ═══════════════════════════════════════════════════════════════
+      function announceToSR(msg) {
+        const region = $("sr-announcer");
+        region.textContent = "";
+        requestAnimationFrame(() => { region.textContent = msg; });
+      }
 
-    // ═══════════════════════════════════════════════════════════════
-    // COPY HELPER
-    // ═══════════════════════════════════════════════════════════════
-    function announceToSR(msg) {
-      const region = $("sr-announcer");
-      region.textContent = "";
-      requestAnimationFrame(() => { region.textContent = msg; });
-    }
+      function _flashTooltip(btn, title) {
+        const existing = bootstrap.Tooltip.getInstance(btn);
+        if (existing) existing.dispose();
+        const tip = new bootstrap.Tooltip(btn, { title, trigger: "manual", placement: "top" });
+        tip.show();
+        setTimeout(() => { tip.hide(); setTimeout(() => tip.dispose(), 200); }, 1500);
+      }
 
-    function copyText(text, btn) {
-      navigator.clipboard.writeText(text).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = "Copied!";
-        btn.classList.replace("btn-outline-secondary", "btn-success");
-        btn.classList.add("copied");
-        announceToSR("Copied to clipboard");
-        setTimeout(() => {
-          btn.textContent = orig;
-          btn.classList.replace("btn-success", "btn-outline-secondary");
-          btn.classList.remove("copied");
-        }, 1800);
-      }).catch(() => {
-        const orig = btn.textContent;
-        btn.textContent = "Failed";
-        setTimeout(() => { btn.textContent = orig; }, 1500);
-      });
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // SIDEBAR
-    // ═══════════════════════════════════════════════════════════════
-    function verdictDotClass(runId) {
-      const v = verdictMap[runId];
-      return v === "good" ? "v-good" : v === "needs_work" ? "v-bad" : "v-none";
-    }
-
-    function makeSidebarItem(run, i, isChild) {
-      const cfg = detectConfig(run);
-      const pct = gradePct(run);
-      // In grouped mode the config name IS the label; in flat mode show "Eval N"
-      const labelText = isChild ? (cfg ? cfg.label : evalTitle(run)) : evalTitle(run);
-      const dot = el("span", {
-        class: "run-dot " + verdictDotClass(run.id),
-        "data-dot": run.id,
-        title: "Your review state",
-        "aria-label": "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"),
-      });
-      const badges = el("span", { class: "d-flex align-items-center gap-1 flex-shrink-0 ms-auto" }, [
-        !isChild && cfg ? el("span", {
-          class: "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with"),
-          text: cfg.label,
-        }) : null,
-        pct == null ? null : el("span", {
-          class: "badge rounded-pill " + passBadgeClass(pct),
-          text: pct + "%",
-        }),
-      ]);
-      return el("button", {
-        class: "list-group-item list-group-item-action d-flex align-items-center gap-2" + (cfg && cfg.baseline ? " is-baseline" : ""),
-        type: "button",
-        "data-index": String(i),
-        onclick: () => { clearTimeout(saveTimer); saveFeedback(false); showRun(i); closeSidebarOnMobile(); },
-      }, [dot, el("span", { class: "text-truncate small flex-grow-1", text: labelText }), badges]);
-    }
-
-    function buildSidebar() {
-      const list = $("eval-list");
-      list.replaceChildren();
-
-      // Group by eval_id when multiple runs share the same eval_id
-      const seenEvalIds = new Set();
-      const grouped = RUNS.some((r) => {
-        if (r.eval_id == null) return false;
-        if (seenEvalIds.has(r.eval_id)) return true;
-        seenEvalIds.add(r.eval_id);
-        return false;
-      });
-
-      if (grouped) {
-        const groups = new Map();
-        RUNS.forEach((run, i) => {
-          const gid = run.eval_id != null ? run.eval_id : "_";
-          if (!groups.has(gid)) groups.set(gid, []);
-          groups.get(gid).push({ run, i });
+      function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+          announceToSR("Copied to clipboard");
+          _flashTooltip(btn, "Copied!");
+        }).catch(() => {
+          _flashTooltip(btn, "Copy failed");
         });
-        let first = true;
-        for (const [gid, items] of groups) {
-          const head = el("div", {
-            class: "sidebar-group-head" + (first ? "" : " sidebar-group-sep"),
-            text: gid === "_" ? "Other" : `Eval ${gid}`,
-          });
-          list.append(head);
-          first = false;
-          items.forEach(({ run, i }) => list.append(makeSidebarItem(run, i, true)));
-        }
-      } else {
-        RUNS.forEach((run, i) => list.append(makeSidebarItem(run, i, false)));
-      }
-    }
-
-    function setActiveSidebar(i) {
-      $("eval-list").querySelectorAll("[data-index]").forEach((b) => {
-        const active = +b.dataset.index === i;
-        b.classList.toggle("active", active);
-        if (active) b.setAttribute("aria-current", "true");
-        else b.removeAttribute("aria-current");
-        if (active) b.scrollIntoView({ block: "nearest" });
-      });
-    }
-
-    function closeSidebarOnMobile() {
-      const inst = window.bootstrap && bootstrap.Offcanvas.getInstance($("sidebar"));
-      if (inst) inst.hide();
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // EVAL DETAIL
-    // ═══════════════════════════════════════════════════════════════
-    function showRun(index) {
-      const run = RUNS[index];
-      if (!run) return;
-      currentIndex = index;
-      setActiveSidebar(index);
-
-      $("no-eval-state").classList.add("d-none");
-      const content = $("eval-content");
-      content.classList.remove("d-none");
-      content.classList.remove("eval-fade");
-      void content.offsetWidth;
-      content.classList.add("eval-fade");
-
-      const cfg = detectConfig(run);
-      $("current-config-label").textContent = evalTitle(run);
-      $("prompt-text").textContent = run.prompt || "(No prompt found)";
-
-      const badge = $("config-badge");
-      if (cfg) {
-        badge.className = "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with");
-        badge.textContent = cfg.label;
-      } else {
-        badge.className = "cfg-chip d-none";
-        badge.textContent = "";
       }
 
-      renderOutputs($("outputs-body"), run.outputs || []);
-      renderPrevOutputs(run);
-      renderGrades(run);
-      renderPrevFeedback(run);
-      const pct = gradePct(run);
-      const rgb = $("rail-grade-badge");
-      if (pct == null) {
-        rgb.className = "badge rounded-pill d-none";
-        rgb.textContent = "";
-      } else {
-        rgb.className = "badge rounded-pill " + passBadgeClass(pct);
-        rgb.textContent = "Grade " + pct + "%";
+      // ═══════════════════════════════════════════════════════════════
+      // SIDEBAR
+      // ═══════════════════════════════════════════════════════════════
+      function verdictDotClass(runId) {
+        const v = verdictMap[runId];
+        return v === "good" ? "v-good" : v === "needs_work" ? "v-bad" : "v-none";
       }
 
-      // Restore saved verdict for this run
-      const v = verdictMap[run.id] || "";
-      ["good", "needs_work", "skip"].forEach((k) => {
-        const r = $("verdict-" + k);
-        if (r) r.checked = (k === v);
-      });
-
-      $("feedback").value = feedbackMap[run.id] || "";
-      $("feedback-status").textContent = "";
-
-      visited.add(index);
-      updateNav();
-      $("main-scroll").scrollTop = 0;
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // FILE RENDERING
-    // ═══════════════════════════════════════════════════════════════
-
-    // SheetJS — load on demand (only when an xlsx file type is encountered)
-    const XLSX_CDN = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
-    const XLSX_SRI = "sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT";
-    let _xlsxPromise = null;
-
-    function loadXlsx() {
-      if (typeof XLSX !== "undefined") return Promise.resolve(XLSX);
-      if (_xlsxPromise) return _xlsxPromise;
-      _xlsxPromise = new Promise((resolve, reject) => {
-        const s = document.createElement("script");
-        s.src = XLSX_CDN;
-        s.integrity = XLSX_SRI;
-        s.crossOrigin = "anonymous";
-        s.onload = () => resolve(XLSX);
-        s.onerror = () => { _xlsxPromise = null; reject(new Error("SheetJS load failed")); };
-        document.head.appendChild(s);
-      });
-      return _xlsxPromise;
-    }
-
-    // Raw file content. Pass includeActions=true to overlay Copy+Download
-    // in the top-right corner of text blocks (used for multi-file tab panes).
-    // fileCard() handles its own actions in the card-header instead.
-    function buildFileContentInto(container, file, includeActions) {
-      if (file.type === "image_url") {
-        const imgWrap = el("div", { class: "bg-body-secondary rounded p-2" });
-        const thumb = el("img", { alt: file.name, class: "img-fluid d-block img-thumb" });
-        thumb.src = file.src;
-        imgWrap.append(
-          thumb,
-          el("a", { href: file.src, target: "_blank", rel: "noopener noreferrer", class: "small mt-2 d-inline-block", text: "Open full size ↗" })
-        );
-        container.append(imgWrap);
-      } else if (file.type === "html") {
-        const frame = el("iframe", { class: "pdf-frame w-100 border-0", sandbox: "allow-scripts", title: "HTML output preview" });
-        frame.srcdoc = file.content;
-        container.append(frame);
-      } else if (file.type === "text") {
-        const lines = (file.content || "").split("\n").length;
-        const pre = el("pre", { class: "output-text p-3 small lh-base overflow-auto", text: file.content });
-        const wrap = el("div", { class: "position-relative" });
-        if (includeActions) {
-          const btnGroup = el("div", { class: "position-absolute top-0 end-0 m-2 d-flex gap-1" });
-          btnGroup.append(
-            el("button", {
-              class: "btn btn-outline-secondary btn-sm",
-              type: "button", text: "Copy",
-              "aria-label": "Copy " + file.name,
-              onclick: (e) => copyText(file.content, e.currentTarget),
-            }),
-            el("a", {
-              class: "btn btn-outline-secondary btn-sm",
-              href: downloadUri(file), download: file.name,
-              title: "Download " + file.name, "aria-label": "Download " + file.name,
-              text: "↓",
-            })
-          );
-          wrap.append(btnGroup);
-        }
-        if (lines > COLLAPSE_LINE_THRESHOLD) {
-          pre.classList.add("output-collapsed");
-          const expandBtn = el("button", {
-            class: "btn btn-link small d-block w-100 text-center py-1 mt-1",
-            type: "button",
-            text: `▼ Show all ${lines} lines`,
-            "aria-expanded": "false",
-            onclick: (e) => {
-              const btn = e.currentTarget;
-              const isCollapsed = pre.classList.toggle("output-collapsed");
-              btn.textContent = isCollapsed ? `▼ Show all ${lines} lines` : "▲ Collapse";
-              btn.setAttribute("aria-expanded", String(!isCollapsed));
-            },
-          });
-          wrap.append(pre, expandBtn);
-        } else {
-          wrap.append(pre);
-        }
-        container.append(wrap);
-      } else if (file.type === "image") {
-        container.append(el("img", { class: "img-fluid", src: file.data_uri, alt: file.name }));
-      } else if (file.type === "pdf") {
-        container.append(el("iframe", { class: "pdf-frame w-100 border-0", src: file.data_uri }));
-      } else if (file.type === "xlsx") {
-        renderXlsx(container, file);
-      } else if (file.type === "binary") {
-        container.append(el("a", { class: "btn btn-outline-secondary", href: file.data_uri, download: file.name, text: "Download " + file.name }));
-      } else if (file.type === "error") {
-        container.append(el("pre", { class: "output-text text-danger mb-0", text: file.content }));
-      }
-    }
-
-    // Single-file card: filename in card-header + Copy + Download; no floating buttons.
-    function fileCard(file) {
-      const body = el("div", { class: "card-body p-0" });
-      buildFileContentInto(body, file, false);
-      const actions = [];
-      if (file.type === "text" && file.content != null) {
-        actions.push(el("button", {
-          class: "btn btn-outline-secondary btn-sm",
-          type: "button", text: "Copy",
-          "aria-label": "Copy " + file.name,
-          onclick: (e) => copyText(file.content, e.currentTarget),
-        }));
-      }
-      if (file.type !== "error") {
-        actions.push(el("a", {
-          class: "btn btn-outline-secondary btn-sm",
-          href: downloadUri(file), download: file.name,
-          title: "Download " + file.name, text: "↓",
-        }));
-      }
-      const header = el("div", { class: "file-header d-flex align-items-center justify-content-between gap-3 px-3 py-2 border-bottom" }, [
-        el("span", { class: "font-monospace file-name text-body-emphasis text-truncate", text: file.name }),
-        actions.length ? el("div", { class: "d-flex gap-2 flex-shrink-0" }, actions) : null,
-      ]);
-      return el("div", { class: "card mb-3 overflow-hidden" }, [header, body]);
-    }
-
-    function renderOutputs(container, outputs) {
-      container.replaceChildren();
-      if (!outputs.length) {
-        container.append(el("div", { class: "text-secondary fst-italic p-3 text-center", text: "No output files" }));
-        return;
-      }
-
-      if (outputs.length === 1) {
-        container.append(fileCard(outputs[0]));
-        return;
-      }
-
-      // Multi-file: same card structure as single-file.
-      // File switcher lives in the header bar alongside Copy + Download.
-      // No nav-tabs — consistent visual language in all cases.
-      let activeFile = outputs[0];
-
-      const copyBtn = el("button", {
-        class: "btn btn-outline-secondary btn-sm",
-        type: "button",
-        text: "Copy",
-      });
-      copyBtn.addEventListener("click", (e) => {
-        if (activeFile.content != null) copyText(activeFile.content, e.currentTarget);
-      });
-
-      const dlBtn = el("a", {
-        class: "btn btn-outline-secondary btn-sm",
-        href: downloadUri(activeFile),
-        download: activeFile.name,
-        title: "Download " + activeFile.name,
-        text: "↓",
-      });
-
-      // Content panels — all rendered, only active shown
-      const panels = outputs.map((f, i) => {
-        const panel = el("div", { class: i === 0 ? "" : "d-none" });
-        buildFileContentInto(panel, f, false);
-        return panel;
-      });
-
-      // Switcher buttons — same font/size as the filename in fileCard
-      let switchBtns;
-      switchBtns = outputs.map((f, i) => {
-        const btn = el("button", {
-          class: "file-switch-btn" + (i === 0 ? " is-active" : ""),
+      function makeSidebarItem(run, i, isChild) {
+        const cfg = detectConfig(run);
+        const pct = gradePct(run);
+        // In grouped mode the config name IS the label; in flat mode show "Eval N"
+        const labelText = isChild ? (cfg ? cfg.label : evalTitle(run)) : evalTitle(run);
+        const dot = el("span", {
+          class: "run-dot " + verdictDotClass(run.id),
+          "data-dot": run.id,
+          title: "Your review state",
+          "aria-label": "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"),
+        });
+        const badges = el("span", { class: "d-flex align-items-center gap-1 flex-shrink-0 ms-auto" }, [
+          !isChild && cfg ? el("span", {
+            class: "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with"),
+          }, [iconEl(_SVG_DOT), cfg.label]) : null,
+          pct == null ? null : el("span", {
+            class: "badge rounded-pill " + passBadgeClass(pct),
+            text: pct + "%",
+          }),
+        ]);
+        return el("button", {
+          class: "list-group-item list-group-item-action d-flex align-items-center gap-2" + (cfg && cfg.baseline ? " is-baseline" : ""),
           type: "button",
-          text: f.name,
-          title: f.name,
-          "aria-pressed": i === 0 ? "true" : "false",
+          "data-index": String(i),
+          onclick: () => { clearTimeout(saveTimer); saveFeedback(false); showRun(i); closeSidebarOnMobile(); },
+        }, [dot, el("span", { class: "text-truncate small flex-grow-1", text: labelText }), badges]);
+      }
+
+      function buildSidebar() {
+        const list = $("eval-list");
+        list.replaceChildren();
+
+        // Group by eval_id when multiple runs share the same eval_id
+        const seenEvalIds = new Set();
+        const grouped = RUNS.some((r) => {
+          if (r.eval_id == null) return false;
+          if (seenEvalIds.has(r.eval_id)) return true;
+          seenEvalIds.add(r.eval_id);
+          return false;
         });
-        btn.addEventListener("click", () => {
-          switchBtns.forEach((b, j) => {
-            b.classList.toggle("is-active", j === i);
-            b.setAttribute("aria-pressed", String(j === i));
+
+        if (grouped) {
+          const groups = new Map();
+          RUNS.forEach((run, i) => {
+            const gid = run.eval_id != null ? run.eval_id : "_";
+            if (!groups.has(gid)) groups.set(gid, []);
+            groups.get(gid).push({ run, i });
           });
-          panels.forEach((p, j) => p.classList.toggle("d-none", j !== i));
-          activeFile = f;
-          dlBtn.href = downloadUri(f);
-          dlBtn.download = f.name;
-          dlBtn.title = "Download " + f.name;
-          copyBtn.style.display = f.type === "text" ? "" : "none";
-        });
-        return btn;
-      });
-
-      if (activeFile.type !== "text") copyBtn.style.display = "none";
-
-      const header = el("div", { class: "file-header d-flex align-items-center gap-3 px-3 py-2 border-bottom" }, [
-        el("div", { class: "d-flex gap-3 flex-grow-1 min-width-0 overflow-hidden" }, switchBtns),
-        el("div", { class: "d-flex gap-2 flex-shrink-0" }, [copyBtn, dlBtn]),
-      ]);
-
-      const card = el("div", { class: "card mb-3 overflow-hidden" });
-      card.append(header);
-      panels.forEach((p) => card.append(p));
-      container.append(card);
-    }
-
-    function sanitizeXlsxWrap(wrap) {
-      wrap.querySelectorAll("*").forEach((node) => {
-        [...node.attributes].forEach((attr) => {
-          if (/^on/i.test(attr.name)) node.removeAttribute(attr.name);
-          if (attr.name === "href" && /^javascript:/i.test(attr.value)) node.removeAttribute(attr.name);
-        });
-        if (node.tagName === "SCRIPT") node.remove();
-      });
-    }
-
-    function renderXlsx(container, file) {
-      const placeholder = el("div", { class: "text-secondary small p-2 fst-italic", text: "Loading spreadsheet…" });
-      container.append(placeholder);
-
-      loadXlsx().then((XLSXLib) => {
-        placeholder.remove();
-        try {
-          const raw = Uint8Array.from(atob(file.data_b64), (c) => c.charCodeAt(0));
-          const wb = XLSXLib.read(raw, { type: "array" });
-          const theme = document.documentElement.getAttribute("data-bs-theme");
-          const theadClass = theme === "dark" ? "table-dark" : "table-light";
-
-          wb.SheetNames.forEach((name) => {
-            if (wb.SheetNames.length > 1) {
-              container.append(el("div", { class: "fw-semibold small text-secondary mt-2", text: "Sheet: " + name }));
-            }
-            const html = XLSXLib.utils.sheet_to_html(wb.Sheets[name]);
-            const wrap = el("div", { class: "table-responsive" });
-            wrap.innerHTML = html;
-            sanitizeXlsxWrap(wrap);
-            wrap.querySelectorAll("table").forEach((t) => {
-              t.classList.add("table", "table-hover", "table-sm", "table-striped", "table-bordered", "align-middle");
-              const thead = t.querySelector("thead");
-              if (thead) thead.classList.add(theadClass);
+          let first = true;
+          for (const [gid, items] of groups) {
+            const head = el("div", {
+              class: "sidebar-group-head" + (first ? "" : " sidebar-group-sep"),
+              text: gid === "_" ? "Other" : `Eval ${gid}`,
             });
-            container.append(wrap);
-          });
-        } catch (err) {
-          container.append(el("div", { class: "text-danger", text: "Error rendering spreadsheet: " + err.message }));
+            list.append(head);
+            first = false;
+            items.forEach(({ run, i }) => list.append(makeSidebarItem(run, i, true)));
+          }
+        } else {
+          RUNS.forEach((run, i) => list.append(makeSidebarItem(run, i, false)));
         }
-      }).catch(() => {
-        placeholder.remove();
-        container.append(el("a", {
-          class: "btn btn-outline-secondary",
-          href: downloadUri(file), download: file.name,
-          text: "Download " + file.name + " (spreadsheet preview unavailable offline)",
-        }));
-      });
-    }
-
-    function renderPrevOutputs(run) {
-      const item = $("prev-outputs-item");
-      const body = $("prev-outputs-body");
-      const prev = PREV_OUT[run.id];
-      if (!prev || !prev.length) { item.classList.add("d-none"); return; }
-      item.classList.remove("d-none");
-      body.replaceChildren();
-      prev.forEach((f) => body.append(fileCard(f)));
-    }
-
-    function renderGrades(run) {
-      const item = $("grades-item");
-      if (!run.grading) { item.classList.add("d-none"); return; }
-      item.classList.remove("d-none");
-
-      const g = run.grading, s = g.summary || {}, exps = g.expectations || [];
-      const pct = s.pass_rate != null ? Math.round(s.pass_rate * 100) : null;
-      const progressPct = pct ?? 0;
-
-      const badge = $("grades-badge");
-      badge.className = "badge rounded-pill " + passBadgeClass(pct);
-      badge.textContent = pct == null ? "?" : pct + "%";
-
-      const bar = $("grades-progress");
-      bar.style.width = progressPct + "%";
-      bar.className = "progress-bar " + passBarClass(pct);
-      bar.closest("[role='progressbar']").setAttribute("aria-valuenow", progressPct);
-
-      $("grades-summary").textContent = `${s.passed || 0} passed, ${s.failed || 0} failed of ${s.total || 0}`;
-
-      const list = $("grades-list");
-      list.className = "";
-      list.replaceChildren();
-      exps.forEach((e) => {
-        list.append(el("div", { class: "d-flex gap-2 py-2 border-bottom" }, [
-          el("span", { class: "fw-bold flex-shrink-0 " + (e.passed ? "text-success" : "text-danger"), text: e.passed ? "✓" : "✗" }),
-          el("div", {}, [
-            el("span", { class: "small", text: e.text }),
-            e.evidence ? el("div", { class: "text-secondary small mt-1", text: e.evidence }) : null,
-          ]),
-        ]));
-      });
-    }
-
-    function renderPrevFeedback(run) {
-      const box = $("prev-feedback");
-      const txt = PREV_FB[run.id];
-      if (txt) {
-        $("prev-feedback-text").textContent = txt;
-        box.classList.remove("d-none");
-      } else {
-        box.classList.add("d-none");
       }
-    }
 
-    // ═══════════════════════════════════════════════════════════════
-    // BENCHMARK
-    // ═══════════════════════════════════════════════════════════════
-    function fmtStat(stat, pct) {
-      if (!stat || stat.mean == null || stat.stddev == null) return "—";
-      const u = pct ? "%" : "";
-      const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
-      const sd = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
-      return `${m}${u} ± ${sd}${u}`;
-    }
-
-    function deltaClass(v) {
-      const n = parseFloat(v);
-      if (!v || isNaN(n)) return "";
-      return n > 0 ? "text-success" : n < 0 ? "text-danger" : "";
-    }
-
-    // Formats a raw proportion delta as percentage-points string, e.g. 0.74 → "+74pp"
-    function fmtDeltaPp(v) {
-      if (v == null) return "—";
-      const n = parseFloat(v);
-      if (isNaN(n)) return String(v);
-      const pp = Math.round(n * 100);
-      return (n > 0 ? "+" : "") + pp + "pp";
-    }
-
-    function makeStatCard(valueEl, label, contextText, highlightClass) {
-      return el("div", { class: "col-sm-6 col-lg-4" }, [
-        el("div", { class: "card bg-body-tertiary h-100 " + (highlightClass || "") }, [
-          el("div", { class: "card-body text-center py-4" }, [
-            valueEl,
-            el("div", { class: "eyebrow mt-2", text: label }),
-            contextText ? el("div", { class: "small text-secondary mt-1", text: contextText }) : null,
-          ]),
-        ]),
-      ]);
-    }
-
-    // Appends a numeric delta stat card (time, tokens) to heroRow.
-    // Pass rate uses a custom card because it has unique color logic.
-    function appendNumericStatCard(heroRow, aData, bData, deltaRaw, label, suffix, ca, cb) {
-      if (!aData && !bData) return;
-      const deltaN = deltaRaw != null ? parseFloat(deltaRaw) : NaN;
-      const sign = !isNaN(deltaN) && deltaN > 0 ? "+" : "";
-      const valueText = deltaRaw != null ? sign + deltaRaw + suffix : "—";
-      heroRow.append(makeStatCard(
-        el("div", { class: "hero-delta-value text-body-emphasis", text: valueText }),
-        label,
-        ca && cb ? `${titleCase(ca)}: ${fmtStat(aData, false)}  ·  ${titleCase(cb)}: ${fmtStat(bData, false)}` : null,
-        ""
-      ));
-    }
-
-    function renderBenchmark() {
-      const d = DATA.benchmark;
-      if (!d) return;
-      const c = $("benchmark-content");
-      c.replaceChildren();
-
-      const summary = d.run_summary || {}, meta = d.metadata || {}, notes = d.notes || [];
-      c.append(el("h2", { class: "h4 mt-3 mb-1", text: "Benchmark Results" }));
-      const metaBits = [
-        meta.skill_name, meta.timestamp,
-        meta.evals_run ? "Evals: " + meta.evals_run.join(", ") : null,
-        (meta.runs_per_configuration || "?") + " runs/config",
-      ].filter(Boolean).join(" · ");
-      c.append(el("p", { class: "text-secondary small mb-3", text: metaBits }));
-
-      const configs = Object.keys(summary).filter((k) => k !== "delta");
-      const ca = configs[0], cb = configs[1];
-      const a = summary[ca] || {}, b = summary[cb] || {}, delta = summary.delta || {};
-
-      // ── Hero stat cards ──
-      const heroRow = el("div", { class: "row g-3 mb-4" });
-
-      // Pass Rate: custom card — colored value, uses fmtDeltaPp, highlights border on win
-      const prDeltaRaw = delta.pass_rate;
-      const prDeltaN = prDeltaRaw != null ? parseFloat(prDeltaRaw) : NaN;
-      const prA = a.pass_rate?.mean != null ? Math.round(a.pass_rate.mean * 100) + "%" : "—";
-      const prB = b.pass_rate?.mean != null ? Math.round(b.pass_rate.mean * 100) + "%" : "—";
-      const prValueCls = !isNaN(prDeltaN)
-        ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "text-body-emphasis")
-        : "text-body-emphasis";
-      heroRow.append(makeStatCard(
-        el("div", { class: "hero-delta-value " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
-        "Pass Rate Delta",
-        ca && cb ? `${titleCase(ca)}: ${prA}  ·  ${titleCase(cb)}: ${prB}` : null,
-        !isNaN(prDeltaN) && prDeltaN > 0 ? "stat-hero-win" : ""
-      ));
-
-      appendNumericStatCard(heroRow, a.time_seconds, b.time_seconds, delta.time_seconds, "Time Delta (s)", "s", ca, cb);
-      appendNumericStatCard(heroRow, a.tokens, b.tokens, delta.tokens, "Token Delta", "", ca, cb);
-
-      c.append(heroRow);
-
-      // ── Detail metrics table ──
-      const rows = [["Pass Rate", fmtStat(a.pass_rate, true), fmtStat(b.pass_rate, true), delta.pass_rate != null ? fmtDeltaPp(delta.pass_rate) : null]];
-      if (a.time_seconds || b.time_seconds) {
-        rows.push(["Time (s)", fmtStat(a.time_seconds, false), fmtStat(b.time_seconds, false), delta.time_seconds ? delta.time_seconds + "s" : null]);
+      function setActiveSidebar(i) {
+        $("eval-list").querySelectorAll("[data-index]").forEach((b) => {
+          const active = +b.dataset.index === i;
+          b.classList.toggle("active", active);
+          if (active) b.setAttribute("aria-current", "true");
+          else b.removeAttribute("aria-current");
+          if (active) b.scrollIntoView({ block: "nearest" });
+        });
       }
-      if (a.tokens || b.tokens) {
-        rows.push(["Tokens", fmtStat(a.tokens, false), fmtStat(b.tokens, false), delta.tokens != null ? String(delta.tokens) : null]);
+
+      function closeSidebarOnMobile() {
+        const inst = window.bootstrap && bootstrap.Offcanvas.getInstance($("sidebar"));
+        if (inst) inst.hide();
       }
-      const tbody = el("tbody", { class: "table-group-divider" }, rows.map((r) => el("tr", {}, [
-        el("td", {}, [el("strong", { text: r[0] })]),
-        el("td", { class: "text-secondary num", text: r[1] }),
-        el("td", { class: "text-secondary num", text: r[2] }),
-        el("td", { class: "bm-delta text-end " + deltaClass(r[3]), text: r[3] || "—" }),
-      ])));
-      const summaryWrap = el("div", { class: "table-responsive mb-4" });
-      summaryWrap.append(el("table", { class: "table align-middle" }, [
-      el("thead", {}, [el("tr", {}, [
-          el("th", { class: "text-secondary", text: "Metric" }),
-          el("th", { class: "text-secondary", text: titleCase(ca || "A") }),
-          el("th", { class: "text-secondary", text: titleCase(cb || "B") }),
-          el("th", { class: "text-secondary text-end", text: "Delta" }),
-        ])]),
-        tbody,
-      ]));
-      c.append(summaryWrap);
 
-      renderBenchmarkPerEval(c, d);
+      // ═══════════════════════════════════════════════════════════════
+      // EVAL DETAIL
+      // ═══════════════════════════════════════════════════════════════
+      function showRun(index) {
+        const run = RUNS[index];
+        if (!run) return;
+        currentIndex = index;
+        setActiveSidebar(index);
 
-      if (notes.length) {
-        const notesList = el("ul", { class: "mb-0 ps-3 d-flex flex-column gap-1" },
-          notes.map((n) => el("li", { class: "small text-secondary", text: n })));
-        c.append(el("div", { class: "bench-eval-card mt-2" }, [
-          el("div", { class: "bench-eval-head eyebrow", text: "Analysis Notes" }),
-          el("div", { class: "p-3" }, [notesList]),
-        ]));
+        $("no-eval-state").classList.add("d-none");
+        const content = $("eval-content");
+        content.classList.remove("d-none");
+        content.classList.remove("eval-fade");
+        void content.offsetWidth;
+        content.classList.add("eval-fade");
+
+        const cfg = detectConfig(run);
+        $("current-config-label").textContent = evalTitle(run);
+        $("prompt-text").textContent = run.prompt || "(No prompt found)";
+
+        const badge = $("config-badge");
+        if (cfg) {
+          badge.className = "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with");
+          badge.replaceChildren(iconEl(_SVG_DOT), document.createTextNode(cfg.label));
+        } else {
+          badge.className = "cfg-chip d-none";
+          badge.replaceChildren();
+        }
+
+        renderOutputs($("outputs-body"), run.outputs || []);
+        renderPrevOutputs(run);
+        renderGrades(run);
+        renderPrevFeedback(run);
+        const pct = gradePct(run);
+        const rgb = $("rail-grade-badge");
+        if (pct == null) {
+          rgb.className = "badge rounded-pill d-none";
+          rgb.textContent = "";
+        } else {
+          rgb.className = "badge rounded-pill " + passBadgeClass(pct);
+          rgb.textContent = "Grade " + pct + "%";
+        }
+
+        // Restore saved verdict for this run
+        const v = verdictMap[run.id] || "";
+        ["good", "needs_work", "skip"].forEach((k) => {
+          const r = $("verdict-" + k);
+          if (r) r.checked = (k === v);
+        });
+
+        $("feedback").value = feedbackMap[run.id] || "";
+        $("feedback-status").textContent = "";
+
+        visited.add(index);
+        updateNav();
+        $("main-scroll").scrollTop = 0;
       }
-    }
 
-    function renderBenchmarkPerEval(c, d) {
-      const runs = d.runs || [];
-      if (!runs.length) return;
-      const evalIds = [...new Set(runs.map((r) => r.eval_id))].sort((x, y) => x - y);
+      // ═══════════════════════════════════════════════════════════════
+      // FILE RENDERING
+      // ═══════════════════════════════════════════════════════════════
 
-      c.append(el("div", { class: "eyebrow mb-2 mt-4", text: "Per-Eval Breakdown" }));
+      // SheetJS — load on demand (only when an xlsx file type is encountered)
+      const XLSX_CDN = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
+      const XLSX_SRI = "sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT";
+      let _xlsxPromise = null;
 
-      evalIds.forEach((id) => {
-        const er = runs.filter((r) => r.eval_id === id);
-        const name = (er[0] && er[0].eval_name) || ("Eval " + id);
-        // Skill version leads, baseline trails
-        const groups = [...new Set(er.map((r) => r.configuration))]
-          .sort((a, b) => (isBaselineCfg(a) ? 1 : 0) - (isBaselineCfg(b) ? 1 : 0));
-        const runsPer = Math.max(...groups.map((g) => er.filter((r) => r.configuration === g).length), 1);
+      function loadXlsx() {
+        if (typeof XLSX !== "undefined") return Promise.resolve(XLSX);
+        if (_xlsxPromise) return _xlsxPromise;
+        _xlsxPromise = new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = XLSX_CDN;
+          s.integrity = XLSX_SRI;
+          s.crossOrigin = "anonymous";
+          s.onload = () => resolve(XLSX);
+          s.onerror = () => { _xlsxPromise = null; reject(new Error("SheetJS load failed")); };
+          document.head.appendChild(s);
+        });
+        return _xlsxPromise;
+      }
 
-        const grid = el("div", { class: "row g-0" });
-        groups.forEach((cfg) => {
-          const cr = er.filter((r) => r.configuration === cfg);
-          const rates = cr.map((r) => (r.result || {}).pass_rate || 0);
-          const avg = rates.reduce((s, v) => s + v, 0) / (rates.length || 1);
-          const total = (cr[0] && cr[0].result && cr[0].result.total) || 0;
-          const passed = cr.length === 1 ? ((cr[0].result || {}).passed || 0) : Math.round(avg * total);
-          const times = cr.map((r) => (r.result || {}).time_seconds).filter((t) => t != null);
-          const avgTime = times.length ? times.reduce((s, v) => s + v, 0) / times.length : null;
-          const pctNum = Math.round(avg * 100);
-          const baseline = isBaselineCfg(cfg);
-          const metaBits = [`${passed} / ${total} assertions`];
-          if (avgTime != null) metaBits.push(`${avgTime.toFixed(1)}s${runsPer > 1 ? " avg" : ""}`);
-        grid.append(el("div", { class: "col-12 col-sm-6 vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
-          el("div", { class: "cfg-chip " + (baseline ? "is-baseline" : "is-with") + " mb-2", text: titleCase(cfg) }),
-            el("div", { class: "fs-2 lh-1 " + passTextClass(pctNum), text: pctNum + "%" }),
-            el("div", { class: "small text-secondary mt-1", text: metaBits.join(" · ") }),
+      // Raw file content. Pass includeActions=true to overlay Copy+Download
+      // in the top-right corner of text blocks (used for multi-file tab panes).
+      // fileCard() handles its own actions in the card-header instead.
+      function buildFileContentInto(container, file, includeActions) {
+        if (file.type === "image_url") {
+          const imgWrap = el("div", { class: "bg-body-secondary rounded p-2" });
+          const thumb = el("img", { alt: file.name, class: "img-fluid d-block img-thumb" });
+          thumb.src = file.src;
+          imgWrap.append(
+            thumb,
+            el("a", { href: file.src, target: "_blank", rel: "noopener noreferrer", class: "small mt-2 d-inline-flex align-items-center gap-1" }, [iconEl(_SVG_BOX_UP_RIGHT), "Open full size"])
+          );
+          container.append(imgWrap);
+        } else if (file.type === "html") {
+          const frame = el("iframe", { class: "pdf-frame w-100 border-0", sandbox: "allow-scripts", title: "HTML output preview" });
+          frame.srcdoc = file.content;
+          container.append(frame);
+        } else if (file.type === "text") {
+          const lines = (file.content || "").split("\n").length;
+          const pre = el("pre", { class: "output-text p-3 small lh-base overflow-auto", text: file.content });
+          const wrap = el("div", { class: "position-relative" });
+          if (includeActions) {
+            const btnGroup = el("div", { class: "position-absolute top-0 end-0 m-2 d-flex gap-1" });
+            btnGroup.append(
+              el("button", {
+                class: "btn ",
+                type: "button",
+                "aria-label": "Copy " + file.name,
+                onclick: (e) => copyText(file.content, e.currentTarget),
+              }, [iconEl(_SVG_COPY)]),
+              el("a", {
+                class: "btn  d-inline-flex align-items-center",
+                href: downloadUri(file), download: file.name,
+                title: "Download " + file.name, "aria-label": "Download " + file.name,
+              }, [iconEl(_SVG_DOWNLOAD)])
+            );
+            wrap.append(btnGroup);
+          }
+          if (lines > COLLAPSE_LINE_THRESHOLD) {
+            pre.classList.add("output-collapsed");
+            const expandBtn = el("button", {
+              class: "btn btn-link small d-flex align-items-center justify-content-center gap-1 w-100 py-1 mt-1",
+              type: "button",
+              "aria-expanded": "false",
+              onclick: (e) => {
+                const btn = e.currentTarget;
+                const isCollapsed = pre.classList.toggle("output-collapsed");
+                btn.innerHTML = isCollapsed
+                  ? _SVG_CHEVRON_DOWN + ` Show all ${lines} lines`
+                  : _SVG_CHEVRON_UP + " Collapse";
+                btn.setAttribute("aria-expanded", String(!isCollapsed));
+              },
+            }, [iconEl(_SVG_CHEVRON_DOWN), ` Show all ${lines} lines`]);
+            wrap.append(pre, expandBtn);
+          } else {
+            wrap.append(pre);
+          }
+          container.append(wrap);
+        } else if (file.type === "image") {
+          container.append(el("img", { class: "img-fluid", src: file.data_uri, alt: file.name }));
+        } else if (file.type === "pdf") {
+          container.append(el("iframe", { class: "pdf-frame w-100 border-0", src: file.data_uri }));
+        } else if (file.type === "xlsx") {
+          renderXlsx(container, file);
+        } else if (file.type === "binary") {
+          container.append(el("a", { class: "btn btn-outline-secondary", href: file.data_uri, download: file.name, text: "Download " + file.name }));
+        } else if (file.type === "error") {
+          container.append(el("pre", { class: "output-text text-danger mb-0", text: file.content }));
+        }
+      }
+
+      // Single-file card: filename in card-header + Copy + Download; no floating buttons.
+      function fileCard(file) {
+        const body = el("div", { class: "card-body p-0" });
+        buildFileContentInto(body, file, false);
+        const actions = [];
+        if (file.type === "text" && file.content != null) {
+          actions.push(el("button", {
+            class: "btn ",
+            type: "button",
+            "aria-label": "Copy " + file.name,
+            onclick: (e) => copyText(file.content, e.currentTarget),
+          }, [iconEl(_SVG_COPY)]));
+        }
+        if (file.type !== "error") {
+          actions.push(el("a", {
+            class: "btn  d-inline-flex align-items-center",
+            href: downloadUri(file), download: file.name,
+            title: "Download " + file.name, "aria-label": "Download " + file.name,
+          }, [iconEl(_SVG_DOWNLOAD)]));
+        }
+        const header = el("div", { class: "file-header d-flex align-items-center justify-content-between gap-3 px-3 py-2 border-bottom" }, [
+          el("span", { class: "font-monospace file-name text-body-emphasis text-truncate", text: file.name }),
+          actions.length ? el("div", { class: "d-flex gap-2 flex-shrink-0" }, actions) : null,
+        ]);
+        return el("div", { class: "card mb-3 overflow-hidden" }, [header, body]);
+      }
+
+      function renderOutputs(container, outputs) {
+        container.replaceChildren();
+        if (!outputs.length) {
+          container.append(el("div", { class: "text-secondary fst-italic p-3 text-center", text: "No output files" }));
+          return;
+        }
+
+        if (outputs.length === 1) {
+          container.append(fileCard(outputs[0]));
+          return;
+        }
+
+        // Multi-file: same card structure as single-file.
+        // File switcher lives in the header bar alongside Copy + Download.
+        // No nav-tabs — consistent visual language in all cases.
+        let activeFile = outputs[0];
+
+        const copyBtn = el("button", {
+          class: "btn ",
+          type: "button",
+          "aria-label": "Copy",
+        }, [iconEl(_SVG_COPY)]);
+        copyBtn.addEventListener("click", (e) => {
+          if (activeFile.content != null) copyText(activeFile.content, e.currentTarget);
+        });
+
+        const dlBtn = el("a", {
+          class: "btn  d-inline-flex align-items-center",
+          href: downloadUri(activeFile),
+          download: activeFile.name,
+          title: "Download " + activeFile.name,
+          "aria-label": "Download " + activeFile.name,
+        }, [iconEl(_SVG_DOWNLOAD)]);
+
+        // Content panels — all rendered, only active shown
+        const panels = outputs.map((f, i) => {
+          const panel = el("div", { class: i === 0 ? "" : "d-none" });
+          buildFileContentInto(panel, f, false);
+          return panel;
+        });
+
+        // Switcher buttons — same font/size as the filename in fileCard
+        let switchBtns;
+        switchBtns = outputs.map((f, i) => {
+          const btn = el("button", {
+            class: "file-switch-btn" + (i === 0 ? " is-active" : ""),
+            type: "button",
+            text: f.name,
+            title: f.name,
+            "aria-pressed": i === 0 ? "true" : "false",
+          });
+          btn.addEventListener("click", () => {
+            switchBtns.forEach((b, j) => {
+              b.classList.toggle("is-active", j === i);
+              b.setAttribute("aria-pressed", String(j === i));
+            });
+            panels.forEach((p, j) => p.classList.toggle("d-none", j !== i));
+            activeFile = f;
+            dlBtn.href = downloadUri(f);
+            dlBtn.download = f.name;
+            dlBtn.title = "Download " + f.name;
+            copyBtn.style.display = f.type === "text" ? "" : "none";
+          });
+          return btn;
+        });
+
+        if (activeFile.type !== "text") copyBtn.style.display = "none";
+
+        const header = el("div", { class: "file-header d-flex align-items-center gap-3 px-3 py-2 border-bottom" }, [
+          el("div", { class: "d-flex gap-3 flex-grow-1 min-width-0 overflow-hidden" }, switchBtns),
+          el("div", { class: "d-flex gap-2 flex-shrink-0" }, [copyBtn, dlBtn]),
+        ]);
+
+        const card = el("div", { class: "card mb-3 overflow-hidden" });
+        card.append(header);
+        panels.forEach((p) => card.append(p));
+        container.append(card);
+      }
+
+      function sanitizeXlsxWrap(wrap) {
+        wrap.querySelectorAll("*").forEach((node) => {
+          [...node.attributes].forEach((attr) => {
+            if (/^on/i.test(attr.name)) node.removeAttribute(attr.name);
+            if (attr.name === "href" && /^javascript:/i.test(attr.value)) node.removeAttribute(attr.name);
+          });
+          if (node.tagName === "SCRIPT") node.remove();
+        });
+      }
+
+      function renderXlsx(container, file) {
+        const placeholder = el("div", { class: "text-secondary small p-2 fst-italic", text: "Loading spreadsheet…" });
+        container.append(placeholder);
+
+        loadXlsx().then((XLSXLib) => {
+          placeholder.remove();
+          try {
+            const raw = Uint8Array.from(atob(file.data_b64), (c) => c.charCodeAt(0));
+            const wb = XLSXLib.read(raw, { type: "array" });
+            const theme = document.documentElement.getAttribute("data-bs-theme");
+            const theadClass = theme === "dark" ? "table-dark" : "table-light";
+
+            wb.SheetNames.forEach((name) => {
+              if (wb.SheetNames.length > 1) {
+                container.append(el("div", { class: "fw-semibold small text-secondary mt-2", text: "Sheet: " + name }));
+              }
+              const html = XLSXLib.utils.sheet_to_html(wb.Sheets[name]);
+              const wrap = el("div", { class: "table-responsive" });
+              wrap.innerHTML = html;
+              sanitizeXlsxWrap(wrap);
+              wrap.querySelectorAll("table").forEach((t) => {
+                t.classList.add("table", "table-hover", "table-sm", "table-striped", "table-bordered", "align-middle");
+                const thead = t.querySelector("thead");
+                if (thead) thead.classList.add(theadClass);
+              });
+              container.append(wrap);
+            });
+          } catch (err) {
+            container.append(el("div", { class: "text-danger", text: "Error rendering spreadsheet: " + err.message }));
+          }
+        }).catch(() => {
+          placeholder.remove();
+          container.append(el("a", {
+            class: "btn btn-outline-secondary",
+            href: downloadUri(file), download: file.name,
+            text: "Download " + file.name + " (spreadsheet preview unavailable offline)",
+          }));
+        });
+      }
+
+      function renderPrevOutputs(run) {
+        const item = $("prev-outputs-item");
+        const body = $("prev-outputs-body");
+        const prev = PREV_OUT[run.id];
+        if (!prev || !prev.length) { item.classList.add("d-none"); return; }
+        item.classList.remove("d-none");
+        body.replaceChildren();
+        prev.forEach((f) => body.append(fileCard(f)));
+      }
+
+      function renderGrades(run) {
+        const item = $("grades-item");
+        if (!run.grading) { item.classList.add("d-none"); return; }
+        item.classList.remove("d-none");
+
+        const g = run.grading, s = g.summary || {}, exps = g.expectations || [];
+        const pct = s.pass_rate != null ? Math.round(s.pass_rate * 100) : null;
+        const progressPct = pct ?? 0;
+
+        const badge = $("grades-badge");
+        badge.className = "badge rounded-pill " + passBadgeClass(pct);
+        badge.textContent = pct == null ? "?" : pct + "%";
+
+        const bar = $("grades-progress");
+        bar.style.width = progressPct + "%";
+        bar.className = "progress-bar " + passBarClass(pct);
+        bar.closest("[role='progressbar']").setAttribute("aria-valuenow", progressPct);
+
+        $("grades-summary").textContent = `${s.passed || 0} passed, ${s.failed || 0} failed of ${s.total || 0}`;
+
+        const list = $("grades-list");
+        list.className = "";
+        list.replaceChildren();
+        exps.forEach((e) => {
+          list.append(el("div", { class: "d-flex gap-2 py-2 border-bottom" }, [
+            el("span", { class: "fw-bold flex-shrink-0 " + (e.passed ? "text-success" : "text-danger") }, [iconEl(e.passed ? _SVG_CHECK : _SVG_X)]),
+            el("div", {}, [
+              el("span", { class: "small", text: e.text }),
+              e.evidence ? el("div", { class: "text-secondary small mt-1", text: e.evidence }) : null,
+            ]),
           ]));
         });
+      }
 
-        const card = el("div", { class: "bench-eval-card mb-3" }, [
-          el("div", { class: "bench-eval-head d-flex align-items-center justify-content-between" }, [
-            el("span", { class: "font-monospace text-body-emphasis", text: name }),
-            el("span", { class: "eyebrow", text: runsPer + (runsPer === 1 ? " run/config" : " runs/config") }),
+      function renderPrevFeedback(run) {
+        const box = $("prev-feedback");
+        const txt = PREV_FB[run.id];
+        if (txt) {
+          $("prev-feedback-text").textContent = txt;
+          box.classList.remove("d-none");
+        } else {
+          box.classList.add("d-none");
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // BENCHMARK
+      // ═══════════════════════════════════════════════════════════════
+      function fmtStat(stat, pct) {
+        if (!stat || stat.mean == null || stat.stddev == null) return "—";
+        const u = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const sd = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return `${m}${u} ± ${sd}${u}`;
+      }
+
+      function deltaClass(v) {
+        const n = parseFloat(v);
+        if (!v || isNaN(n)) return "";
+        return n > 0 ? "text-success" : n < 0 ? "text-danger" : "";
+      }
+
+      // Formats a raw proportion delta as percentage-points string, e.g. 0.74 → "+74pp"
+      function fmtDeltaPp(v) {
+        if (v == null) return "—";
+        const n = parseFloat(v);
+        if (isNaN(n)) return String(v);
+        const pp = Math.round(n * 100);
+        return (n > 0 ? "+" : "") + pp + "pp";
+      }
+
+      function makeStatCard(valueEl, label, contextText, highlightClass) {
+        return el("div", { class: "col-sm-6 col-lg-4" }, [
+          el("div", { class: "card bg-body-tertiary h-100 " + (highlightClass || "") }, [
+            el("div", { class: "card-body text-center py-4" }, [
+              valueEl,
+              el("div", { class: "eyebrow mt-2", text: label }),
+              contextText ? el("div", { class: "small text-secondary mt-1", text: contextText }) : null,
+            ]),
           ]),
-          grid,
         ]);
-        const matrix = buildAssertionMatrix(er, groups);
-        if (matrix) card.append(matrix);
-        c.append(card);
-      });
-    }
+      }
 
-    // Returns a table element (assertion × configuration), or null if no expectations.
-    function buildAssertionMatrix(evalRuns, groups) {
-      const withExp = {};
-      groups.forEach((g) => { withExp[g] = evalRuns.filter((r) => r.configuration === g && (r.expectations || []).length); });
-      if (!Object.values(withExp).some((a) => a.length)) return null;
+      // Appends a numeric delta stat card (time, tokens) to heroRow.
+      // Pass rate uses a custom card because it has unique color logic.
+      function appendNumericStatCard(heroRow, aData, bData, deltaRaw, label, suffix, ca, cb) {
+        if (!aData && !bData) return;
+        const deltaN = deltaRaw != null ? parseFloat(deltaRaw) : NaN;
+        const sign = !isNaN(deltaN) && deltaN > 0 ? "+" : "";
+        const valueText = deltaRaw != null ? sign + deltaRaw + suffix : "—";
+        heroRow.append(makeStatCard(
+          el("div", { class: "hero-delta-value text-body-emphasis", text: valueText }),
+          label,
+          ca && cb ? `${titleCase(ca)}: ${fmtStat(aData, false)}  ·  ${titleCase(cb)}: ${fmtStat(bData, false)}` : null,
+          ""
+        ));
+      }
 
-      const seen = new Set(), assertions = [];
-      groups.forEach((g) => withExp[g].forEach((run) => (run.expectations || []).forEach((e) => {
-        if (!seen.has(e.text)) { seen.add(e.text); assertions.push(e.text); }
-      })));
+      function renderBenchmark() {
+        const d = DATA.benchmark;
+        if (!d) return;
+        const c = $("benchmark-content");
+        c.replaceChildren();
 
-      const tbody = el("tbody", { class: "table-group-divider" }, assertions.map((text) => el("tr", {}, [
-        el("td", { class: "small", text }),
-        ...groups.map((g) => {
-          const results = withExp[g].map((run) => {
-            const e = (run.expectations || []).find((x) => x.text === text);
-            return e ? { passed: e.passed, evidence: e.evidence, runNum: run.run_number } : null;
-          }).filter(Boolean);
+        const summary = d.run_summary || {}, meta = d.metadata || {}, notes = d.notes || [];
+        c.append(el("h2", { class: "h4 mt-3 mb-1", text: "Benchmark Results" }));
+        const metaBits = [
+          meta.skill_name, meta.timestamp,
+          meta.evals_run ? "Evals: " + meta.evals_run.join(", ") : null,
+          (meta.runs_per_configuration || "?") + " runs/config",
+        ].filter(Boolean).join(" · ");
+        c.append(el("p", { class: "text-secondary small mb-3", text: metaBits }));
 
-          if (!results.length) return el("td", { class: "text-center text-secondary", text: "—" });
+        const configs = Object.keys(summary).filter((k) => k !== "delta");
+        const ca = configs[0], cb = configs[1];
+        const a = summary[ca] || {}, b = summary[cb] || {}, delta = summary.delta || {};
 
-          const allPass = results.every((r) => r.passed);
-          const anyFail = results.some((r) => !r.passed);
-          const anyPass = results.some((r) => r.passed);
-          const cellCls = allPass
-            ? "assert-pass text-center"
-            : anyFail
-            ? "assert-fail text-center"
-            : "text-center";
+        // ── Hero stat cards ──
+        const heroRow = el("div", { class: "row g-3 mb-4" });
 
-          const children = results.flatMap((r, i) => {
-            const span = el("span", {
-              class: r.passed ? "text-success" : "text-danger",
-              title: `Run ${r.runNum}${r.evidence ? ": " + r.evidence : ""}`,
-              text: r.passed ? "✓" : "✗",
-            });
-            return i > 0 ? [" ", span] : [span];
+        // Pass Rate: custom card — colored value, uses fmtDeltaPp, highlights border on win
+        const prDeltaRaw = delta.pass_rate;
+        const prDeltaN = prDeltaRaw != null ? parseFloat(prDeltaRaw) : NaN;
+        const prA = a.pass_rate?.mean != null ? Math.round(a.pass_rate.mean * 100) + "%" : "—";
+        const prB = b.pass_rate?.mean != null ? Math.round(b.pass_rate.mean * 100) + "%" : "—";
+        const prValueCls = !isNaN(prDeltaN)
+          ? (prDeltaN > 0 ? "text-success" : prDeltaN < 0 ? "text-danger" : "text-body-emphasis")
+          : "text-body-emphasis";
+        heroRow.append(makeStatCard(
+          el("div", { class: "hero-delta-value " + prValueCls, text: fmtDeltaPp(prDeltaRaw) }),
+          "Pass Rate Delta",
+          ca && cb ? `${titleCase(ca)}: ${prA}  ·  ${titleCase(cb)}: ${prB}` : null,
+          !isNaN(prDeltaN) && prDeltaN > 0 ? "stat-hero-win" : ""
+        ));
+
+        appendNumericStatCard(heroRow, a.time_seconds, b.time_seconds, delta.time_seconds, "Time Delta (s)", "s", ca, cb);
+        appendNumericStatCard(heroRow, a.tokens, b.tokens, delta.tokens, "Token Delta", "", ca, cb);
+
+        c.append(heroRow);
+
+        // ── Detail metrics table ──
+        const rows = [["Pass Rate", fmtStat(a.pass_rate, true), fmtStat(b.pass_rate, true), delta.pass_rate != null ? fmtDeltaPp(delta.pass_rate) : null]];
+        if (a.time_seconds || b.time_seconds) {
+          rows.push(["Time (s)", fmtStat(a.time_seconds, false), fmtStat(b.time_seconds, false), delta.time_seconds ? delta.time_seconds + "s" : null]);
+        }
+        if (a.tokens || b.tokens) {
+          rows.push(["Tokens", fmtStat(a.tokens, false), fmtStat(b.tokens, false), delta.tokens != null ? String(delta.tokens) : null]);
+        }
+        const tbody = el("tbody", { class: "table-group-divider" }, rows.map((r) => el("tr", {}, [
+          el("td", {}, [el("strong", { text: r[0] })]),
+          el("td", { class: "text-secondary num", text: r[1] }),
+          el("td", { class: "text-secondary num", text: r[2] }),
+          el("td", { class: "bm-delta text-end " + deltaClass(r[3]), text: r[3] || "—" }),
+        ])));
+        const summaryWrap = el("div", { class: "table-responsive mb-4" });
+        summaryWrap.append(el("table", { class: "table align-middle" }, [
+          el("thead", {}, [el("tr", {}, [
+            el("th", { class: "text-secondary", text: "Metric" }),
+            el("th", { class: "text-secondary", text: titleCase(ca || "A") }),
+            el("th", { class: "text-secondary", text: titleCase(cb || "B") }),
+            el("th", { class: "text-secondary text-end", text: "Delta" }),
+          ])]),
+          tbody,
+        ]));
+        c.append(summaryWrap);
+
+        renderBenchmarkPerEval(c, d);
+
+        if (notes.length) {
+          const notesList = el("ul", { class: "mb-0 ps-3 d-flex flex-column gap-1" },
+            notes.map((n) => el("li", { class: "small text-secondary", text: n })));
+          c.append(el("div", { class: "bench-eval-card mt-2" }, [
+            el("div", { class: "bench-eval-head eyebrow", text: "Analysis Notes" }),
+            el("div", { class: "p-3" }, [notesList]),
+          ]));
+        }
+      }
+
+      function renderBenchmarkPerEval(c, d) {
+        const runs = d.runs || [];
+        if (!runs.length) return;
+        const evalIds = [...new Set(runs.map((r) => r.eval_id))].sort((x, y) => x - y);
+
+        c.append(el("div", { class: "eyebrow mb-2 mt-4", text: "Per-Eval Breakdown" }));
+
+        evalIds.forEach((id) => {
+          const er = runs.filter((r) => r.eval_id === id);
+          const name = (er[0] && er[0].eval_name) || ("Eval " + id);
+          // Skill version leads, baseline trails
+          const groups = [...new Set(er.map((r) => r.configuration))]
+            .sort((a, b) => (isBaselineCfg(a) ? 1 : 0) - (isBaselineCfg(b) ? 1 : 0));
+          const runsPer = Math.max(...groups.map((g) => er.filter((r) => r.configuration === g).length), 1);
+
+          const grid = el("div", { class: "row g-0" });
+          groups.forEach((cfg) => {
+            const cr = er.filter((r) => r.configuration === cfg);
+            const rates = cr.map((r) => (r.result || {}).pass_rate || 0);
+            const avg = rates.reduce((s, v) => s + v, 0) / (rates.length || 1);
+            const total = (cr[0] && cr[0].result && cr[0].result.total) || 0;
+            const passed = cr.length === 1 ? ((cr[0].result || {}).passed || 0) : Math.round(avg * total);
+            const times = cr.map((r) => (r.result || {}).time_seconds).filter((t) => t != null);
+            const avgTime = times.length ? times.reduce((s, v) => s + v, 0) / times.length : null;
+            const pctNum = Math.round(avg * 100);
+            const baseline = isBaselineCfg(cfg);
+            const metaBits = [`${passed} / ${total} assertions`];
+            if (avgTime != null) metaBits.push(`${avgTime.toFixed(1)}s${runsPer > 1 ? " avg" : ""}`);
+            grid.append(el("div", { class: "col-12 col-sm-6 vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
+              el("div", { class: "cfg-chip " + (baseline ? "is-baseline" : "is-with") + " mb-2" }, [iconEl(_SVG_DOT), titleCase(cfg)]),
+              el("div", { class: "fs-2 lh-1 " + passTextClass(pctNum), text: pctNum + "%" }),
+              el("div", { class: "small text-secondary mt-1", text: metaBits.join(" · ") }),
+            ]));
           });
-          return el("td", { class: cellCls }, children);
-        }),
-      ])));
 
-      const matrixWrap = el("div", { class: "table-responsive" });
-      matrixWrap.append(el("table", { class: "table align-middle mb-0" }, [
-        el("thead", {}, [el("tr", {}, [
-          el("th", { class: "small text-secondary", text: "Assertion" }),
-          ...groups.map((g) => el("th", { class: "text-center small text-secondary matrix-cfg-col", text: titleCase(g) })),
-        ])]),
-        tbody,
-      ]));
-      return matrixWrap;
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // NAVIGATION
-    // ═══════════════════════════════════════════════════════════════
-    function setVerdict(value) {
-      const run = RUNS[currentIndex];
-      if (!run) return;
-      if (value) verdictMap[run.id] = value; else delete verdictMap[run.id];
-      const dot = $("eval-list").querySelector('[data-dot="' + run.id + '"]');
-      if (dot) {
-        dot.className = "run-dot " + verdictDotClass(run.id);
-        dot.setAttribute("aria-label", "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"));
-      }
-      updateNav();
-      scheduleSave();
-    }
-
-    function navigate(delta) {
-      const next = currentIndex + delta;
-      if (next >= 0 && next < RUNS.length) { clearTimeout(saveTimer); saveFeedback(false); showRun(next); }
-    }
-
-    function updateNav() {
-      $("prev-btn").disabled = currentIndex === 0;
-      $("next-btn").disabled = RUNS.length === 0 || currentIndex === RUNS.length - 1;
-      const total = RUNS.length;
-      const pos = $("subbar-pos");
-      if (pos) pos.textContent = total ? (currentIndex + 1) + "\u2009/\u2009" + total : "";
-      const reviewed = visited.size;
-      const pct = total ? Math.round(reviewed / total * 100) : 0;
-      const bar = $("progress-bar");
-      bar.style.width = pct + "%";
-      bar.closest("[role='progressbar']").setAttribute("aria-valuenow", pct);
-      const rc = $("reviewed-count");
-      if (rc) rc.textContent = `${reviewed} / ${total}`;
-      if (total && Object.keys(verdictMap).length >= total) {
-        $("submit-btn").classList.replace("btn-outline-secondary", "btn-primary");
-      }
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // PERSISTENCE
-    // ═══════════════════════════════════════════════════════════════
-    async function prefillFeedback() {
-      // If prior-iteration context is embedded, the on-disk feedback.json is stale — skip prefill.
-      const hasPriorContext = Object.keys(PREV_FB).length > 0 || Object.keys(PREV_OUT).length > 0;
-      if (hasPriorContext) return;
-      try {
-        const r = await fetch("/api/feedback");
-        const d = await r.json();
-        (d.reviews || []).forEach((x) => { feedbackMap[x.run_id] = x.feedback; if (x.verdict) verdictMap[x.run_id] = x.verdict; });
-      } catch { /* static mode or first run — nothing to prefill */ }
-    }
-
-    function scheduleSave() {
-      clearTimeout(saveTimer);
-      setFeedbackStatus("Saving…");
-      saveTimer = setTimeout(() => saveFeedback(true), 800);
-    }
-
-    function saveFeedback(showStatus) {
-      flushCurrentFeedback();
-      if (!RUNS[currentIndex]) return;
-
-      const ids = new Set([...Object.keys(feedbackMap), ...Object.keys(verdictMap)]);
-      const reviews = [...ids].map((id) => buildReviewEntry(id)).filter((r) => r.feedback.trim() || r.verdict);
-
-      fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reviews, status: "in_progress" }),
-      }).then(() => {
-        if (showStatus) { setFeedbackStatus("✓ Saved", "success"); toast("Saved"); }
-      }).catch(() => {
-        if (showStatus) { setFeedbackStatus("Will download on submit"); }
-      });
-    }
-
-    function toast(msg) {
-      const t = $("save-toast");
-      t.querySelector(".toast-body").textContent = msg;
-      bootstrap.Toast.getOrCreateInstance(t, { delay: 3000 }).show();
-    }
-
-    function submitAll() {
-      clearTimeout(saveTimer);
-      $("submit-btn").disabled = true;
-      flushCurrentFeedback();
-
-      const ts = new Date().toISOString();
-      // Include every run so the model can tell "no feedback" from "not reviewed"
-      const reviews = RUNS.map((r) => buildReviewEntry(r.id, ts));
-      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
-      const done = () => bootstrap.Modal.getOrCreateInstance($("done-modal")).show();
-
-      fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: payload,
-      }).then(done).catch(() => {
-        // Static mode (no server) — download the file instead
-        const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
-        const a = el("a", { href: url, download: "feedback.json" });
-        a.click();
-        URL.revokeObjectURL(url);
-        done();
-      });
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // INIT
-    // ═══════════════════════════════════════════════════════════════
-    function onKey(e) {
-      if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
-      if (e.key === "ArrowLeft") { e.preventDefault(); navigate(-1); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); navigate(1); }
-    }
-
-    function init() {
-      const skillNameEl = $("skill-name");
-      skillNameEl.textContent = DATA.skill_name || "";
-      skillNameEl.title = DATA.skill_name || "";
-      buildSidebar();
-      $("prev-btn").addEventListener("click", () => navigate(-1));
-      $("next-btn").addEventListener("click", () => navigate(1));
-      document.querySelectorAll("[data-action='submit']").forEach((b) => b.addEventListener("click", submitAll));
-      $("feedback").addEventListener("input", scheduleSave);
-      document.querySelectorAll("input[name='verdict']").forEach((r) =>
-        r.addEventListener("change", () => setVerdict(r.checked ? r.value : "")));
-      document.addEventListener("keydown", onKey);
-      if (DATA.benchmark) {
-        $("view-tabs").classList.remove("d-none");
-        renderBenchmark();
-        $("view-tabs").addEventListener("shown.bs.tab", (e) => {
-          const targetId = e.target.getAttribute("data-bs-target");
-          const panel = document.querySelector(targetId);
-          if (panel) panel.focus();
+          const card = el("div", { class: "bench-eval-card mb-3" }, [
+            el("div", { class: "bench-eval-head d-flex align-items-center justify-content-between" }, [
+              el("span", { class: "font-monospace text-body-emphasis", text: name }),
+              el("span", { class: "eyebrow", text: runsPer + (runsPer === 1 ? " run/config" : " runs/config") }),
+            ]),
+            grid,
+          ]);
+          const matrix = buildAssertionMatrix(er, groups);
+          if (matrix) card.append(matrix);
+          c.append(card);
         });
       }
-      prefillFeedback().then(() => { if (RUNS.length) showRun(0); else updateNav(); });
-    }
 
-    document.addEventListener("DOMContentLoaded", init);
-  })();
+      // Returns a table element (assertion × configuration), or null if no expectations.
+      function buildAssertionMatrix(evalRuns, groups) {
+        const withExp = {};
+        groups.forEach((g) => { withExp[g] = evalRuns.filter((r) => r.configuration === g && (r.expectations || []).length); });
+        if (!Object.values(withExp).some((a) => a.length)) return null;
+
+        const seen = new Set(), assertions = [];
+        groups.forEach((g) => withExp[g].forEach((run) => (run.expectations || []).forEach((e) => {
+          if (!seen.has(e.text)) { seen.add(e.text); assertions.push(e.text); }
+        })));
+
+        const tbody = el("tbody", { class: "table-group-divider" }, assertions.map((text) => el("tr", {}, [
+          el("td", { class: "small", text }),
+          ...groups.map((g) => {
+            const results = withExp[g].map((run) => {
+              const e = (run.expectations || []).find((x) => x.text === text);
+              return e ? { passed: e.passed, evidence: e.evidence, runNum: run.run_number } : null;
+            }).filter(Boolean);
+
+            if (!results.length) return el("td", { class: "text-center text-secondary", text: "—" });
+
+            const allPass = results.every((r) => r.passed);
+            const anyFail = results.some((r) => !r.passed);
+            const anyPass = results.some((r) => r.passed);
+            const cellCls = allPass
+              ? "assert-pass text-center"
+              : anyFail
+                ? "assert-fail text-center"
+                : "text-center";
+
+            const children = results.flatMap((r, i) => {
+              const span = el("span", {
+                class: r.passed ? "text-success" : "text-danger",
+                title: `Run ${r.runNum}${r.evidence ? ": " + r.evidence : ""}`,
+              }, [iconEl(r.passed ? _SVG_CHECK : _SVG_X)]);
+              return i > 0 ? [" ", span] : [span];
+            });
+            return el("td", { class: cellCls }, children);
+          }),
+        ])));
+
+        const matrixWrap = el("div", { class: "table-responsive" });
+        matrixWrap.append(el("table", { class: "table align-middle mb-0" }, [
+          el("thead", {}, [el("tr", {}, [
+            el("th", { class: "small text-secondary", text: "Assertion" }),
+            ...groups.map((g) => el("th", { class: "text-center small text-secondary matrix-cfg-col", text: titleCase(g) })),
+          ])]),
+          tbody,
+        ]));
+        return matrixWrap;
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // NAVIGATION
+      // ═══════════════════════════════════════════════════════════════
+      function setVerdict(value) {
+        const run = RUNS[currentIndex];
+        if (!run) return;
+        if (value) verdictMap[run.id] = value; else delete verdictMap[run.id];
+        const dot = $("eval-list").querySelector('[data-dot="' + run.id + '"]');
+        if (dot) {
+          dot.className = "run-dot " + verdictDotClass(run.id);
+          dot.setAttribute("aria-label", "Review state: " + (verdictMap[run.id] ? titleCase(verdictMap[run.id]) : "unreviewed"));
+        }
+        updateNav();
+        scheduleSave();
+      }
+
+      function navigate(delta) {
+        const next = currentIndex + delta;
+        if (next >= 0 && next < RUNS.length) { clearTimeout(saveTimer); saveFeedback(false); showRun(next); }
+      }
+
+      function updateNav() {
+        $("prev-btn").disabled = currentIndex === 0;
+        $("next-btn").disabled = RUNS.length === 0 || currentIndex === RUNS.length - 1;
+        const total = RUNS.length;
+        const pos = $("subbar-pos");
+        if (pos) pos.textContent = total ? (currentIndex + 1) + "\u2009/\u2009" + total : "";
+        const reviewed = visited.size;
+        const pct = total ? Math.round(reviewed / total * 100) : 0;
+        const bar = $("progress-bar");
+        bar.style.width = pct + "%";
+        bar.closest("[role='progressbar']").setAttribute("aria-valuenow", pct);
+        const rc = $("reviewed-count");
+        if (rc) rc.textContent = `${reviewed} / ${total}`;
+        if (total && Object.keys(verdictMap).length >= total) {
+          $("submit-btn").classList.replace("btn-outline-secondary", "btn-primary");
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // PERSISTENCE
+      // ═══════════════════════════════════════════════════════════════
+      async function prefillFeedback() {
+        // If prior-iteration context is embedded, the on-disk feedback.json is stale — skip prefill.
+        const hasPriorContext = Object.keys(PREV_FB).length > 0 || Object.keys(PREV_OUT).length > 0;
+        if (hasPriorContext) return;
+        try {
+          const r = await fetch("/api/feedback");
+          const d = await r.json();
+          (d.reviews || []).forEach((x) => { feedbackMap[x.run_id] = x.feedback; if (x.verdict) verdictMap[x.run_id] = x.verdict; });
+        } catch { /* static mode or first run — nothing to prefill */ }
+      }
+
+      function scheduleSave() {
+        clearTimeout(saveTimer);
+        setFeedbackStatus("Saving…");
+        saveTimer = setTimeout(() => saveFeedback(true), 800);
+      }
+
+      function saveFeedback(showStatus) {
+        flushCurrentFeedback();
+        if (!RUNS[currentIndex]) return;
+
+        const ids = new Set([...Object.keys(feedbackMap), ...Object.keys(verdictMap)]);
+        const reviews = [...ids].map((id) => buildReviewEntry(id)).filter((r) => r.feedback.trim() || r.verdict);
+
+        fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reviews, status: "in_progress" }),
+        }).then(() => {
+          if (showStatus) { setFeedbackStatus(_SVG_CHECK + " Saved", "success"); toast("Saved"); }
+        }).catch(() => {
+          if (showStatus) { setFeedbackStatus("Will download on submit"); }
+        });
+      }
+
+      function toast(msg) {
+        const t = $("save-toast");
+        t.querySelector(".toast-body").textContent = msg;
+        bootstrap.Toast.getOrCreateInstance(t, { delay: 3000 }).show();
+      }
+
+      function submitAll() {
+        clearTimeout(saveTimer);
+        $("submit-btn").disabled = true;
+        flushCurrentFeedback();
+
+        const ts = new Date().toISOString();
+        // Include every run so the model can tell "no feedback" from "not reviewed"
+        const reviews = RUNS.map((r) => buildReviewEntry(r.id, ts));
+        const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+        const done = () => bootstrap.Modal.getOrCreateInstance($("done-modal")).show();
+
+        fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+        }).then(done).catch(() => {
+          // Static mode (no server) — download the file instead
+          const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
+          const a = el("a", { href: url, download: "feedback.json" });
+          a.click();
+          URL.revokeObjectURL(url);
+          done();
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════════════════════════════
+      function onKey(e) {
+        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+        if (e.key === "ArrowLeft") { e.preventDefault(); navigate(-1); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); navigate(1); }
+      }
+
+      function init() {
+        const skillNameEl = $("skill-name");
+        skillNameEl.textContent = DATA.skill_name || "";
+        skillNameEl.title = DATA.skill_name || "";
+        buildSidebar();
+        $("prev-btn").addEventListener("click", () => navigate(-1));
+        $("next-btn").addEventListener("click", () => navigate(1));
+        document.querySelectorAll("[data-action='submit']").forEach((b) => b.addEventListener("click", submitAll));
+        $("feedback").addEventListener("input", scheduleSave);
+        document.querySelectorAll("input[name='verdict']").forEach((r) =>
+          r.addEventListener("change", () => setVerdict(r.checked ? r.value : "")));
+        document.addEventListener("keydown", onKey);
+        if (DATA.benchmark) {
+          $("view-tabs").classList.remove("d-none");
+          renderBenchmark();
+          $("view-tabs").addEventListener("shown.bs.tab", (e) => {
+            const targetId = e.target.getAttribute("data-bs-target");
+            const panel = document.querySelector(targetId);
+            if (panel) panel.focus();
+          });
+        }
+        prefillFeedback().then(() => { if (RUNS.length) showRun(0); else updateNav(); });
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    })();
   </script>
 </body>
+
 </html>
