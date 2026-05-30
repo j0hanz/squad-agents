@@ -111,6 +111,19 @@ The linter checks:
 
 **If linter fails:** Fix issues and rerun. Don't proceed to Pass 2 until PASS.
 
+**After Pass 1 PASS — spawn the `agents-md-quality-reviewer` subagent** (`agents/agents-md-quality-reviewer.md`):
+
+```
+Agent(
+  description: "Semantic quality review of AGENTS.md",
+  prompt: |
+    agents_md_path: [absolute path to the AGENTS.md file]
+    project_root: [project root directory, if available]
+)
+```
+
+The agent scores the file on five semantic dimensions (signal density, convention specificity, command completeness, progressive disclosure, anti-pattern freedom) that the structural linter cannot catch. Review the returned `improvement_suggestions` sorted by `priority`. **Address all `high`-priority suggestions before Pass 2.** The `strengths` array confirms what to keep.
+
 #### Pass 2: Manual Checklist (Thorough)
 
 Even after linter PASS, work through this checklist manually:

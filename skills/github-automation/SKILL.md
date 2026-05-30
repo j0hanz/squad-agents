@@ -119,6 +119,22 @@ python ${CLAUDE_SKILL_DIR}/scripts/lint.py .github/workflows/<file>.yml
 
 **Do not report the task complete until lint passes. ALWAYS report which linter tier was used (e.g., "actionlint" or "built-in Python checks").**
 
+**After lint passes — spawn the `workflow-security-auditor` subagent** (`agents/workflow-security-auditor.md`) for semantic security review that rule-based linting cannot catch:
+
+```
+Agent(
+  description: "Security audit of [workflow filename]",
+  prompt: |
+    workflow_path: [absolute path to the .github/workflows/*.yml file]
+    project_root: [repository root, for resolving composite action paths]
+)
+```
+
+The agent evaluates 7 semantic dimensions: OIDC trust scope, `pull_request_target` safety, secret scope tightness, token scope minimality, runner trust level, artifact/cache poisoning surface, and dispatch input trust. Check the output:
+- `summary.critical > 0` or `summary.high > 0` → **resolve before reporting complete**
+- `summary.medium` or `summary.low` → disclose findings to the user; they do not block completion
+- `clean: true` → workflow is semantically secure; proceed
+
 #### 5. Verify the trigger fires
 
 - `push`/`pull_request` workflow → push a branch and watch it

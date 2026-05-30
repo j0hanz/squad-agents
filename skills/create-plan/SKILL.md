@@ -360,6 +360,22 @@ FIX: See lines 52-55 in plan-feature-auth-middleware-1.md
 
 **Don't skip validation.** A plan that passes validation is ready for agent execution; a plan that doesn't will fail partway through.
 
+**After `validate_plan.py` returns READY FOR EXECUTION — spawn the `plan-quality-reviewer` subagent** (`agents/plan-quality-reviewer.md`) for semantic quality review that structural validation cannot catch:
+
+```
+Agent(
+  description: "Semantic quality review of [plan filename]",
+  prompt: |
+    plan_path: [absolute path to the plan file]
+    project_root: [project root, if available]
+)
+```
+
+The agent samples tasks and scores four dimensions: atomicity (one observable outcome per task), validation runability (commands that can execute verbatim), dependency order correctness, and effort estimate realism. Check the output:
+- `ready_for_execution: false` → resolve `blocking_issues` before handing the plan to an executor
+- `plan_wide_issues` → address pattern-level problems across the plan
+- `ready_for_execution: true` → plan is ready for execution
+
 ---
 
 ## Anti-Patterns (NEVER Do These)

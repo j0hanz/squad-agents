@@ -235,6 +235,21 @@ Use these scripts to automate spec creation and validation:
    > **GATEKEEPER**: Implementation planning MUST NOT begin until `validate_spec.py` returns 0 errors. You MUST resolve all **ERRORS** before proceeding. Address **WARNINGS** where possible to improve quality.
    >
    > **Parser note**: The validator requires at least one line of body text directly under each `##` section heading before any `###` sub-headings. If `## 4. Interfaces` is followed immediately by `### POST /endpoint` with no intervening text, the parser will report a false "Missing mandatory section: Interfaces" error. Fix by adding one introductory sentence (e.g., "The system exposes the following endpoints:") before the first sub-heading.
+
+3.5. **Spawn the `spec-quality-reviewer` subagent** (`agents/spec-quality-reviewer.md`) after structural validation passes:
+
+   ```
+   Agent(
+     description: "Semantic quality review of [spec filename]",
+     prompt: |
+       spec_path: [absolute path to the spec file]
+       project_root: [project root, if available]
+       maturity: [sketch|contract|blueprint]
+   )
+   ```
+
+   The agent checks semantic quality that `validate_spec.py` cannot: unmeasured adjectives, compound requirements, interfaces missing error cases, REQ→AC and AC→VAL orphans. Check `ready_for_planning` in the output — **if `false`, resolve all `blocking_issues` before step 7**. Address `high`-priority `improvement_suggestions` before handoff to `create-plan`.
+
 4. **MANDATORY - READ ENTIRE FILE**: Run through `references/self-check.md` for a final manual quality pass.
 5. **Review with stakeholder** (if applicable).
 6. **Export as a file** (e.g., `spec-auth-jwt.md`).

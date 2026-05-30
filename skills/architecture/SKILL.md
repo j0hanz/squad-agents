@@ -80,6 +80,20 @@ Walk the codebase using the automated analysis scripts. Scripts gracefully skip 
 - **MANDATORY — RUN SCRIPT**: **Locality Check**: Run `node ${CLAUDE_SKILL_DIR}/scripts/check-locality.mjs [dir]` to find circular dependencies and "God modules" (high fan-out). Example: `node ${CLAUDE_SKILL_DIR}/scripts/check-locality.mjs src`
 - **MANDATORY — RUN SCRIPT**: **Bleed Detection**: Run `node ${CLAUDE_SKILL_DIR}/scripts/detect-bleed.mjs [domain_dir] [infra_packages]` to find infrastructure leaks (e.g., Express or Prisma in domain logic). Example: `node ${CLAUDE_SKILL_DIR}/scripts/detect-bleed.mjs src/domain express,prisma,typeorm`
 
+**After both scripts complete — spawn the `architecture-scanner` subagent** (`agents/architecture-scanner.md`):
+
+```
+Agent(
+  description: "Architecture scan of [target_dir]",
+  prompt: |
+    target_dir: [the directory you scanned]
+    locality_output: [paste full stdout of check-locality.mjs here]
+    bleed_output: [paste full stdout of detect-bleed.mjs here]
+)
+```
+
+The agent reads every flagged file, applies the Deletion/Seam/Locality tests, and returns a `candidates` JSON array ranked by impact. **Use that array as your Phase 2 input** — each element maps directly to the candidate format in Phase 2. Skip manual file reading in the main context when the agent is available.
+
 **If no directory is available** (user pasted inline code without a path):
 - Skip the scripts.
 - Tell the user: "Running manual analysis on the provided code — if you have a project directory, share the path for automated scanning."
