@@ -1,15 +1,13 @@
 ---
 name: skill-builder
 description: |
-  Create new skills, optimize skill descriptions for accurate triggering, and systematically measure/improve skill performance. Use when users want to create a skill from scratch, optimize a skill's description to trigger reliably on the right requests, run evals to test a skill, iterate based on benchmarking data with variance analysis, or improve an existing skill based on user feedback.
+  Build, test, and iteratively improve Claude Agent Skills — from first draft through description optimization and benchmarked iteration. Use this skill whenever the user says things like "I want to make a skill for X", "help me build a skill", "my skill isn't triggering / isn't working", "turn this workflow into a skill", "run evals on my skill", "improve my existing skill", or "optimize my skill's description". Also invoke when someone hands you a SKILL.md and asks for feedback, or when you're designing a new skill from scratch and want a rigorous testing loop.
 disable-model-invocation: false
 ---
 
 # Skill builder
 
 A skill for creating new skills and iteratively improving them.
-
-Refer to `references/skill-lifecycle.md` for the procedural lifecycle and anatomy of a skill.
 
 Your job when using this skill is to figure out where the user is in the skill development process and help them progress. Use this map to orient yourself:
 
@@ -26,7 +24,7 @@ Your job when using this skill is to figure out where the user is in the skill d
 ## NEVER List
 - **NEVER** optimize the description before the skill logic is stable.
 - **NEVER** skip baseline runs when iterating on a skill; it prevents verifying the skill's added value.
-- **NEVER** overfit the skill to a small set of test cases; ensure instructions generalize to broad usage.
+- **NEVER** tighten the skill around your test cases. The failure mode: you add an instruction like "always output JSON with keys X, Y, Z" because an eval broke without it — then six months later, someone uses the skill for a slightly different task and gets rigid JSON where prose was needed. Prefer framing the *why* over adding a rule; the model generalizes intent, not rules.
 - **NEVER** use conversational filler or tutorial-style language; provide direct, imperative instructions.
 
 ---
@@ -46,18 +44,13 @@ Calibrate your jargon based on user context cues:
 
 ### Capture Intent
 
-Start by understanding the user's intent. The current conversation might already contain a workflow the user wants to capture (e.g., they say "turn this into a skill"). If so, extract answers from the conversation history first — the tools used, the sequence of steps, corrections the user made, input/output formats observed. The user may need to fill the gaps, and should confirm before proceeding to the next step.
+Start by understanding the user's intent. The current conversation might already contain a workflow the user wants to capture (e.g., they say "turn this into a skill"). If so, extract answers from the conversation history first — the tools used, the sequence of steps, corrections the user made, input/output formats observed. The user may need to fill the gaps, and should confirm before proceeding.
 
-1. What should this skill enable Claude to do?
-2. When should this skill trigger? (what user phrases/contexts)
-3. What's the expected output format?
-4. Should we set up test cases to verify the skill works? Skills with objectively verifiable outputs (file transforms, data extraction, code generation, fixed workflow steps) benefit from test cases. Skills with subjective outputs (writing style, art) often don't need them. Suggest the appropriate default based on the skill type, but let the user decide.
+One non-obvious question to always answer before drafting: **Should we set up test cases?** Skills with objectively verifiable outputs (file transforms, data extraction, code generation, fixed workflow steps) benefit from them. Skills with subjective outputs (writing style, art) often don't. Suggest the appropriate default based on the skill type, but let the user decide.
 
 ### Interview and Research
 
-Proactively ask questions about edge cases, input/output formats, example files, success criteria, and dependencies. Wait to write test prompts until you've got this part ironed out.
-
-Check available MCPs - if useful for research (searching docs, finding similar skills, looking up best practices), research in parallel via subagents if available, otherwise inline. Come prepared with context to reduce burden on the user.
+Get edge cases, input/output formats, example files, success criteria, and dependencies locked down before writing test prompts. Check available MCPs — if useful for research, query them in parallel via subagents rather than sequentially.
 
 ### Write the SKILL.md
 
@@ -111,10 +104,6 @@ cloud-deploy/
 ```
 
 Claude reads only the relevant reference file.
-
-#### Principle of Lack of Surprise
-
-This goes without saying, but skills must not contain malware, exploit code, or any content that could compromise system security. A skill's contents should not surprise the user in their intent if described. Don't go along with requests to create misleading skills or skills designed to facilitate unauthorized access, data exfiltration, or other malicious activities. Things like a "roleplay as an XYZ" are OK though.
 
 #### Writing Patterns
 
@@ -507,16 +496,16 @@ In Claude.ai, the core workflow is the same (draft → test → review → impro
 
 ## Reference files
 
-The agents/ directory contains instructions for specialized subagents. Read them when you need to spawn the relevant subagent.
+The agents/ directory contains instructions for specialized subagents. Each has an explicit MANDATORY trigger embedded in the workflow above — don't load them proactively.
 
-- `agents/grader.md` — How to evaluate assertions against outputs. Spawn a grader subagent when you have run outputs and need to score them against your defined assertions.
-- `agents/comparator.md` — How to do blind A/B comparison between two outputs. Use only when you want independent assessment of which skill version is objectively better, without revealing which is which.
-- `agents/analyzer.md` — How to analyze why one version beat another. Read before doing an analyst pass on benchmark data; identifies patterns hidden by aggregate statistics.
+- `agents/grader.md` — Grading assertions against run outputs (MANDATORY trigger at Step 4)
+- `agents/comparator.md` — Blind A/B comparison between two skill versions (triggered in Advanced section)
+- `agents/analyzer.md` — Analyst pass on benchmark data (MANDATORY trigger at Step 4)
 
-The references/ directory has additional documentation:
+The references/ directory:
 
-- `references/schemas.md` — JSON structures for evals.json, grading.json, benchmark.json, and eval_metadata.json. Reference this when constructing any data structure the workflow depends on.
-- `references/cowork.md` — Adapted instructions for Cowork environments (no browser, static viewer, feedback download).
+- `references/schemas.md` — Full JSON schemas for evals.json, grading.json, benchmark.json, eval_metadata.json. MANDATORY trigger is embedded in the Test Cases section above. Do NOT load for other tasks.
+- `references/cowork.md` — Adapted workflow for headless/Cowork environments. Load only when the user is in Cowork or you can't open a browser.
 
 ---
 
