@@ -551,6 +551,7 @@
                 </svg></button>
               <span id="current-config-label"
                 class="ms-2 fw-semibold text-body-emphasis text-truncate label-flex"></span>
+              <span id="rail-grade-badge" class="badge rounded-pill d-none"></span>
               <span id="config-badge" class="cfg-chip d-none"></span>
             </div>
 
@@ -636,12 +637,9 @@
           </div>
           <div class="offcanvas-body scroll-pane p-3 bg-body-tertiary">
             <span id="fb-rail-title" class="visually-hidden">Your Review</span>
-            <div class="d-flex align-items-center justify-content-between mb-3 d-none d-xl-flex">
+            <div class="mb-3 d-none d-xl-flex">
               <span class="fw-semibold text-body-emphasis">Your Review</span>
-              <span id="rail-grade-badge" class="badge rounded-pill d-none"></span>
             </div>
-
-
             <div class="eyebrow mb-2">Verdict</div>
             <div class="d-grid gap-2 verdict-stack mb-3" role="group" aria-label="Verdict">
               <input type="radio" class="btn-check" name="verdict" id="verdict-good" value="good" autocomplete="off">
