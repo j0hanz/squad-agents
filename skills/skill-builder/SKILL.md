@@ -9,19 +9,9 @@ disable-model-invocation: false
 
 A skill for creating new skills and iteratively improving them.
 
-At a high level, the process of creating a skill goes like this:
+Refer to `references/skill-lifecycle.md` for the procedural lifecycle and anatomy of a skill.
 
-- Decide what you want the skill to do and roughly how it should do it
-- Write a draft of the skill
-- Create a few test prompts and run claude-with-access-to-the-skill on them
-- Help the user evaluate the results both qualitatively and quantitatively
-  - While the runs happen in the background, draft some quantitative evals if there aren't any (if there are some, you can either use as is or modify if you feel something needs to change about them). Then explain them to the user (or if they already existed, explain the ones that already exist)
-  - Use the `eval-viewer/generate_review.py` script to show the user the results for them to look at, and also let them look at the quantitative metrics
-- Rewrite the skill based on feedback from the user's evaluation of the results (and also if there are any glaring flaws that become apparent from the quantitative benchmarks)
-- Repeat until you're satisfied
-- Expand the test set and try again at larger scale
-
-Your job when using this skill is to figure out where the user is in this process and then jump in and help them progress through these stages. Use this map to orient yourself:
+Your job when using this skill is to figure out where the user is in the skill development process and help them progress. Use this map to orient yourself:
 
 | What the user says                                     | Where to start                                                                          |
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
@@ -31,9 +21,15 @@ Your job when using this skill is to figure out where the user is in this proces
 | "My skill isn't working / outputs are inconsistent"    | Read transcripts or ask for a bad-output example first, then diagnose and improve       |
 | "I don't need evals, just vibe with me"                | Write the skill directly, skip the formal eval loop                                     |
 
-Of course, be flexible — the order is always negotiable based on what the user needs.
+---
 
-Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
+## NEVER List
+- **NEVER** optimize the description before the skill logic is stable.
+- **NEVER** skip baseline runs when iterating on a skill; it prevents verifying the skill's added value.
+- **NEVER** overfit the skill to a small set of test cases; ensure instructions generalize to broad usage.
+- **NEVER** use conversational filler or tutorial-style language; provide direct, imperative instructions.
+
+---
 
 ## Communicating with the user
 
