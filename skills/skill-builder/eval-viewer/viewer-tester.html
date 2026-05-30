@@ -42,6 +42,9 @@
 
       /* ── Accent borders ── */
       --ev-accent-w: 3px;
+
+      /* ── Surface rounding ── */
+      --ev-card-radius: .45rem;
     }
 
     /* ── Layout shell ── */
@@ -62,10 +65,6 @@
 
     .pdf-frame {
       height: var(--ev-pdf-h);
-    }
-
-    .skill-name {
-      max-width: 22ch;
     }
 
     .read-col {
@@ -108,6 +107,10 @@
       .nav-rail {
         flex: 0 0 var(--ev-nav-rail-w);
         border-right: 1px solid var(--bs-border-color);
+        /* Override Bootstrap offcanvas: static + full-height on desktop */
+        position: static !important;
+        transform: none !important;
+        visibility: visible !important;
       }
     }
 
@@ -224,11 +227,6 @@
     }
 
     /* ════ Additions: surface, animation, and component consistency ════ */
-
-    /* Shared card radius token — applied everywhere a surface has rounding */
-    :root {
-      --ev-card-radius: .45rem;
-    }
 
     /* Code pre: give it a background so it reads as a distinct surface */
     pre.output-text {
@@ -545,10 +543,9 @@
               d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
           </svg>
         </button>
-        <div>
-          <div class="eyebrow">Skill Builder</div>
-          <div id="skill-name" class="skill-name d-inline-block align-bottom h5 mb-0" title=""></div>
-        </div>
+        <div class="fs-5 eyebrow">Skill Builder</div>
+        <div id="skill-name" class="d-none"></div>
+
       </div>
       <ul class="nav seg-tabs d-none gap-3" id="view-tabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -564,7 +561,7 @@
         </li>
         <li class="nav-item" role="presentation">
           <button id="tab-benchmark" class="nav-link d-inline-flex align-items-center gap-2" type="button" role="tab"
-            data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false"
+            tabindex="-1" data-bs-toggle="tab" data-bs-target="#panel-benchmark" aria-selected="false"
             aria-controls="panel-benchmark"><svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em"
               fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
               <path
@@ -598,7 +595,7 @@
 
     <!-- ---- Outputs panel (qualitative review) — three-column workbench ---- -->
     <div class="tab-pane fade show active h-100" id="panel-outputs" role="tabpanel" aria-labelledby="tab-outputs"
-      tabindex="-1">
+      tabindex="0">
       <div class="d-flex h-100 overflow-hidden">
 
         <!-- Nav rail: grouped eval list (static on lg+, offcanvas below) -->
@@ -717,7 +714,7 @@
           aria-labelledby="fb-rail-title">
           <div class="offcanvas-header border-bottom d-xl-none">
             <h6 class="offcanvas-title">Your Review</h6>
-            <button class="btn-close" type="button" data-bs-dismiss="offcanvas" data-bs-target="#feedback-rail"
+            <button class="btn-close" type="button" data-bs-dismiss="offcanvas"
               aria-label="Close review panel"></button>
           </div>
           <div class="offcanvas-body scroll-pane p-3 bg-body-tertiary">
@@ -1584,13 +1581,13 @@ def test_explain_uses_index_scan(db):
             const btnGroup = el("div", { class: "position-absolute top-0 end-0 m-2 d-flex gap-1" });
             btnGroup.append(
               el("button", {
-                class: "btn ",
+                class: "btn btn-link",
                 type: "button",
                 "aria-label": "Copy " + file.name,
                 onclick: (e) => copyText(file.content, e.currentTarget),
               }, [iconEl(_SVG_COPY)]),
               el("a", {
-                class: "btn  d-inline-flex align-items-center",
+                class: "btn btn-link d-inline-flex align-items-center",
                 href: downloadUri(file), download: file.name,
                 title: "Download " + file.name, "aria-label": "Download " + file.name,
               }, [iconEl(_SVG_DOWNLOAD)])
@@ -1637,7 +1634,7 @@ def test_explain_uses_index_scan(db):
         const actions = [];
         if (file.type === "text" && file.content != null) {
           actions.push(el("button", {
-            class: "btn ",
+            class: "btn btn-link",
             type: "button",
             "aria-label": "Copy " + file.name,
             onclick: (e) => copyText(file.content, e.currentTarget),
@@ -1645,7 +1642,7 @@ def test_explain_uses_index_scan(db):
         }
         if (file.type !== "error") {
           actions.push(el("a", {
-            class: "btn  d-inline-flex align-items-center",
+            class: "btn btn-link d-inline-flex align-items-center",
             href: downloadUri(file), download: file.name,
             title: "Download " + file.name, "aria-label": "Download " + file.name,
           }, [iconEl(_SVG_DOWNLOAD)]));
@@ -1675,7 +1672,7 @@ def test_explain_uses_index_scan(db):
         let activeFile = outputs[0];
 
         const copyBtn = el("button", {
-          class: "btn ",
+          class: "btn btn-link",
           type: "button",
           "aria-label": "Copy",
         }, [iconEl(_SVG_COPY)]);
@@ -1684,7 +1681,7 @@ def test_explain_uses_index_scan(db):
         });
 
         const dlBtn = el("a", {
-          class: "btn  d-inline-flex align-items-center",
+          class: "btn btn-link d-inline-flex align-items-center",
           href: downloadUri(activeFile),
           download: activeFile.name,
           title: "Download " + activeFile.name,
@@ -1887,9 +1884,10 @@ def test_explain_uses_index_scan(db):
         return (r >= 10 ? r.toFixed(0) : r.toFixed(1)) + "×";
       }
       // Bootstrap progress bar
-      function progressBar(rate, bgClass, h) {
+      function progressBar(rate, bgClass, h, label) {
         return el("div", {
           class: "progress", role: "progressbar", style: "height:" + (h || 8) + "px",
+          "aria-label": label || "Pass rate",
           "aria-valuenow": Math.round((rate || 0) * 100), "aria-valuemin": "0", "aria-valuemax": "100",
         }, [el("div", { class: "progress-bar " + bgClass, style: "width:" + Math.max((rate || 0) * 100, 2) + "%" })]);
       }
