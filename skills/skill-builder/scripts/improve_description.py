@@ -49,18 +49,15 @@ def _call_claude(prompt: str, model: str | None, timeout: int = 300) -> str:
     return result.stdout
 
 
-def improve_description(
+def _build_prompt(
     skill_name: str,
     skill_content: str,
     current_description: str,
     eval_results: dict,
     history: list[dict],
-    model: str,
-    test_results: dict | None = None,
-    log_dir: Path | None = None,
-    iteration: int | None = None,
+    test_results: dict | None,
 ) -> str:
-    """Call Claude to improve the description based on eval results."""
+    """Build the improvement prompt from eval results and history."""
     failed_triggers = [
         r for r in eval_results["results"] if r["should_trigger"] and not r["pass"]
     ]
@@ -68,7 +65,6 @@ def improve_description(
         r for r in eval_results["results"] if not r["should_trigger"] and not r["pass"]
     ]
 
-    # Build scores summary
     train_score = (
         f"{eval_results['summary']['passed']}/{eval_results['summary']['total']}"
     )
@@ -153,12 +149,78 @@ I'd encourage you to be creative and mix up the style in different iterations si
 
 Please respond with only the new description text in <new_description> tags, nothing else."""
 
-    text = _call_claude(prompt, model)
+    return prompt
 
+
+def _parse_description(text: str) -> str:
+    """Extract description from <new_description> tags, falling back to raw text."""
     match = re.search(r"<new_description>(.*?)</new_description>", text, re.DOTALL)
-    description = (
-        match.group(1).strip().strip('"') if match else text.strip().strip('"')
+    return match.group(1).strip().strip('"') if match else text.strip().strip('"')
+
+
+def _shorten_if_needed(description: str, prompt: str, model: str) -> tuple[str, dict]:
+    """If description exceeds 1024 chars, call Claude once more to shorten it.
+
+    Returns (final_description, extra_transcript_fields).
+    """
+    if len(description) <= 1024:
+        return description, {}
+
+    # Safety net: the prompt already states the 1024-char hard limit, but if
+    # the model blew past it anyway, make one fresh single-turn call that
+    # quotes the too-long version and asks for a shorter rewrite. (The old
+    # SDK path did this as a true multi-turn; `claude -p` is one-shot, so we
+    # inline the prior output into the new prompt instead.)
+    shorten_prompt = (
+        f"{prompt}\n\n"
+        f"---\n\n"
+        f"A previous attempt produced this description, which at "
+        f"{len(description)} characters is over the 1024-character hard limit:\n\n"
+        f'"{description}"\n\n'
+        f"Rewrite it to be under 1024 characters while keeping the most "
+        f"important trigger words and intent coverage. Respond with only "
+        f"the new description in <new_description> tags."
     )
+    shorten_text = _call_claude(shorten_prompt, model)
+    shortened = _parse_description(shorten_text)
+
+    extra = {
+        "rewrite_prompt": shorten_prompt,
+        "rewrite_response": shorten_text,
+        "rewrite_description": shortened,
+        "rewrite_char_count": len(shortened),
+    }
+    return shortened, extra
+
+
+def _write_log(log_dir: Path, iteration: int | None, transcript: dict) -> None:
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"improve_iter_{iteration or 'unknown'}.json"
+    log_file.write_text(json.dumps(transcript, indent=2), encoding="utf-8")
+
+
+def improve_description(
+    skill_name: str,
+    skill_content: str,
+    current_description: str,
+    eval_results: dict,
+    history: list[dict],
+    model: str,
+    test_results: dict | None = None,
+    log_dir: Path | None = None,
+    iteration: int | None = None,
+) -> str:
+    """Call Claude to improve the description based on eval results."""
+    prompt = _build_prompt(
+        skill_name,
+        skill_content,
+        current_description,
+        eval_results,
+        history,
+        test_results,
+    )
+    text = _call_claude(prompt, model)
+    description = _parse_description(text)
 
     transcript: dict = {
         "iteration": iteration,
@@ -169,44 +231,12 @@ Please respond with only the new description text in <new_description> tags, not
         "over_limit": len(description) > 1024,
     }
 
-    # Safety net: the prompt already states the 1024-char hard limit, but if
-    # the model blew past it anyway, make one fresh single-turn call that
-    # quotes the too-long version and asks for a shorter rewrite. (The old
-    # SDK path did this as a true multi-turn; `claude -p` is one-shot, so we
-    # inline the prior output into the new prompt instead.)
-    if len(description) > 1024:
-        shorten_prompt = (
-            f"{prompt}\n\n"
-            f"---\n\n"
-            f"A previous attempt produced this description, which at "
-            f"{len(description)} characters is over the 1024-character hard limit:\n\n"
-            f'"{description}"\n\n'
-            f"Rewrite it to be under 1024 characters while keeping the most "
-            f"important trigger words and intent coverage. Respond with only "
-            f"the new description in <new_description> tags."
-        )
-        shorten_text = _call_claude(shorten_prompt, model)
-        match = re.search(
-            r"<new_description>(.*?)</new_description>", shorten_text, re.DOTALL
-        )
-        shortened = (
-            match.group(1).strip().strip('"')
-            if match
-            else shorten_text.strip().strip('"')
-        )
-
-        transcript["rewrite_prompt"] = shorten_prompt
-        transcript["rewrite_response"] = shorten_text
-        transcript["rewrite_description"] = shortened
-        transcript["rewrite_char_count"] = len(shortened)
-        description = shortened
-
+    description, extra = _shorten_if_needed(description, prompt, model)
+    transcript.update(extra)
     transcript["final_description"] = description
 
     if log_dir:
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / f"improve_iter_{iteration or 'unknown'}.json"
-        log_file.write_text(json.dumps(transcript, indent=2), encoding="utf-8")
+        _write_log(log_dir, iteration, transcript)
 
     return description
 

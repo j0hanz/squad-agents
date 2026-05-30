@@ -75,6 +75,14 @@ MIME_OVERRIDES = {
 }
 
 
+def _read_b64(path: Path) -> str | None:
+    """Read a file and return its base64 encoding, or None on error."""
+    try:
+        return base64.b64encode(path.read_bytes()).decode("ascii")
+    except OSError:
+        return None
+
+
 def get_mime_type(path: Path) -> str:
     ext = path.suffix.lower()
     if ext in MIME_OVERRIDES:
@@ -218,10 +226,8 @@ def embed_file(path: Path) -> dict:
             "content": content,
         }
     elif ext in IMAGE_EXTENSIONS:
-        try:
-            raw = path.read_bytes()
-            b64 = base64.b64encode(raw).decode("ascii")
-        except OSError:
+        b64 = _read_b64(path)
+        if b64 is None:
             return {
                 "name": path.name,
                 "type": "error",
@@ -234,10 +240,8 @@ def embed_file(path: Path) -> dict:
             "data_uri": f"data:{mime};base64,{b64}",
         }
     elif ext == ".pdf":
-        try:
-            raw = path.read_bytes()
-            b64 = base64.b64encode(raw).decode("ascii")
-        except OSError:
+        b64 = _read_b64(path)
+        if b64 is None:
             return {
                 "name": path.name,
                 "type": "error",
@@ -249,26 +253,18 @@ def embed_file(path: Path) -> dict:
             "data_uri": f"data:{mime};base64,{b64}",
         }
     elif ext == ".xlsx":
-        try:
-            raw = path.read_bytes()
-            b64 = base64.b64encode(raw).decode("ascii")
-        except OSError:
+        b64 = _read_b64(path)
+        if b64 is None:
             return {
                 "name": path.name,
                 "type": "error",
                 "content": "(Error reading file)",
             }
-        return {
-            "name": path.name,
-            "type": "xlsx",
-            "data_b64": b64,
-        }
+        return {"name": path.name, "type": "xlsx", "data_b64": b64}
     else:
         # Binary / unknown — base64 download link
-        try:
-            raw = path.read_bytes()
-            b64 = base64.b64encode(raw).decode("ascii")
-        except OSError:
+        b64 = _read_b64(path)
+        if b64 is None:
             return {
                 "name": path.name,
                 "type": "error",

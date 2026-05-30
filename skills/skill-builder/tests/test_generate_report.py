@@ -1,4 +1,4 @@
-from scripts.generate_report import generate_html
+from scripts.generate_report import generate_html, _aggregate_runs
 
 
 def _minimal_data(description: str = "test description") -> dict:
@@ -85,3 +85,33 @@ def test_generate_html_auto_refresh_when_requested():
 def test_generate_html_skill_name_in_title():
     html = generate_html(_minimal_data(), skill_name="my-skill")
     assert "my-skill" in html
+
+
+def test_generate_html_empty_history():
+    data = _minimal_data()
+    data["history"] = []
+    html = generate_html(data)
+    assert isinstance(html, str)
+    assert len(html) > 100
+
+
+def test_aggregate_runs_none():
+    assert _aggregate_runs(None) == (0, 0)
+
+
+def test_aggregate_runs_empty():
+    assert _aggregate_runs([]) == (0, 0)
+
+
+def test_aggregate_runs_should_trigger():
+    results = [{"runs": 3, "triggers": 2, "should_trigger": True}]
+    correct, total = _aggregate_runs(results)
+    assert correct == 2
+    assert total == 3
+
+
+def test_aggregate_runs_should_not_trigger():
+    results = [{"runs": 3, "triggers": 1, "should_trigger": False}]
+    correct, total = _aggregate_runs(results)
+    assert correct == 2  # runs - triggers
+    assert total == 3

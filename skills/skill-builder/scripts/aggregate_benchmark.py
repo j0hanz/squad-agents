@@ -42,7 +42,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-def calculate_stats(values: list[float]) -> dict:
+def calculate_stats(values: list[float]) -> dict[str, float]:
     """Calculate mean, stddev, min, max for a list of values."""
     if not values:
         return {"mean": 0.0, "stddev": 0.0, "min": 0.0, "max": 0.0}
@@ -64,7 +64,7 @@ def calculate_stats(values: list[float]) -> dict:
     }
 
 
-def load_run_results(benchmark_dir: Path) -> dict:
+def load_run_results(benchmark_dir: Path) -> dict[str, list[dict]]:
     """
     Load all run results from a benchmark directory.
 
@@ -156,7 +156,7 @@ def load_run_results(benchmark_dir: Path) -> dict:
                 # Extract metrics if available
                 metrics = grading.get("execution_metrics", {})
                 result["tool_calls"] = metrics.get("total_tool_calls", 0)
-                if not result.get("tokens"):
+                if result.get("tokens") is None:
                     result["tokens"] = metrics.get("output_chars", 0)
                 result["errors"] = metrics.get("errors_encountered", 0)
 
@@ -182,7 +182,7 @@ def load_run_results(benchmark_dir: Path) -> dict:
     return results
 
 
-def aggregate_results(results: dict) -> dict:
+def aggregate_results(results: dict[str, list[dict]]) -> dict[str, dict]:
     """
     Aggregate run results into summary statistics.
 
