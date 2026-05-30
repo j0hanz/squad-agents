@@ -17,13 +17,13 @@ Agent Dev is a Claude Code plugin that provides process skills, managed agents, 
 
 ## Highlights
 
-| Component | Count | Purpose                                                                    |
-| :-------- | :---: | :------------------------------------------------------------------------- |
-| Skills    |  19   | Process + domain skills (brainstorming, TDD, diagnose, refactor, …)        |
-| Agents    |   2   | `coder` (autonomous execution) · `explorer` (read-only research)           |
-| Commands  |   7   | `/plan`, `/new`, `/eval`, `/check`, `/deliver`, `/code-review`, `/welcome` |
-| Hooks     |  15   | Lifecycle events covering format, nudge, session context, and debug scan   |
-| MCP       |   1   | Context7 for live library documentation                                    |
+| Component | Count | Purpose                                                                                                                 |
+| :-------- | :---: | :---------------------------------------------------------------------------------------------------------------------- |
+| Skills    |  19   | Process + domain skills (brainstorming, TDD, diagnose, refactor, …)                                                     |
+| Agents    |   2   | `coder` (autonomous execution) · `explorer` (read-only research)                                                        |
+| Commands  |  11   | `/plan`, `/new`, `/eval`, `/check`, `/deliver`, `/artifact-review`, `/debug`, `/test`, `/refactor`, `/docs`, `/welcome` |
+| Hooks     |  15   | Lifecycle events covering format, nudge, session context, and debug scan                                                |
+| MCP       |   1   | Context7 for live library documentation                                                                                 |
 
 ## Quick Start
 
@@ -47,15 +47,19 @@ This confirms the plugin loaded and walks you through each component. Run `/chec
 
 All plugin capabilities are exposed as slash commands inside Claude Code.
 
-| Command        | Purpose                                                        |
-| :------------- | :------------------------------------------------------------- |
-| `/welcome`     | Plugin orientation and health check                            |
-| `/plan`        | Brainstorm → spec → implementation plan                        |
-| `/new`         | Scaffold a skill, agent, or hook from a template               |
-| `/eval`        | Create and run evaluation suites for agents                    |
-| `/check`       | Validate plugin health (components, hooks, structure)          |
-| `/deliver`     | Validate output and commit with proper attribution             |
-| `/code-review` | Review the current diff at a chosen effort level (low → ultra) |
+| Command            | Purpose                                                       |
+| :----------------- | :------------------------------------------------------------ |
+| `/welcome`         | Plugin orientation and component overview                     |
+| `/plan`            | Brainstorm → spec → implementation plan                       |
+| `/new`             | Scaffold a skill, agent, or hook from a template              |
+| `/eval`            | Create and run evaluation suites for agents                   |
+| `/check`           | Validate plugin health (components, hooks, structure)         |
+| `/deliver`         | Validate, commit with attribution, and open a PR              |
+| `/artifact-review` | Audit or refine skills, agents, plans, and hooks              |
+| `/debug`           | Debug a problem using the structured diagnose methodology     |
+| `/test`            | Run the plugin test suite (node, python, integration, or all) |
+| `/refactor`        | Clean up code without changing behavior                       |
+| `/docs`            | Create or update AGENTS.md, CLAUDE.md, README, or skill docs  |
 
 ## Project Structure
 

@@ -4,42 +4,50 @@ description: Get a guided tour of the agent-dev plugin.
 
 # Welcome — Plugin Walkthrough
 
-Welcome to the **agent-dev** plugin! This tool is designed to help you build, test, and maintain high-quality Claude Code agents and skills.
+Welcome to the **agent-dev** plugin. This plugin provides skills, agents, hooks, and slash commands for building and maintaining Claude Code agents and skills.
 
-## 🚀 Key Workflows
+## Slash Commands
 
-### 1. Planning a Feature
+| Command             | Purpose                                                                 |
+| ------------------- | ----------------------------------------------------------------------- |
+| `/plan`             | Brainstorm → spec → implementation plan                                 |
+| `/new`              | Scaffold a skill, agent, or hook from a template                        |
+| `/eval`             | Create, audit, run, or lint evaluation suites                           |
+| `/check`            | Validate plugin health (structure, skills, agents, hooks, manifest)     |
+| `/artifact-review`  | Audit existing skills, agents, plans, or hooks for quality and design   |
+| `/deliver`          | Validate, commit with attribution, and open a PR                        |
+| `/debug`            | Debug a problem using the structured `diagnose` methodology             |
+| `/test`             | Run the plugin test suite (node, python, integration, or all)           |
+| `/refactor`         | Clean up code using the `refactor` skill without changing behavior      |
+| `/docs`             | Create or update AGENTS.md, CLAUDE.md, README, or skill documentation   |
 
-Use `/plan [description]` to run the sequential planning pipeline:
+## Agents
 
-- **Brainstorm:** Explore intent and design.
-- **Spec:** Define technical requirements.
-- **Plan:** Create a step-by-step implementation plan.
+| Agent        | Purpose                                                    |
+| ------------ | ---------------------------------------------------------- |
+| `coder`      | Autonomous code execution and refactoring                  |
+| `explorer`   | Read-only research and codebase navigation                 |
+| `documenter` | Documentation generation (invoked by `/docs readme`)       |
 
-### 2. Developing Components
+## Skill Routing
 
-Use `/new [skill|agent|hook] [name]` to scaffold new components.
+Not sure which skill to use? Run the `using-agent-dev` skill for a full routing map and decision tree. Quick guide:
 
-### 3. Evaluating Behavior
+- Something broken → `/debug` (diagnose skill)
+- Building something new → `/plan` (brainstorm → spec → plan)
+- Requirements unclear → brainstorming skill
+- Code messy → `/refactor` (refactor skill)
+- Structure wrong → architecture skill
+- Need API docs → research skill (Context7)
 
-The plugin follows an **eval-first** philosophy:
+## Monitors
 
-- `/eval create [name]` — Author a new test suite.
-- `/eval run [name]` — Run behavioral simulations.
+| Monitor | Purpose |
+| --- | --- |
+| `telemetry-watcher` | Live hook execution telemetry and error surfacing |
+| `node-test-watcher` | Hook handler tests — live feedback during hook dev |
+| `python-test-watcher` | Skill script tests — live feedback during skill dev |
 
-### 4. Health Checks
+## Getting Started
 
-Use `/check all` to ensure your plugin structure, agents, and hooks are correct.
-
-### 5. Delivery
-
-Use `/deliver` to validate your work and commit it with proper attribution.
-
-## 🤖 Specialized Agents
-
-- **Coder:** Autonomous code execution and refactoring.
-- **Explorer:** Research-focused, read-only exploration of code and docs.
-
-## 📚 Getting Started
-
-Try running `/check all` now to see the health status of this workspace!
+Run `/check all` to confirm the plugin is healthy, then `/plan` to start building.
