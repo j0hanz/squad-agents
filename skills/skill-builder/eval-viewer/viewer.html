@@ -18,8 +18,6 @@
 
       /* ── Navbar ── */
       --ev-navbar-min-h: 58px;
-      --ev-progress-meter-w: clamp(110px, 12vw, 150px);
-      --ev-progress-bar-h: 5px;
 
       /* ── Content panels ── */
       --ev-pdf-h: clamp(300px, 70vh, 900px);
@@ -74,11 +72,6 @@
       max-width: var(--ev-read-col-max);
     }
 
-    .label-flex {
-      flex: 1 1 0;
-      min-width: 0;
-    }
-
     .img-thumb {
       max-height: var(--ev-img-thumb-max-h);
       object-fit: contain;
@@ -115,10 +108,6 @@
       background: var(--bs-body-bg);
       color: var(--bs-body-emphasis);
       box-shadow: var(--bs-box-shadow-sm);
-    }
-
-    .progress-meter {
-      width: var(--ev-progress-meter-w);
     }
 
     /* ── Nav rail: grouped eval list (static on lg+, offcanvas below) ── */
@@ -317,6 +306,45 @@
       z-index: 10;
     }
 
+    /* Subbar clusters — nav (left, natural width), identity (flex-grow,
+       truncates), meter (right, natural width). A cluster's content
+       change is absorbed inside itself, not propagated to its siblings. */
+    .subbar-nav {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      flex-shrink: 0;
+    }
+
+    .subbar-id {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .subbar-id #current-config-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .subbar-meter {
+      flex-shrink: 0;
+    }
+
+    /* Stabilise the numeric column in every .ev-meter so the donut stays put
+       across configs (100 → 25 → 14). Score numbers are pure digits — no % —
+       so 3.25ch covers "100" with a small buffer across system fonts. */
+    .ev-meter .ev-meter-num {
+      min-width: 3.25ch;
+      display: inline-flex;
+      justify-content: flex-end;
+      align-items: baseline;
+    }
+
     /* Sidebar group header: consistent spacing + visual divider between groups */
     .sidebar-group-head {
       padding: .5rem .85rem .3rem;
@@ -454,10 +482,173 @@
       text-align: center;
       flex-shrink: 0;
     }
+
+    /* ════ Donut progress meter — single source for every percent badge / progress meter ════
+       Replaces the four legacy uses:
+         · sidebar row score              (small, 18 px)
+         · subbar grade indicator         (medium, 22 px + Grade label)
+         · top-right reviewed counter     (medium, 28 px + Reviewed label + fraction)
+         · formal-grades accordion badge  (small, 18 px) */
+    .ev-meter {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      --ev-meter-tone: var(--bs-secondary-color);
+      --ev-meter-fg: var(--bs-body-emphasis);
+    }
+
+    .ev-meter.tone-good {
+      --ev-meter-tone: var(--bs-success);
+      --ev-meter-fg: var(--bs-success-text-emphasis, #75b798);
+    }
+
+    .ev-meter.tone-warn {
+      --ev-meter-tone: var(--bs-warning);
+      --ev-meter-fg: var(--bs-warning-text-emphasis, #ffda6a);
+    }
+
+    .ev-meter.tone-bad {
+      --ev-meter-tone: var(--bs-danger);
+      --ev-meter-fg: var(--bs-danger-text-emphasis, #ea868f);
+    }
+
+    .ev-meter.tone-sec {
+      --ev-meter-tone: var(--bs-secondary-color);
+      --ev-meter-fg: var(--bs-secondary-color);
+    }
+
+    .ev-donut {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .ev-donut .donut-track {
+      stroke: var(--bs-border-color);
+      opacity: .55;
+    }
+
+    .ev-donut .donut-fill {
+      stroke: var(--ev-meter-tone);
+      transition: stroke-dasharray .25s ease;
+    }
+
+    .ev-meter-num {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--ev-meter-fg);
+      letter-spacing: -.01em;
+    }
+
+    .ev-meter-eyebrow {
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+      font-weight: 500;
+    }
+
+    .ev-meter-frac {
+      font-size: .8rem;
+      color: var(--bs-secondary-color);
+    }
+
+    .ev-meter-frac strong {
+      color: var(--bs-body-emphasis);
+      font-weight: 700;
+      font-size: .95rem;
+    }
+
+    .ev-meter-frac .ev-slash {
+      opacity: .5;
+      margin: 0 1px;
+      font-weight: 400;
+    }
+
+    /* Scale variants — pick by context */
+    .ev-meter-sub .ev-meter-num {
+      font-size: .9rem;
+    }
+
+    .ev-meter-reviewed {
+      gap: .55rem;
+      padding: .15rem 0;
+    }
+
+    /* Benchmark per-eval vs-col gauge — large donut + percent.
+       display:flex (not inline-flex) so it owns its own row beneath
+       the cfg-chip above and the meta line below. */
+    .ev-meter-vs {
+      display: flex;
+      gap: .75rem;
+    }
+
+    .ev-meter-vs .vs-num {
+      font-size: clamp(1.4rem, 2.6vw, 2rem);
+      line-height: 1;
+      font-weight: 600;
+      color: var(--ev-meter-fg);
+      letter-spacing: -.01em;
+    }
+
+    /* Per-eval vs-col: chip + stats share the top row; gauge sits below.
+       Uses the previously empty card width to surface assertions + time
+       as first-class labelled stats. */
+    .vs-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: .9rem;
+    }
+
+    .vs-stats {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .vs-stat {
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+      min-width: 0;
+    }
+
+    .vs-stat-label {
+      font-size: var(--ev-eyebrow-fs);
+      letter-spacing: var(--ev-eyebrow-ls);
+      text-transform: uppercase;
+      color: var(--bs-secondary-color);
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .vs-stat-val {
+      font-size: 1rem;
+      color: var(--bs-body-emphasis);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      line-height: 1.1;
+    }
   </style>
 </head>
 
 <body class="d-flex flex-column app-shell">
+
+  <!-- Splash thumbnail shown by the bundler while the inlined file unpacks. -->
+  <template id="__bundler_thumbnail" data-bg-color="#0f1216">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="600" cy="400" r="180" fill="none" stroke="#3a3f47" stroke-width="38" />
+      <circle cx="600" cy="400" r="180" fill="none" stroke="#198754" stroke-width="38" stroke-linecap="round"
+        stroke-dasharray="848 1131" transform="rotate(-90 600 400)" />
+      <text x="600" y="430" text-anchor="middle" fill="#e9ecef"
+        font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="120"
+        font-weight="700">100</text>
+    </svg>
+  </template>
 
   <!-- ============ Navbar: brand · tabs · progress · submit ============ -->
   <nav class="navbar bg-body-tertiary border-bottom flex-shrink-0 py-1">
@@ -499,12 +690,12 @@
         </li>
       </ul>
       <div class="d-flex align-items-center gap-5 ms-auto">
-        <div class="progress-meter d-none d-sm-block">
-          <div class="d-flex justify-content-between small text-secondary mb-1"><span>Reviewed</span><span
-              id="reviewed-count" class="text-body-emphasis">0 / 0</span></div>
-          <div class="progress" role="progressbar" style="--bs-progress-height: var(--ev-progress-bar-h)"
+        <div class="progress-meter d-none d-sm-flex align-items-center">
+          <div id="reviewed-meter" class="ev-meter ev-meter-reviewed tone-sec" role="progressbar"
             aria-label="Review progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-            <div id="progress-bar" class="progress-bar bg-success"></div>
+            <span class="ev-meter-eyebrow">Reviewed</span>
+            <span id="reviewed-donut"></span>
+            <span id="reviewed-count" class="ev-meter-frac"><strong>0</strong><span class="ev-slash">/</span>0</span>
           </div>
         </div>
         <button class="btn btn-primary  d-xl-none" type="button" data-bs-toggle="offcanvas"
@@ -535,24 +726,27 @@
         <div class="d-flex flex-column flex-grow-1 overflow-hidden">
           <div id="main-scroll" class="scroll-pane flex-grow-1 d-flex flex-column">
 
-            <div id="reading-subbar" class="d-flex align-items-center gap-2 px-3 py-2">
-              <button id="prev-btn" class="btn btn-dark d-flex align-items-center justify-content-center" type="button"
-                aria-label="Previous eval"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                  fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                  <path fill-rule="evenodd"
-                    d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm11.5 5.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z" />
-                </svg></button>
-              <span id="subbar-pos" aria-live="polite"></span>
-              <button id="next-btn" class="btn btn-dark d-flex align-items-center justify-content-center" type="button"
-                aria-label="Next eval"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                  fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                  <path fill-rule="evenodd"
-                    d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
-                </svg></button>
-              <span id="current-config-label"
-                class="ms-2 fw-semibold text-body-emphasis text-truncate label-flex"></span>
-              <span id="rail-grade-badge" class="badge rounded-pill d-none"></span>
-              <span id="config-badge" class="cfg-chip d-none"></span>
+            <div id="reading-subbar" class="d-flex align-items-center gap-3 px-3 py-2">
+              <div class="subbar-nav">
+                <button id="prev-btn" class="btn btn-dark d-flex align-items-center justify-content-center"
+                  type="button" aria-label="Previous eval"><svg xmlns="http://www.w3.org/2000/svg" width="20"
+                    height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                      d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm11.5 5.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z" />
+                  </svg></button>
+                <span id="subbar-pos" aria-live="polite"></span>
+                <button id="next-btn" class="btn btn-dark d-flex align-items-center justify-content-center"
+                  type="button" aria-label="Next eval"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                      d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
+                  </svg></button>
+              </div>
+              <div class="subbar-id">
+                <span id="current-config-label" class="fw-semibold text-body-emphasis"></span>
+                <span id="config-badge" class="cfg-chip d-none"></span>
+              </div>
+              <span id="rail-grade-badge" class="ev-meter ev-meter-sub subbar-meter d-none"></span>
             </div>
 
             <!-- Empty state -->
@@ -606,15 +800,11 @@
                           <path
                             d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
                         </svg><span>Formal Grades</span>
-                        <span id="grades-badge" class="badge"></span>
+                        <span id="grades-badge" class="ev-meter"></span>
                       </button>
                     </h2>
                     <div id="grades-collapse" class="accordion-collapse collapse">
                       <div class="accordion-body">
-                        <div class="progress mb-2" role="progressbar" aria-label="Grade pass rate" aria-valuenow="0"
-                          aria-valuemin="0" aria-valuemax="100">
-                          <div id="grades-progress" class="progress-bar"></div>
-                        </div>
                         <p id="grades-summary" class="small text-secondary mb-2"></p>
                         <div id="grades-list" class="list-group list-group-flush"></div>
                       </div>
@@ -644,22 +834,22 @@
             <div class="d-grid gap-2 verdict-stack mb-3" role="group" aria-label="Verdict">
               <input type="radio" class="btn-check" name="verdict" id="verdict-good" value="good" autocomplete="off">
               <label class="btn btn-outline-success text-start gap-2" for="verdict-good"><svg
-                  xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16"
-                  aria-hidden="true">
+                  xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor"
+                  viewBox="0 0 16 16" aria-hidden="true">
                   <path
                     d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
                 </svg>Looks good</label>
               <input type="radio" class="btn-check" name="verdict" id="verdict-needs_work" value="needs_work"
                 autocomplete="off">
               <label class="btn btn-outline-danger text-start gap-2" for="verdict-needs_work"><svg
-                  xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16"
-                  aria-hidden="true">
+                  xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor"
+                  viewBox="0 0 16 16" aria-hidden="true">
                   <path
                     d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
                 </svg>Needs work</label>
               <input type="radio" class="btn-check" name="verdict" id="verdict-skip" value="skip" autocomplete="off">
-              <label class="btn text-start gap-2" for="verdict-skip"><svg xmlns="http://www.w3.org/2000/svg" width="1.1em"
-                  height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <label class="btn text-start gap-2" for="verdict-skip"><svg xmlns="http://www.w3.org/2000/svg"
+                  width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
                   <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8" />
                 </svg>Skip for now</label>
@@ -731,6 +921,46 @@
       const _SVG_X = `<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>`;
       const _SVG_DOT = `<svg xmlns="http://www.w3.org/2000/svg" width="0.5em" height="0.5em" fill="currentColor" viewBox="6.5 6.5 3 3" aria-hidden="true"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/></svg>`;
       function iconEl(svgStr) { const t = document.createElement("span"); t.innerHTML = svgStr; return t.firstElementChild; }
+
+      // ═══ Donut progress meter helpers ═══
+      // donutSvg(pct, size, stroke) → SVG element. Pair with .ev-meter wrapper
+      // and a .ev-meter-num / .ev-meter-frac sibling for the number.
+      const _SVG_NS = "http://www.w3.org/2000/svg";
+      function donutSvg(pct, size = 18, stroke = 2.5) {
+        const r = (size - stroke) / 2;
+        const c = 2 * Math.PI * r;
+        const safe = pct == null ? 0 : Math.max(0, Math.min(100, pct));
+        const dash = c * (safe / 100);
+        const svg = document.createElementNS(_SVG_NS, "svg");
+        svg.setAttribute("class", "ev-donut");
+        svg.setAttribute("width", size);
+        svg.setAttribute("height", size);
+        svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+        svg.setAttribute("aria-hidden", "true");
+        const track = document.createElementNS(_SVG_NS, "circle");
+        track.setAttribute("cx", size / 2); track.setAttribute("cy", size / 2); track.setAttribute("r", r);
+        track.setAttribute("class", "donut-track"); track.setAttribute("fill", "none");
+        track.setAttribute("stroke-width", stroke);
+        const fill = document.createElementNS(_SVG_NS, "circle");
+        fill.setAttribute("cx", size / 2); fill.setAttribute("cy", size / 2); fill.setAttribute("r", r);
+        fill.setAttribute("class", "donut-fill"); fill.setAttribute("fill", "none");
+        fill.setAttribute("stroke-width", stroke);
+        fill.setAttribute("stroke-linecap", "round");
+        fill.setAttribute("stroke-dasharray", `${dash} ${c}`);
+        fill.setAttribute("transform", `rotate(-90 ${size / 2} ${size / 2})`);
+        svg.append(track, fill);
+        return svg;
+      }
+      function passToneClass(pct) {
+        if (pct == null) return "tone-sec";
+        return pct >= 80 ? "tone-good" : pct < 50 ? "tone-bad" : "tone-warn";
+      }
+      // Compose a row-style meter: small donut + numeric tail (e.g. "100").
+      function meterRow(pct) {
+        const wrap = el("span", { class: "ev-meter " + passToneClass(pct) });
+        wrap.append(donutSvg(pct, 18, 2.5), el("span", { class: "ev-meter-num", text: pct + "" }));
+        return wrap;
+      }
 
 
       /*__EMBEDDED_DATA__*/
@@ -821,22 +1051,12 @@
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // COLOR HELPERS
-      // Pass-rate → Bootstrap class mapping. Thresholds (80% / 50%) are
-      // defined once here so all badge, bar, and text uses stay in sync.
+      // PASS-RATE THRESHOLDS — see passToneClass() above
+      // 80% → success · 50–79% → warning · <50% → danger. Single source
+      // of truth for every donut meter (sidebar, subbar, navbar Reviewed,
+      // Formal Grades, benchmark vs-col).
       // ═══════════════════════════════════════════════════════════════
-      function passBadgeClass(pct) {   // → text-bg-* for badges
-        if (pct == null) return "text-bg-secondary";
-        return pct >= 80 ? "text-bg-success" : pct < 50 ? "text-bg-danger" : "text-bg-warning";
-      }
-      function passBarClass(pct) {     // → bg-* for progress bars
-        if (pct == null) return "bg-secondary";
-        return pct >= 80 ? "bg-success" : pct < 50 ? "bg-danger" : "bg-warning";
-      }
-      function passTextClass(pct) {    // → text-* for inline text
-        if (pct == null) return "text-secondary";
-        return pct >= 80 ? "text-success" : pct < 50 ? "text-danger" : "text-warning";
-      }
+      // (passToneClass + meterRow defined above next to donutSvg.)
 
       // ═══════════════════════════════════════════════════════════════
       // FEEDBACK UTILS
@@ -909,10 +1129,7 @@
           !isChild && cfg ? el("span", {
             class: "cfg-chip " + (cfg.baseline ? "is-baseline" : "is-with"),
           }, [iconEl(_SVG_DOT), cfg.label]) : null,
-          pct == null ? null : el("span", {
-            class: "badge rounded-pill " + passBadgeClass(pct),
-            text: pct + "%",
-          }),
+          pct == null ? null : meterRow(pct),
         ]);
         return el("button", {
           class: "list-group-item list-group-item-action d-flex align-items-center gap-2" + (cfg && cfg.baseline ? " is-baseline" : ""),
@@ -1008,11 +1225,16 @@
         const pct = gradePct(run);
         const rgb = $("rail-grade-badge");
         if (pct == null) {
-          rgb.className = "badge rounded-pill d-none";
-          rgb.textContent = "";
+          rgb.className = "ev-meter ev-meter-sub subbar-meter d-none";
+          rgb.replaceChildren();
         } else {
-          rgb.className = "badge rounded-pill " + passBadgeClass(pct);
-          rgb.textContent = "Grade " + pct + "%";
+          rgb.className = "ev-meter ev-meter-sub subbar-meter " + passToneClass(pct);
+          const num = el("span", { class: "ev-meter-num", text: String(pct) });
+          rgb.replaceChildren(
+            el("span", { class: "ev-meter-eyebrow", text: "Grade" }),
+            donutSvg(pct, 22, 3),
+            num
+          );
         }
 
         // Restore saved verdict for this run
@@ -1301,13 +1523,14 @@
         const progressPct = pct ?? 0;
 
         const badge = $("grades-badge");
-        badge.className = "badge rounded-pill " + passBadgeClass(pct);
-        badge.textContent = pct == null ? "?" : pct + "%";
-
-        const bar = $("grades-progress");
-        bar.style.width = progressPct + "%";
-        bar.className = "progress-bar " + passBarClass(pct);
-        bar.closest("[role='progressbar']").setAttribute("aria-valuenow", progressPct);
+        badge.className = "ev-meter " + passToneClass(pct);
+        badge.replaceChildren();
+        if (pct == null) {
+          badge.append(el("span", { class: "ev-meter-num text-secondary", text: "?" }));
+        } else {
+          const num = el("span", { class: "ev-meter-num", text: String(pct) });
+          badge.append(donutSvg(pct, 18, 2.5), num);
+        }
 
         $("grades-summary").textContent = `${s.passed || 0} passed, ${s.failed || 0} failed of ${s.total || 0}`;
 
@@ -1495,12 +1718,26 @@
             const avgTime = times.length ? times.reduce((s, v) => s + v, 0) / times.length : null;
             const pctNum = Math.round(avg * 100);
             const baseline = isBaselineCfg(cfg);
-            const metaBits = [`${passed} / ${total} assertions`];
-            if (avgTime != null) metaBits.push(`${avgTime.toFixed(1)}s${runsPer > 1 ? " avg" : ""}`);
+            const gauge = el("div", { class: "ev-meter ev-meter-vs " + passToneClass(pctNum) }, [
+              donutSvg(pctNum, 52, 4.5),
+              el("div", { class: "vs-num", text: String(pctNum) }),
+            ]);
+            const stats = el("div", { class: "vs-stats" }, [
+              el("div", { class: "vs-stat" }, [
+                el("div", { class: "vs-stat-label", text: "Assertions" }),
+                el("div", { class: "vs-stat-val", text: `${passed} / ${total}` }),
+              ]),
+              avgTime == null ? null : el("div", { class: "vs-stat" }, [
+                el("div", { class: "vs-stat-label", text: runsPer > 1 ? "Time avg" : "Time" }),
+                el("div", { class: "vs-stat-val", text: avgTime.toFixed(1) + "s" }),
+              ]),
+            ]);
             grid.append(el("div", { class: "col-12 col-sm-6 vs-col p-3 " + (baseline ? "is-without" : "is-with") }, [
-              el("div", { class: "cfg-chip " + (baseline ? "is-baseline" : "is-with") + " mb-2" }, [iconEl(_SVG_DOT), titleCase(cfg)]),
-              el("div", { class: "fs-2 lh-1 " + passTextClass(pctNum), text: pctNum + "%" }),
-              el("div", { class: "small text-secondary mt-1", text: metaBits.join(" · ") }),
+              el("div", { class: "vs-head" }, [
+                el("div", { class: "cfg-chip " + (baseline ? "is-baseline" : "is-with") }, [iconEl(_SVG_DOT), titleCase(cfg)]),
+                stats,
+              ]),
+              gauge,
             ]));
           });
 
@@ -1598,11 +1835,21 @@
         if (pos) pos.textContent = total ? (currentIndex + 1) + "\u2009/\u2009" + total : "";
         const reviewed = visited.size;
         const pct = total ? Math.round(reviewed / total * 100) : 0;
-        const bar = $("progress-bar");
-        bar.style.width = pct + "%";
-        bar.closest("[role='progressbar']").setAttribute("aria-valuenow", pct);
+        const meter = $("reviewed-meter");
+        if (meter) {
+          const tone = reviewed === 0 ? "tone-sec" : pct >= 80 ? "tone-good" : "tone-sec";
+          meter.className = "ev-meter ev-meter-reviewed " + tone;
+          meter.setAttribute("aria-valuenow", pct);
+          $("reviewed-donut").replaceChildren(donutSvg(pct, 28, 3));
+        }
         const rc = $("reviewed-count");
-        if (rc) rc.textContent = `${reviewed} / ${total}`;
+        if (rc) {
+          rc.replaceChildren(
+            el("strong", { text: String(reviewed) }),
+            el("span", { class: "ev-slash", text: "/" }),
+            document.createTextNode(String(total))
+          );
+        }
         if (total && Object.keys(verdictMap).length >= total) {
           $("submit-btn").classList.replace("btn-outline-secondary", "btn-primary");
         }
@@ -1710,7 +1957,13 @@
         prefillFeedback().then(() => { if (RUNS.length) showRun(0); else updateNav(); });
       }
 
-      document.addEventListener("DOMContentLoaded", init);
+      // DOMContentLoaded may have already fired if the script is injected
+      // dynamically (e.g. by an offline-bundler splash). Handle both cases.
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
     })();
   </script>
 </body>
