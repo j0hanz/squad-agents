@@ -2,7 +2,6 @@
 import re
 import sys
 import argparse
-import os
 from pathlib import Path
 
 # Add lib to path
@@ -20,9 +19,9 @@ VAGUE_ADJECTIVES = [
 ]
 
 
-def validate(spec):
-    errors = []
-    warnings = []
+def validate(spec) -> tuple[list[str], list[str]]:
+    errors: list[str] = []
+    warnings: list[str] = []
 
     # 1. Structural Checks
     mandatory_sections = [
@@ -49,7 +48,7 @@ def validate(spec):
     req_lines = [line for line in spec.raw_lines if _REQ_STMT_RE.match(line)]
     for line in req_lines:
         # Atomicity check
-        if " and " in line.lower() and not re_contains_code_block(line):
+        if " and " in line.lower() and not contains_code_block(line):
             warnings.append(
                 f"Requirement might not be atomic (contains 'and'): {line.strip()}"
             )
@@ -96,8 +95,8 @@ def validate(spec):
     return errors, warnings
 
 
-def re_contains_code_block(line):
-    return "`" in line or "```" in line
+def contains_code_block(line: str) -> bool:
+    return "`" in line
 
 
 def main():
@@ -107,35 +106,33 @@ def main():
     parser.add_argument("file", help="Path to the spec.md file")
     args = parser.parse_args()
 
-    if not os.path.exists(args.file):
-        print(f"Error: File {args.file} not found.")
-        sys.exit(1)
-
     try:
         spec = parse_spec(args.file)
         errors, warnings = validate(spec)
-
-        print(f"Audit Results for: {args.file}\n")
-
-        if warnings:
-            print("WARNINGS:")
-            for w in warnings:
-                print(f"  [!] {w}")
-            print()
-
-        if errors:
-            print("ERRORS:")
-            for e in errors:
-                print(f"  [X] {e}")
-            print("\nSpec is INVALID.")
-            sys.exit(1)
-        else:
-            print("Spec is VALID.")
-            sys.exit(0)
-
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+    except FileNotFoundError:
+        print(f"Error: File not found: {args.file}")
         sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error ({type(e).__name__}): {e}")
+        sys.exit(1)
+
+    print(f"Audit Results for: {args.file}\n")
+
+    if warnings:
+        print("WARNINGS:")
+        for w in warnings:
+            print(f"  [!] {w}")
+        print()
+
+    if errors:
+        print("ERRORS:")
+        for e in errors:
+            print(f"  [X] {e}")
+        print("\nSpec is INVALID.")
+        sys.exit(1)
+    else:
+        print("Spec is VALID.")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
