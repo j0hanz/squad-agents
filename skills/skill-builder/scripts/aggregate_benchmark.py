@@ -160,7 +160,7 @@ def aggregate_results(results: dict[str, list[dict[str, Any]]]) -> dict[str, dic
     configs = list(results.keys())
 
     for config in configs:
-        runs = results.get(config, [])
+        runs = results[config]
 
         if not runs:
             run_summary[config] = {
@@ -345,13 +345,11 @@ def main():
     output_json = args.output or (args.benchmark_dir / "benchmark.json")
     output_md = output_json.with_suffix(".md")
 
-    with open(output_json, "w", encoding="utf-8") as f:
-        json.dump(benchmark, f, indent=2)
+    output_json.write_text(json.dumps(benchmark, indent=2), encoding="utf-8")
     print(f"Generated: {output_json}")
 
     markdown = generate_markdown(benchmark)
-    with open(output_md, "w", encoding="utf-8") as f:
-        f.write(markdown)
+    output_md.write_text(markdown, encoding="utf-8")
     print(f"Generated: {output_md}")
 
     run_summary = benchmark["run_summary"]

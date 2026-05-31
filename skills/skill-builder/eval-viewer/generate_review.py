@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from functools import partial
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 # --- Configuration & Constants ---
 
@@ -37,10 +37,10 @@ class Config:
     """Central configuration for eval viewer utilities."""
 
     # Files to exclude from output listings
-    METADATA_FILES: Set[str] = {"transcript.md", "user_notes.md", "metrics.json"}
+    METADATA_FILES: set[str] = {"transcript.md", "user_notes.md", "metrics.json"}
 
     # Extensions we render as inline text
-    TEXT_EXTENSIONS: Set[str] = {
+    TEXT_EXTENSIONS: set[str] = {
         ".txt",
         ".md",
         ".json",
@@ -69,13 +69,13 @@ class Config:
     }
 
     # Extensions we render as sandboxed iframes
-    HTML_EXTENSIONS: Set[str] = {".html", ".htm"}
+    HTML_EXTENSIONS: set[str] = {".html", ".htm"}
 
     # Extensions we render as inline images
-    IMAGE_EXTENSIONS: Set[str] = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
+    IMAGE_EXTENSIONS: set[str] = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
 
     # MIME type overrides for common types
-    MIME_OVERRIDES: Dict[str, str] = {
+    MIME_OVERRIDES: dict[str, str] = {
         ".svg": "image/svg+xml",
         ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -83,7 +83,7 @@ class Config:
     }
 
     # Directories to skip during run discovery
-    SKIP_DIRS: Set[str] = {"node_modules", ".git", "__pycache__", "skill", "inputs"}
+    SKIP_DIRS: set[str] = {"node_modules", ".git", "__pycache__", "skill", "inputs"}
 
     DEFAULT_PORT = 3117
 
@@ -94,13 +94,13 @@ class EmbeddedFile:
 
     name: str
     type: str
-    content: Optional[str] = None
-    data_uri: Optional[str] = None
-    mime: Optional[str] = None
-    src: Optional[str] = None
-    data_b64: Optional[str] = None
+    content: str | None = None
+    data_uri: str | None = None
+    mime: str | None = None
+    src: str | None = None
+    data_b64: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to a dictionary for JSON serialization, excluding None values."""
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
@@ -111,11 +111,11 @@ class RunInfo:
 
     id: str
     prompt: str
-    eval_id: Optional[str] = None
-    outputs: List[EmbeddedFile] = field(default_factory=list)
-    grading: Optional[Dict[str, Any]] = None
+    eval_id: str | None = None
+    outputs: list[EmbeddedFile] = field(default_factory=list)
+    grading: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to a dictionary for JSON serialization."""
         return {
             "id": self.id,
@@ -138,7 +138,7 @@ def safe_print(text: str, file: Any = sys.stdout) -> None:
         print(encoded.decode(getattr(file, "encoding", "utf-8") or "utf-8"), file=file)
 
 
-def _read_b64(path: Path) -> Optional[str]:
+def _read_b64(path: Path) -> str | None:
     """Read a file and return its base64 encoding, or None on error."""
     try:
         return base64.b64encode(path.read_bytes()).decode("ascii")
@@ -155,16 +155,16 @@ def get_mime_type(path: Path) -> str:
     return mime or "application/octet-stream"
 
 
-def find_runs(workspace: Path) -> List[RunInfo]:
+def find_runs(workspace: Path) -> list[RunInfo]:
     """Recursively find directories that contain an outputs/ subdirectory."""
-    runs: List[RunInfo] = []
+    runs: list[RunInfo] = []
     _find_runs_recursive(workspace, workspace, runs)
     # Sort by eval_id (if present) then by run_id
     runs.sort(key=lambda r: (r.eval_id or "zzzz", r.id))
     return runs
 
 
-def _find_runs_recursive(root: Path, current: Path, runs: List[RunInfo]) -> None:
+def _find_runs_recursive(root: Path, current: Path, runs: list[RunInfo]) -> None:
     if not current.is_dir():
         return
 
@@ -180,7 +180,7 @@ def _find_runs_recursive(root: Path, current: Path, runs: List[RunInfo]) -> None
             _find_runs_recursive(root, child, runs)
 
 
-def build_run(root: Path, run_dir: Path) -> Optional[RunInfo]:
+def build_run(root: Path, run_dir: Path) -> RunInfo | None:
     """Build a RunInfo DTO with prompt, outputs, and grading data."""
     prompt = ""
     eval_id = None
@@ -224,7 +224,7 @@ def build_run(root: Path, run_dir: Path) -> Optional[RunInfo]:
 
     # Collect output files
     outputs_dir = run_dir / "outputs"
-    output_files: List[EmbeddedFile] = []
+    output_files: list[EmbeddedFile] = []
     if outputs_dir.is_dir():
         try:
             for f in sorted(outputs_dir.iterdir()):
@@ -325,15 +325,15 @@ def embed_file(path: Path) -> EmbeddedFile:
     )
 
 
-def load_previous_iteration(workspace: Path) -> Dict[str, Dict[str, Any]]:
+def load_previous_iteration(workspace: Path) -> dict[str, dict[str, Any]]:
     """Load previous iteration's feedback and outputs.
 
     Returns a map of run_id -> {"feedback": str, "outputs": list[dict]}.
     """
-    result: Dict[str, Dict[str, Any]] = {}
+    result: dict[str, dict[str, Any]] = {}
 
     # Load feedback
-    feedback_map: Dict[str, str] = {}
+    feedback_map: dict[str, str] = {}
     feedback_path = workspace / "feedback.json"
     if feedback_path.exists():
         try:
@@ -363,10 +363,10 @@ def load_previous_iteration(workspace: Path) -> Dict[str, Dict[str, Any]]:
 
 
 def generate_html(
-    runs: List[RunInfo],
+    runs: list[RunInfo],
     skill_name: str,
-    previous: Optional[Dict[str, Dict[str, Any]]] = None,
-    benchmark: Optional[Dict[str, Any]] = None,
+    previous: dict[str, dict[str, Any]] | None = None,
+    benchmark: dict[str, Any] | None = None,
 ) -> str:
     """Generate the complete standalone HTML page with embedded data."""
     assets_dir = Path(__file__).parent.parent / "assets"
@@ -402,8 +402,8 @@ def generate_html(
             pass
 
     # Build previous_feedback and previous_outputs maps for the template
-    previous_feedback: Dict[str, str] = {}
-    previous_outputs: Dict[str, List[Dict[str, Any]]] = {}
+    previous_feedback: dict[str, str] = {}
+    previous_outputs: dict[str, list[dict[str, Any]]] = {}
     if previous:
         for run_id, data in previous.items():
             if data.get("feedback"):
@@ -476,8 +476,8 @@ class ReviewHandler(BaseHTTPRequestHandler):
         workspace: Path,
         skill_name: str,
         feedback_path: Path,
-        previous: Dict[str, Dict[str, Any]],
-        benchmark_path: Optional[Path],
+        previous: dict[str, dict[str, Any]],
+        benchmark_path: Path | None,
         *args,
         **kwargs,
     ):
@@ -612,7 +612,7 @@ def main() -> None:
     skill_name = args.skill_name or workspace.name.replace("-workspace", "")
     feedback_path = workspace / "feedback.json"
 
-    previous: Dict[str, Dict[str, Any]] = {}
+    previous: dict[str, dict[str, Any]] = {}
     if args.previous_workspace:
         previous = load_previous_iteration(args.previous_workspace.resolve())
 

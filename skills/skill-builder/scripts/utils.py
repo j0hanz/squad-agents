@@ -49,10 +49,10 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
 def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
     """Parse a SKILL.md file, returning (name, description, full_content)."""
     skill_md_path = skill_path / "SKILL.md"
-    if not skill_md_path.exists():
+    try:
+        content = skill_md_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
         raise FileNotFoundError(f"SKILL.md not found in {skill_path}")
-
-    content = skill_md_path.read_text(encoding="utf-8")
 
     match = re.match(r"^---\n(.*?)\n---\n", content, re.DOTALL)
     if not match:

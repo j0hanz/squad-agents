@@ -138,8 +138,7 @@ async def run_single_query(
 
         return triggered
     finally:
-        if await asyncio.to_thread(command_file.exists):
-            await asyncio.to_thread(command_file.unlink)
+        await asyncio.to_thread(command_file.unlink, missing_ok=True)
 
 
 async def run_eval(
@@ -155,7 +154,7 @@ async def run_eval(
 ) -> dict:
     semaphore = asyncio.Semaphore(num_workers)
 
-    async def sem_run_single(item, run_idx):
+    async def sem_run_single(item):
         async with semaphore:
             return await run_single_query(
                 item["query"],
@@ -169,7 +168,7 @@ async def run_eval(
     tasks = []
     for item in eval_set:
         for _ in range(runs_per_query):
-            tasks.append(sem_run_single(item, 0))
+            tasks.append(sem_run_single(item))
 
     results_data = await asyncio.gather(*tasks, return_exceptions=True)
 

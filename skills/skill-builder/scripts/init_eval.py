@@ -35,8 +35,7 @@ def init_eval(
     }
 
     metadata_path = base_dir / "eval_metadata.json"
-    with open(metadata_path, "w", encoding="utf-8") as f:
-        json.dump(metadata, f, indent=2)
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     print(f"Generated: {metadata_path}")
 
 

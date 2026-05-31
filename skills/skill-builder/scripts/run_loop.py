@@ -173,7 +173,6 @@ async def run_loop_async(
         if train_results["summary"]["failed"] == 0 or iteration == max_iterations:
             break
 
-        # Assuming improve_description is sync, wrap in to_thread
         current_description = await asyncio.to_thread(
             improve_description,
             name,
