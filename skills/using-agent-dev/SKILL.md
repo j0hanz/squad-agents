@@ -59,7 +59,7 @@ These provide domain expertise. **Use AFTER choosing your process skill.**
 | `diagrams` | Creating architectural visualizations, system diagrams, flow charts | Renders visual representations of designs or systems |
 | `github-automation` | GitHub Actions workflows, gh CLI scripts, automation/CI tasks | Workflow automation, CI/CD pipeline design, scripting |
 | `create-hook` | Designing or implementing Claude Code hooks (session, pre-tool, format events) | Hook architecture, event handling, hook testing |
-| `agent-development` | Building Claude agents, skills, or multi-skill pipelines; agent routing | Agent design patterns, skill composition, LLM agent logic |
+| `create-agent` | Designing/writing agents — subagents, agent teams, workflows, Managed Agents; agent prompts, tool/permission scoping, model routing | Agent primitive selection, system-prompt craft, least-privilege tooling, eval-first testing |
 | `skill-builder` | Creating new skills, updating existing skills, testing skills, benchmarking | Skill authoring, iteration, quality assurance |
 | `agents-maintainer` | Updating AGENTS.md, CLAUDE.md, instruction files, plugin metadata | Documentation updates, instruction clarity, plugin configuration |
 
@@ -150,7 +150,7 @@ Use these complete paths for common scenarios:
 ```
 1. brainstorming (clarify requirements, design options)
 2. research (if unfamiliar with APIs/patterns)
-3. agent-development (if building agents/skills) OR create-hook (if building hooks)
+3. create-agent (if building agents) OR create-hook (if building hooks)
 4. skill-builder (if creating a skill; includes testing and iteration)
 5. code-review (quality gate)
 6. delivery-manager (merge, release)
@@ -179,7 +179,7 @@ Ask yourself:
 
 |  | New Code/System | Existing Code/System |
 |---|---|---|
-| **Unclear structure** | `agent-development` (if agents), `skill-builder` (if skills), `architecture` (if system redesign) | `architecture` (redesign needed) |
+| **Unclear structure** | `create-agent` (if agents), `skill-builder` (if skills), `architecture` (if system redesign) | `architecture` (redesign needed) |
 | **Structure clear, quality poor** | `test-driven-development` (TDD as you build) | `refactor` (improve without changing structure) |
 | **Need automation/scripting** | `github-automation` (CI/CD) or `create-hook` (Claude hooks) | Same |
 | **Uncertain how to implement** | `research` (learn APIs/patterns) | Same |
@@ -191,7 +191,7 @@ Ask yourself:
 
 Some skills work together:
 
-- **`agent-development` + `skill-builder`**: Build agents using skills; use skill-builder to create the skills themselves
+- **`create-agent` + `skill-builder`**: Build agents that compose skills; use skill-builder to create the skills themselves
 - **`spec-driven-development` includes `create-specs` + `create-plan`**: Don't invoke specs/plan as standalone skills; they're internal steps
 - **`code-review` → `delivery-manager`**: code-review must pass (zero blocking findings) before running delivery-manager
 - **`diagnose` → `test-driven-development`**: After diagnosing root cause, TDD ensures the fix stays fixed

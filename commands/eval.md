@@ -32,11 +32,7 @@ Two ways to run, depending on what the user wants to learn. Expected suite file:
 
 ### A) Behavioral simulation (fast, no baseline)
 
-Checks that the skill triggers and follows its workflow on each case.
-
-```bash
-python skills/agent-development/scripts/simulate.py skills/[skill-name]/SKILL.md skills/[skill-name]/evals.yaml --runs 1 --sandbox
-```
+Checks that the skill triggers and follows its workflow on each case. Invoke the `skill-builder` skill and run a single with-skill pass over the suite (no baseline, one run per case) — this is its Test & Iterate Workflow with the baseline step skipped. Use this when the question is just "does the skill fire and follow its steps?" rather than "is it measurably better?".
 
 ### B) Benchmark vs a baseline (run → grade → review → iterate)
 

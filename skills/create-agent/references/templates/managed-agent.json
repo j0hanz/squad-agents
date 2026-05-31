@@ -1,0 +1,27 @@
+{
+  "//": "Conceptual shape for agents.create. Confirm exact fields/headers via /claude-api.",
+  "//beta_header": "managed-agents-2026-04-01",
+  "name": "my-managed-agent",
+  "model": "claude-sonnet-4-6",
+  "system_prompt": "You are <role>. You <single job>. You never <forbidden action>.\n\nProcedure:\n1. ...\n\nBoundaries:\n- Do not ...\n\nOutput:\nReturn <exact final-message shape>.",
+  "tools": ["Read", "Grep", "Glob"],
+  "skills": [
+    {
+      "name": "my-skill",
+      "version": "1.4.0",
+      "//": "PIN an exact version — never 'latest' (it moves under you)."
+    }
+  ],
+  "mcp_servers": [
+    {
+      "name": "trusted-server",
+      "//": "Only a single, pinned, fully-trusted server may use always_allow."
+    }
+  ],
+  "permission_policy": {
+    "agent_toolset": "always_ask",
+    "//": "Default always_ask. Reserve always_allow for one trusted, pinned MCP server."
+  },
+  "//secrets": "Never inline credentials here. Reference env vars / a secret store.",
+  "//update_warning": "agents.update REPLACES arrays wholesale. Read current config, merge, diff removals, then update."
+}

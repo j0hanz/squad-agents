@@ -13,7 +13,7 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = [
-    "skills/agent-development/scripts/tests",
+    "skills/create-agent/scripts/tests",
     "skills/skill-builder/tests",
 ]
 addopts = "-v"

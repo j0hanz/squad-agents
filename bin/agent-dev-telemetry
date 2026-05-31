@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# Displays the hook telemetry dashboard.
-# Usage: agent-dev-telemetry
-PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-exec python "${PLUGIN_ROOT}/skills/agent-development/scripts/telemetry_dashboard.py" "$@"
