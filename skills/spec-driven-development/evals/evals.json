@@ -9,7 +9,7 @@
       "expectations": [
         "Response invokes or references the brainstorming step before anything else",
         "Response conducts or references a scope interview (asking about goal, in-scope, out-of-scope, constraints, success criteria)",
-        "Response identifies Contract maturity as appropriate for this multi-file feature",
+        "Response correctly determines maturity level (Contract for this multi-file, multi-channel feature)",
         "Response references the create-specs sub-skill as the next step after scope clarification",
         "Response does NOT jump directly to writing code or designing the implementation"
       ]
@@ -17,14 +17,14 @@
     {
       "id": 2,
       "prompt": "Hey can you just quickly add a 'remember me' checkbox to our login form? It's a tiny change, shouldn't take more than 5 minutes.",
-      "expected_output": "The skill should acknowledge the quick nature of the request but still apply SDD. It should identify this as a candidate for Sketch maturity (one-file change, clear bug fix). It should offer to write a lightweight one-page spec (15-30 min) and NOT skip the spec process entirely. It should explain why even small changes benefit from a spec.",
+      "expected_output": "The skill should invoke or reference brainstorming, then conduct a scope interview. It must correctly determine maturity level using the decision tree: if the feature is genuinely one-file (e.g., only the form template changes), Sketch is appropriate; if it touches session/token logic, backend, and UI (the common case), Contract is correct. Either way, the skill should NOT skip the spec process and should NOT immediately start writing implementation code.",
       "files": [],
       "expectations": [
         "Response acknowledges the small scope but still invokes or references the spec-driven development workflow",
-        "Response identifies Sketch maturity as appropriate for this small change",
-        "Response offers to create a lightweight spec (using the sketch template) before implementing",
+        "Response correctly determines maturity level using the decision tree (Sketch if truly one-file; Contract if multi-file touching auth/session backend)",
+        "Response offers to create a spec (either sketch template or create-specs) before implementing",
         "Response does NOT immediately start writing the implementation code",
-        "Response explains or implies why specs help even for small changes (preventing rework, misunderstanding)"
+        "Response explains or implies why specs help even for apparently small changes (preventing rework, misunderstanding)"
       ]
     },
     {
@@ -63,7 +63,7 @@
         "Response mentions or references the need for architecture documentation as part of Blueprint maturity",
         "Response acknowledges the high complexity and multi-team nature of this change",
         "Response mentions ops runbooks, monitoring, or rollback plans as Blueprint maturity components",
-        "Response recommends the architecture sub-skill or similar comprehensive planning before SDD cycles"
+        "Response recommends decomposing into multiple specs rather than one monolithic spec, or recommends the architecture sub-skill before SDD cycles"
       ]
     },
     {
@@ -95,14 +95,53 @@
     {
       "id": 8,
       "prompt": "Skip all the spec stuff, my manager says we don't have time for documentation. Just build a file upload feature - users should be able to upload profile photos (JPG/PNG, max 5MB, stored in S3). I need this done today.",
-      "expected_output": "The skill should acknowledge the time pressure but NOT simply comply and start coding. It should offer the Sketch maturity escape hatch as a lightweight alternative (15-30 minutes) rather than skipping specs entirely. It should explain the time cost tradeoff: skipping specs risks rework that costs more time, while a Sketch spec takes 15 min and prevents it.",
+      "expected_output": "The skill should acknowledge the time pressure but NOT simply comply and start coding. Since this feature touches multiple files (API endpoint, validation middleware, S3 client, user model, frontend), it is Contract maturity — not Sketch. The skill should offer to run the spec process quickly (scope interview 15 min, spec 30–45 min) and explain that 'no time for documentation' misidentifies what a spec is.",
       "files": [],
       "expectations": [
         "Response acknowledges the time constraint without dismissing it",
-        "Response offers the Sketch maturity path as a lightweight alternative, not a full spec process",
-        "Response explains the risk/cost of skipping specs (rework, misunderstanding scope)",
-        "Response offers to write a Sketch spec in 15-30 minutes before coding",
+        "Response correctly determines maturity level (Contract, since this is a multi-file feature with API, validation, S3, and model changes)",
+        "Response explains the risk/cost of skipping specs (rework, wrong architecture decisions, missing auth)",
+        "Response offers to run the spec process efficiently (scope interview then create-specs) rather than skipping it entirely",
         "Response does NOT immediately start writing the implementation code without any spec"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Change the default timeout value in our HTTP client from 30 seconds to 60 seconds. It's a one-line config change.",
+      "expected_output": "The skill should recognize this as a trivial one-file change and use the Sketch maturity fast-path. It should write a brief one-page spec (goal + AC + validation) and NOT run the full brainstorming → create-specs → create-plan cycle. Response should be short (under 60 lines).",
+      "files": [],
+      "expectations": [
+        "Response recognizes this as a trivial one-file change qualifying for the Sketch fast-path",
+        "Response uses Sketch maturity (NOT Contract or Blueprint)",
+        "Response does NOT invoke brainstorming or the full scope interview",
+        "Response produces or offers to produce a brief one-page spec (goal + AC + validation) rather than an 8-section Contract spec",
+        "Response is concise — under 60 lines, not a 200+ line workflow explanation"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Skip the brainstorming stuff, I've already decided: we're adding JWT refresh tokens to our auth service. The access token expires in 15 minutes, the refresh token is valid for 7 days, stored in an HttpOnly cookie, rotation on use, single-use. Build it.",
+      "expected_output": "The skill should accept the explicit brainstorming skip since the user has provided design decisions. It should note the skip inline with a brief warning about assumption gaps, then proceed directly to the scope interview. It should identify Contract maturity (multi-file auth change). It should NOT re-argue for brainstorming or repeat the warning.",
+      "files": [],
+      "expectations": [
+        "Response accepts the brainstorming skip and notes it inline (does not re-argue)",
+        "Response includes at most one warning that skipping brainstorming on an underspecified request increases assumption gap risk — then moves on",
+        "Response proceeds to the scope interview (Step 1) rather than stopping at the brainstorming gate",
+        "Response identifies Contract maturity as appropriate (multi-file: token issuance, rotation logic, cookie handling, logout, tests)",
+        "Response references create-specs as the next step after the scope interview"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "I ran validate_spec.py on my spec and got 3 errors: 'REQ-002 has no associated AC', 'VAL-003 references test path tests/auth/test_session.py which does not exist', and 'AC-007 maps to REQ-012 which is not defined'. How do I fix this?",
+      "expected_output": "The skill should diagnose each error type and provide concrete fix instructions. REQ-002 missing AC: add at least one AC-### that references REQ-002. VAL-003 bad path: either create the test file at that path, or update VAL-003 to use the correct path. AC-007 dangling reference: either add REQ-012 to the spec, or update AC-007's REQ reference to an existing REQ. The spec gate must not be passed until all 3 errors are resolved.",
+      "files": [],
+      "expectations": [
+        "Response addresses all 3 errors separately with specific fix instructions for each",
+        "Response explains what each error type means structurally (not just how to fix it)",
+        "Response reminds the user that all 3 errors must be resolved before proceeding to the planning gate",
+        "Response does NOT suggest skipping validate_spec.py or manually overriding the gate",
+        "Response explains how to fix 'REQ has no AC' (add a new AC-### that traces to that REQ)"
       ]
     }
   ]

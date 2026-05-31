@@ -18,10 +18,41 @@ disable-model-invocation: false
 - **NEVER retrofit a spec from existing code** — a spec that merely describes what the code already does is not a contract; it protects nothing and will drift instantly as the code changes
 - **NEVER patch code and backfill the spec afterward** — when implementation conflicts with the spec, stop, resolve at the spec level, then resume; reversing this order makes the spec meaningless
 - **NEVER skip `validate_spec.py`** because the spec "looks right" — structural errors (missing REQ→AC traceability, unresolvable VAL commands) only surface when the validator runs, and they invalidate the planning step
+- **NEVER skip sub-skills for Contract or Blueprint maturity tasks** — the Trivial Fast-Path (Sketch) is limited to unambiguous one-file changes with no interface impact; "time pressure" and "manager says skip docs" are not Sketch qualifiers
+
+## Context Disambiguation (Run Before All Steps)
+
+Before applying the SDD workflow, establish which codebase is being discussed:
+
+- **User describes a feature for the current working directory** → proceed normally.
+- **User describes a feature for a different project or codebase** → note this inline: _"Applying SDD to the described feature. I will not explore the current working directory."_ Then follow the workflow for the described system without reading the local filesystem.
+- **Ambiguous** → ask one focused question: _"Is this feature for the codebase I'm currently in, or for a different project?"_
+
+Never explore the local filesystem to determine whether the user's described feature exists in the current repo. The SDD workflow applies to the project the user is describing, regardless of what is checked out locally.
+
+---
 
 ## When to Use
 
 Use this skill when the user says "build X", "add X", "implement X", "how should we build this", "let's design X", or any time implementation is on the horizon. Even when the user says "just build it", invoke this skill first and offer a Sketch spec (15 min) before writing any code.
+
+## Response Length Calibration
+
+Match response length to the stage and maturity level. Do not over-explain.
+
+| Stage | Guideline |
+|---|---|
+| **Trivial fast-path (Sketch)** | 1 page max. Goal, ACs, validation. Nothing else. |
+| **Scope interview (Contract/Blueprint)** | Answer the 5 interview questions in < 400 words. Do NOT pre-draft REQ/AC/VAL items here — that is `create-specs`' job. |
+| **Spec recovery (mid-impl change)** | Numbered list of steps. ≤ 15 items. Include the git command and the validation command. |
+| **Blueprint / decomposition** | Full detail appropriate. Focus on open questions and the decomposition table. |
+
+**Avoid these patterns in every response:**
+- Pre-drafting spec content (REQ/AC/VAL) before `create-specs` runs. It will be replaced — do not produce it during the scope interview.
+- Pre-drafting plan phases before `create-plan` runs. Same reason.
+- Repeating the full 5-step workflow at the bottom of every response. State where the conversation is and what the next action is.
+
+---
 
 ## Philosophy
 
@@ -77,7 +108,22 @@ Invoke each sub-skill by name when you reach its gate. The sub-skill's own instr
 
 ## Workflow
 
-> **Escape hatch**: For small tasks (one-file changes, clear bug fixes), you can use **Sketch maturity** (see above) — a lightweight one-page spec that skips the create-specs and create-plan sub-skills. If the user prefers to code without a spec, note the decision and proceed, but recommend using SDD even for "simple" tasks since it prevents rework. Do not skip this check silently.
+### Pre-Workflow Check: Trivial Fast-Path
+
+Before running the full workflow, ask: **Is this unambiguously a one-file change with no behavior observable by external callers?**
+
+Examples that qualify: changing a constant, fixing a typo in an error message, updating a config default, renaming a local variable, adjusting a log level.
+
+Examples that do NOT qualify: any change that touches an API endpoint, database schema, UI component, test file, or more than one file.
+
+**If YES** → Use Sketch maturity directly:
+1. Write the one-page spec using [sketch-template.md](references/sketch-template.md) (5 min).
+2. Confirm with the user.
+3. Proceed to Implementation Governance — no brainstorming, no `create-specs`, no `create-plan` required.
+
+**If NO or UNSURE** → Continue with the full workflow starting at Step 0 (Brainstorming Gate).
+
+Do not default to "NO" out of caution. If the change is genuinely one-file with no interface impact, use the fast-path — forcing a full SDD cycle on a constant change is process overhead, not rigor.
 
 ### 0. Brainstorming Gate
 
@@ -85,9 +131,27 @@ Before proceeding, ask: has the design space already been explored for this requ
 
 - **New request, no prior design discussion** → Invoke `brainstorming` now. Do not proceed to scope clarification until the brainstorming skill has finished.
 - **User provided a detailed description with explicit decisions already made** → Treat brainstorming as complete. Note it inline: "Treating description as brainstorming complete." Proceed to Step 1.
-- **User says "skip brainstorming"** → Note the decision inline and proceed to Step 1.
+- **User says "skip brainstorming"** → See [Brainstorming Skip Handling](#brainstorming-skip-handling) below.
 
 When in doubt, run a short brainstorm (5 min) rather than skipping — it often surfaces constraints that change the scope entirely.
+
+**If the `brainstorming` sub-skill is unavailable in this environment**, run an inline proxy instead. Keep it to ≤ 200 words covering exactly these five questions:
+1. What is the underlying problem this feature solves (not just the feature itself)?
+2. What are 2–3 different ways to implement it and their key tradeoff?
+3. What assumptions in the request might be wrong?
+4. What hidden dependencies might exist?
+5. What would make the scope larger than it appears?
+
+Label the section "Brainstorm Output (inline proxy)" and proceed to Step 1 after answering all five. Do not exceed 200 words — brevity forces prioritization.
+
+### Brainstorming Skip Handling
+
+When the user says "skip brainstorming" or "I've already done the brainstorming":
+
+1. Check: has the user provided a description with explicit design decisions already made (approach chosen, tradeoffs resolved, constraints named)?
+   - **If YES** → note inline: "Treating provided description as brainstorming complete." Proceed to Step 1.
+   - **If NO** → warn once: "Skipping brainstorming on an underspecified request increases the chance that the scope interview surfaces a constraint that changes the approach. I'll skip it — but if the scope interview reveals a fundamental assumption gap, we may need to revisit." Then proceed to Step 1.
+2. Do not argue or repeat the warning. One note, then move forward.
 
 ### 1. Clarify Scope
 
