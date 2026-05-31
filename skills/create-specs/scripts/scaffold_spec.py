@@ -127,6 +127,11 @@ def main():
         "--domain", choices=["api", "cli"], help="Inject domain-specific snippets"
     )
     parser.add_argument("--goal", help="One-sentence goal to pre-fill")
+    parser.add_argument(
+        "--output",
+        metavar="FILE",
+        help="Write scaffolded spec to FILE instead of stdout",
+    )
     args = parser.parse_args()
 
     template = TEMPLATES[args.level]
@@ -149,7 +154,13 @@ def main():
                 "## 4. Interfaces", f"## 4. Interfaces\n{iface_snippet}"
             )
 
-    print(template)
+    if args.output:
+        from pathlib import Path
+
+        Path(args.output).write_text(template, encoding="utf-8")
+        print(f"Scaffolded spec written to: {args.output}")
+    else:
+        print(template)
 
 
 if __name__ == "__main__":

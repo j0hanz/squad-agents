@@ -233,12 +233,12 @@ Use these scripts to automate spec creation and validation:
 
 1. **Scaffold the spec** using `<skill-dir>/scripts/scaffold_spec.py` to get the correct structure and domain snippets.
 2. **Write the spec** following the generated template.
-3. **MANDATORY - VALIDATE**: Run `python <skill-dir>/scripts/validate_spec.py <your_spec.md>`.
+3. **MANDATORY - VALIDATE**: Run `python <skill-dir>/scripts/validate_spec.py --level [sketch|contract|blueprint] <your_spec.md>`.
    > **GATEKEEPER**: Implementation planning MUST NOT begin until `validate_spec.py` returns 0 errors. You MUST resolve all **ERRORS** before proceeding. Address **WARNINGS** where possible to improve quality.
    >
    > **Parser note**: The validator requires at least one line of body text directly under each `##` section heading before any `###` sub-headings. If `## 4. Interfaces` is followed immediately by `### POST /endpoint` with no intervening text, the parser will report a false "Missing mandatory section: Interfaces" error. Fix by adding one introductory sentence (e.g., "The system exposes the following endpoints:") before the first sub-heading.
 
-3.5. **Spawn the `reviewer` subagent** (`agents/reviewer.md`) after structural validation passes:
+4. **Spawn the `reviewer` subagent** (`agents/reviewer.md`) after structural validation passes:
 
    ```
    Agent(
@@ -250,12 +250,12 @@ Use these scripts to automate spec creation and validation:
    )
    ```
 
-   The agent checks semantic quality that `validate_spec.py` cannot: unmeasured adjectives, compound requirements, interfaces missing error cases, REQ→AC and AC→VAL orphans. Check `ready_for_planning` in the output — **if `false`, resolve all `blocking_issues` before step 7**. Address `high`-priority `improvement_suggestions` before handoff to `create-plan`.
+   The agent checks semantic quality that `validate_spec.py` cannot: unmeasured adjectives, compound requirements, interfaces missing error cases, REQ→AC and AC→VAL orphans. Check `ready_for_planning` in the output — **if `false`, resolve all `blocking_issues` before step 8**. Address `high`-priority `improvement_suggestions` before handoff to `create-plan`.
 
-4. **MANDATORY - READ ENTIRE FILE**: Run through `references/self-check.md` for a final manual quality pass.
-5. **Review with stakeholder** (if applicable).
-6. **Export as a file** (e.g., `spec-auth-jwt.md`).
-7. **Use the `create-plan` skill** — pass the validated spec file as primary input. Highlight any `UNKNOWN:` items and `CONFLICT:` items that remain unresolved; create-plan will produce a task list keyed to the spec's REQ-### identifiers and will stall on any unresolved ambiguities.
+5. **MANDATORY - READ ENTIRE FILE**: Run through `references/self-check.md` for a final manual quality pass.
+6. **Review with stakeholder** (if applicable).
+7. **Export as a file** (e.g., `spec-auth-jwt.md`).
+8. **Use the `create-plan` skill** — pass the validated spec file as primary input. Highlight any `UNKNOWN:` items and `CONFLICT:` items that remain unresolved; create-plan will produce a task list keyed to the spec's REQ-### identifiers and will stall on any unresolved ambiguities.
 
 The spec + plan together form a complete work package: spec says _what_ and _why_, plan says _how_ and _in what order_.
 

@@ -4,8 +4,8 @@ import sys
 import argparse
 from pathlib import Path
 
-# Add lib to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "lib"))
+# Use bundled spec_parser — self-contained, no external lib dependency
+sys.path.insert(0, str(Path(__file__).parent))
 from spec_parser import parse_spec
 
 VAGUE_ADJECTIVES = [
@@ -18,13 +18,13 @@ VAGUE_ADJECTIVES = [
     "simple",
 ]
 
-
-def validate(spec) -> tuple[list[str], list[str]]:
-    errors: list[str] = []
-    warnings: list[str] = []
-
-    # 1. Structural Checks
-    mandatory_sections = [
+SECTIONS_BY_LEVEL: dict[str, list[str]] = {
+    "sketch": [
+        "Goal",
+        "Requirements",
+        "Interfaces",
+    ],
+    "contract": [
         "Goal",
         "Requirements",
         "Constraints",
@@ -32,10 +32,26 @@ def validate(spec) -> tuple[list[str], list[str]]:
         "Context",
         "Acceptance Criteria & Validation",
         "Examples & Edge Cases",
-    ]
-    # Notes & Risks is optional according to SKILL.md for Sketch/Contract, but good to check
+    ],
+    "blueprint": [
+        "Goal",
+        "Requirements",
+        "Constraints",
+        "Interfaces",
+        "Context",
+        "Acceptance Criteria & Validation",
+        "Examples & Edge Cases",
+        "Notes & Risks",
+    ],
+}
 
-    for section in mandatory_sections:
+
+def validate(spec, level: str) -> tuple[list[str], list[str]]:
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    # 1. Structural Checks
+    for section in SECTIONS_BY_LEVEL[level]:
         if section not in spec.sections or not spec.sections[section]:
             errors.append(f"Missing mandatory section: {section}")
 
@@ -66,8 +82,8 @@ def validate(spec) -> tuple[list[str], list[str]]:
                     f"Requirement contains vague adjective '{adj}': {line.strip()}"
                 )
 
-    # 3. Traceability Checks
-    if spec.reqs:
+    # 3. Traceability Checks (skip for sketch — ACs and VALs are optional)
+    if spec.reqs and level != "sketch":
         if not spec.acs:
             errors.append(
                 "Requirements found but no Acceptance Criteria (AC-###) defined."
@@ -77,17 +93,13 @@ def validate(spec) -> tuple[list[str], list[str]]:
                 "Requirements found but no Validation steps (VAL-###) defined."
             )
 
-        # Check if every REQ is mentioned in AC/VAL (Basic mapping check)
-        # Note: SKILL.md doesn't strictly require REQ-001 in AC-001,
-        # but self-check says "At least one AC per core requirement".
-        # We'll just check if the counts are reasonable for now.
         if len(spec.acs) < len(spec.reqs) * 0.5:  # Heuristic
             warnings.append(
                 f"Low AC density: {len(spec.acs)} ACs for {len(spec.reqs)} Requirements."
             )
 
-    # 4. Constraints
-    if not spec.cons:
+    # 4. Constraints (skip for sketch — CONs are optional)
+    if level != "sketch" and not spec.cons:
         warnings.append(
             "No constraints (CON-###) defined. SKILL.md recommends defining what the solution does NOT do."
         )
@@ -104,11 +116,17 @@ def main():
         description="Validate a specification Markdown file."
     )
     parser.add_argument("file", help="Path to the spec.md file")
+    parser.add_argument(
+        "--level",
+        choices=["sketch", "contract", "blueprint"],
+        default="contract",
+        help="Spec maturity level — controls which sections are mandatory (default: contract)",
+    )
     args = parser.parse_args()
 
     try:
         spec = parse_spec(args.file)
-        errors, warnings = validate(spec)
+        errors, warnings = validate(spec, args.level)
     except FileNotFoundError:
         print(f"Error: File not found: {args.file}")
         sys.exit(1)
@@ -116,7 +134,7 @@ def main():
         print(f"Unexpected error ({type(e).__name__}): {e}")
         sys.exit(1)
 
-    print(f"Audit Results for: {args.file}\n")
+    print(f"Audit Results for: {args.file} [level={args.level}]\n")
 
     if warnings:
         print("WARNINGS:")

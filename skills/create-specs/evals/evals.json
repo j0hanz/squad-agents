@@ -1,0 +1,48 @@
+{
+  "skill_name": "create-specs",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to add authentication to my app. Can you help me write a spec?",
+      "expected_output": "Skill conducts a spec interview (asking about goal, scope, constraints, interface, success criteria), then produces a Sketch or Contract spec with at minimum: Goal, Requirements (REQ/SEC prefixed), and Interfaces sections. UNKNOWN labels used where info was not provided.",
+      "files": [],
+      "expectations": [
+        "Skill asks at least one clarifying question before writing the spec (interview step)",
+        "Produced spec includes a Goal section with one sentence and a measurable completion signal",
+        "Produced spec includes at least one SEC-### requirement",
+        "Produced spec includes an Interfaces section with at least one input, output, and error case",
+        "Skill does not jump straight to implementation or a plan"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write a contract-level spec for a REST API endpoint: POST /api/v1/users that creates a new user account. The request body has email (string, required) and password (string, required, min 8 chars). Returns the created user object (id, email, createdAt). Requires Bearer token auth. Must respond within 300ms. Cannot use the existing users_legacy table.",
+      "expected_output": "A complete Contract-level spec with all 7 mandatory sections filled in, validate_spec.py run with --level contract returning 0 errors, and reviewer subagent spawned.",
+      "files": [],
+      "expectations": [
+        "Spec includes all 7 mandatory Contract sections: Goal, Requirements, Constraints, Interfaces, Context, Acceptance Criteria & Validation, Examples & Edge Cases",
+        "PERF-### requirement captures the 300ms threshold",
+        "SEC-### requirement captures Bearer token auth",
+        "CON-### constraint captures the users_legacy table exclusion",
+        "Interfaces section includes 400, 401, and at least one 5xx error case for POST /api/v1/users",
+        "validate_spec.py is run with --level contract and returns 0 errors",
+        "Reviewer subagent is spawned after structural validation passes"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a blueprint spec for a high-throughput event ingestion pipeline. Events come in via HTTP POST, get queued in Redis, and a worker processes them into PostgreSQL. Must handle 10,000 events/second, survive Redis restarts without data loss, and roll back cleanly if the PostgreSQL schema migration fails.",
+      "expected_output": "A complete Blueprint-level spec with all 8 sections including Notes & Risks, a Mermaid diagram in Notes & Risks, rollback strategy, migration steps, validate_spec.py run with --level blueprint returning 0 errors.",
+      "files": [],
+      "expectations": [
+        "Spec includes all 8 mandatory Blueprint sections including Notes & Risks",
+        "Notes & Risks section contains a Mermaid diagram (graph TD or sequenceDiagram)",
+        "Notes & Risks section contains at least one rollback strategy entry",
+        "PERF-### requirement captures 10,000 events/second threshold",
+        "At least one RISK-### entry addresses Redis restart / data loss scenario",
+        "At least one RISK-### or NOTE-### entry addresses PostgreSQL migration rollback",
+        "validate_spec.py is run with --level blueprint and returns 0 errors"
+      ]
+    }
+  ]
+}
