@@ -8,7 +8,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:node": "node --test hooks/handlers/explorer.test.mjs hooks/handlers/session.test.mjs hooks/runner.test.mjs skills/architecture/scripts/check-locality.test.mjs skills/architecture/scripts/detect-bleed.test.mjs skills/architecture/scripts/utils/extractor.test.mjs skills/architecture/scripts/utils/graph.test.mjs",
+    "test:node": "node --test hooks/handlers/explorer.test.mjs hooks/handlers/session.test.mjs hooks/handlers/skills.test.mjs hooks/runner.test.mjs skills/architecture/scripts/check-locality.test.mjs skills/architecture/scripts/detect-bleed.test.mjs skills/architecture/scripts/utils/extractor.test.mjs skills/architecture/scripts/utils/graph.test.mjs",
     "test:python": "python -m pytest skills/create-agent/scripts/tests/ skills/skill-builder/tests/ -q",
     "test": "npm run test:node && npm run test:python",
     "test:integration": "node tests/integration/test-hooks-fire.mjs && node tests/integration/test-skills-load.mjs"
