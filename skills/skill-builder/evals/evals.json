@@ -4,11 +4,11 @@
     {
       "id": 0,
       "prompt": "I want to create a skill that helps Claude write good git commit messages. It should analyze git diffs and generate conventional commit format messages (feat:, fix:, chore:, docs:, etc). I'm pretty new to this whole skill-building thing.",
-      "expected_output": "The skill-builder asks clarifying questions before writing anything, then produces a complete SKILL.md with YAML frontmatter, proper description with trigger phrases, and proposes test cases.",
+      "expected_output": "The skill-builder either asks at least one clarifying question OR drafts immediately because the user's description already contains sufficient domain, trigger, and output information. The produced SKILL.md has valid YAML frontmatter and git-related trigger phrases. Test cases are proposed after the draft.",
       "files": [],
-      "assertions": [
-        "At least one clarifying question is asked before producing a SKILL.md",
-        "A SKILL.md is produced (in the response) with valid YAML frontmatter containing both name and description fields",
+      "expectations": [
+        "Either at least one clarifying question is asked, OR the response drafts immediately with a note that the user's description was sufficient to proceed without questions",
+        "A SKILL.md is produced (in the response) with valid YAML frontmatter delimited by --- containing both name and description fields",
         "The description field contains specific git/commit-related trigger phrases",
         "Test cases are proposed after a complete skill draft is presented"
       ]
@@ -16,12 +16,12 @@
     {
       "id": 1,
       "prompt": "I want to turn this workflow into a skill. When users ask for a performance audit of their Python code, I always do: 1) Profile the code using cProfile or line_profiler, 2) Identify the top 3 bottlenecks from the profile data, 3) Research idiomatic Python optimization patterns relevant to those bottlenecks, 4) Rewrite the hot paths with optimizations, 5) Run benchmarks before/after and generate a comparison report. Can you turn this into a skill called perf-audit?",
-      "expected_output": "The skill-builder extracts all 5 workflow steps, confirms or proceeds confidently with the user, then writes a complete SKILL.md named perf-audit with all steps captured.",
+      "expected_output": "The skill-builder extracts all 5 workflow steps and writes a complete SKILL.md named perf-audit with all steps captured, proper YAML frontmatter, and a pushy description.",
       "files": [],
-      "assertions": [
-        "A SKILL.md (in the response) is produced with name: perf-audit in the frontmatter",
+      "expectations": [
+        "A SKILL.md is produced with name: perf-audit in the YAML frontmatter (delimited by ---)",
         "All 5 workflow steps are present in the skill content (profiling, bottleneck identification, research, rewriting, benchmarking/comparison report)",
-        "The description includes trigger phrases related to performance audit or Python optimization"
+        "The description includes at least 4 distinct trigger phrases related to performance audit or Python optimization"
       ]
     },
     {
@@ -29,7 +29,7 @@
       "prompt": "Here's my draft skill that's giving inconsistent outputs - sometimes it formats things differently, sometimes it misses endpoints:\n\n---\nname: api-docs-gen\ndescription: Generates API documentation from source code\n---\n# API Docs Generator\nWhen the user asks for API docs, read their code and generate documentation.\nOutput: Markdown with all endpoints documented.\n\nHelp me fix this inconsistency issue.",
       "expected_output": "The skill-builder diagnoses the root cause, proposes specific improvements including an explicit output template, and produces an improved SKILL.md that preserves the original name.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "An improved SKILL.md is produced (in the response) within the same conversational turn, preserving the original name (api-docs-gen) in the frontmatter",
         "The improved skill includes an explicit output template or structured format section",
         "The improved skill includes guidance to ensure completeness (all endpoints/classes captured)",
@@ -38,24 +38,24 @@
     },
     {
       "id": 3,
-      "prompt": "make a skill",
-      "expected_output": "The skill-builder asks multiple clarifying questions about purpose, trigger conditions, and output format. It does NOT immediately write a SKILL.md.",
+      "prompt": "Create a skill called db-query-helper that helps users write SQL queries for PostgreSQL. It should handle SELECT statements, JOINs, and window functions.",
+      "expected_output": "The skill-builder produces a SKILL.md with proper YAML frontmatter, a pushy description with at least 4 trigger phrases, and skill body written in imperative form (not declarative 'you should' language).",
       "files": [],
-      "assertions": [
-        "No SKILL.md content is written or produced in the response",
-        "At least 2 clarifying questions are asked (about purpose, trigger conditions, or output format)",
-        "The response invites the user to describe intent before proceeding"
+      "expectations": [
+        "A SKILL.md with name: db-query-helper is produced with a proper YAML frontmatter block delimited by ---",
+        "The description contains at least 4 distinct trigger phrases related to SQL queries or PostgreSQL (e.g., 'write a SQL query', 'help me with JOIN', 'write a SELECT statement')",
+        "The skill body uses imperative form ('Check', 'Generate', 'Output') rather than declarative language ('You should', 'You might want to', 'Maybe')"
       ]
     },
     {
       "id": 4,
-      "prompt": "I need a quick skill for summarizing Slack threads. Just write me something solid - I don't need any formal testing or evals, let's skip all that and just ship it.",
-      "expected_output": "The skill-builder respects the user preference and writes a SKILL.md directly without proposing evals or setting up test infrastructure.",
+      "prompt": "Create a skill for validating JSON schemas. After you're done with the draft, I'd like some test prompts I can try it with.",
+      "expected_output": "The skill-builder produces a SKILL.md relevant to JSON schema validation, then explicitly proposes at least 2 test prompts the user can try.",
       "files": [],
-      "assertions": [
-        "A SKILL.md is produced with content relevant to Slack thread summarization",
-        "No evals.json setup, no formal test runner proposal, and no eval execution is invoked or suggested",
-        "The description includes Slack-related trigger phrases"
+      "expectations": [
+        "A SKILL.md is produced with content relevant to JSON schema validation",
+        "At least 2 concrete test prompts are explicitly proposed after the skill draft is complete",
+        "The description includes JSON/schema-related trigger phrases"
       ]
     },
     {
@@ -63,10 +63,77 @@
       "prompt": "My skill for generating markdown documentation from Python source code is really inconsistent. Sometimes it misses classes, sometimes it generates wrong method signatures. It's installed and I use it regularly but the output quality is all over the place. Help me fix it.",
       "expected_output": "The skill-builder does NOT immediately rewrite the skill. It asks for the skill file or a bad output example, then diagnoses before proposing changes.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "The skill-builder explicitly asks for the skill file OR asks for a bad output example before proposing changes",
         "No rewritten SKILL.md is produced without first seeing the current skill",
         "The response includes at least one diagnostic question (what does correct output look like, can you share the skill file, etc.)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I want to test my new skill. Can we skip the baseline runs and just see how it does with the skill enabled? Baselines take too long and I just want to see the skill in action.",
+      "expected_output": "The skill-builder explains why baseline runs are required and does not agree to skip them. It explains that baselines are mandatory for measuring added value.",
+      "files": [],
+      "expectations": [
+        "The skill-builder does not agree to skip baseline runs",
+        "The response explains that baselines are required to measure the skill's added value",
+        "No eval workspace is created without mention that baseline runs are mandatory"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Create a skill called 'My Email Writer' (with spaces in the name) that helps Claude write professional emails. Keep the name exactly as I wrote it.",
+      "expected_output": "The skill-builder corrects the name to a valid kebab-case format. It does not use a name with spaces in the SKILL.md frontmatter, even though the user asked for it verbatim.",
+      "files": [],
+      "expectations": [
+        "A SKILL.md is produced in the response",
+        "The name field in the frontmatter does NOT contain spaces (must be valid kebab-case)",
+        "The skill contains email writing related trigger phrases in the description"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Here's my skill, can you rewrite it with better instructions?\n\n---\nname: code-explainer\ndescription: Explains code\n---\n# Code Explainer\nWhen a user wants code explained, you should look at the code and you might want to explain it. Maybe add some comments about what it does.",
+      "expected_output": "The skill-builder rewrites the skill using imperative form, a more specific and pushy description, and an explicit output format. The name code-explainer is preserved.",
+      "files": [],
+      "expectations": [
+        "An improved SKILL.md is produced preserving the name code-explainer in the frontmatter",
+        "The improved skill body uses imperative form and does not contain phrases like 'you should', 'you might', or 'maybe'",
+        "The improved description contains at least 3 specific code-explanation trigger phrases (more than just 'explains code')",
+        "An explicit output format or structure is defined in the skill body"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Turn this into a skill called incident-debugger. My workflow for debugging production incidents has 10 steps: 1) Check error logs in Datadog, 2) Identify affected services from the dependency map, 3) Check recent deployments in the last 24 hours, 4) Attempt to reproduce locally, 5) Identify root cause using bisection, 6) Draft the minimal fix, 7) Write a regression test for the bug, 8) Apply the fix, 9) Verify fix in staging, 10) Deploy and monitor for 30 minutes.",
+      "expected_output": "The skill-builder produces a complete SKILL.md capturing all 10 workflow steps under the name incident-debugger.",
+      "files": [],
+      "expectations": [
+        "A SKILL.md with name: incident-debugger in the frontmatter is produced",
+        "All 10 workflow steps are present in the skill content",
+        "The description includes trigger phrases related to production incidents, debugging, or outages"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "I've been running my data-cleaner skill for a week, running evals every day. It scores 92% consistently. The main remaining issue is that it doesn't always trigger — sometimes I have to explicitly invoke it. Can we run the description optimization loop to fix the triggering?",
+      "expected_output": "The skill-builder agrees to proceed with description optimization since the skill logic is stable (tested and scoring 92%). It references the run_loop script or description optimization process and asks for the necessary inputs.",
+      "files": [],
+      "expectations": [
+        "The skill-builder agrees to proceed with description optimization (not refuses it)",
+        "The response references the description optimization process or run_loop script",
+        "The skill-builder asks for the skill path and/or eval set needed to run the optimization"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Here's my skill that I can't get to trigger. Can you fix the frontmatter?\n\n---\nname: My Skill Name With Spaces\ndescription: Helps with <various> things and <stuff>\n---\n# My Skill\nDoes helpful things.",
+      "expected_output": "The skill-builder fixes both frontmatter violations: converts the name to valid kebab-case, and removes angle brackets from the description.",
+      "files": [],
+      "expectations": [
+        "A fixed SKILL.md is produced in the response",
+        "The name field in the fixed frontmatter is in valid kebab-case with no spaces",
+        "The description in the fixed frontmatter does not contain angle brackets (< or >)"
       ]
     }
   ]

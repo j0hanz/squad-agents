@@ -46,6 +46,14 @@ Progress the user through the skill development lifecycle:
 2. **Research:** Check available MCPs for data/tools. Use subagents in parallel.
 3. **Draft immediately:** Write `SKILL.md`. Mark uncertainties with `[USER TO CONFIRM: X]`.
 
+**When to ask vs. draft:** If the user's message provides all three of the following, draft immediately and annotate any assumptions inline. If any is missing, ask targeted questions first.
+
+- [ ] Domain/purpose is clear
+- [ ] At least one example trigger phrase is known
+- [ ] Expected output format is known (even roughly)
+
+For users who identify as new to skill-building, add one orienting sentence before the draft.
+
 ### Write the SKILL.md
 
 Fill in these components based on the interview:
@@ -231,7 +239,7 @@ python -m scripts.package_skill <path/to/skill-folder>
 
 ### Cowork / Headless
 - **MANDATORY: Read `references/cowork.md`**.
-- Use `--static` for viewer.
+- Use `--static` for viewer. Headless environments cannot serve the eval viewer — `--static` generates a standalone HTML file that opens directly without a server.
 
 ---
 
