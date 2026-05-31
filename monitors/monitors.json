@@ -2,8 +2,7 @@
   {
     "name": "telemetry-watcher",
     "command": "tail -F \"${CLAUDE_PROJECT_DIR}/.claude/telemetry.log\"",
-    "description": "Hook execution telemetry — surfaces errors and slow hooks in real time",
-    "when": "on-skill-invoke:create-hook"
+    "description": "Hook execution telemetry — surfaces errors and slow hooks in real time"
   },
   {
     "name": "node-test-watcher",
