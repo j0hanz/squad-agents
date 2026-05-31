@@ -13,18 +13,21 @@ Progress the user through the skill development lifecycle:
 | :--- | :--- |
 | "I want to make a skill for X" | [Interview and Draft](#interview-and-draft) |
 | "Turn this workflow into a skill" | Extract steps, confirm, then [Draft](#write-the-skillmd) |
-| "Help me improve my skill" | [Diagnose before rewriting](#diagnose-before-rewriting) |
-| "My skill is inconsistent" | Ask for bad-output example, then [Diagnose](#diagnose-before-rewriting) |
+| "Help me improve my skill" | [Improving the Skill](#improving-the-skill) |
+| "My skill is inconsistent" | Ask for bad-output example, then [Diagnose](#improving-the-skill) |
 | "Just vibe with me (no evals)" | Draft directly, skip formal eval loop |
+
+**Vibe mode:** Draft immediately. Skip `evals/evals.json`, formal workspace, and baseline runs. Still enforce all NEVER list items and frontmatter constraints. Propose test prompts verbally at the end.
 
 ---
 
 ## NEVER List
 
-- **NEVER** optimize description before logic is stable.
-- **NEVER** skip baseline runs — required for measuring added value.
+- **NEVER** optimize description before logic is stable. Even if the user insists, confirm stable eval scores first.
+- **NEVER** skip baseline runs — required for measuring added value. Even if the user insists, explain why and offer faster alternatives (fewer evals, parallel runs).
 - **NEVER** overfit to test cases; prefer general logic over rigid constraints.
 - **NEVER** use conversational filler; provide direct, imperative instructions.
+- **NEVER** defer producing a SKILL.md when a constraint violation is detected (e.g., invalid name with spaces). Apply the correction inline, note it with one sentence, and produce the complete SKILL.md immediately without asking for confirmation.
 
 ---
 
@@ -55,6 +58,11 @@ Progress the user through the skill development lifecycle:
 For users who identify as new to skill-building, add one orienting sentence before the draft.
 
 ### Write the SKILL.md
+
+**Before producing any SKILL.md, validate all fields:**
+1. `name` — must be kebab-case (lowercase, digits, hyphens only), max 64 chars. If the user supplied an invalid name (spaces, uppercase), convert it immediately and note the change inline (e.g., `name adjusted to kebab-case: my-skill-name`). Do not ask for confirmation.
+2. `description` — must have no angle brackets (`<` or `>`), max 1024 chars.
+3. Skill body — must use imperative form throughout. No "you should", "you might", "maybe".
 
 Fill in these components based on the interview:
 
@@ -123,7 +131,7 @@ skill-name/
 
 Follow this sequence. Do NOT use `/skill-test`.
 
-**Workspace:** `<skill-name>-workspace/iteration-<N>/eval-<ID>/`
+**Workspace:** `<skill-name>-workspace/iteration-<N>/eval-<ID>/` (relative to CWD, e.g., `./skill-builder-workspace/iteration-1/eval-0/`). Output files must go under `run-N/outputs/` — not directly under the config directory.
 
 ### 0. Setup Workspace (Recommended)
 Run the initialization script to scaffold the directory structure and metadata:
