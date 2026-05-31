@@ -112,7 +112,7 @@ The linter checks:
 
 **If linter fails:** Fix issues and rerun. Don't proceed to Pass 2 until PASS.
 
-**After Pass 1 PASS — spawn the `agents-md-quality-reviewer` subagent** (`agents/agents-md-quality-reviewer.md`):
+**After Pass 1 PASS — spawn the `reviewer` subagent** (`agents/reviewer.md`):
 
 ```
 Agent(

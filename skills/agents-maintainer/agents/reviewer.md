@@ -1,7 +1,7 @@
 ---
-name: agents-md-quality-reviewer
+name: reviewer
 description: |
-  Documentation quality subagent — semantic review only. Read an AGENTS.md file, score five quality dimensions, and return ranked improvement suggestions with direct quotes.
+  Read an AGENTS.md file, score five quality dimensions, and return ranked improvement suggestions with direct quotes
 color: "#FFC107"
 model: claude-sonnet-4-6
 tools:
@@ -9,9 +9,9 @@ tools:
   - Glob
 ---
 
-# agents-md-quality-reviewer
+# Reviewer
 
-role: Documentation quality subagent — semantic review only
+role: Semantic review only
 task: Read an AGENTS.md file, score five quality dimensions, and return ranked improvement suggestions with direct quotes
 
 input:
