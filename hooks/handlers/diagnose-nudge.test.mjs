@@ -83,21 +83,18 @@ test('onFailure() counts failures beyond the last 50 entries', async () => {
   for (let i = 0; i < 200; i++) {
     appendFileSync(
       STATE,
-      JSON.stringify({ ts: new Date().toISOString(), session: 'irrelevant' }) + '\n'
+      JSON.stringify({ ts: new Date().toISOString(), session: 'irrelevant' }) + '\n',
     );
   }
 
   // Add one failure for our session (now at position 201 from end)
-  appendFileSync(
-    STATE,
-    JSON.stringify({ ts: new Date().toISOString(), session: session }) + '\n'
-  );
+  appendFileSync(STATE, JSON.stringify({ ts: new Date().toISOString(), session: session }) + '\n');
 
   // Add 10 more irrelevant entries (failure is now at position 11 from end relative to the 10, but total > 50)
   for (let i = 0; i < 10; i++) {
     appendFileSync(
       STATE,
-      JSON.stringify({ ts: new Date().toISOString(), session: 'irrelevant' }) + '\n'
+      JSON.stringify({ ts: new Date().toISOString(), session: 'irrelevant' }) + '\n',
     );
   }
 
