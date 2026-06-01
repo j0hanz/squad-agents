@@ -1,9 +1,8 @@
 ---
 name: architecture
-description: Software architecture: diagnose (circular deps, God modules, testing issues) or design (organize features, module boundaries, patterns, clear boundaries).
+description: "Use when a codebase has structural problems (circular deps, God modules, testability issues) or when designing new systems. Trigger on 'architecture review', 'where should this code live', 'too coupled', 'God class', 'design this system'."
 disable-model-invocation: false
 allowed-tools: Bash(node *)
-version: 1.0.0
 ---
 
 # Architecture

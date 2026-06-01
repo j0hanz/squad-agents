@@ -3,7 +3,6 @@ name: agents-maintainer
 description: Create, audit, refactor AGENTS.md, CLAUDE.md, instruction files and onboarding guides. Trigger on 'agent docs', 'instructions', 'onboard', 'understand repo', file needs setup.
 disable-model-invocation: true
 allowed-tools: Bash(python *) Bash(python3 *)
-version: 1.0.0
 ---
 
 # agents-maintainer

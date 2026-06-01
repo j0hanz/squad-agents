@@ -1,8 +1,7 @@
 ---
 name: refactor
-description: Apply to 'clean up', 'refactor', 'simplify', 'improve', 'modernize', 'messy'/'hard to read'/'hard to test'. Also: API changes, discovered bugs, structural problems, proactive cleanup.
+description: "Trigger on 'clean up', 'refactor', 'simplify', 'improve', 'modernize', 'messy', 'hard to read', 'hard to test'. Also: API changes, discovered bugs, structural problems, proactive cleanup."
 disable-model-invocation: false
-version: 1.0.0
 ---
 
 # Refactor

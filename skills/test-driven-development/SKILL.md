@@ -1,7 +1,6 @@
 ---
 name: test-driven-development
 description: Test-driven development. Trigger on 'TDD', 'test-first', 'write tests'. Mandatory for non-trivial logic. Defines strict red-green-refactor procedures for agent-driven development.
-version: 1.0.0
 ---
 
 # Test-Driven Development (TDD)

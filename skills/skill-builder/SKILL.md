@@ -2,7 +2,6 @@
 name: skill-builder
 description: Build, test, improve Claude Agent Skills. Trigger on 'make skill', 'build skill', 'skill not working', 'turn workflow into skill', 'run evals', 'optimize skill', SKILL.md feedback.
 disable-model-invocation: false
-version: 1.0.0
 ---
 
 # Skill Builder

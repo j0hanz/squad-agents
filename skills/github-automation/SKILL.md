@@ -1,9 +1,8 @@
 ---
 name: github-automation
-description: GitHub automation: PATH A (Actions workflows, OIDC, hardening) or PATH B (gh CLI, bots, batch ops). Trigger on 'add CI', 'set up release', 'pin actions', 'deploy AWS'.
+description: "GitHub automation: PATH A (Actions workflows, OIDC, hardening) or PATH B (gh CLI, bots, batch ops). Trigger on 'add CI', 'set up release', 'pin actions', 'deploy AWS'."
 disable-model-invocation: true
 allowed-tools: Bash(python *) Bash(python3 *)
-version: 1.0.0
 ---
 
 # GitHub Automation

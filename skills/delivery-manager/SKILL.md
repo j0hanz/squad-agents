@@ -2,7 +2,6 @@
 name: delivery-manager
 description: Transition feature to 'delivered'. Trigger on 'deliver this', 'create PR', 'finish feature', 'wrap up'. Validates, generates PR metadata, attribution, changelog.
 disable-model-invocation: true
-version: 1.0.0
 ---
 
 # Delivery Manager

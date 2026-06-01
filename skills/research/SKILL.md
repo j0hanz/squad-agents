@@ -1,9 +1,8 @@
 ---
 name: research
-description: Developer docs, API references, code examples via Context7. Trigger on 'React hooks', 'AWS SDK', 'library API', 'Context7', 'ctx7'. Manage Context7 skills and setup.
+description: "Use when Context7 needs setup, authentication, or skill management. Trigger on 'Context7 setup', 'ctx7 auth', 'install ctx7 skill', 'context7 not working', 'ctx7 skills list'. Also guides MCP-to-CLI fallback when context7 tools fail."
 disable-model-invocation: false
 argument-hint: "[library/framework or ctx7 command]"
-version: 1.0.0
 ---
 
 ## NEVER

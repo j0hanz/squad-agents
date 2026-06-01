@@ -1,9 +1,8 @@
 ---
 name: create-hook
-description: Design, write, test Claude Code hooks. Trigger on 'add hook', 'block tool', 'auto-format', 'run tests', 'inject context'. Also: hook types, lifecycle events, debugging non-firing hooks.
+description: "Design, write, test Claude Code hooks. Trigger on 'add hook', 'block tool', 'auto-format', 'run tests', 'inject context'. Also: hook types, lifecycle events, debugging non-firing hooks."
 disable-model-invocation: false
 argument-hint: "[what the hook should guarantee]"
-version: 1.0.0
 ---
 
 # Create Hook

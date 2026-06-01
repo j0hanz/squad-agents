@@ -1,8 +1,7 @@
 ---
 name: spec-driven-development
-description: Spec-driven development: spec→plan→code. Trigger on 'build', 'add', 'implement', 'design'. Mandatory workflow enforces specs before code. Even for 'just build' requests.
+description: "Use when requirements are explored and it's time to formalize: spec then plan then code. Trigger on 'write the spec', 'formalize this', 'spec-driven', 'spec first', 'ready to build'. NOT for initial idea exploration — use brainstorming for that."
 disable-model-invocation: false
-version: 1.0.0
 ---
 
 # Spec-Driven Development

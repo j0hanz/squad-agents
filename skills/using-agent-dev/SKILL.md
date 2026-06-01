@@ -1,8 +1,7 @@
 ---
 name: using-agent-dev
-description: Navigation guide for agent-dev skills. Trigger on 'which skill for X', task unclear, agent-dev context. Routing between process/domain skills, workflow sequences.
+description: "Use when unsure which skill to invoke, or to navigate the agent-dev skill system. Trigger on 'which skill should I use', 'what skill for this', 'confused about workflow', 'how do I approach this'. Routes between brainstorming, diagnose, spec-driven-development, and domain skills."
 disable-model-invocation: false
-version: 1.0.0
 ---
 
 > **Invocation:** When installed as the `agent-dev` plugin, prefix skill names with `agent-dev:` — e.g., `/agent-dev:brainstorming`. In a standalone `.claude/skills/` installation, use bare names — e.g., `/brainstorming`.

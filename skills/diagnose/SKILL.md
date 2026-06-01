@@ -1,9 +1,8 @@
 ---
 name: diagnose
-description: Disciplined debugging for any bug. Trigger on "debug this", "fix crash", "why slow", "diagnose", "broken code", or unexpected behavior. Works for software, infrastructure, everything.
+description: "Disciplined debugging for any bug or unexpected behavior. Trigger on 'debug', 'fix crash', 'not working', 'why is this failing', 'unexpected output', 'production error', 'diagnose'. Mandatory root-cause workflow before any fix."
 disable-model-invocation: false
 argument-hint: "[symptom or file path]"
-version: 1.0.0
 ---
 
 # Skill: diagnose

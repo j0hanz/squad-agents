@@ -1,8 +1,7 @@
 ---
 name: verification-before-completion
-description: Verify before completion. Trigger on 'done', 'finished', 'looks good', 'ready to review', 'ready to merge'. Test actual behavior, not code inspection alone.
+description: "Verify before completion. Trigger when the USER says 'looks good', 'ready to review', 'ready to merge', 'mark as done', or when Claude is about to report a task complete. Test actual behavior — not code inspection alone."
 disable-model-invocation: false
-version: 1.0.0
 ---
 
 # Verification Before Completion

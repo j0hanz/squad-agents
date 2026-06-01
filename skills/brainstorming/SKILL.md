@@ -1,7 +1,6 @@
 ---
 name: brainstorming
 description: Structured requirements discovery before implementation. Trigger on feature building, ambiguous design, or unclear terminology. Prevents rework by catching problems early.
-version: 1.0.0
 ---
 
 ## When to Apply

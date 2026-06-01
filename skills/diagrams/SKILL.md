@@ -3,7 +3,6 @@ name: diagrams
 description: Expert Mermaid architectural modeling. Trigger on 'visualize architecture', 'draw diagram', 'C4 model', 'sequence flow', 'schema', 'coupling', 'simplify', 'microservice design'.
 disable-model-invocation: false
 allowed-tools: Bash(node *)
-version: 1.0.0
 ---
 
 # Architectural Diagrams

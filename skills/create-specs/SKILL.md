@@ -4,7 +4,6 @@ description: AI-ready technical specification. Trigger on 'specs', 'requirements
 disable-model-invocation: false
 user-invocable: false
 allowed-tools: Bash(python *) Bash(python3 *)
-version: 1.0.0
 ---
 
 # Create Specs
