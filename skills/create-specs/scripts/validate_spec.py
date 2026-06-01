@@ -58,9 +58,9 @@ def validate(spec, level: str) -> tuple[list[str], list[str]]:
     # 2. Requirement Linter
     # Match only actual requirement statements (label at line start), not prose
     # references to requirement IDs that appear mid-line in analysis text.
-    # Pattern: optional whitespace, dash, optional whitespace, optional backtick,
-    # then the label (e.g. REQ-001, SEC-002), optional backtick, then a colon.
-    _REQ_STMT_RE = re.compile(r"^\s*-\s*`?(REQ|SEC|PERF|COMP)-\d+`?\s*:")
+    # Pattern: optional minimal whitespace (up to 2 spaces), dash,
+    # then the label (e.g. REQ-001, SEC-002), then optional whitespace/colon.
+    _REQ_STMT_RE = re.compile(r"^[ ]{0,2}-\s+`?(REQ|SEC|PERF|COMP)-\d+`?[\s:]*")
     req_lines = [line for line in spec.raw_lines if _REQ_STMT_RE.match(line)]
     for line in req_lines:
         # Atomicity check

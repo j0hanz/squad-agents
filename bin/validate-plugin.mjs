@@ -118,36 +118,52 @@ function main() {
   // Validate skills
   const skillsDir = path.join(pluginRoot, 'skills');
   if (fs.existsSync(skillsDir)) {
-    fs.readdirSync(skillsDir).forEach((skill) => {
-      const skillPath = path.join(skillsDir, skill);
-      if (fs.statSync(skillPath).isDirectory()) {
-        validateSkillStructure(skillPath);
-      }
-    });
+    try {
+      fs.readdirSync(skillsDir).forEach((skill) => {
+        const skillPath = path.join(skillsDir, skill);
+        try {
+          if (fs.statSync(skillPath).isDirectory()) {
+            validateSkillStructure(skillPath);
+          }
+        } catch (e) {
+          errors.push(`[Skills] Failed to stat skill ${skill}: ${e.message}`);
+        }
+      });
+    } catch (e) {
+      errors.push(`[Skills] Failed to read skills directory: ${e.message}`);
+    }
   }
 
   // Validate agents
   const agentsDir = path.join(pluginRoot, 'agents');
   if (fs.existsSync(agentsDir)) {
-    fs.readdirSync(agentsDir)
-      .filter((f) => f.endsWith('.md'))
-      .forEach((agent) => {
-        const agentPath = path.join(agentsDir, agent);
-        const result = validateFrontmatter(agentPath, 'Agent');
-        if (result) {
-          validateAgentTriggers(agentPath, result.frontmatter);
-        }
-      });
+    try {
+      fs.readdirSync(agentsDir)
+        .filter((f) => f.endsWith('.md'))
+        .forEach((agent) => {
+          const agentPath = path.join(agentsDir, agent);
+          const result = validateFrontmatter(agentPath, 'Agent');
+          if (result) {
+            validateAgentTriggers(agentPath, result.frontmatter);
+          }
+        });
+    } catch (e) {
+      errors.push(`[Agents] Failed to read agents directory: ${e.message}`);
+    }
   }
 
   // Validate commands
   const commandsDir = path.join(pluginRoot, 'commands');
   if (fs.existsSync(commandsDir)) {
-    fs.readdirSync(commandsDir)
-      .filter((f) => f.endsWith('.md'))
-      .forEach((cmd) => {
-        validateCommand(path.join(commandsDir, cmd));
-      });
+    try {
+      fs.readdirSync(commandsDir)
+        .filter((f) => f.endsWith('.md'))
+        .forEach((cmd) => {
+          validateCommand(path.join(commandsDir, cmd));
+        });
+    } catch (e) {
+      errors.push(`[Commands] Failed to read commands directory: ${e.message}`);
+    }
   }
 
   // Validate hooks

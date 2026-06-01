@@ -62,7 +62,17 @@ export function replay() {
     if (n && !seen.has(n)) {
       seen.add(n);
       // Include timestamp if available for session-relative ordering across resume.
-      const time = entry.ts ? new Date(entry.ts).toLocaleTimeString() : '';
+      let time = '';
+      if (entry.ts) {
+        try {
+          const date = new Date(entry.ts);
+          if (!isNaN(date.getTime())) {
+            time = date.toLocaleTimeString();
+          }
+        } catch {
+          // Silently skip invalid timestamps
+        }
+      }
       notes.unshift(`  ${n}${time ? ` [${time}]` : ''}`);
     }
   }

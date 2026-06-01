@@ -28,7 +28,7 @@ export function nudge(input = {}) {
   if (!INTENT.test(prompt) || ALREADY.test(prompt)) return null;
 
   const session = input.session_id || 'unknown';
-  const already = readJsonlTail(STATE, 50).some((r) => r.session === session);
+  const already = readJsonlTail(STATE, 50).some((r) => r.session && r.session === session);
   if (already) return null; // once per session
 
   appendJsonl(STATE, { ts: new Date().toISOString(), session });

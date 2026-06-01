@@ -30,6 +30,9 @@ export function findCycles(adjacencyList) {
       
       if (component.length > 1) {
           cycles.push(component);
+      } else if (component.length === 1 && adjacencyList[component[0]]?.includes(component[0])) {
+          // Self-loop: single node that imports itself
+          cycles.push(component);
       }
     }
   }

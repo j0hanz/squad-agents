@@ -9,16 +9,31 @@ import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+const MAX_STDIN_SIZE = 10 * 1024 * 1024; // 10MB
+
 /** Read all of stdin and parse it as the hook event JSON. Never throws. */
 export async function readStdin() {
   const chunks = [];
-  for await (const chunk of process.stdin) chunks.push(chunk);
+  let totalSize = 0;
+  try {
+    for await (const chunk of process.stdin) {
+      totalSize += chunk.length;
+      if (totalSize > MAX_STDIN_SIZE) {
+        throw new Error(`stdin exceeds ${MAX_STDIN_SIZE} bytes`);
+      }
+      chunks.push(chunk);
+    }
+  } catch (err) {
+    debug('readStdin failed', err.message);
+    return { _parseError: err.message };
+  }
+
   const raw = Buffer.concat(chunks).toString('utf8').trim();
   if (!raw) return {};
   try {
     return JSON.parse(raw);
-  } catch {
-    return { _raw: raw };
+  } catch (err) {
+    return { _raw: raw, _parseError: err.message };
   }
 }
 

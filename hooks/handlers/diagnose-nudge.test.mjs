@@ -70,3 +70,38 @@ test('onFailure() nudges without crashing when tool_response is absent', () => {
   assert.ok(result, 'nudge should still fire without error detail');
   assert.match(result, /diagnose/);
 });
+
+test('onFailure() counts failures beyond the last 50 entries', async () => {
+  const dir = freshProject();
+  const session = 'sess-beyond-tail';
+  const STATE = join(dir, '.claude/state/diagnose-nudge.jsonl');
+  const fs = await import('node:fs');
+  const { mkdirSync, appendFileSync } = fs;
+  mkdirSync(join(dir, '.claude/state'), { recursive: true });
+
+  // Fill state with 200 irrelevant entries
+  for (let i = 0; i < 200; i++) {
+    appendFileSync(
+      STATE,
+      JSON.stringify({ ts: new Date().toISOString(), session: 'irrelevant' }) + '\n'
+    );
+  }
+
+  // Add one failure for our session (now at position 201 from end)
+  appendFileSync(
+    STATE,
+    JSON.stringify({ ts: new Date().toISOString(), session: session }) + '\n'
+  );
+
+  // Add 10 more irrelevant entries (failure is now at position 11 from end relative to the 10, but total > 50)
+  for (let i = 0; i < 10; i++) {
+    appendFileSync(
+      STATE,
+      JSON.stringify({ ts: new Date().toISOString(), session: 'irrelevant' }) + '\n'
+    );
+  }
+
+  // Call onFailure which should record 2nd failure for this session and nudge
+  const result = onFailure({ tool_name: 'Bash', session_id: session });
+  assert.ok(result, 'should nudge even if first failure was > 50 entries ago');
+});

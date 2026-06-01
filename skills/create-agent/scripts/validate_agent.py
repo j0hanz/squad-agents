@@ -83,7 +83,7 @@ def split_frontmatter(text: str) -> tuple[str | None, str]:
     if not text.startswith("---"):
         return None, text
     # Find the closing --- on its own line.
-    m = re.match(r"^---\s*\n(.*?)\n---\s*\n?(.*)$", text, re.DOTALL)
+    m = re.match(r"^---\s*\r?\n(.*?)\r?\n---\s*\r?\n?(.*)$", text, re.DOTALL)
     if not m:
         return None, text
     return m.group(1), m.group(2)
