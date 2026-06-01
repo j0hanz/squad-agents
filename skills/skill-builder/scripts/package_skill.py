@@ -12,6 +12,7 @@ Example:
 
 from __future__ import annotations
 
+import argparse
 import fnmatch
 import sys
 import zipfile
@@ -119,9 +120,7 @@ def package_skill(
         return None
 
 
-def main():
-    import argparse
-
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Package a skill folder into a .skill file"
     )

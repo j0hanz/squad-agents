@@ -45,6 +45,8 @@ SECTIONS_BY_LEVEL: dict[str, list[str]] = {
     ],
 }
 
+_REQ_STMT_RE = re.compile(r"^[ ]{0,2}-\s+`?(REQ|SEC|PERF|COMP)-\d+`?[\s:]*")
+
 
 def validate(spec, level: str) -> tuple[list[str], list[str]]:
     errors: list[str] = []
@@ -60,7 +62,6 @@ def validate(spec, level: str) -> tuple[list[str], list[str]]:
     # references to requirement IDs that appear mid-line in analysis text.
     # Pattern: optional minimal whitespace (up to 2 spaces), dash,
     # then the label (e.g. REQ-001, SEC-002), then optional whitespace/colon.
-    _REQ_STMT_RE = re.compile(r"^[ ]{0,2}-\s+`?(REQ|SEC|PERF|COMP)-\d+`?[\s:]*")
     req_lines = [line for line in spec.raw_lines if _REQ_STMT_RE.match(line)]
     for line in req_lines:
         # Atomicity check

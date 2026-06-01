@@ -15,13 +15,13 @@ import sys
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import IO, Any
+from typing import IO, Any, ClassVar
 
 
 class Config:
     """Central configuration for plugin audit utilities."""
 
-    DEPENDENCY_DIRS: dict[str, str] = {
+    DEPENDENCY_DIRS: ClassVar[dict[str, str]] = {
         "node_modules": "Node.js (npm/pnpm/yarn/bun)",
         "venv": "Python (virtualenv)",
         ".venv": "Python (virtualenv)",
@@ -42,7 +42,7 @@ class Config:
         "extern": "External dependencies",
     }
 
-    PACKAGE_MANAGERS: dict[str, str] = {
+    PACKAGE_MANAGERS: ClassVar[dict[str, str]] = {
         "pnpm-lock.yaml": "pnpm",
         "yarn.lock": "yarn",
         "package-lock.json": "npm",
@@ -53,7 +53,7 @@ class Config:
         "go.sum": "go",
     }
 
-    DEFAULT_IGNORE_PATTERNS: set[str] = {
+    DEFAULT_IGNORE_PATTERNS: ClassVar[set[str]] = {
         ".git",
         ".vscode",
         ".idea",

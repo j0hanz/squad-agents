@@ -159,6 +159,7 @@ def main():
                 + [str(f) for f in files],
                 check=True,
             )
+            external_ran = True
             print()  # Spacer
         except subprocess.CalledProcessError:
             sys.exit(1)

@@ -10,18 +10,27 @@ from pathlib import Path
 
 
 def init_eval(
-    skill_name: str, iteration: int, eval_id: int, prompt: str, eval_name: str = ""
+    skill_name: str,
+    iteration: int,
+    eval_id: int,
+    prompt: str,
+    eval_name: str = "",
+    runs: int = 3,
 ) -> None:
     """Initialize an evaluation workspace."""
-    base_dir = Path(f"{skill_name}-workspace/iteration-{iteration}/eval-{eval_id}")
+    # Sanitize skill_name to prevent path traversal (strip ../ and path separators)
+    safe_name = Path(skill_name).name
+    base_dir = (
+        Path(f"{safe_name}-workspace") / f"iteration-{iteration}" / f"eval-{eval_id}"
+    )
 
     # Define configurations
     configs = ["with_skill", "without_skill"]
 
     for config in configs:
         config_dir = base_dir / config
-        # Create run-1, run-2, run-3 directories
-        for i in range(1, 4):
+        # Create run directories
+        for i in range(1, runs + 1):
             run_dir = config_dir / f"run-{i}"
             (run_dir / "outputs").mkdir(parents=True, exist_ok=True)
             print(f"Created: {run_dir}/outputs")
@@ -39,16 +48,24 @@ def init_eval(
     print(f"Generated: {metadata_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Initialize an evaluation workspace")
     parser.add_argument("--skill-name", required=True, help="Name of the skill")
     parser.add_argument("--iteration", type=int, default=1, help="Iteration number")
     parser.add_argument("--eval-id", type=int, required=True, help="Evaluation ID")
     parser.add_argument("--prompt", required=True, help="The test prompt")
     parser.add_argument("--name", help="Descriptive name for the evaluation")
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=3,
+        help="Number of run directories to create per configuration",
+    )
 
     args = parser.parse_args()
-    init_eval(args.skill_name, args.iteration, args.eval_id, args.prompt, args.name)
+    init_eval(
+        args.skill_name, args.iteration, args.eval_id, args.prompt, args.name, args.runs
+    )
 
 
 if __name__ == "__main__":

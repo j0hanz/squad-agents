@@ -174,13 +174,14 @@ def process_line(
     new_ref_path = f"{repo}/{subpath}" if subpath else repo
     new_ref = f"{new_ref_path}@{sha}"
 
-    # Preserve existing trailing comment if it already has the version tag;
-    # otherwise append ` # <rev>`. Trailing typically begins with optional spaces
-    # and then `#` (or is empty).
+    # Preserve existing trailing comment, but ensure version tag is present.
+    # Trailing typically begins with optional spaces and then `#` (or is empty).
     stripped = trailing.strip()
     if stripped.startswith("#"):
-        # Already has a comment — keep it unless it has no version info.
+        # Already has a comment — append version tag if not already present.
         comment = stripped
+        if rev not in comment:
+            comment = f"{comment} {rev}"
     else:
         comment = f"# {rev}"
     new_line = f"{prefix}{new_ref} {comment}\n"

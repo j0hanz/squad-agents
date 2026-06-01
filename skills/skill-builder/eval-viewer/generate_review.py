@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from functools import partial
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 # --- Configuration & Constants ---
 
@@ -37,10 +37,14 @@ class Config:
     """Central configuration for eval viewer utilities."""
 
     # Files to exclude from output listings
-    METADATA_FILES: set[str] = {"transcript.md", "user_notes.md", "metrics.json"}
+    METADATA_FILES: ClassVar[set[str]] = {
+        "transcript.md",
+        "user_notes.md",
+        "metrics.json",
+    }
 
     # Extensions we render as inline text
-    TEXT_EXTENSIONS: set[str] = {
+    TEXT_EXTENSIONS: ClassVar[set[str]] = {
         ".txt",
         ".md",
         ".json",
@@ -436,14 +440,18 @@ def _kill_port(port: int) -> None:
     """Kill any process listening on the given port."""
     if sys.platform == "win32":
         try:
-            # On Windows, we can use netstat and taskkill
-            cmd = f"netstat -ano | findstr :{port}"
-            output = subprocess.check_output(cmd, shell=True, text=True)
-            for line in output.strip().split("\n"):
-                if "LISTENING" in line:
+            # On Windows, use netstat without shell=True for safety
+            result = subprocess.run(
+                ["netstat", "-ano"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            for line in result.stdout.strip().split("\n"):
+                if f":{port}" in line and "LISTENING" in line:
                     pid = line.strip().split()[-1]
                     subprocess.run(["taskkill", "/F", "/PID", pid], capture_output=True)
-        except (subprocess.CalledProcessError, IndexError):
+        except (subprocess.CalledProcessError, IndexError, subprocess.TimeoutExpired):
             pass
         return
 
@@ -501,8 +509,8 @@ class ReviewHandler(BaseHTTPRequestHandler):
                     )
                 except (json.JSONDecodeError, OSError):
                     pass
-            html = generate_html(runs, self.skill_name, self.previous, benchmark)
-            content = html.encode("utf-8")
+            page_html = generate_html(runs, self.skill_name, self.previous, benchmark)
+            content = page_html.encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(content)))
@@ -625,11 +633,11 @@ def main() -> None:
             pass
 
     if args.static:
-        html = generate_html(runs, skill_name, previous, benchmark)
+        page_html = generate_html(runs, skill_name, previous, benchmark)
         abs_static = args.static.resolve()
         try:
             abs_static.parent.mkdir(parents=True, exist_ok=True)
-            abs_static.write_text(html, encoding="utf-8")
+            abs_static.write_text(page_html, encoding="utf-8")
             file_url = abs_static.as_uri()
             safe_print("\n  Static Eval Viewer")
             safe_print("  ---------------------------------")

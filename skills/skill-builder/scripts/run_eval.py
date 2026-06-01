@@ -119,6 +119,8 @@ async def run_single_query(
                 elif se_type in ("content_block_stop", "message_stop"):
                     if pending_tool_name and clean_name in accumulated_json:
                         triggered = True
+                    pending_tool_name = None
+                    accumulated_json = ""
 
             elif event.get("type") == "assistant":
                 message = event.get("message", {})

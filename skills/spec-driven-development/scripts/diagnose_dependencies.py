@@ -14,10 +14,11 @@ _PROJECT_ROOT = _SCRIPT_DIR.parent.parent.parent
 _SKILLS_DIR = _PROJECT_ROOT / "skills"
 
 
-def check_command(cmd):
+def check_command(cmd: str) -> tuple[bool, str | None]:
     """Check if a command exists in PATH or as a file."""
     try:
-        subprocess.run(cmd, capture_output=True, check=True, shell=True, timeout=5)
+        # shell=False: commands are internal constants, not user input
+        subprocess.run(cmd.split(), capture_output=True, check=True, timeout=5)
         return True, None
     except (
         subprocess.CalledProcessError,
@@ -27,7 +28,7 @@ def check_command(cmd):
         return False, str(e)
 
 
-def check_file(path):
+def check_file(path: str | Path) -> bool:
     """Check if a file exists."""
     return Path(path).exists()
 
@@ -63,7 +64,7 @@ PREREQUISITES = {
 }
 
 
-def main():
+def main() -> int:
     all_ok = True
     print("=" * 70)
     print("Spec-Driven Development: Dependency Diagnostic")
@@ -73,10 +74,10 @@ def main():
     for name, spec in PREREQUISITES.items():
         try:
             present = spec["check"]()
-        except Exception as e:
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             present = False
             print(f"[ERROR] {name}")
-            print(f"          Could not check: {str(e)}")
+            print(f"          Could not check: {e}")
             print()
             all_ok = False
             continue

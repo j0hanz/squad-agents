@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from pathlib import Path
 
 TEMPLATES = {
     "sketch": """# [Title]
@@ -113,7 +114,7 @@ DOMAIN_SNIPPETS = {
 }
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Scaffold a new specification template."
     )
@@ -155,8 +156,6 @@ def main():
             )
 
     if args.output:
-        from pathlib import Path
-
         Path(args.output).write_text(template, encoding="utf-8")
         print(f"Scaffolded spec written to: {args.output}")
     else:

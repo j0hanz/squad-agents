@@ -78,12 +78,8 @@ def validate_plan(plan_path: str | Path) -> tuple[list[str], list[str]]:
             )
 
     # 2. Global Anti-Patterns
-    if "```" in content and "Validate:" not in content:
-        # Tables or mermaid might be in here
-        if "|" in content and "--|" in content:
-            warnings.append(
-                "Plan contains markdown tables. SKILL.md advises against them."
-            )
+    if "|" in content and "--|" in content:
+        warnings.append("Plan contains markdown tables. SKILL.md advises against them.")
 
     return errors, warnings
 

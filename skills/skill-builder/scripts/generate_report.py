@@ -43,12 +43,13 @@ def _aggregate_runs(results: list[dict] | None) -> tuple[int, int]:
 
 def _score_class(correct: int, total: int) -> str:
     """Return a CSS class name based on the correct/total ratio."""
-    if total > 0:
-        ratio = correct / total
-        if ratio >= 0.8:
-            return "score-good"
-        elif ratio >= 0.5:
-            return "score-ok"
+    if total == 0:
+        return "score-na"
+    ratio = correct / total
+    if ratio >= 0.8:
+        return "score-good"
+    elif ratio >= 0.5:
+        return "score-ok"
     return "score-bad"
 
 
@@ -182,6 +183,7 @@ def generate_html(data: dict, auto_refresh: bool = False, skill_name: str = "") 
         .score-good { background: #eef2e8; color: #788c5d; }
         .score-ok { background: #fef3c7; color: #d97706; }
         .score-bad { background: #fceaea; color: #c44; }
+        .score-na { color: #888; }
         .train-label { color: #b0aea5; font-size: 10px; }
         .test-label { color: #6a9bcc; font-size: 10px; font-weight: bold; }
         .best-row { background: #f5f8f2; }

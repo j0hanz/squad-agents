@@ -191,41 +191,6 @@ def _parse_description(text: str) -> str:
     return match.group(1).strip().strip('"') if match else text.strip().strip('"')
 
 
-def _shorten_if_needed(description: str, prompt: str, model: str) -> tuple[str, dict]:
-    """If description exceeds 1024 chars, call Claude once more to shorten it.
-
-    Returns (final_description, extra_transcript_fields).
-    """
-    if len(description) <= 1024:
-        return description, {}
-
-    # Safety net: the prompt already states the 1024-char hard limit, but if
-    # the model blew past it anyway, make one fresh single-turn call that
-    # quotes the too-long version and asks for a shorter rewrite. (The old
-    # SDK path did this as a true multi-turn; `claude -p` is one-shot, so we
-    # inline the prior output into the new prompt instead.)
-    shorten_prompt = (
-        f"{prompt}\n\n"
-        f"---\n\n"
-        f"A previous attempt produced this description, which at "
-        f"{len(description)} characters is over the 1024-character hard limit:\n\n"
-        f'"{description}"\n\n'
-        f"Rewrite it to be under 1024 characters while keeping the most "
-        f"important trigger words and intent coverage. Respond with only "
-        f"the new description in <new_description> tags."
-    )
-    shorten_text = _call_claude(shorten_prompt, model)
-    shortened = _parse_description(shorten_text)
-
-    extra = {
-        "rewrite_prompt": shorten_prompt,
-        "rewrite_response": shorten_text,
-        "rewrite_description": shortened,
-        "rewrite_char_count": len(shortened),
-    }
-    return shortened, extra
-
-
 def _write_log(log_dir: Path, iteration: int | None, transcript: dict) -> None:
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / f"improve_iter_{iteration or 'unknown'}.json"

@@ -2,9 +2,10 @@
 
 import re
 from pathlib import Path
+from typing import Any
 
 
-def _parse_frontmatter(text: str) -> dict[str, str]:
+def _parse_frontmatter(text: str) -> dict[str, Any]:
     """Parse a flat YAML-style frontmatter block into top-level key/value pairs."""
     try:
         import yaml
@@ -12,12 +13,12 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
         result = yaml.safe_load(text) or {}
         if not isinstance(result, dict):
             return {}
-        return {str(k): str(v) for k, v in result.items()}
+        return {str(k): v for k, v in result.items()}
     except ImportError:
         pass
 
     # Fallback: hand-rolled parser for environments without PyYAML
-    result: dict[str, str] = {}
+    result: dict[str, Any] = {}
     lines = text.splitlines()
     i = 0
     while i < len(lines):
@@ -29,7 +30,7 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
         m = re.match(r"^([a-zA-Z_][a-zA-Z0-9_-]*):\s*(.*)", line)
         if m:
             key, value = m.group(1), m.group(2).strip()
-            if value in (">", "|", ">-", "|-", ""):
+            if value in (">", "|", ">-", "|-", ">+", "|+", ""):
                 i += 1
                 block: list[str] = []
                 while i < len(lines) and (
@@ -52,7 +53,7 @@ def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
     try:
         content = skill_md_path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        raise FileNotFoundError(f"SKILL.md not found in {skill_path}")
+        raise FileNotFoundError(f"SKILL.md not found in {skill_path}") from None
 
     match = re.match(r"^---\n(.*?)\n---\n", content, re.DOTALL)
     if not match:

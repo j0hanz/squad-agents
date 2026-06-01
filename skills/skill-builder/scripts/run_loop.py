@@ -154,10 +154,20 @@ async def run_loop_async(
         )
 
         if live_report_path:
+            current_best = max(
+                (
+                    h.get("test_passed", 0) or 0
+                    if test_set
+                    else h.get("train_passed", 0) or 0
+                    for h in history
+                ),
+                default=0,
+            )
             report_html = generate_html(
                 {
                     "original_description": original_description,
                     "best_description": current_description,
+                    "best_score": current_best,
                     "iterations_run": len(history),
                     "history": history,
                     "train_size": len(train_set),
@@ -193,8 +203,14 @@ async def run_loop_async(
         history,
         key=lambda h: (h["test_passed"] if test_set else h["train_passed"]) or 0,
     )
+    best_score = (best["test_passed"] if test_set else best["train_passed"]) or 0
     return {
+        "original_description": original_description,
         "best_description": best["description"],
+        "best_score": best_score,
+        "iterations_run": len(history),
+        "train_size": len(train_set),
+        "test_size": len(test_set),
         "history": history,
     }
 

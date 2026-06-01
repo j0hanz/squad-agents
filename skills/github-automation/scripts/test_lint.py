@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Regression tests for lint.py"""
 
+import sys
+from pathlib import Path
+
+# Add current directory to path so lint module can be imported
+sys.path.insert(0, str(Path(__file__).parent))
+
 import textwrap
 import tempfile
 import pathlib

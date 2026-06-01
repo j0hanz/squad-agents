@@ -25,7 +25,7 @@ DESC_MIN_LEN = 30
 BODY_MIN_LEN = 80
 
 KEBAB = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-FULL_MODEL_ID = re.compile(r"^claude-(opus|sonnet|haiku)-[0-9].*$")
+FULL_MODEL_ID = re.compile(r"^claude-(opus|sonnet|haiku)-\d+(-\d+)*$")
 
 MODEL_KEYWORDS = {"haiku", "sonnet", "opus", "inherit"}
 PERMISSION_MODES = {
