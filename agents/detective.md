@@ -17,6 +17,12 @@ color: '#dc3545'
 model: claude-sonnet-4-6
 effort: high
 tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Skill
   - TodoWrite
   - mcp__filesystem__read
   - mcp__filesystem__search_text
