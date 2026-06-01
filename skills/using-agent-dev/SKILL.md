@@ -27,6 +27,8 @@ Agent-Dev is a Claude Code plugin for **authoring, testing, validating, and ship
 
 Everything in this repo follows a **skill-first, design-before-code** discipline. The output style enforces four phases: **Design → Build → Validate → Ship**.
 
+**Invocation patterns**: Skills are invoked via the Skill tool (or skill name in your message). Managed agents are invoked via `@agent-name` followed by a prompt. Slash commands are typed as `/command-name`. These are three distinct mechanisms — do not confuse them.
+
 ---
 
 ## Instruction Priority
@@ -37,26 +39,20 @@ Everything in this repo follows a **skill-first, design-before-code** discipline
 
 ---
 
-## Skill-First Rule
+See [references/terminology.md](references/terminology.md) for definitions of skill, agent, command, hook, component, and other key terms.
 
-**Invoke relevant skills BEFORE any response or action.** Even clarifying questions wait until you have checked for applicable skills.
+---
+
+## Process-First Rule (Skill-First)
+
+**Invoke process skills (brainstorming, diagnose, create-plan) before implementation skills (refactor, code-review) and before any direct action.** Process skills tell you HOW to approach a task; implementation skills tell you HOW to execute it.
 
 ```
 User message → Might any skill apply? → YES → Invoke Skill tool → Follow skill
                                        → DEFINITELY NOT → Respond directly
 ```
 
-### Red Flags (Stop — You Are Rationalizing)
-
-| Thought                              | Reality                                                  |
-| ------------------------------------ | -------------------------------------------------------- |
-| "This is just a quick fix"           | Quick fixes become large tasks. Check for skills.        |
-| "I need more context first"          | Skills tell you HOW to gather context. Check first.      |
-| "Let me look at the code first"      | Skills tell you HOW to explore. Check first.             |
-| "I remember this skill"              | Skills evolve. Always read current version.              |
-| "The skill is overkill here"         | Simple tasks become complex. Skills prevent wasted work. |
-| "I'll just start then use the skill" | Skill check comes BEFORE the first action.               |
-| "This doesn't need a formal process" | If a skill exists for it, use it.                        |
+See [references/red-flags.md](references/red-flags.md) for warning signs you're rationalizing away the skill-first rule, plus the cost of skipping process skills.
 
 ### Skill Priority Order
 
@@ -66,41 +62,27 @@ User message → Might any skill apply? → YES → Invoke Skill tool → Follow
 "Let's build X" → `brainstorming` first, then implementation skills.
 "Fix this bug" → `diagnose` first, then domain skills.
 
+**When to skip skill invocation**: If none of the skills in the Skill Routing Map applies, respond directly. If the task is a single-word search, a clarifying question, or retrieving a file path — no skill is needed. If in doubt, check the Quick Lookup table first.
+
 ---
 
-## Skills Index
+## Building a New Skill: Complete Workflow Example
 
-### Process / Methodology Skills
+**Want to create a new skill?** Follow this 5-step workflow:
 
-| Skill                            | Invoke when…                                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `brainstorming`                  | Starting any new feature, component, agent, skill, or hook. **Required before design approval.** |
-| `create-plan`                    | Translating an approved design into an atomic implementation plan.                               |
-| `create-specs`                   | Writing formal specifications for a component before building.                                   |
-| `spec-driven-development`        | Full spec-first development lifecycle with validation gates.                                     |
-| `test-driven-development`        | Any non-trivial logic that needs red-green-refactor discipline.                                  |
-| `skill-builder`                  | Creating, testing, improving, or evaluating a skill.                                             |
-| `create-agent`                   | Designing a new managed agent (system prompt, tools, model, context).                            |
-| `create-hook`                    | Designing or implementing a lifecycle hook handler.                                              |
-| `verification-before-completion` | Final validation sweep before marking work complete or shipping.                                 |
-| `architecture`                   | Checking code locality, coupling, or module boundary decisions.                                  |
+| Step      | Invoke                 | How           | Output                          | Move On When                              |
+| --------- | ---------------------- | ------------- | ------------------------------- | ----------------------------------------- |
+| 1. Design | `brainstorming` skill  | Skill tool    | Design approval from user       | User says "Approved" / "LGTM" / "Proceed" |
+| 2. Plan   | `/plan` command        | Slash command | `plan-*.md` file in `/plan/`    | Plan file created and reviewed            |
+| 3. Build  | `/skill-builder` skill | Skill tool    | `SKILL.md` + `evals/evals.json` | All evals scaffolded                      |
+| 4. Test   | `/test` command        | Slash command | Test results                    | All pass: `npm test` exits 0              |
+| 5. Ship   | `/pr` command          | Slash command | PR URL + commit hash            | PR open, CI green                         |
 
-### Domain / Execution Skills
+---
 
-| Skill         | Invoke when…                                                                                              |
-| ------------- | --------------------------------------------------------------------------------------------------------- |
-| `code-review` | Reviewing a diff or PR (accepts `--low`, `--medium`, `--high`, `--ultra` effort flags; `--fix` to apply). |
-| `refactor`    | Cleaning up code without behavior change. Trigger on "messy", "hard to follow", "simplify".               |
-| `diagnose`    | Debugging a failure, tracing a runtime error, or investigating unexpected behavior.                       |
-| `diagrams`    | Visualizing architecture, workflows, hook flow, or data models.                                           |
-| `research`    | Scoped web research on libraries, APIs, or external services.                                             |
+## Skill Routing Map
 
-### Lifecycle / Ops Skills
-
-| Skill               | Invoke when…                                                      |
-| ------------------- | ----------------------------------------------------------------- |
-| `agents-maintainer` | Keeping AGENTS.md and CLAUDE.md in sync after structural changes. |
-| `delivery-manager`  | Validating, committing, and opening a PR (invoke via `/deliver`). |
+18 skills organized by category. See [references/skill-routing-map.md](references/skill-routing-map.md) for the complete index of all Process, Domain/Execution, and Lifecycle skills with detailed invocation guidance.
 
 ---
 
@@ -108,63 +90,35 @@ User message → Might any skill apply? → YES → Invoke Skill tool → Follow
 
 Delegate to agents for isolated, autonomous work. Each runs in its own context — give it everything it needs in the prompt, because it has no access to the parent session.
 
-### `coder`
+**How to invoke**: Mention the agent name with `@` prefix followed by your prompt.
+Example: `@coder refactor hooks/handlers/format.mjs to reduce nesting`
 
-- **Job:** Autonomous code execution — implement, refactor, fix, test
-- **Isolation:** Git worktree (changes land in a branch, not your working tree)
-- **Preloaded skills:** `refactor`, `diagnose`
-- **Use when:** A task requires many file edits, a known implementation approach, or you want to protect the main session from churn
-- **Invoke:** Mention `@coder` or use the `coder` skill
+**Where outputs appear**: Coder and documenter write to a git worktree branch (`.claude/worktrees/`). Detective and explorer return structured text output in the conversation.
 
-### `detective`
+**Lifecycle**: Agents run asynchronously. You will receive a notification when complete. If an agent times out, re-invoke with a more scoped prompt.
 
-- **Job:** Root-cause analysis — stack traces, logic bugs, resource leaks
-- **Read-only:** Cannot modify files; returns a structured bug report with diff proposals
-- **Output format:** Severity / Category / Root cause / Evidence / Proposed fix
-- **Use when:** A bug is non-obvious, cross-file, or you want an independent diagnosis
-- **Invoke:** Mention `@detective`
-
-### `documenter`
-
-- **Job:** Generate or update AGENTS.md, README, CLAUDE.md, skill docs
-- **Use when:** Structure changed, new components added, or docs are stale
-- **Invoke:** Mention `@documenter` or `/docs`
-
-### `explorer`
-
-- **Job:** Read-only code search and research (Haiku model — low cost)
-- **Use when:** You need to find symbols, trace usage, or research a library before acting
-- **Invoke:** Mention `@explorer`
+For detailed information on each agent (job, isolation, use cases, invocation), see [references/managed-agents.md](references/managed-agents.md).
 
 ---
 
 ## Slash Commands
 
-| Command     | What it does                                                |
-| ----------- | ----------------------------------------------------------- |
-| `/welcome`  | Session orientation — announces available skills and agents |
-| `/plan`     | Invokes `create-plan` skill for current task                |
-| `/new`      | Starts a new component with brainstorming + spec workflow   |
-| `/check`    | Runs `npm validate` + tests, reports health                 |
-| `/deliver`  | Validate → commit (with attribution) → open PR              |
-| `/test`     | Runs full test suite (`npm test`)                           |
-| `/refactor` | Invokes `refactor` skill on current or specified file       |
-| `/docs`     | Invokes `documenter` agent to sync documentation            |
+| Command       | Invokes               | When to Use                                             | Output                                   |
+| ------------- | --------------------- | ------------------------------------------------------- | ---------------------------------------- |
+| `/brainstorm` | `brainstorming` skill | Start any new feature, component, agent, skill, or hook | Design table + approval                  |
+| `/coder`      | `coder` agent         | Autonomous code execution for multi-file tasks          | Worktree branch with changes             |
+| `/detective`  | `detective` agent     | Root-cause analysis of bugs or failures                 | Structured bug report with fix proposals |
+| `/diagram`    | `diagrams` skill      | Visualize architecture, workflows, or data flows        | ASCII/Mermaid diagram                    |
+| `/explore`    | `explorer` agent      | Read-only code search and symbol lookups                | Search results + usage patterns          |
+| `/fix`        | `diagnose` skill      | Debug a runtime failure or logic bug                    | Root cause analysis with diffs           |
+| `/hook`       | `create-hook` skill   | Design or implement a lifecycle hook                    | Hook handler code + test cases           |
+| `/pr`         | `code-review` skill   | Review a diff or PR for quality issues                  | Review findings with suggestions         |
 
 ---
 
 ## Hook Behaviors (What Fires Automatically)
 
-You do not invoke these — they fire on lifecycle events:
-
-| Trigger                                     | What happens                                                       |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| Session start                               | Context injected; skill list announced; explorer state initialized |
-| `UserPromptSubmit` on creative/design tasks | Brainstorm-nudge suggests invoking `brainstorming` skill           |
-| `PostToolUse` Write/Edit on JS/Python files | Auto-format via ESLint/Prettier (JS) or Ruff (Python)              |
-| `PostToolUseFailure` on Bash errors         | Diagnose-nudge surfaces `diagnose` skill and `@detective` agent    |
-| `PreToolUse` Glob/Grep/Read                 | Explorer pre-fetches and enriches context                          |
-| `Stop` / `SessionEnd`                       | Debug artifact scan; explorer state flushed                        |
+Hook behaviors are automatic — you do not invoke them. They fire on lifecycle events. See [references/hooks.md](references/hooks.md) for the complete hook trigger and behavior reference.
 
 ---
 
@@ -178,11 +132,24 @@ Every work session follows four phases. **Do not skip phases or merge them.**
 - Get explicit design approval from the user before proceeding
 - `brainstorming` skill governs this phase
 
+**Design Phase Complete When:**
+
+- [ ] User explicitly says "Approved", "LGTM", "Good", or "Proceed"
+- [ ] Design table is present with: component type, trigger condition, approach
+- [ ] No open blocking questions remain
+
 ### Build Phase
 
 - One-line intent, then act — no preamble
 - Every claim about existing code includes a `file:line` citation
 - Sequential file edits only — one edit per turn per file
+
+**Build Phase Complete When:**
+
+- [ ] All planned files have been created or edited
+- [ ] Code follows the project style guide (check with linting)
+- [ ] No debug code, console.log, or `.skip` in tests remains
+- [ ] Ready for validation testing
 
 ### Validate Phase
 
@@ -190,56 +157,64 @@ Every work session follows four phases. **Do not skip phases or merge them.**
 - Each failure is a triple: **component → rule violated → specific fix**
 - Run `npm validate` and `npm test` before marking complete
 
+**Validate Phase Complete When:**
+
+- [ ] `npm validate` exits with code 0
+- [ ] `npm test` exits with code 0, all tests passing
+- [ ] No code review findings block the PR
+- [ ] Ready to ship
+
 ### Ship Phase
 
 - List artifacts produced and what the next session can build on
-- Commit using `/deliver` — never commit without it
+- Use `/pr` to create a pull request with proper attribution
 - All AI commits MUST include the attribution trailer (see below)
+
+**Ship Phase Complete When:**
+
+- [ ] Invoked `/pr` successfully
+- [ ] PR is open with title and description
+- [ ] CI/checks are running or passing
+- [ ] Work is available for code review
+
+### Phase Iteration
+
+Phases are not strictly linear. Validate failures loop back to Build. Design changes during Build loop back to Design (get re-approval). Expect 1–3 Build/Validate iterations per task. This is normal.
+
+### Exceptions to Phase Discipline
+
+Not all work requires four full phases. See [references/exceptions.md](references/exceptions.md) for guidance on which phases to use for different work types (features, bugs, hotfixes, docs, research).
+
+### Phase Discipline: Worked Example
+
+See [references/phase-example.md](references/phase-example.md) for a detailed worked example showing the `/lint` command flowing through all four phases (Design → Build → Validate → Ship).
 
 ---
 
 ## Commit Attribution — Required on Every AI Commit
 
-Every commit made by or with AI assistance MUST include this trailer:
+Every commit made by or with AI assistance MUST include this trailer (replace model name with the active model):
 
 ```
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
 
-Use `/deliver` to handle this automatically. If committing manually, add the trailer via HEREDOC:
-
-```bash
-git commit -m "$(cat <<'EOF'
-feat: describe what changed
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
-EOF
-)"
-```
+Use `/pr` to create a PR with proper attribution, or add the trailer manually when committing directly.
 
 ---
 
-## Tech Stack Quick Reference
-
-- **Runtime:** Node.js ≥ 22 (ESM, no TypeScript — use `.mjs` for hook handlers)
-- **Python:** ≥ 3.10, managed via `uv` / `pyproject.toml`
-- **Package management:** `npm` (JS), `uv` (Python)
-- **Validation:** `npm validate` (plugin health), `npm test` (full suite)
-- **Hook dispatch:** `hooks/runner.mjs <domain> <action>` → `hooks/handlers/<domain>.mjs`
-- **No logic outside runner pattern** — all hook logic lives in `hooks/handlers/`
+See [references/reference.md](references/reference.md) for tech stack and key file paths.
 
 ---
 
-## Key Paths
+## If You're Stuck
 
-| Path                         | Purpose                                        |
-| ---------------------------- | ---------------------------------------------- |
-| `AGENTS.md`                  | Primary contributor guide — read this first    |
-| `skills/<name>/SKILL.md`     | Each skill's instructions and frontmatter      |
-| `agents/<name>.md`           | Each managed agent's system prompt and config  |
-| `commands/<name>.md`         | Each slash command definition                  |
-| `hooks/runner.mjs`           | Central hook dispatcher                        |
-| `hooks/hooks.json`           | Event → handler registration                   |
-| `hooks/handlers/*.mjs`       | Hook handler modules                           |
-| `output-styles/agent-dev.md` | Output style spec (Design/Build/Validate/Ship) |
-| `bin/validate-plugin.mjs`    | Plugin validation entrypoint                   |
+**Can't find a skill?** Use the Quick Lookup table in Skill Routing Map or browse by category.
+
+**Skill output confusing?** Check the skill's SKILL.md file for examples and guidance.
+
+**Phase discipline unclear?** See the worked example in Phase Discipline section — shows `/lint` command through all four phases.
+
+**Workflow steps?** The "Building a New Skill" table shows all 5 invocation steps with outputs.
+
+**Error occurred?** See [references/error-recovery.md](references/error-recovery.md) for recovery steps: skill load failures, subagent timeouts, test failures, design approval stalls.
