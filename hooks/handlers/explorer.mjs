@@ -21,6 +21,20 @@ function describe(tool, input = {}) {
       return input.file_path ? `read ${input.file_path}` : '';
     case 'WebFetch':
       return input.url ? `fetch ${input.url}` : '';
+    // filesystem-mcp tools
+    case 'mcp__filesystem__read':
+      if (input.paths?.length) return `fs:read ${input.paths.length} files`;
+      return input.path ? `fs:read ${input.path}` : '';
+    case 'mcp__filesystem__search_text':
+      return input.searchPattern
+        ? `fs:grep /${input.searchPattern}/${input.path ? ` in ${input.path}` : ''}`
+        : '';
+    case 'mcp__filesystem__find_files':
+      return input.pattern
+        ? `fs:find ${input.pattern}${input.path ? ` in ${input.path}` : ''}`
+        : '';
+    case 'mcp__filesystem__list':
+      return input.path ? `fs:list ${input.path}` : '';
     default:
       return '';
   }

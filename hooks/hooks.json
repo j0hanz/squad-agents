@@ -35,7 +35,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Grep|Glob|Read|WebFetch",
+        "matcher": "Grep|Glob|Read|WebFetch|mcp__filesystem__read|mcp__filesystem__search_text|mcp__filesystem__find_files|mcp__filesystem__list",
         "hooks": [
           {
             "type": "command",
@@ -48,7 +48,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Edit|Write|MultiEdit|mcp__filesystem__create|mcp__filesystem__edit|mcp__filesystem__replace_text",
         "hooks": [
           {
             "type": "command",

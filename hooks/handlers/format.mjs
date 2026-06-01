@@ -22,7 +22,8 @@ function prettierEntry() {
 
 /** PostToolUse: format the written file in place. Returns null (side effect). */
 export function onWrite(input = {}) {
-  const file = input.tool_input?.file_path;
+  // Claude native tools use file_path; filesystem-mcp create/edit use path
+  const file = input.tool_input?.file_path ?? input.tool_input?.path;
   if (!file || !existsSync(file)) return null;
 
   const ext = extname(file).toLowerCase();

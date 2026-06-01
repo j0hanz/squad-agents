@@ -3,6 +3,10 @@
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
+    },
+    "filesystem": {
+      "command": "node",
+      "args": ["C:\\filesystem-mcp\\dist\\index.js", "${workspaceFolder}"]
     }
   }
 }
