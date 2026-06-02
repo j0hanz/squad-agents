@@ -140,6 +140,17 @@ Avoid the "checklist trap" — don't run all four techniques as a script. Pick 1
 
 ## Phase 4: Design Proposal
 
+**Compress the Codebase Context Report before spawning the design-proposer:**
+
+```bash
+python skills/brainstorming/scripts/compress_report.py <path-to-report.json>
+# or pipe directly:
+echo '<report-json>' | python skills/brainstorming/scripts/compress_report.py
+```
+
+Use the compressed JSON output as the codebase context in the packet below — not the raw report.
+If the script fails, pass the raw report as-is.
+
 **Spawn `design-proposer` to generate approaches:**
 
 Use the Agent tool to launch the `design-proposer` subagent (see `agents/design-proposer.md`).
@@ -147,7 +158,7 @@ Use the Agent tool to launch the `design-proposer` subagent (see `agents/design-
 Pass a context packet containing:
 
 - Feature description (confirmed by the user in Phase 1)
-- Codebase Context Report (from the scanner agent)
+- Codebase Context Report (compressed output from script above)
 - Domain terms (from Phase 2, if run; otherwise note "Phase 2 skipped")
 - Risks and success criteria (from Phase 3, if run; otherwise note "Phase 3 skipped")
 - Any constraints the user stated explicitly during the session

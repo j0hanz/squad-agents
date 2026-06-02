@@ -15,6 +15,21 @@ Extract the domain nouns and verbs from the description. These drive all searche
 
 ## Scan Protocol
 
+**Run `scan_context.py` first — it replaces steps 1–5 with a single parallel call.**
+
+```bash
+python skills/brainstorming/scripts/scan_context.py <noun1> [noun2 ...] --cwd <project_root>
+```
+
+- Extract domain nouns and verbs from the feature description (e.g., `"add search to catalog"` → `search catalog`)
+- Pass them as positional args; set `--cwd` to the project root
+- The script runs all Glob, Grep, git-log, terminology, and constraint scans in parallel and returns structured JSON
+- Use the JSON output to populate every section of the Output Format below — do not run Glob/Grep/git-log manually
+
+**If `scan_context.py` fails** (missing Python, import error, permission denied): fall back to the manual steps below.
+
+### Manual Fallback: Steps 1–5
+
 Run all independent operations in parallel — never sequentially when they can be concurrent.
 
 ### 1. File Discovery
