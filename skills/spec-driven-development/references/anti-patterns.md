@@ -18,8 +18,8 @@
 
 ## Manual Spec or Plan Writing
 
-**NEVER** write the spec or plan manually when the `create-specs` and `create-plan` sub-skills are available. Manual work is not validated against structural rules and will produce plans with missing traceability.
+**NEVER** write the spec or plan manually when the `planning` skill is available. Manual work is not validated against structural rules and will produce plans with missing traceability and an empty coverage matrix.
 
 ## Partially Validated Plans
 
-**NEVER** begin implementation on a plan that failed `validate_plan.py`. A plan with structural errors (missing dependencies, broken task references) will produce unpredictable implementation order and untraceable failures.
+**NEVER** begin implementation on a plan that failed `validate.py --plan` or `validate.py --cross`. A plan with structural errors or uncovered requirements will produce unpredictable implementation order and untraceable failures.

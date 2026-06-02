@@ -35,31 +35,25 @@ def check_file(path: str | Path) -> bool:
 
 # Define prerequisites
 PREREQUISITES = {
-    "create-specs skill": {
-        "check": lambda: check_file(_SKILLS_DIR / "create-specs" / "SKILL.md"),
-        "fix": "Verify create-specs is installed under skills/create-specs/",
+    "planning skill": {
+        "check": lambda: check_file(_SKILLS_DIR / "planning" / "SKILL.md"),
+        "fix": "Verify planning is installed under skills/planning/",
     },
-    "create-plan skill": {
-        "check": lambda: check_file(_SKILLS_DIR / "create-plan" / "SKILL.md"),
-        "fix": "Verify create-plan is installed under skills/create-plan/",
-    },
-    "validate_spec.py": {
+    "scaffold.py": {
         "check": lambda: check_file(
-            _SKILLS_DIR / "create-specs" / "scripts" / "validate_spec.py"
+            _SKILLS_DIR / "planning" / "scripts" / "scaffold.py"
         ),
-        "fix": "Verify create-specs skill is installed (contains scripts/validate_spec.py)",
+        "fix": "Verify planning skill is installed (contains scripts/scaffold.py)",
     },
-    "validate_plan.py": {
-        "check": lambda: check_file(
-            _SKILLS_DIR / "create-plan" / "scripts" / "validate_plan.py"
-        ),
-        "fix": "Verify create-plan skill is installed (contains scripts/validate_plan.py)",
+    "sync.py": {
+        "check": lambda: check_file(_SKILLS_DIR / "planning" / "scripts" / "sync.py"),
+        "fix": "Verify planning skill is installed (contains scripts/sync.py)",
     },
-    "generate_plan.py": {
+    "validate.py": {
         "check": lambda: check_file(
-            _SKILLS_DIR / "create-plan" / "scripts" / "generate_plan.py"
+            _SKILLS_DIR / "planning" / "scripts" / "validate.py"
         ),
-        "fix": "Verify create-plan skill is installed (contains scripts/generate_plan.py)",
+        "fix": "Verify planning skill is installed (contains scripts/validate.py)",
     },
 }
 

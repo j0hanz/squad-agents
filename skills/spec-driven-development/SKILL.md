@@ -37,17 +37,17 @@ Use this skill when the user says "build X", "add X", "implement X", "how should
 
 Match response length to the stage and maturity level. Do not over-explain.
 
-| Stage                                    | Guideline                                                                                                              |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Trivial fast-path (Sketch)**           | 1 page max. Goal, ACs, validation. Nothing else.                                                                       |
-| **Scope interview (Contract/Blueprint)** | Answer the 5 interview questions in < 400 words. Do NOT pre-draft REQ/AC/VAL items here — that is `create-specs`' job. |
-| **Spec recovery (mid-impl change)**      | Numbered list of steps. ≤ 15 items. Include the git command and the validation command.                                |
-| **Blueprint / decomposition**            | Full detail appropriate. Focus on open questions and the decomposition table.                                          |
+| Stage                                    | Guideline                                                                                                           |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Trivial fast-path (Sketch)**           | 1 page max. Goal, ACs, validation. Nothing else.                                                                    |
+| **Scope interview (Contract/Blueprint)** | Answer the 5 interview questions in < 400 words. Do NOT pre-draft REQ/AC/VAL items here — that is `planning`'s job. |
+| **Spec recovery (mid-impl change)**      | Numbered list of steps. ≤ 15 items. Include the git command and the validation command.                             |
+| **Blueprint / decomposition**            | Full detail appropriate. Focus on open questions and the decomposition table.                                       |
 
 **Avoid these patterns in every response:**
 
-- Pre-drafting spec content (REQ/AC/VAL) before `create-specs` runs. It will be replaced — do not produce it during the scope interview.
-- Pre-drafting plan phases before `create-plan` runs. Same reason.
+- Pre-drafting spec content (REQ/AC/VAL) before `planning` runs. It will be replaced — do not produce it during the scope interview.
+- Pre-drafting plan phases before `planning` runs. Same reason.
 - Repeating the full 5-step workflow at the bottom of every response. State where the conversation is and what the next action is.
 
 ---
@@ -60,13 +60,13 @@ Match response length to the stage and maturity level. Do not over-explain.
 
 | Artifact           | What it says                                                     | Produced by               |
 | ------------------ | ---------------------------------------------------------------- | ------------------------- |
-| **Spec**           | What must be built, why, how it connects to other systems        | `create-specs`            |
-| **Plan**           | Atomic ordered tasks with verified paths and validation commands | `create-plan`             |
+| **Spec**           | What must be built, why, how it connects to other systems        | `planning`                |
+| **Plan**           | Atomic ordered tasks with verified paths and validation commands | `planning`                |
 | **Implementation** | Code that satisfies the plan, verified against the spec's ACs    | `test-driven-development` |
 
 **Change propagation order:** requirements change → update spec → validate spec → update plan → update code. Never reverse this. Patching code and backfilling the spec makes the spec a description of what was built, not a contract.
 
-**Notation:** `REQ` (requirements), `AC` (acceptance criteria), `VAL` (validation commands) — defined and scaffolded by the `create-specs` sub-skill.
+**Notation:** `REQ` (requirements), `AC` (acceptance criteria), `VAL` (validation commands) — defined and scaffolded by the `planning` skill.
 
 For common mistakes and how to avoid them: [Anti-Patterns](references/anti-patterns.md).
 
@@ -77,7 +77,7 @@ Different skills for different situations:
 | Situation                                                                | Skill                                  | Output                                                | Time      |
 | ------------------------------------------------------------------------ | -------------------------------------- | ----------------------------------------------------- | --------- |
 | **Implementing a single feature or bug fix** (small-to-medium scope)     | spec-driven-development (you are here) | spec-_.md + plan-_.md + validated code                | 1–3 hours |
-| **Planning a large initiative, roadmap, or multi-sprint effort**         | `create-plan`                          | high-level plan with phases and milestones            | 2–4 hours |
+| **Planning a large initiative, roadmap, or multi-sprint effort**         | `planning`                             | high-level plan with phases and milestones            | 2–4 hours |
 | **Designing system architecture, component interactions, API contracts** | `architecture`                         | architecture.md, ADRs, diagrams                       | 2–6 hours |
 | **Exploring unknown problem space or evaluating technologies**           | `research-engineer`                    | research findings, recommendations, proof-of-concepts | varies    |
 
@@ -90,20 +90,19 @@ Different skills for different situations:
 
 ## Prerequisites
 
-This skill orchestrates two sub-skills (`create-specs`, `create-plan`) that each bundle their own validators (`validate_spec.py`, `validate_plan.py`, `generate_plan.py`) — there is nothing to install separately.
+This skill orchestrates the `planning` sub-skill which bundles its own scripts (`scaffold.py`, `sync.py`, `validate.py`, `discover.py`) — there is nothing to install separately.
 
-If a sub-skill fails to invoke, run `python <skill-dir>/scripts/diagnose_dependencies.py` to check availability. If it reports a missing sub-skill, confirm the `agent-dev` plugin is enabled and run `/reload-plugins`. Do not substitute manual work for missing tooling — invoke the sub-skill by name so its own validators run.
+If the sub-skill fails to invoke, run `python <skill-dir>/scripts/diagnose_dependencies.py` to check availability. If it reports a missing sub-skill, confirm the `agent-dev` plugin is enabled and run `/reload-plugins`. Do not substitute manual work for missing tooling — invoke the sub-skill by name so its own validators run.
 
-## Required Sub-Skills
+## Required Sub-Skill
 
-Both sub-skills are **mandatory**. Do not skip them or substitute manual work.
+The `planning` sub-skill is **mandatory**. Do not skip it or substitute manual work.
 
-| Sub-Skill      | Invoked at step             | Produces                                                       |
-| -------------- | --------------------------- | -------------------------------------------------------------- |
-| `create-specs` | Step 2 (Specification Gate) | Validated `spec-*.md` with REQ, interfaces, AC, VAL            |
-| `create-plan`  | Step 3 (Planning Gate)      | Executable `plan-*.md` with phases, tasks, validation commands |
+| Sub-Skill  | Invoked at step        | Produces                                                                                        |
+| ---------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `planning` | Step 2 (Planning Gate) | Paired `<name>.specs.md` + `<name>.plan.md` with REQ/AC/VAL traceability and coverage validated |
 
-Invoke each sub-skill by name when you reach its gate. The sub-skill's own instructions define how to execute it — do not summarize or shortcut them.
+Invoke the sub-skill by name when you reach the gate. The sub-skill's own instructions define how to execute it — do not summarize or shortcut them.
 
 ## Workflow
 
@@ -119,7 +118,7 @@ Examples that do NOT qualify: any change that touches an API endpoint, database 
 
 1. Write the one-page spec using [sketch-template.md](references/sketch-template.md) (5 min).
 2. Confirm with the user.
-3. Proceed to Implementation Governance — no brainstorming, no `create-specs`, no `create-plan` required.
+3. Proceed to Implementation Governance — no brainstorming, no `planning` required.
 
 **If NO or UNSURE** → Continue with the full workflow starting at Step 0 (Brainstorming Gate).
 
@@ -162,57 +161,34 @@ Also check: does this feature depend on an interface owned by another team (API,
 
 If **yes** — identify the dependency owner before proceeding to Step 2. Find their spec if one exists. An unresolved external interface cannot be validated and will block spec completion. See [Multi-Team Specs](references/multi-team-specs.md).
 
-### 2. Specification Gate ← `create-specs` required
+### 2. Planning Gate ← `planning` required
 
-**How to invoke the `create-specs` skill:**
+**How to invoke the `planning` skill:**
 
-- **In Claude Code**: Use the `Skill` tool with `create-specs` as the skill name
-- **In Claude.ai**: Request spec creation; the skill may trigger automatically
-- **In Copilot CLI**: Run `copilot -s create-specs`
+- **In Claude Code**: Use the `Skill` tool with `planning` as the skill name
+- **In Claude.ai**: Request planning; the skill may trigger automatically
 
-If the `create-specs` skill is not available in your environment:
-
-1. Contact your workspace admin to ensure it's installed
-2. As a fallback, use the [Sketch Spec Template](references/sketch-template.md) and follow it directly (note: automated validation will not be available)
-
-**Do not write the spec manually** — the create-specs skill provides traceability and validation.
-
-The `create-specs` skill will:
-
-- Gather requirements, constraints, interfaces, and acceptance criteria via the Spec Interview
-- Scaffold and populate the 8-section spec template
-- Run `validate_spec.py` to check structural integrity and traceability
-- Produce a `spec-*.md` file ready for planning
-
-**Gate**: Do not proceed to Step 3 until `validate_spec.py` returns 0 errors and the `create-specs` self-check passes.
-_Failure mode_: If `validate_spec.py` fails, analyze the output, run the `create-specs` refinement loop again to fix the structural errors, and re-verify. Do not manually force it past the gate.
-
-### 3. Planning Gate ← `create-plan` required
-
-**How to invoke the `create-plan` skill:**
-
-- **In Claude Code**: Use the `Skill` tool with `create-plan` as the skill name, passing the spec file
-- **In Claude.ai**: Request plan creation from the spec; the skill may trigger automatically
-- **In Copilot CLI**: Run `copilot -s create-plan -- <spec-file>`
-
-If the `create-plan` skill is not available:
+If the `planning` skill is not available in your environment:
 
 1. Contact your workspace admin to ensure it's installed
-2. As a fallback, manually create the plan by running `generate_plan.py <spec.md>` directly (note: automated validation will not be available)
+2. As a fallback, use the [Sketch Spec Template](references/sketch-template.md) and follow the planning skill steps manually (note: automated validation will not be available)
 
-**Pass the validated spec file as input.**
+**Do not write spec or plan manually** — the planning skill provides traceability validation and the `Satisfies:` coverage spine.
 
-The `create-plan` skill will:
+The `planning` skill will:
 
-- Run `generate_plan.py <spec.md>` to scaffold tasks from REQ → Task mappings
-- Verify all file paths and code symbols via `discover.py`
-- Produce an executable `plan-*.md` with phases, tasks, and validation commands
-- Run `validate_plan.py` to confirm the plan has no structural errors
+- Gather requirements via the Spec Interview and scaffold `plan/<name>.specs.md`
+- Author the spec with REQ/AC/VAL IDs pre-placed by `scaffold.py`
+- Run `validate.py --spec` to check structural integrity and traceability
+- Run `sync.py` to generate `plan/<name>.plan.md` with `Satisfies:` fields pre-filled
+- Verify file paths and code symbols via `discover.py`
+- Run `validate.py --plan` and `validate.py --cross` to confirm coverage
+- Spawn the reviewer agent for semantic quality checks
 
-**Gate**: Do not begin implementation until the plan passes `validate_plan.py` with 0 errors.
-_Failure mode_: If validation fails, or if `discover.py` reports missing symbols, fix the plan tasks to match reality. If reality contradicts the spec, loop back to Step 2.
+**Gate**: Do not begin implementation until `validate.py --cross` returns 0 errors and the reviewer returns `ready_for_execution: true`.
+_Failure mode_: If any validator fails, fix the issue at the spec level first, re-run `sync.py` to propagate changes, then re-validate. Never patch the plan without first updating the spec.
 
-### 4. Implementation Governance
+### 3. Implementation Governance
 
 **Sub-skill required**: Invoke `test-driven-development` for each task in the plan. Write the test first (red), then implement (green), then refactor. Do not skip this even for "obvious" tasks — the spec's `AC-###` items map directly to test assertions.
 
@@ -230,8 +206,8 @@ This phase covers:
 2. `git commit -m "WIP: partial implementation of [spec-name]"` (checkpoint)
 3. Classify: **minor** (1–2 new ACs, no architecture change) or **major** (3+ ACs, or new DB table / API endpoint / external service)
 4. Update `spec-*.md` with new REQ/AC/VAL items
-5. Run `python validate_spec.py spec-*.md` — hard gate: 0 errors before resuming
-6. If **major**: `python generate_plan.py spec-*.md > plan-*.md && python validate_plan.py plan-*.md`
+5. Run `python <skill-dir>/scripts/validate.py <name> --spec` — hard gate: 0 errors before resuming
+6. If **major**: run `sync.py` to regenerate plan stubs, then `validate.py --plan` and `validate.py --cross`
 7. Evaluate: are previously completed tasks still valid? If yes, resume from first new task. If not, `git reset --hard HEAD~1` and restart from the new plan.
 
 Full recovery reference: [Spec Recovery](references/spec-recovery.md)
@@ -253,8 +229,9 @@ Ask: _"Does the system now do what the spec says it must do?"_ If yes: done. If 
 ```
 [ ] Scope clarified: goal, in/out-of-scope, constraints, maturity level
 [ ] External dependencies identified (multi-team interfaces resolved before spec is finalized)
-[ ] Spec validated: validate_spec.py = 0 errors, self-check passed
-[ ] Plan validated: validate_plan.py = 0 errors, all paths verified by discover.py
+[ ] Spec validated: validate.py --spec = 0 errors, self-check passed
+[ ] Plan validated: validate.py --plan = 0 errors, all paths verified by discover.py
+[ ] Cross-validated: validate.py --cross = 0 errors, coverage matrix complete
 [ ] Tasks executed in dependency order (Depends on: respected)
 [ ] Each task's Validate command run and Expected result confirmed before next task
 [ ] Spec changes (if any) propagated: spec → plan → code (in that order, never reversed)
@@ -273,14 +250,14 @@ Update the spec directly (no validation needed for cosmetic changes). Keep imple
 ### New Requirement (Additional AC/REQ)
 
 1. Add new REQ/AC/VAL to the spec alongside existing ones
-2. Run `validate_spec.py` again
+2. Run `validate.py --spec` again
 3. If validation passes: Update plan (add new tasks for new AC)
 4. Continue implementation
 
 ### Fundamental Change (Requirement Changes)
 
 1. Update the affected REQ items in the spec
-2. Run `validate_spec.py` again
+2. Run `validate.py --spec` again
 3. Evaluate: Does this change any AC/VAL items? If yes: update, revalidate, update plan
 4. Continue implementation
 

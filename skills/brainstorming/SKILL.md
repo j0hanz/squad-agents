@@ -42,18 +42,27 @@ Ask **one question at a time** throughout all phases — wait for each answer be
 
 **Design approval gate:** Do not write any code, scaffolding, or invoke any implementation skill until the user has explicitly approved a design in Phase 4.
 
+## Dispatch Agents
+
+Two subagents handle the computation-heavy phases. Use the Agent tool to spawn them at the points indicated. Do not re-do their work manually.
+
+| Agent              | File                         | When to spawn                                  |
+| ------------------ | ---------------------------- | ---------------------------------------------- |
+| `codebase-scanner` | `agents/codebase-scanner.md` | Start of Phase 1, before asking any questions  |
+| `design-proposer`  | `agents/design-proposer.md`  | Start of Phase 4, before presenting approaches |
+
 ## Phase 1: Discovery (Read Before Asking)
 
-**Discovery checklist — complete before asking questions:**
+**Spawn `codebase-scanner` before asking questions:**
 
-1. **Code patterns** — Find 3-5 files related to this area; grep for related functions/classes
-2. **Recent history** — Check `git log --oneline -20` on affected files; what changed recently?
-3. **Existing glossaries** — Search for `glossary.md`, `CONTEXT.md`, `docs/glossary/`, `docs/terminology/`
-4. **Documentation** — Skim relevant README, ADR, or design docs for context
-5. **Known constraints** — Note performance limits, API contracts, or technical debt mentioned in code
+Use the Agent tool to launch the `codebase-scanner` subagent (see `agents/codebase-scanner.md`).
+
+- **Pass:** the feature description exactly as the user stated it
+- **Wait for:** the Codebase Context Report
+- **Use:** the report as your discovery findings in all subsequent phases — do not re-scan independently
 
 **Then, state your understanding:**
-Summarize your understanding of the task in one paragraph and ask the user to confirm. Include what you've found and what you DON'T know yet.
+Summarize your understanding of the task in one paragraph and ask the user to confirm. Draw from the Codebase Context Report: cite what was found, what constraints exist, and what the Key Unknowns section flagged. Include what you DON'T know yet.
 
 **Scope reality check:** If discovery reveals the feature is >4x larger than initially expected, suggest splitting into phases. Example: "This dashboard includes 5 major areas. Should we start with user management and add reporting later?"
 
@@ -131,13 +140,30 @@ Avoid the "checklist trap" — don't run all four techniques as a script. Pick 1
 
 ## Phase 4: Design Proposal
 
-Propose 2-3 approaches. For each:
+**Compress the Codebase Context Report before spawning the design-proposer:**
 
-- One-line name and description
-- Key trade-offs (what it gains, what it costs)
-- Your recommendation with reasoning
+```bash
+python skills/brainstorming/scripts/compress_report.py <path-to-report.json>
+# or pipe directly:
+echo '<report-json>' | python skills/brainstorming/scripts/compress_report.py
+```
 
-Apply YAGNI: remove any feature not justified by a stated requirement.
+Use the compressed JSON output as the codebase context in the packet below — not the raw report.
+If the script fails, pass the raw report as-is.
+
+**Spawn `design-proposer` to generate approaches:**
+
+Use the Agent tool to launch the `design-proposer` subagent (see `agents/design-proposer.md`).
+
+Pass a context packet containing:
+
+- Feature description (confirmed by the user in Phase 1)
+- Codebase Context Report (compressed output from script above)
+- Domain terms (from Phase 2, if run; otherwise note "Phase 2 skipped")
+- Risks and success criteria (from Phase 3, if run; otherwise note "Phase 3 skipped")
+- Any constraints the user stated explicitly during the session
+
+Wait for the Design Proposals, then present them to the user as your Phase 4 output.
 
 Present the design in sections. Validate each section before continuing to the next.
 

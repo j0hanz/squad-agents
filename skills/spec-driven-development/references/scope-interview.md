@@ -37,7 +37,7 @@ Is this a ONE-FILE CHANGE (typo fix, small utility)?
   → Use SKETCH (write a one-page spec directly, 15–30 min)
 
 Is this a MULTI-FILE FEATURE (new API endpoint, UI component, DB change)?
-  → Use CONTRACT (full spec via create-specs, plan via create-plan, 1–2 hours)
+  → Use CONTRACT (full spec + plan via planning skill, 1–2 hours)
 
 Is this a PLATFORM/INFRASTRUCTURE CHANGE (new service, deployment, scaling)?
   → Use BLUEPRINT (Contract + ops runbook + monitoring, 2+ hours)
@@ -52,7 +52,7 @@ UNSURE?
 
 - One-page spec (Goal + Acceptance Criteria only)
 - 15–30 minute write time
-- Does NOT require create-specs or create-plan sub-skills
+- Does NOT require the `planning` sub-skill
 - Use for: one-file changes, clear bug fixes, local tools, POC features
 - Template: See [sketch-template.md](sketch-template.md)
 - Proceed directly to Implementation Governance after writing
@@ -60,8 +60,7 @@ UNSURE?
 **Contract Maturity**:
 
 - Full spec with REQ, AC, VAL, interfaces
-- 1–2 hour write time (via create-specs skill)
-- Plan via create-plan skill
+- 1–2 hour write time (via `planning` skill, which produces both spec and plan)
 - Use for: multi-file features, API changes, user-facing work
 - **Default choice when uncertain**
 

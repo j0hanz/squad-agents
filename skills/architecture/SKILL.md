@@ -141,7 +141,7 @@ Once the user picks a candidate, do NOT start writing code immediately.
 
 4. Wait for user approval before modifying files.
 
-5. **Handoff:** This skill diagnoses and proposes seams — it does not implement them. Once a seam is approved, execute it with the `refactor` skill for a behavior-preserving extraction, or hand the proposed seam to `create-plan` when the change spans multiple files or phases.
+5. **Handoff:** This skill diagnoses and proposes seams — it does not implement them. Once a seam is approved, execute it with the `refactor` skill for a behavior-preserving extraction, or hand the proposed seam to `planning` when the change spans multiple files or phases.
 
 **Required output for Mode A:** A ranked candidate list (3–6 items in Phase 2 format) + a proposed seam interface (typed signatures only, no implementation bodies) for the user-selected candidate. No code changes. No file edits until the user explicitly approves and the appropriate downstream skill is invoked.
 

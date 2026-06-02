@@ -8,8 +8,7 @@
 | Fix a bug or trace a failure        | `diagnose`                       |
 | Clean up messy or hard-to-read code | `refactor`                       |
 | Review a diff or PR                 | `code-review`                    |
-| Write an implementation plan        | `create-plan`                    |
-| Write formal specs before building  | `create-specs`                   |
+| Write a spec and plan               | `planning`                       |
 | Create or improve a skill           | `skill-builder`                  |
 | Design a new managed agent          | `create-agent`                   |
 | Implement a lifecycle hook          | `create-hook`                    |
@@ -24,8 +23,7 @@
 | Skill                            | Invoke when…                                                                                                                                                                                    |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `brainstorming`                  | Starting any new feature, component, agent, skill, or hook. **Required before design approval.**                                                                                                |
-| `create-plan`                    | Translating an approved design into an atomic implementation plan.                                                                                                                              |
-| `create-specs`                   | Writing formal specifications for a component before building.                                                                                                                                  |
+| `planning`                       | Writing formal specs AND an atomic implementation plan together. Produces paired `<name>.specs.md` + `<name>.plan.md` with enforced traceability.                                               |
 | `spec-driven-development`        | Full spec-first development lifecycle with validation gates.                                                                                                                                    |
 | `test-driven-development`        | Any non-trivial logic that needs red-green-refactor discipline.                                                                                                                                 |
 | `skill-builder`                  | Creating, testing, improving, or evaluating a skill.                                                                                                                                            |

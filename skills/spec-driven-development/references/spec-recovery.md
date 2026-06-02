@@ -57,14 +57,14 @@ When you discover the spec is missing requirements:
 3. **Re-validate the spec**
 
    ```bash
-   python validate_spec.py spec-*.md
+   python <skill-dir>/scripts/validate.py <name> --spec
    ```
 
-4. **Re-run create-plan** (full plan regeneration)
+4. **Re-sync and validate the plan** (full regeneration)
 
    ```bash
-   python generate_plan.py spec-*.md > plan-*.md
-   python validate_plan.py plan-*.md
+   python <skill-dir>/scripts/sync.py <name>.specs.md
+   python <skill-dir>/scripts/validate.py <name> --plan --cross
    ```
 
 5. **Evaluate: Continue or Restart?**

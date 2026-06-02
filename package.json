@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "validate": "node bin/validate-plugin.mjs",
     "test:node": "node --test hooks/handlers/brainstorm-nudge.test.mjs hooks/handlers/debug.test.mjs hooks/handlers/diagnose-nudge.test.mjs hooks/handlers/explorer.test.mjs hooks/handlers/format.test.mjs hooks/handlers/session.test.mjs hooks/handlers/skills.test.mjs hooks/runner.test.mjs skills/architecture/scripts/check-locality.test.mjs skills/architecture/scripts/detect-bleed.test.mjs skills/architecture/scripts/utils/extractor.test.mjs skills/architecture/scripts/utils/graph.test.mjs",
-    "test:python": "python -m pytest skills/create-agent/scripts/tests/ skills/skill-builder/tests/ -q",
+    "test:python": "python -m pytest skills/create-agent/scripts/tests/ skills/skill-builder/tests/ skills/planning/tests/ -q",
     "test": "npm run validate && npm run test:node && npm run test:python",
     "test:integration": "node tests/integration/test-hooks-fire.mjs && node tests/integration/test-skills-load.mjs"
   },

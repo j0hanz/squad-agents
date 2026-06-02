@@ -53,5 +53,5 @@ If implementation reveals a gap between the code and the spec, you must stop.
 
 1. Stop coding immediately.
 2. Update the `spec-*.md` file with the new requirement or edge case.
-3. Re-run `create-plan` or manually update the affected plan section.
+3. Re-run `sync.py` to update plan stubs, then `validate.py --cross` to confirm coverage.
 4. Resume implementation from the updated plan.

@@ -48,7 +48,7 @@ See [references/terminology.md](references/terminology.md) for definitions of sk
 
 ## Process-First Rule (Skill-First)
 
-**Invoke process skills (brainstorming, diagnose, create-plan) before implementation skills (refactor, code-review) and before any direct action.** Process skills tell you HOW to approach a task; implementation skills tell you HOW to execute it.
+**Invoke process skills (brainstorming, diagnose, planning) before implementation skills (refactor, code-review) and before any direct action.** Process skills tell you HOW to approach a task; implementation skills tell you HOW to execute it.
 
 ```
 User message → Might any skill apply? → YES → Invoke Skill tool → Follow skill
@@ -59,7 +59,7 @@ See [references/red-flags.md](references/red-flags.md) for warning signs you're 
 
 ### Skill Priority Order
 
-1. **Process skills first** (brainstorming, diagnose, create-plan) — determine HOW to approach
+1. **Process skills first** (brainstorming, diagnose, planning) — determine HOW to approach
 2. **Implementation skills second** (refactor, code-review, tdd) — guide execution
 
 "Let's build X" → `brainstorming` first, then implementation skills.

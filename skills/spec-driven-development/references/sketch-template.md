@@ -48,4 +48,4 @@ Example:
 
 **Done?** Proceed directly to **Implementation Governance** (references/implementation-governance.md).
 
-For multi-file features, use **Contract** maturity instead (full spec via create-specs skill).
+For multi-file features, use **Contract** maturity instead (full spec + plan via `planning` skill).
