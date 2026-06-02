@@ -10,11 +10,30 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { execSync } from 'child_process';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pluginRoot = path.resolve(__dirname, '..');
 
 const errors = [];
 const warnings = [];
+
+function getPythonPath() {
+  const paths = [
+    path.join(pluginRoot, '.venv', 'Scripts', 'python.exe'),
+    path.join(pluginRoot, '.venv', 'bin', 'python'),
+    'python3',
+    'python'
+  ];
+  for (const p of paths) {
+    try {
+      if (fs.existsSync(p)) {
+        return p;
+      }
+    } catch (e) {}
+  }
+  return 'python';
+}
 
 // Validate YAML frontmatter and description
 function validateFrontmatter(filePath, componentType) {
@@ -27,14 +46,28 @@ function validateFrontmatter(filePath, componentType) {
   }
 
   const frontmatter = match[1];
-  const hasDescription = /^description:/m.test(frontmatter);
+  const pythonPath = getPythonPath();
+  const helperPath = path.join(pluginRoot, 'bin', 'validate_yaml.py');
 
-  if (!hasDescription) {
-    errors.push(`[${componentType}] ${filePath}: Missing 'description' field in frontmatter`);
+  let fmData;
+  try {
+    const jsonStr = execSync(`"${pythonPath}" "${helperPath}"`, {
+      input: frontmatter,
+      stdio: ['pipe', 'pipe', 'pipe']
+    }).toString();
+    fmData = JSON.parse(jsonStr);
+  } catch (err) {
+    const errMsg = err.stderr ? err.stderr.toString().trim() : err.message;
+    errors.push(`[${componentType}] ${filePath}: Invalid YAML frontmatter - ${errMsg}`);
     return null;
   }
 
-  return { frontmatter, content };
+  if (!fmData || typeof fmData.description !== 'string' || !fmData.description.trim()) {
+    errors.push(`[${componentType}] ${filePath}: Missing or empty 'description' field in frontmatter`);
+    return null;
+  }
+
+  return { frontmatter, content, fmData };
 }
 
 // Check agent trigger enumeration — only enforced for proactive agents (proactive: true)

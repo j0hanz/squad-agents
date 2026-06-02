@@ -1,6 +1,7 @@
 ---
 name: test-driven-development
 description: "Test-driven development. Trigger on 'TDD', 'test-first', 'write tests', 'write a function', 'implement this', 'add feature', 'build this'. Also trigger proactively before any non-trivial implementation begins, even when TDD is not explicitly requested. Defines strict red-green-refactor procedures for agent-driven development."
+user-invocable: false
 ---
 
 # Test-Driven Development (TDD)

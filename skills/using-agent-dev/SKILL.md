@@ -1,6 +1,7 @@
 ---
 name: using-agent-dev
 description: Use when working on the agent-dev plugin itself — for authoring, testing, validating, or shipping agents, skills, hooks, or documentation. Trigger on 'agent-dev', 'using agent-dev', 'how to use agent-dev'. Always check for relevant skills before acting.
+user-invocable: false
 ---
 
 <SUBAGENT-STOP>

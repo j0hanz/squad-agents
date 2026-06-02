@@ -1,9 +1,10 @@
 ---
 name: code-review
-description: Mandatory quality gate before delivery. Trigger on 'code review', 'review this diff', 'any issues with this', 'check for bugs', 'quality review', 'ready to merge'. ALSO trigger automatically: (1) after verification-before-completion confirms tests pass, (2) before invoking delivery-manager, (3) on any non-trivial change that will be committed. Do not skip — correctness bugs and security issues discovered here are cheaper to fix than after merge.
+description: "Mandatory quality gate before delivery. Trigger on 'code review', 'review this diff', 'any issues with this', 'check for bugs', 'quality review', 'ready to merge'. ALSO trigger automatically: (1) after verification-before-completion confirms tests pass, (2) before invoking delivery-manager, (3) on any non-trivial change that will be committed. Do not skip — correctness bugs and security issues discovered here are cheaper to fix than after merge."
 disable-model-invocation: false
 argument-hint: '[target: branch, commit, file, or "current diff"]'
 allowed-tools: Bash(git *)
+disallowed-tools: WriteFile, ReplaceFileContent, MultiReplaceFileContent
 ---
 
 # Code Review
