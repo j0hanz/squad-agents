@@ -97,3 +97,33 @@ NEVER do the following during delivery:
 - **NEVER invent version numbers.** Always target the `[Unreleased]` block in the changelog unless explicitly instructed to perform a release cut.
 - **NEVER proceed past Phase 1 if `delivery_blockers` is non-empty.** Each blocker must be resolved by the developer before the PR is created — do not create the PR and note the blockers in the description; that ships broken code.
 - **NEVER open a PR if `code-review` has not returned PASS.** If the user hasn't run code review, invoke `code-review` now. Do not skip this prerequisite under time pressure.
+
+---
+
+## Command Usage & Git Integration Guidelines
+
+### Usage Scenarios
+
+- Work is complete and all local tests pass.
+- AGENTS.md is up to date for any new agents or skills added.
+- After coding/refactoring or bug fixing completes and the change is ready to ship.
+
+Do not run if tests are failing or uncommitted changes are unintentional — fix those first.
+
+### Pull Request & Committing Workflow Steps
+
+1. **Run Validation**: Run `npm test` (or the equivalent test suite). Stop and report failures if any.
+2. **Verify Documentation**: Confirm that `AGENTS.md` is up to date with any newly added agents, skills, or hooks.
+3. **Stage Changes**: Stage relevant changes with `git add` for specific files (never run `git add -A` blindly).
+4. **Commit with Attribution**: Run `git commit -m "<message>"` with the mandatory co-authorship attribution trailer appended:
+   `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+5. **Push Branch**: Run `git push -u origin <branch>` to push your changes.
+6. **Create PR**: Run `gh pr create` with the drafted PR description containing the context, the "Why", "How", and "Verification" plan.
+
+### Troubleshooting
+
+- **Tests fail** — Do not proceed. Fix the code first and verify.
+- **Git push is rejected** — The remote branch has diverged. Run `git pull --rebase origin main`, resolve any conflicts, and push.
+- **GitHub CLI auth error** — Run `gh auth login` and complete authentication before retrying.
+- **PR already exists** — Use `gh pr edit` to update the existing PR description.
+- **Success Criteria** — Unit tests pass, `gh pr` completes successfully returning a valid URL, PR title is clean and descriptive, and the PR description contains complete context.

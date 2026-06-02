@@ -143,3 +143,22 @@ node <skill-dir>/scripts/scaffold_c4.js <project-dir>
 ```
 
 **Action**: Use this when the user asks to "diagram this existing repo" or "analyze this codebase's architecture". It auto-generates a C4 scaffold from file structure.
+
+---
+
+## Command Usage & Troubleshooting Guidelines
+
+### Usage Scenarios
+
+- Documenting how a new agent or skill fits into the plugin architecture.
+- Visualizing hook lifecycle flow for debugging or onboarding.
+- Creating an ADR or README section that needs a visual component.
+- Explaining a multi-step process (PR flow, context loading sequence).
+- Before a refactor, to map current structure and spot dependencies.
+
+### Troubleshooting
+
+- **Diagram references a nonexistent component** — Cross-check every node against the loaded file listings (`agents/`, `skills/`, `hooks/handlers/`) before accepting.
+- **Mermaid syntax errors when rendering** — Common causes: spaces in node IDs, unclosed brackets, unsupported diagram type. Simplify to a flowchart if another type fails.
+- **Diagram is too large to read** — Scope it: "only the hook lifecycle, not the full agent graph."
+- **Success Criteria** — Diagram accurately reflects current codebase structure, Mermaid syntax is valid (no syntax errors), all referenced components exist in the repo, and the diagram is understandable without additional explanation.

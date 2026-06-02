@@ -281,10 +281,38 @@ Test: `echo '{"tool_name":"ExitPlanMode","tool_input":{}}' | bash -c "echo '{\"h
 
 Security: `PermissionRequest` with an empty or `.*` matcher silently auto-approves every permission dialog including writes and shell commands. Always name the exact tool. This event does **not** fire in `-p` (headless) mode — use `PreToolUse` there.
 
----
-
 ## Reference map
 
 - [references/events.md](references/events.md) — full event catalog: every event's input fields, output schema, matcher values, and exit-code-2 behavior. **Read before picking an event.**
 - [references/recipes.md](references/recipes.md) — ready-to-use patterns (format-on-save, block files, notify, context injection, audit, auto-approve), debugging, and security considerations.
 - [scripts/test_hook.py](scripts/test_hook.py) — local test harness: pipes sample JSON to a hook, reports exit code and parsed output.
+
+---
+
+## Command Usage & Troubleshooting Guidelines
+
+### Usage Scenarios
+
+- **Check Hook Wiring** (`check`): Run when hook behavior seems silently broken or after modifying a hook configuration/wiring in `hooks/hooks.json` to ensure everything is wired correctly.
+- **Scaffold New Hook** (`new <hook-name>`): Scaffolding a handler for a new hook event (e.g. `PreToolUse`, `PostToolUse`, `Stop`, etc.).
+- **Fix Hook Handler** (`fix <handler-file>`): When a specific handler throws errors, does not fire, or produces incorrect output.
+
+### Hook Workflow Steps in `agent-dev`
+
+1. **Check Workflow**:
+   - Read `hooks/hooks.json` and verify every handler path exists.
+   - Run the hook unit tests (`npm run test:node`) to verify wiring.
+   - Report any missing handlers or wiring mismatches.
+2. **New Hook Workflow**:
+   - Scaffold a new handler under `hooks/handlers/` using the ESM pattern.
+   - Register the handler under the appropriate event list in `hooks/hooks.json`.
+3. **Fix Hook Workflow**:
+   - Diagnose the issue in the handler. Fix import errors, syntax bugs, or invalid return schemas.
+   - Re-run `npm run test:node` to verify.
+
+### Troubleshooting
+
+- **Wiring passes but hooks don't fire** — Verify the hook event name in `hooks.json` matches the Claude Code event name exactly (case-sensitive).
+- **Handler is created but never runs** — Ensure the handler is correctly registered in `hooks.json` under the active event name.
+- **Dynamic import error** — Path in `hooks.json` is wrong. Path must be relative to `runner.mjs`, not the project root.
+- **Success Criteria** — All hook handlers exist, no wiring gaps exist in `hooks.json`, repaired handlers pass tests, and all unit tests run cleanly.

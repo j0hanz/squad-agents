@@ -123,3 +123,28 @@ Always conclude with this exact structure:
 - **Prevention:** [What would have prevented this?]
 - **Next Steps:** [Concrete and actionable — a skill to activate, a doc to update, or "None" if the fix is complete]
 ```
+
+---
+
+## Command Usage & Troubleshooting Guidelines
+
+### Usage Scenarios
+
+- You have a concrete error message or failing test and need root-cause analysis.
+- A regression appeared after a recent change and you need to trace where it broke.
+- A bug is subtle enough that guessing the fix would likely miss the actual cause.
+
+Prefer coding (`using-agent-dev` / `@coder` agent) directly when the bug location is already known. Prefer research (`research` / `@explorer` agent) when unsure if the behavior is actually a bug.
+
+### Execution Coordination with Coder Agent
+
+1. Run the `diagnose` skill first to find the root cause, identifying the file, line, and failure mode.
+2. Once the root cause is isolated, delegate the implementation to the coder agent: `Spawn coder agent with instructions: "Fix the bug at <file>:<line>. Root cause: <diagnosis>. Run tests after fix."`
+3. Verify the fix — confirm the failure is gone and check for regressions in related tests.
+
+### Troubleshooting
+
+- **Diagnose skill can't find root cause** — Provide a stack trace or exact failing assertion instead of a high-level description.
+- **Fix applied but tests still fail** — The identified root cause may have been a symptom. Re-run the diagnose skill with the new failure as input.
+- **New failures appear after fix** — Stop. Revert changes to confirm scope, then re-diagnose with the regression as input.
+- **Success Criteria** — Root cause identified (not just symptom fixed), fix is minimal and targeted (no unrelated changes), all tests pass after the fix, and no regressions are introduced.

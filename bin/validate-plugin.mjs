@@ -72,23 +72,6 @@ function validateFrontmatter(filePath, componentType) {
   return { frontmatter, content, fmData };
 }
 
-// Check agent trigger enumeration — only enforced for proactive agents (proactive: true)
-function validateAgentTriggers(filePath, frontmatter) {
-  if (!frontmatter.includes('type: agent')) {
-    return; // Not an agent
-  }
-
-  if (!frontmatter.includes('proactive: true')) {
-    return; // User-invoked agent — no proactive trigger required
-  }
-
-  if (!frontmatter.includes('PROACTIVELY activate for:')) {
-    warnings.push(
-      `[Agent] ${filePath}: Missing 'PROACTIVELY activate for:' enumeration in description`,
-    );
-  }
-}
-
 // Validate skill structure
 function validateSkillStructure(skillDir) {
   const skillMd = path.join(skillDir, 'SKILL.md');
@@ -113,11 +96,6 @@ function validateSkillStructure(skillDir) {
       );
     }
   }
-}
-
-// Validate command structure
-function validateCommand(filePath) {
-  validateFrontmatter(filePath, 'Command');
 }
 
 // Validate hook configuration
@@ -177,27 +155,10 @@ function main() {
         .filter((f) => f.endsWith('.md'))
         .forEach((agent) => {
           const agentPath = path.join(agentsDir, agent);
-          const result = validateFrontmatter(agentPath, 'Agent');
-          if (result) {
-            validateAgentTriggers(agentPath, result.frontmatter);
-          }
+          validateFrontmatter(agentPath, 'Agent');
         });
     } catch (e) {
       errors.push(`[Agents] Failed to read agents directory: ${e.message}`);
-    }
-  }
-
-  // Validate commands
-  const commandsDir = path.join(pluginRoot, 'commands');
-  if (fs.existsSync(commandsDir)) {
-    try {
-      fs.readdirSync(commandsDir)
-        .filter((f) => f.endsWith('.md'))
-        .forEach((cmd) => {
-          validateCommand(path.join(commandsDir, cmd));
-        });
-    } catch (e) {
-      errors.push(`[Commands] Failed to read commands directory: ${e.message}`);
     }
   }
 

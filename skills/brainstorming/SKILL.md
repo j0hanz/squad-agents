@@ -213,4 +213,24 @@ When the user approves a design:
 - [Key data flow between them]
   **Success criteria:** [Observable signals — what user/system will do differently]
   **Open TBDs:** [Unresolved items with owner and due date, or "None"]
+
+---
+
+## Command Usage & Troubleshooting Guidelines
+
+### Usage Scenarios
+
+- Scope or approach is unclear before starting a feature.
+- Domain terminology is ambiguous (e.g., "task", "session", "context").
+- Multiple implementation approaches exist and the right one isn't decided.
+- A stakeholder description needs to become concrete requirements.
+
+Prefer planning (`planning` skill) when requirements are clear. Prefer coding (`using-agent-dev` / `@coder` agent) when requirements and approach are both decided.
+
+### Troubleshooting
+
+- **Skill returns with no questions** — Input is too narrow. Add context about the feature goal and rerun.
+- **Requirements feel incomplete** — Ask the skill to explore edge cases, failure modes, or "what should NOT happen."
+- **Brainstorm diverges from goal** — Add a constraint upfront (e.g., "only changes within the hook layer, no new agents").
+- **Success Criteria** — All ambiguous terms are defined, scope boundaries are clear (in-scope and out-of-scope), key design decisions are documented with rationale, and no open questions remain before planning or implementation.
 ```
