@@ -21,6 +21,15 @@ description: "Structured requirements discovery before implementation. Trigger o
 
 Ask **one question at a time** throughout all phases — wait for each answer before asking the next. This prevents the user from feeling interrogated and gives you better signal per question.
 
+**Fast Track (For resistant users):**
+If the user explicitly declines brainstorming or insists on "just coding" after your first attempt to start Phase 1:
+
+1. Acknowledge the request for speed.
+2. Immediately spawn `codebase-scanner` to gather context.
+3. Present a **single, grounded proposal** based on the scanner's report.
+4. If approved, skip to Phase 5.
+   This honors the design-first mandate without stalling a high-velocity user.
+
 ## Do Not
 
 - **Ask leading questions** (e.g., "So this is a caching layer, right?") — LLMs tend to confirm user bias. Let the user define the domain.
@@ -117,14 +126,15 @@ Offer to write findings to `glossary.md` or `CONTEXT.md` at Phase 5 transition.
 
 **Technique selection** — use 1-2 based on what the conversation reveals:
 
-| Situation                                              | Use This            | Reason                                     |
-| ------------------------------------------------------ | ------------------- | ------------------------------------------ |
-| User says "just build it" or requirements seem obvious | **Why (Five Whys)** | Uncovers hidden motivation                 |
-| Large scope or complex dependencies                    | **Premortem**       | Surfaces organizational/technical risks    |
-| Success criteria vague ("just make it fast")           | **Success Logic**   | Clarifies acceptance criteria              |
-| Feature creep risk or unclear boundaries               | **Anti-Scope**      | Defines what we're explicitly NOT building |
+| Situation                                              | Use This            | Reason                                      |
+| ------------------------------------------------------ | ------------------- | ------------------------------------------- |
+| User says "just build it" or requirements seem obvious | **Why (Five Whys)** | Uncovers hidden motivation                  |
+| Large scope or complex dependencies                    | **Premortem**       | Surfaces organizational/technical risks     |
+| Success criteria vague ("just make it fast")           | **Success Logic**   | Clarifies acceptance criteria               |
+| Feature creep risk or unclear boundaries               | **Anti-Scope**      | Defines what we're explicitly NOT building  |
+| Feature handles sensitive data or user permissions     | **Trust Breach**    | Identifies security/privacy vulnerabilities |
 
-Avoid the "checklist trap" — don't run all four techniques as a script. Pick 1-2 based on signals from discovery.
+Avoid the "checklist trap" — don't run all five techniques as a script. Pick 1-2 based on signals from discovery.
 
 **Depth check:** After 1-2 techniques, ask: "Are there other risks or unknowns that could derail this?"
 
@@ -137,6 +147,7 @@ Avoid the "checklist trap" — don't run all four techniques as a script. Pick 1
 2. **The Premortem:** "Imagine we've implemented this and it's a disaster. What's the most likely thing that went wrong?" (Surfaces hidden technical or organizational risks.)
 3. **Success Logic:** "How will we know this is a success without using the word 'functional'? What behavior change should we see in users or the system?"
 4. **The "Anti-Scope":** Instead of asking "what's out of scope," ask: "What's a related feature that we are _strictly_ choosing NOT to build today?"
+5. **The Trust Breach:** "If a malicious actor wanted to abuse this new feature to access unauthorized data or disrupt the system, what would be their easiest path?" (Surfaces security/privacy gaps.)
 
 ## Phase 4: Design Proposal
 
@@ -183,14 +194,10 @@ Ambiguous responses ("sounds good") → loop back and clarify which specific app
 When the user approves a design:
 
 1. Summarize the approved approach in one short paragraph including the chosen option and key tradeoffs.
-2. If terminology was captured in Phase 2: offer to write findings to `glossary.md` or `CONTEXT.md` now (before moving on).
-3. **Design handoff:** Document the approved design as your implementation brief with:
-   - **The chosen approach** (which of the 2-3 options)
-   - **Why this approach** (key tradeoffs and reasoning)
-   - **Architecture summary** (key components, data flows)
-   - **Success criteria** (how you'll know it worked)
+2. If terminology was captured in Phase 2 or risks in Phase 3: offer to write findings to `glossary.md` or a new `CONTEXT.md` file now. **MANDATORY**: If there are Open TBDs, offer to save them to a `TODO.md` or tracker.
+3. **Design handoff:** Document the approved design as your implementation brief with the required output format below.
 
-   Produce this brief as your final output and stop — do not invoke `/plan` or write any code automatically. The user decides what to do next. If they want to proceed to planning, they can invoke `/plan` themselves or ask you to do so explicitly.
+   Produce this brief as your final output and stop — do not invoke `/plan` or write any code automatically. **Conclude by inviting the next step:** "You can now use `/plan` to generate a detailed implementation plan based on this brief. Would you like me to start that for you?"
 
 **Required output format for the design brief:**
 
