@@ -28,18 +28,20 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TypedDict
 
-# Bundled parser — no external deps; append to avoid shadowing stdlib modules
-sys.path.append(str(Path(__file__).parent))
-from spec_parser import parse_spec, parse_plan  # noqa: E402
+# Bundled parser — no external deps; insert idempotently to avoid duplicates
+_here = str(Path(__file__).parent)
+if _here not in sys.path:
+    sys.path.insert(0, _here)
+from spec_parser import parse_spec, parse_plan, PLAN_MANDATORY_FIELDS, IMPL_PREFIXES  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-VAGUE_ADJECTIVES = [
+VAGUE_ADJECTIVES: tuple[str, ...] = (
     "lightweight",
     "clean",
     "robust",
@@ -47,7 +49,7 @@ VAGUE_ADJECTIVES = [
     "performant",
     "easy",
     "simple",
-]
+)
 
 SECTIONS_BY_LEVEL: dict[str, list[str]] = {
     "sketch": ["Goal", "Requirements", "Interfaces"],
@@ -73,19 +75,19 @@ SECTIONS_BY_LEVEL: dict[str, list[str]] = {
 }
 
 _REQ_STMT_RE = re.compile(r"^[ ]{0,2}-\s+`?(REQ|SEC|PERF|COMP)-\d+`?[\s:]*")
-_IMPL_PREFIXES = ("REQ-", "SEC-", "PERF-", "COMP-")
 _PASSIVE_VOICE_RE = re.compile(
     r"\bbe\s+(?!(?:red|bed|fed|led|shed)\b)\w+ed\b", re.IGNORECASE
 )
 
-PLAN_MANDATORY_FIELDS = {
-    "Depends on",
-    "Files",
-    "Symbols",
-    "Action",
-    "Validate",
-    "Expected result",
-}
+
+class CoverageMatrix(TypedDict):
+    spec_impl_ids: list[str]
+    spec_ac_ids: list[str]
+    covered: list[str]
+    uncovered: list[str]
+    orphan_count: int
+    ac_covered: list[str]
+    ac_uncovered: list[str]
 
 
 # ---------------------------------------------------------------------------
@@ -209,7 +211,7 @@ def validate_plan(plan_path: Path) -> tuple[list[str], list[str]]:
 
 def validate_cross(
     spec_path: Path, plan_path: Path, level: str = "contract"
-) -> tuple[list[str], list[str], dict[str, Any]]:
+) -> tuple[list[str], list[str], CoverageMatrix]:
     """Check spec↔plan traceability: every requirement covered, no orphan tasks."""
     errors: list[str] = []
     warnings: list[str] = []
@@ -225,7 +227,7 @@ def validate_cross(
         return [f"Plan file not found: {plan_path}"], [], {}
 
     impl_ids = {
-        id_ for id_ in spec.reqs if any(id_.startswith(p) for p in _IMPL_PREFIXES)
+        id_ for id_ in spec.reqs if any(id_.startswith(p) for p in IMPL_PREFIXES)
     }
     ac_ids = spec.acs
 
@@ -256,7 +258,7 @@ def validate_cross(
         warnings.append(f"[CROSS] AC {ac} has no corresponding task in plan.")
 
     # Coverage matrix summary
-    matrix = {
+    matrix: CoverageMatrix = {
         "spec_impl_ids": sorted(impl_ids),
         "spec_ac_ids": sorted(ac_ids),
         "covered": sorted(impl_ids & all_satisfied),
@@ -316,7 +318,7 @@ def _print_results(
     label: str,
     errors: list[str],
     warnings: list[str],
-    matrix: dict | None = None,
+    matrix: CoverageMatrix | None = None,
 ) -> None:
     if warnings:
         print("WARNINGS:")
@@ -324,8 +326,8 @@ def _print_results(
             print(f"  [!] {w}")
     if errors:
         print("ERRORS:")
-        for e in errors:
-            print(f"  [X] {e}")
+        for err in errors:
+            print(f"  [X] {err}")
     if matrix:
         covered = len(matrix["covered"])
         total = len(matrix["spec_impl_ids"])

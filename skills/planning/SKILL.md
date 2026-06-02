@@ -36,8 +36,8 @@ Every plan task carries `Satisfies: REQ-001, SEC-002` linking it to spec IDs. `v
 
 - `--spec-only` — write only `NAME.specs.md`; stop before planning
 - `--from-spec <file>` — skip spec authoring, generate plan from an existing spec file (see Step 2 for error handling)
-- `--quick` — skip file discovery, assume standard structure
-- `--assume-paths` — multi-repo: document path assumptions instead of discovering
+- `--quick` — _(agent-level flag, not passed to any script)_ skip `discover.py`; assume standard project structure and document intended paths using `[UNVERIFIED]` prefix
+- `--assume-paths` — _(agent-level flag, not passed to any script)_ multi-repo: document all path assumptions with `[UNVERIFIED]` prefix instead of running `discover.py`
 - `--domain api|cli` — inject domain-specific requirement + interface snippets
 
 ## Step-by-Step Execution
@@ -68,6 +68,8 @@ Document all answers inline. Mark unknowns `UNKNOWN: [what and why]` — don't g
 - Verify the file exists.
 - If missing: output `"Spec file not found: <path>. Create it first or omit --from-spec."` and stop.
 - If exists: skip Steps 2–3 and go directly to Step 4 (Sync).
+
+**Otherwise (normal flow):**
 
 ```bash
 python <skill-dir>/scripts/scaffold.py NAME --depth contract [--domain api|cli] [--goal "..."]

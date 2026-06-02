@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import sys
+import shutil
 from pathlib import Path
 
 import pytest
-
-SCRIPTS_DIR = Path(__file__).parent.parent / "scripts"
-sys.path.insert(0, str(SCRIPTS_DIR))
 
 from spec_parser import parse_spec, parse_plan  # noqa: E402
 from scaffold import scaffold  # noqa: E402
@@ -81,8 +78,8 @@ The system exposes the following interfaces:
 
 
 @pytest.fixture()
-def plan_file(tmp_path: Path, spec_file: Path) -> Path:
-    """A minimal plan with one task that satisfies REQ-001."""
+def plan_file(spec_file: Path) -> Path:
+    """A minimal plan with one task that satisfies REQ-001, co-located with spec_file."""
     content = """\
 # test-feature
 
@@ -102,7 +99,7 @@ Expected result: All tests pass.
 
 ## PHASE-END: Acceptance
 """
-    p = tmp_path / "test-feature.plan.md"
+    p = spec_file.parent / "test-feature.plan.md"
     p.write_text(content, encoding="utf-8")
     return p
 
@@ -188,8 +185,6 @@ def test_sync_preserves_authored_task(
     spec_file: Path, plan_file: Path, tmp_path: Path
 ) -> None:
     # plan_file already has TASK-001 covering REQ-001; sync should not duplicate it
-    import shutil
-
     work = tmp_path / "preserve"
     work.mkdir()
     dest_spec = work / spec_file.name
@@ -214,12 +209,12 @@ def test_sync_preserves_authored_task(
 
 def test_validate_spec_valid_contract(spec_file: Path) -> None:
     errors, warnings = validate_spec(spec_file, "contract")
-    assert errors == [], f"unexpected errors: {errors}"
+    assert not errors, f"unexpected errors: {errors}"
 
 
 def test_validate_plan_valid(plan_file: Path) -> None:
     errors, warnings = validate_plan(plan_file)
-    assert errors == [], f"unexpected errors: {errors}"
+    assert not errors, f"unexpected errors: {errors}"
 
 
 def test_validate_cross_clean(spec_file: Path, plan_file: Path) -> None:

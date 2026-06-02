@@ -53,7 +53,7 @@
       "id": 4,
       "prompt": "/planning --from-spec plan/auth-jwt.specs.md",
       "expected_output": "Skill skips spec authoring, runs sync.py on the existing spec to generate plan stubs with Satisfies: fields, then validates with validate.py --plan and validate.py --cross.",
-      "files": [],
+      "files": ["evals/fixtures/plan/auth-jwt.specs.md"],
       "expectations": [
         "Skill does not re-author or overwrite the existing spec file",
         "sync.py is run on the existing spec to populate plan/<name>.plan.md",
@@ -114,10 +114,7 @@
       "id": 9,
       "prompt": "We have an existing spec plan/auth.specs.md with two requirements: REQ-001 (JWT issuance) and REQ-002 (rejecting invalid token). Now add a new requirement: SEC-001 (tokens must expire in 3600s). Re-sync the plan and show the updated cross-validation matrix.",
       "expected_output": "Skill runs sync.py to add the new stub for SEC-001 without manual modifications to Satisfies fields, and verifies with validate.py --cross.",
-      "files": [
-        "plan/auth.specs.md",
-        "plan/auth.plan.md"
-      ],
+      "files": ["evals/fixtures/plan/auth.specs.md", "evals/fixtures/plan/auth.plan.md"],
       "expectations": [
         "Skill does not manually edit the Satisfies: field of the tasks",
         "Skill runs sync.py to add the new stub for SEC-001",
@@ -129,8 +126,8 @@
       "prompt": "Upgrade the exploratory sketch spec/plan plan/payment-sketch (contains REQ-001, REQ-002) to blueprint level. Add Notes & Risks, a Mermaid diagram, and a database schema interface definition, and add a rollback phase to the plan.",
       "expected_output": "Skill adds Notes & Risks section with Mermaid diagram, defines database schema in Interfaces, validates spec at blueprint depth, and appends PHASE-ROLLBACK to the plan.",
       "files": [
-        "plan/payment-sketch.specs.md",
-        "plan/payment-sketch.plan.md"
+        "evals/fixtures/plan/payment-sketch.specs.md",
+        "evals/fixtures/plan/payment-sketch.plan.md"
       ],
       "expectations": [
         "Skill adds a Notes & Risks section with a valid Mermaid diagram",

@@ -19,24 +19,22 @@ import re
 import sys
 from pathlib import Path
 
-# Bundled parser — no external deps; append to avoid shadowing stdlib modules
-sys.path.append(str(Path(__file__).parent))
-from spec_parser import parse_spec, parse_plan, PlanTask  # noqa: E402
-
-
-# IDs we generate tasks for (not CON/AC/VAL — those don't need impl tasks)
-_IMPL_PREFIXES = ("REQ-", "SEC-", "PERF-", "COMP-")
+# Bundled parser — no external deps; insert idempotently to avoid duplicates
+_here = str(Path(__file__).parent)
+if _here not in sys.path:
+    sys.path.insert(0, _here)
+from spec_parser import parse_spec, parse_plan, PlanTask, IMPL_PREFIXES  # noqa: E402
 
 
 def _is_impl_id(id_str: str) -> bool:
-    return any(id_str.startswith(p) for p in _IMPL_PREFIXES)
+    return any(id_str.startswith(p) for p in IMPL_PREFIXES)
 
 
 def _task_stub(task_id: str, spec_id: str, depends_on: str) -> str:
     return (
         f"### {task_id}: Implement {spec_id}\n\n"
         f"Depends on: {depends_on}\n"
-        f"Files: UNVERIFIED\n"
+        f"Files: [UNVERIFIED](UNVERIFIED)\n"
         f"Symbols: none\n"
         f"Satisfies: {spec_id}\n"
         f"Action: [Implement the logic required by {spec_id} as specified in the spec]\n"
@@ -60,12 +58,12 @@ def _acceptance_stub(task_id: str, ac_ids: list[str], depends_on: str) -> str:
 
 
 def _next_task_number(existing_tasks: list[PlanTask]) -> int:
-    nums = []
+    best = 0
     for t in existing_tasks:
         m = re.match(r"TASK-(\d+)", t.id)
         if m:
-            nums.append(int(m.group(1)))
-    return (max(nums) + 1) if nums else 1
+            best = max(best, int(m.group(1)))
+    return best + 1
 
 
 def sync(spec_path: Path, plan_path: Path) -> int:

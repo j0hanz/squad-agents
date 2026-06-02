@@ -38,9 +38,9 @@ when:   reviewing spec and plan
 action: Parse paths → Read artifacts → Run skills/planning/scripts/validate.py → Apply Spec/Plan semantic checks
 
 rule:   verdict-gating
-condition: setting ready_for_execution: true
-action: Require ZERO blockers in spec/plan and successful structural validation
-...
+when:   setting ready_for_execution: true
+action: Require ZERO [BLOCKER] findings in spec/plan and successful structural validation (validate.py exit 0)
+
 rule:   idempotent-reporting
 when:   audit complete
 action: Write review to `plan/<name>.review.md` — overwrite existing, do not modify spec/plan

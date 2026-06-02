@@ -10,7 +10,18 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-__all__ = ["SpecDocument", "PlanDocument", "PlanTask", "parse_spec", "parse_plan"]
+__all__ = [
+    "SpecDocument",
+    "PlanDocument",
+    "PlanTask",
+    "parse_spec",
+    "parse_plan",
+    "PLAN_MANDATORY_FIELDS",
+    "IMPL_PREFIXES",
+]
+
+# Prefixes that require implementation tasks (not CON/AC/VAL — those don't need impl tasks)
+IMPL_PREFIXES: tuple[str, ...] = ("REQ-", "SEC-", "PERF-", "COMP-")
 
 
 # ---------------------------------------------------------------------------
@@ -83,8 +94,8 @@ def parse_spec(path: str | Path) -> SpecDocument:
         FileNotFoundError: If the path doesn't exist.
         OSError: If the file cannot be read.
     """
-    path = Path(path)
-    content = path.read_text(encoding="utf-8")
+    p = Path(path)
+    content = p.read_text(encoding="utf-8")
     lines = content.splitlines()
 
     doc = SpecDocument(raw_lines=lines)
@@ -131,14 +142,16 @@ def parse_spec(path: str | Path) -> SpecDocument:
 # Plan parser
 # ---------------------------------------------------------------------------
 
-_PLAN_MANDATORY_FIELDS = {
-    "Depends on",
-    "Files",
-    "Symbols",
-    "Action",
-    "Validate",
-    "Expected result",
-}
+PLAN_MANDATORY_FIELDS: frozenset[str] = frozenset(
+    {
+        "Depends on",
+        "Files",
+        "Symbols",
+        "Action",
+        "Validate",
+        "Expected result",
+    }
+)
 
 
 def parse_plan(path: str | Path) -> PlanDocument:
@@ -152,8 +165,8 @@ def parse_plan(path: str | Path) -> PlanDocument:
         FileNotFoundError: If the path doesn't exist.
         OSError: If the file cannot be read.
     """
-    path = Path(path)
-    content = path.read_text(encoding="utf-8")
+    p = Path(path)
+    content = p.read_text(encoding="utf-8")
     lines = content.splitlines()
 
     doc = PlanDocument(raw_lines=lines)
@@ -190,7 +203,7 @@ def parse_plan(path: str | Path) -> PlanDocument:
             current_field = field_name
             if field_name == "Satisfies":
                 ids = {m.group(1) for m in _IDS_RE.finditer(field_value)}
-                current_task.satisfies = ids
+                current_task.satisfies |= ids
                 doc.satisfied_ids |= ids
             else:
                 current_task.fields[field_name] = field_value
