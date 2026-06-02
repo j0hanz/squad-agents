@@ -4,14 +4,27 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['node_modules/**', '.simulate/**', '.venv/**', '.ruff_cache/**', '__pycache__/**'],
+    ignores: [
+      'node_modules/**',
+      '.simulate/**',
+      '.venv/**',
+      '.ruff_cache/**',
+      '__pycache__/**',
+      'skills/skill-builder/assets/**',
+    ],
   },
 
   js.configs.recommended,
 
-  // All Node.js scripts — hooks and skills
+  // All Node.js scripts — hooks, skills, bin, tests
   {
-    files: ['hooks/**/*.mjs', 'skills/**/*.mjs', 'skills/**/*.js'],
+    files: [
+      'hooks/**/*.mjs',
+      'skills/**/*.mjs',
+      'skills/**/*.js',
+      'bin/**/*.mjs',
+      'tests/**/*.mjs',
+    ],
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',

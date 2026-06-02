@@ -63,9 +63,9 @@ skipIfNoClaude('format hook runs without error on a JS file', async () => {
   try {
     const pluginRoot = process.cwd();
     const input = JSON.stringify({ tool_name: 'Write', tool_input: { file_path: jsFile } });
-    // format.run should exit 0 even if prettier is not installed (it is installed here)
+    // format.onWrite should exit 0 even if prettier is not installed (it is installed here)
     execSync(
-      `echo ${JSON.stringify(input)} | node "${join(pluginRoot, 'hooks/runner.mjs')}" format run`,
+      `echo ${JSON.stringify(input)} | node "${join(pluginRoot, 'hooks/runner.mjs')}" format onWrite`,
       {
         cwd: dir,
         env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
