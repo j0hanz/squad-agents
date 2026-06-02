@@ -97,6 +97,46 @@
         "Skill outputs the specified error message",
         "Skill does not proceed to scaffold.py or sync.py"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "Create a spec and plan for a REST API endpoint. Use the goal 'Make a simple, robust user registration API'. If validate.py reports any warnings or errors, modify the spec to resolve them and re-validate.",
+      "expected_output": "Skill detects vague adjectives like 'simple' and 'robust', replaces them with precise, measurable requirements (e.g. numeric latency limits), runs validate.py --spec, and returns 0 warnings.",
+      "files": [],
+      "expectations": [
+        "Skill runs validate.py --spec to validate the initial draft",
+        "Skill detects/warns about vague adjectives like 'simple' and 'robust' in the goal",
+        "Skill corrects the goal/requirements to use specific, measurable thresholds",
+        "Skill runs validate.py --spec successfully on the revised spec with 0 warnings"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "We have an existing spec plan/auth.specs.md with two requirements: REQ-001 (JWT issuance) and REQ-002 (rejecting invalid token). Now add a new requirement: SEC-001 (tokens must expire in 3600s). Re-sync the plan and show the updated cross-validation matrix.",
+      "expected_output": "Skill runs sync.py to add the new stub for SEC-001 without manual modifications to Satisfies fields, and verifies with validate.py --cross.",
+      "files": [
+        "plan/auth.specs.md",
+        "plan/auth.plan.md"
+      ],
+      "expectations": [
+        "Skill does not manually edit the Satisfies: field of the tasks",
+        "Skill runs sync.py to add the new stub for SEC-001",
+        "Skill runs validate.py --cross to check the updated coverage"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Upgrade the exploratory sketch spec/plan plan/payment-sketch (contains REQ-001, REQ-002) to blueprint level. Add Notes & Risks, a Mermaid diagram, and a database schema interface definition, and add a rollback phase to the plan.",
+      "expected_output": "Skill adds Notes & Risks section with Mermaid diagram, defines database schema in Interfaces, validates spec at blueprint depth, and appends PHASE-ROLLBACK to the plan.",
+      "files": [
+        "plan/payment-sketch.specs.md",
+        "plan/payment-sketch.plan.md"
+      ],
+      "expectations": [
+        "Skill adds a Notes & Risks section with a valid Mermaid diagram",
+        "Skill runs validate.py --spec --level blueprint and returns 0 errors",
+        "Skill appends a rollback phase (PHASE-ROLLBACK) with appropriate tasks to the plan"
+      ]
     }
   ]
 }
