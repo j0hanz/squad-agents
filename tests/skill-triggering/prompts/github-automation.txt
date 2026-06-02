@@ -1,0 +1,1 @@
+I want to set up a CI pipeline that runs tests on every pull request and blocks merging if they fail. Can you write the GitHub Actions workflow for that?

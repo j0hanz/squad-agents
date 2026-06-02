@@ -1,0 +1,1 @@
+I want to add a notification system to the app. Users should get alerts when something important happens. Can you help me figure out what we should build?

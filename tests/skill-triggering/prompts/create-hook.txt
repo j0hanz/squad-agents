@@ -1,0 +1,1 @@
+I want Claude to automatically run the linter every time it edits a JavaScript file. How do I set that up?

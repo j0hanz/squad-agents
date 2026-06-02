@@ -1,0 +1,1 @@
+Every time I ask Claude to do a database migration, it makes the same mistakes. I want to encode the correct process so it always follows it. How do I turn this into a reusable skill?

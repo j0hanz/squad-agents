@@ -1,0 +1,1 @@
+I need a function that validates email addresses. It should check for an @ symbol, at least one character before it, and a dot in the domain. Can you implement it?

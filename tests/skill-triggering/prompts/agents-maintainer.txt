@@ -1,0 +1,1 @@
+Our AGENTS.md is out of date — it still references the old hook system we replaced last month. Can you update it to reflect how things actually work now?

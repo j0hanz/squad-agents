@@ -1,0 +1,6 @@
+Our tests are failing with this error:
+
+TypeError: Cannot read properties of undefined (reading 'id')
+  at resolveUser (src/auth/resolver.ts:42:18)
+
+It was working yesterday. Can you figure out what's going wrong and fix it?

@@ -1,0 +1,1 @@
+Our auth module imports from the payment module and the payment module imports from auth. It's causing circular dependency errors and making both hard to test. How should we restructure this?
