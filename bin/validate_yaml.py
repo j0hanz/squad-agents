@@ -2,6 +2,7 @@ import sys
 import json
 import yaml
 
+
 def main():
     try:
         content = sys.stdin.read()
@@ -14,6 +15,7 @@ def main():
     except Exception as e:
         print(str(e), file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

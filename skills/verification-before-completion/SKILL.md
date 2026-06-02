@@ -48,7 +48,7 @@ Before declaring any task done, verify ALL that apply:
 
 State explicitly what could not be verified and why, so the user can decide how to proceed. Never silently declare success or let an untestable claim stand.
 
-**CI-only environments:** If tests can only run in CI (no local runner available), do not declare success before CI completes. State: "Tests are queued in CI — I cannot confirm PASS until the pipeline finishes. Proceed only after CI returns green." Do not proceed to `code-review` or `delivery-manager` until CI confirms PASS.
+**CI-only environments:** If tests can only run in CI (no local runner available), do not declare success before CI completes. State: "Tests are queued in CI — I cannot confirm PASS until the pipeline finishes. Proceed only after CI returns green." Do not proceed to `code-review` or final delivery until CI confirms PASS.
 
 **No test suite exists:** If there are no automated tests and the feature cannot be exercised manually (e.g., a background job, a webhook handler), document exactly what was changed, what the expected behavior is, and what would need to be true for the change to be correct. Mark verification as INCOMPLETE and surface it to the user before proceeding.
 
@@ -57,6 +57,6 @@ State explicitly what could not be verified and why, so the user can decide how 
 Once all applicable checklist items are confirmed (whether verified by you or reported by the developer):
 
 - **For non-trivial changes:** invoke `code-review` before finishing
-- **When moving to PR or delivery:** invoke `delivery-manager`
+- **When moving to PR or delivery:** invoke `github-automation` or prepare the pull request manually
 
 A clean test run is necessary but not sufficient for shipping. The transition steps exist to catch issues that verification alone doesn't surface.

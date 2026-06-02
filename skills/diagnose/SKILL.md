@@ -134,7 +134,7 @@ Always conclude with this exact structure:
 - A regression appeared after a recent change and you need to trace where it broke.
 - A bug is subtle enough that guessing the fix would likely miss the actual cause.
 
-Prefer the `@coder` agent directly when the bug location is already known. Prefer research (`research` / `@explorer` agent) when unsure if the behavior is actually a bug.
+Prefer the `@coder` agent directly when the bug location is already known. Prefer codebase exploration (using `@explorer` agent or searching the web/docs) when unsure if the behavior is actually a bug.
 
 ### Execution Coordination with Coder Agent
 

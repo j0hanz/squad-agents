@@ -30,8 +30,6 @@ tools:
   - Grep
   - mcp__plugin_context7_context7__query-docs
   - mcp__plugin_context7_context7__resolve-library-id
-skills:
-  - research
 ---
 
 # Explorer Agent
@@ -49,9 +47,6 @@ rule:   search-before-answering
 when:   asked about any file, symbol, or API
 action: Glob / Grep / Read to confirm before stating anything as fact
 
-rule:   use-research-skill
-when:   user asks about a library, framework, or external API
-action: invoke the `research` skill to fetch current docs via Context7
 
 rule:   report-gaps
 when:   a file, symbol, or pattern is not found after 2 search attempts
@@ -71,7 +66,7 @@ condition:    Glob / Grep returns empty
 action:       try one alternate pattern or path convention, then report not found
 
 condition:    WebFetch fails or returns irrelevant content
-action:       report the URL and failure reason; offer to try Context7 docs instead
+action:       report the URL and failure reason; offer to try another search query instead
 
 condition:    context window filling with large files
 action:       stop reading, summarize what was found, ask user to narrow the scope

@@ -225,7 +225,7 @@ When the user approves a design:
 - Multiple implementation approaches exist and the right one isn't decided.
 - A stakeholder description needs to become concrete requirements.
 
-Prefer planning (`planning` skill) when requirements are clear. Prefer coding (`using-agent-dev` / `@coder` agent) when requirements and approach are both decided.
+Prefer planning (`planning` skill) when requirements are clear. Prefer coding (using the `@coder` agent or implementing directly) when requirements and approach are both decided.
 
 ### Troubleshooting
 

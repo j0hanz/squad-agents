@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Mandatory quality gate before delivery. Trigger on 'code review', 'review this diff', 'any issues with this', 'check for bugs', 'quality review', 'ready to merge'. ALSO trigger automatically: (1) after verification-before-completion confirms tests pass, (2) before invoking delivery-manager, (3) on any non-trivial change that will be committed. Do not skip — correctness bugs and security issues discovered here are cheaper to fix than after merge."
+description: "Mandatory quality gate before delivery. Trigger on 'code review', 'review this diff', 'any issues with this', 'check for bugs', 'quality review', 'ready to merge'. ALSO trigger automatically: (1) after verification-before-completion confirms tests pass, (2) before opening a PR/shipping the change, (3) on any non-trivial change that will be committed. Do not skip — correctness bugs and security issues discovered here are cheaper to fix than after merge."
 disable-model-invocation: false
 argument-hint: '[target: branch, commit, file, or "current diff"]'
 allowed-tools: Bash(git *)
@@ -217,10 +217,10 @@ When in doubt, lean advisory — the goal is to unblock delivery, not to gatekee
 
 After Phase 3:
 
-- **PASS** → hand off to `delivery-manager` (zero blocking issues required)
+- **PASS** → proceed to open a pull request or merge the changes (zero blocking issues required)
 - **FAIL** → route back to implementation; re-run this skill **only after the developer confirms all blocking issues are resolved** — do not re-review the same unchanged code, and do not downgrade blocking findings to advisory to unblock delivery
 
-Do not invoke `delivery-manager` until code review returns PASS with zero blocking issues.
+Do not merge or submit the pull request until code review returns PASS with zero blocking issues.
 
 ---
 

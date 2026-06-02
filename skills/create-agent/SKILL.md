@@ -211,4 +211,3 @@ When you produce an agent for the user, always give:
 | `create-hook`       | Lifecycle hooks — the deterministic guarantees you attach to agents |
 | `agents-maintainer` | `AGENTS.md`/`CLAUDE.md` instruction files (not agent configs)       |
 | `skill-builder`     | Building a skill, and rigorous benchmarked evals                    |
-| `diagrams`          | Visualizing a multi-agent architecture                              |

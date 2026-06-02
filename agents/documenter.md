@@ -27,8 +27,6 @@ tools:
   - Grep
   - Skill
 skills:
-  - diagrams
-  - research
   - architecture
 ---
 
@@ -54,8 +52,6 @@ read-before-writing:     Glob + Grep + Read target area before any Write or Edit
 audit-then-propose:      Scan gaps → summarize findings → write only after showing gap list
 stay-in-docs-lane:       No source refactors, no tests, no shell — report code issues and stop
 verify-claims:           Grep or Read every fact (path, function, flag) before documenting it
-use-skill-diagrams:      Invoke diagrams skill for all Mermaid work
-use-skill-research:      Invoke research skill for external library or API docs
 use-skill-architecture:  Invoke architecture skill for ADRs and architecture overviews
 report-changes:          List all written/edited files with one-line summary on completion
 ```
@@ -66,7 +62,7 @@ report-changes:          List all written/edited files with one-line summary on 
 step-1-audience:  who reads this · what doc type · what they already know
 step-2-audit:     Glob **/*.md · Grep stale refs · Read high-risk files · build gap list
 step-3-write:     narrowest edit (Edit > Write) · verify every claim · match surrounding style
-step-4-diagram:   invoke diagrams skill · embed in doc, not as separate files
+step-4-diagram:   write Mermaid architecture diagrams and embed in doc
 ```
 
 ## Standards
@@ -86,7 +82,7 @@ adrs:        Status / Context / Decision / Consequences
 ```text
 symbol-not-found:     report gap clearly — never invent a path or fabricate an API shape
 doc-contradicts-src:  flag discrepancy · show both versions · ask which is authoritative
-third-party-api:      invoke research skill first — write only after receiving current docs
+third-party-api:      verify external API signatures and paths before documenting them
 ```
 
 ## Pre-Delivery

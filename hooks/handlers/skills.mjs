@@ -13,7 +13,7 @@ import { debug } from '../utils.mjs';
 // Plugin root, resolved relative to this module (handlers live at <root>/hooks/
 // handlers/), so it works regardless of the process working directory.
 const PLUGIN_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const GUIDE = join(PLUGIN_ROOT, 'skills', 'using-agent-dev', 'SKILL.md');
+const GUIDE = join(PLUGIN_ROOT, 'skills', 'skills-routing-guide.md');
 const MAX_CHARS = 10000; // hard ceiling: the platform caps injected context at 10k chars
 
 // Honors the `skills_announce` plugin config (surfaced as an env var).
