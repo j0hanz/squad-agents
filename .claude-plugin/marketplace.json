@@ -1,0 +1,20 @@
+{
+  "name": "claude-agent-dev",
+  "owner": {
+    "name": "j0hanz",
+    "email": "golfarenlj@gmail.com",
+    "url": "https://github.com/j0hanz"
+  },
+  "plugins": [
+    {
+      "name": "claude-agent-dev",
+      "source": "./",
+      "description": "Skills, agents, and hooks for authoring and maintaining Claude Code agents, skills, and hooks.",
+      "version": "1.0.0",
+      "author": {
+        "name": "j0hanz",
+        "email": "golfarenlj@gmail.com"
+      }
+    }
+  ]
+}
