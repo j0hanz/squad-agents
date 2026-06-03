@@ -110,16 +110,16 @@ Specialized subagents Claude can invoke automatically or you can request directl
 
 Lifecycle hooks fire automatically during every Claude Code session.
 
-| Event                                | Handler                   | What it does                                                   |
-| :----------------------------------- | :------------------------ | :------------------------------------------------------------- |
-| `SessionStart`                       | session, explorer, skills | Injects session context, explorer history, and skill list      |
-| `UserPromptSubmit`                   | brainstorm-nudge          | Encourages requirements discovery before implementation starts |
-| `PreToolUse` (Grep/Glob/Read)        | explorer                  | Logs search breadcrumbs for context replay                     |
-| `PostToolUse` (Write/Edit)           | format                    | Runs Prettier on every saved file                              |
-| `PostToolUse` (Write/Edit/MultiEdit) | debug                     | Scans for new issues after each change                         |
-| `PostToolUseFailure` (Bash)          | diagnose-nudge            | Prompts structured debugging when a command fails              |
-| `Stop`                               | debug                     | Final scan before Claude stops                                 |
-| `SessionEnd`                         | explorer                  | Flushes explorer history to disk                               |
+| Event                                            | Handler                   | What it does                                                   |
+| :----------------------------------------------- | :------------------------ | :------------------------------------------------------------- |
+| `SessionStart`                                   | session, explorer, skills | Injects session context, explorer history, and skill list      |
+| `UserPromptSubmit`                               | brainstorm-nudge          | Encourages requirements discovery before implementation starts |
+| `PreToolUse` (Grep/Glob/Read/WebFetch/WebSearch) | explorer                  | Logs search breadcrumbs for context replay                     |
+| `PostToolUse` (Write/Edit/MultiEdit)             | format                    | Runs Prettier on every saved file                              |
+| `PostToolUse` (Write/Edit/MultiEdit)             | debug                     | Scans for new issues after each change                         |
+| `PostToolUseFailure` (Bash)                      | diagnose-nudge            | Prompts structured debugging when a command fails              |
+| `Stop`                                           | debug                     | Final scan before Claude stops                                 |
+| `SessionEnd`                                     | explorer                  | Flushes explorer history to disk                               |
 
 ### MCP Server
 
