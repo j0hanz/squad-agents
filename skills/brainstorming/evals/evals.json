@@ -34,6 +34,42 @@
         "Skill does NOT propose a design or implementation approach before terminology is resolved",
         "Skill uses the canonical term output format: [Canonical Term]: [Definition]. Aliases: ..."
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "We want to add a real-time collaborative editing system to our platform — think Google Docs style, with presence indicators, cursor sharing, conflict resolution via OT or CRDT, and offline sync.",
+      "expected_output": "Skill detects Scope XL (architectural change, 10+ files, multiple modules) and pauses to suggest splitting into sub-features before continuing. Does not proceed blindly into a full Phase 2–4 cycle without user confirmation on scope.",
+      "files": [],
+      "expectations": [
+        "Skill identifies this as Scope XL based on the scanner report",
+        "Skill explicitly suggests breaking the feature into smaller phases or sub-features",
+        "Skill asks whether to proceed with full scope or tackle a slice first",
+        "Skill does NOT skip the scope split-check and jump directly into Phase 2"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "We need to add export to CSV for our reports page.",
+      "expected_output": "Skill runs the codebase scanner and finds an existing 'import CSV' feature (analogous feature). It surfaces this in the Creative Checkpoint before spawning design-proposer. The design-proposer's Step 0 references the analogous import pattern as a candidate for reuse or mirroring.",
+      "files": [],
+      "expectations": [
+        "Skill runs codebase-scanner and checks for analogous features (e.g., existing import/download flows)",
+        "Skill surfaces the analogous finding in the Creative Checkpoint before Phase 4",
+        "Design proposals include at least one option that mirrors or reuses the existing pattern",
+        "Skill does NOT ignore the analogous feature and propose only net-new solutions"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I want to add a notification system with email, SMS, push, and in-app channels, templating, scheduling, user preferences per channel, and delivery receipts.",
+      "expected_output": "Skill runs Phase 1–3. User approves Approach A. Skill produces a Design Brief with BDD acceptance criteria, a risk register with at least one identified risk, and a concrete first step.",
+      "files": [],
+      "expectations": [
+        "Design Brief includes 'Acceptance criteria' section with at least one Given/When/Then scenario",
+        "Design Brief includes 'Risk register' table with at least one identified risk and mitigation",
+        "Design Brief includes 'First step' field with a concrete action (not 'start coding')",
+        "Design Brief includes 'Open TBDs' field"
+      ]
     }
   ]
 }

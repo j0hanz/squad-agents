@@ -29,6 +29,7 @@ class CompressConfig:
     max_terminology: int = 10
     max_unknowns: int = 4
     max_design_docs: int = 3
+    max_analogous: int = 2
 
 
 def _dedupe_stable(items: list[str]) -> list[str]:
@@ -69,7 +70,7 @@ def compress(report: dict[str, Any], cfg: CompressConfig) -> dict[str, Any]:
     out["scope"] = report.get("scope", "M")
     out["scope_reasoning"] = _trim_str(report.get("scope_reasoning", ""), 150)
 
-    # Related files — cap count, truncate git log per file
+    # Related files — cap count, truncate git log, preserve test coverage signals
     raw_files: list[dict[str, Any]] = report.get("related_files", [])
     out["related_files"] = [
         {
@@ -77,6 +78,8 @@ def compress(report: dict[str, Any], cfg: CompressConfig) -> dict[str, Any]:
             "last_commit": _truncate_git_log(
                 f.get("last_commit", ""), cfg.max_log_lines
             ),
+            "has_tests": f.get("has_tests", False),
+            "test_file": f.get("test_file", ""),
         }
         for f in raw_files[: cfg.max_files]
     ]
@@ -92,6 +95,11 @@ def compress(report: dict[str, Any], cfg: CompressConfig) -> dict[str, Any]:
         : cfg.max_design_docs
     ]
     out["unknowns"] = _dedupe_stable(report.get("unknowns", []))[: cfg.max_unknowns]
+
+    # Analogous features — key for Creative Checkpoint and design-proposer Step 0
+    out["analogous_features"] = _dedupe_stable(report.get("analogous_features", []))[
+        : cfg.max_analogous
+    ]
 
     _annotate_savings(report, out)
     return out
@@ -128,6 +136,7 @@ def main() -> None:
     parser.add_argument("--max-terminology", type=int, default=10)
     parser.add_argument("--max-unknowns", type=int, default=4)
     parser.add_argument("--max-design-docs", type=int, default=3)
+    parser.add_argument("--max-analogous", type=int, default=2)
     args = parser.parse_args()
 
     try:
@@ -149,6 +158,7 @@ def main() -> None:
         max_terminology=args.max_terminology,
         max_unknowns=args.max_unknowns,
         max_design_docs=args.max_design_docs,
+        max_analogous=args.max_analogous,
     )
     print(json.dumps(compress(raw, cfg), indent=2))
 

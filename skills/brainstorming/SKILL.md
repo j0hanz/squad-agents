@@ -21,13 +21,15 @@ description: "Structured requirements discovery before implementation. Trigger o
 
 **rhythm:** one question at a time — wait for each answer before asking the next.
 
-**Fast Track (resistant users):**
-If the user declines brainstorming or insists on "just coding" after your first Phase 1 attempt:
+**Fast Track (resistant users OR Scope S):**
+If the user declines brainstorming, OR Phase 1 scan returns Scope S with no Key Unknowns and no ambiguous terminology:
 
 1. Acknowledge the request for speed.
 2. Spawn `codebase-scanner`.
 3. Present a **single, grounded proposal** based on the scanner's report.
 4. If approved, skip to Phase 5.
+
+**Scope XL check:** If scanner returns Scope XL, pause before Phase 2. Ask: "This appears to span 10+ files or multiple modules. Should we split into phases and tackle one slice first?"
 
 ## Do Not
 
@@ -61,13 +63,21 @@ Spawn via Agent tool. Do not redo their work manually.
 
 ## Phase 1: Discovery (Read Before Asking)
 
+**Stakeholder probe:** If who will use the feature is not evident from context, ask this one question while the scanner runs: "Who interacts with this feature most — end users, internal teams, or other systems?" This single answer changes Phase 4 design tradeoffs significantly.
+
 Spawn `codebase-scanner` — pass the feature description exactly as stated. Wait for the Codebase Context Report.
 
 Summarize your understanding in one paragraph, drawing from the report: what was found, what constraints exist, what Key Unknowns were flagged, and what you don't know yet. Ask the user to confirm.
 
-**scope-check:** If discovery reveals the feature is >4x larger than expected, suggest splitting into phases.
+**Scope-adaptive routing after scan:**
 
-**domain-trigger:** If steps 1–5 reveal ambiguous or conflicting terminology, run Phase 2 before continuing.
+| Scanner output                                | Route                                                          |
+| --------------------------------------------- | -------------------------------------------------------------- |
+| Scope S + no Key Unknowns + terminology clear | **Compressed Track** — skip Phase 2–3, go directly to Phase 4  |
+| Scope XL                                      | **Phase split check** — offer to break into sub-features first |
+| Key Unknowns flagged OR ambiguous terminology | **Full track** — run Phase 2 or Phase 3 as appropriate         |
+
+**domain-trigger:** If scan reveals ambiguous or conflicting terminology, run Phase 2 before continuing.
 
 ### Phase 1 Example
 
@@ -112,15 +122,17 @@ Offer to write findings to `glossary.md` or `CONTEXT.md` at Phase 5 transition.
 
 ## Phase 3: Expert Clarification (Surface the Unsaid)
 
-Pick 1–2 techniques based on conversation signals. Do not run all five as a script.
+Pick 1–2 techniques based on conversation signals. Do not run all as a script.
 
-| Situation                                              | Use This            | Reason                                      |
-| ------------------------------------------------------ | ------------------- | ------------------------------------------- |
-| User says "just build it" or requirements seem obvious | **Why (Five Whys)** | Uncovers hidden motivation                  |
-| Large scope or complex dependencies                    | **Premortem**       | Surfaces organizational/technical risks     |
-| Success criteria vague ("just make it fast")           | **Success Logic**   | Clarifies acceptance criteria               |
-| Feature creep risk or unclear boundaries               | **Anti-Scope**      | Defines what we're explicitly NOT building  |
-| Feature handles sensitive data or user permissions     | **Trust Breach**    | Identifies security/privacy vulnerabilities |
+| Situation                                              | Use This          | Reason                                                  |
+| ------------------------------------------------------ | ----------------- | ------------------------------------------------------- |
+| User says "just build it" or requirements seem obvious | **Why**           | Uncovers hidden motivation                              |
+| Large scope or complex dependencies                    | **Premortem**     | Surfaces organizational/technical risks                 |
+| Success criteria vague ("just make it fast")           | **Success Logic** | Clarifies acceptance criteria                           |
+| Feature creep risk or unclear boundaries               | **Anti-Scope**    | Defines what we're explicitly NOT building              |
+| Feature handles sensitive data or user permissions     | **Trust Breach**  | Identifies security/privacy vulnerabilities             |
+| Stuck in conventional thinking, options feel obvious   | **Analogy**       | Unlocks non-obvious solutions via cross-domain transfer |
+| Scope or constraints feel fuzzy or contested           | **Inversion**     | Reveals constraints by imagining worst-case failure     |
 
 **Depth check:** After 1–2 techniques, ask: "Are there other risks or unknowns that could derail this?"
 
@@ -133,7 +145,19 @@ Pick 1–2 techniques based on conversation signals. Do not run all five as a sc
 2. **The Premortem:** "Imagine we've implemented this and it's a disaster. What's the most likely thing that went wrong?"
 3. **Success Logic:** "How will we know this is a success without using the word 'functional'? What behavior change should we see?"
 4. **The "Anti-Scope":** "What's a related feature that we are _strictly_ choosing NOT to build today?"
-5. **The Trust Breach:** "If a malicious actor wanted to abuse this feature to access unauthorized data, what would be their easiest path?"
+5. **The Trust Breach:** "If a malicious actor wanted to abuse this feature, what would be their easiest path?"
+6. **The Analogy:** "What does a non-digital version of this problem look like? How do people solve it without software?" _(Use when options feel narrow or conventional)_
+7. **The Inversion:** "Describe the feature that would cause the most damage if built wrong. What does the safe inverse look like?" _(Use when scope or constraints feel fuzzy)_
+
+## Creative Checkpoint
+
+Before spawning design-proposer, spend 30 seconds on these three checks:
+
+- Is there a zero-code or near-zero-code solution already in the codebase (config flag, existing extension point)?
+- Has an adjacent feature already solved a structurally similar problem? (The scanner's Analogous Features section reveals this — e.g., an existing "export" flow when building "import".)
+- What would the 10× simpler version look like? Is it good enough for the stated success criteria?
+
+If any answer is "yes" or "possibly" — surface it to the user in one sentence before spawning design-proposer. Include the finding in the context packet as a candidate approach. This one check prevents the most common failure mode: over-engineering a problem that already has a 5-line solution.
 
 ## Phase 4: Design Proposal
 
@@ -150,9 +174,11 @@ If the script fails, pass the raw report as-is.
 Spawn `design-proposer` with a context packet containing:
 
 - Feature description (confirmed in Phase 1)
-- Codebase Context Report (compressed)
+- Stakeholder type (from Phase 1 probe, or "not specified")
+- Codebase Context Report (compressed), including Analogous Features and Test Coverage
 - Domain terms (from Phase 2, or "Phase 2 skipped")
 - Risks and success criteria (from Phase 3, or "Phase 3 skipped")
+- Creative Checkpoint findings (or "none identified")
 - Any constraints the user stated explicitly
 
 Present the design proposals in sections. Validate each section before continuing.
@@ -165,6 +191,13 @@ Wait for explicit commitment:
 - "Let's do Option 1, here's why..."
 
 Ambiguous responses ("sounds good") → clarify which specific approach they're choosing.
+
+**If all approaches are rejected:**
+
+1. Ask: "What felt most wrong — the complexity, the direction, or an unstated constraint?"
+2. Extract the new constraint or direction from their answer.
+3. Re-spawn `design-proposer` once with a "pivot context" addendum: original packet + rejection reason + new constraint.
+4. If rejected again, hand design leadership back: "It sounds like you have a specific direction in mind — can you describe it and I'll document it as the Design Brief?"
 
 ## Phase 5: Transition
 
@@ -185,7 +218,18 @@ Ambiguous responses ("sounds good") → clarify which specific approach they're 
 - [Component 2: responsibility]
 - [Key data flow between them]
 
-**Success criteria:** [Observable signals — what user/system will do differently]
+**Acceptance criteria:**
+
+- Given [context], when [action], then [observable result]
+- [1–3 BDD scenarios; omit this section if Phase 3 Success Logic was not run]
+
+**Risk register:**
+
+| Risk                                      | Likelihood | Mitigation          |
+| ----------------------------------------- | ---------- | ------------------- |
+| [identified risk from Phase 3 or scanner] | H / M / L  | [mitigation action] |
+
+**First step:** [One concrete action to begin — a file to open, a test to write, an interface to define]
 **Open TBDs:** [Unresolved items with owner and due date, or "None"]
 ```
 
