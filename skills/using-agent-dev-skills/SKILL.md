@@ -62,7 +62,7 @@ brainstorming
   planning
      │
      ▼
-test-driven-development  ◄── (loop: RED → GREEN → REFACTOR)
+test-driven-development or multi-agent-development  ◄── (loop: RED → GREEN → REFACTOR)
      │
      ▼
 verification-before-completion

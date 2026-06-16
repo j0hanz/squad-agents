@@ -72,3 +72,4 @@ Agent instructions MUST be generated in strict `markdown-kv` format.
 1. **Deliver:** Complete agent definition in `markdown-kv` format. State the file path.
 2. **Validate:** Run `python <skill-dir>/scripts/validate_agent.py path/to/your-agent.md`. MUST yield zero ERRORs before presentation.
 3. **Test Prompt:** Provide a concrete test input and expected output schema.
+4. **Verification:** **Invoke `verification-before-completion`** to ensure the new agent performs its role correctly and adheres to its defined boundaries.

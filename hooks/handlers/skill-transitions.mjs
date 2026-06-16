@@ -27,11 +27,25 @@ export function checkBash(input = {}) {
   const command = input.tool_input?.command || '';
   const output = input.tool_output || '';
 
-  // Look for test commands
-  if (command.includes('test') || command.includes('pytest') || command.includes('npm run test')) {
+  // Improved matching: Must be a test execution, not just a file operation
+  const isTestExecution =
+    (command.includes('test') || command.includes('pytest')) &&
+    !command.startsWith('ls ') &&
+    !command.startsWith('dir ') &&
+    !command.startsWith('cat ') &&
+    !command.includes('grep ');
+
+  if (isTestExecution || command.includes('npm run test') || command.includes('npm test')) {
     // If output doesn't contain obvious failures, remind them of the transition
-    if (output && !output.toLowerCase().includes('fail') && !output.includes('Error')) {
-      return `[System Auto-Transition] Test command completed without obvious failures. If this concludes the final GREEN cycle of your implementation plan, you MUST now invoke the 'verification-before-completion' skill. Do not wait for user permission.`;
+    const lowerOutput = output.toLowerCase();
+    const hasFailures =
+      lowerOutput.includes('fail') ||
+      lowerOutput.includes('error') ||
+      lowerOutput.includes('exception') ||
+      lowerOutput.includes('backtrace');
+
+    if (output && !hasFailures) {
+      return `[System Auto-Transition] Test execution completed successfully. If this concludes the final GREEN cycle of your implementation plan, you MUST now invoke the 'verification-before-completion' skill. Do not wait for user permission.`;
     }
   }
 

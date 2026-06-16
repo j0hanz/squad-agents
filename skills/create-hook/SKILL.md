@@ -215,26 +215,11 @@ Env vars available: `$CLAUDE_PROJECT_DIR` (all hooks), `${CLAUDE_PLUGIN_ROOT}`/`
 
 ---
 
-## 7 — Test before shipping
+### After Creation
 
-Never register a hook untested. Pipe representative JSON and inspect the exit code and output:
-
-```bash
-echo '{"tool_name":"Edit","tool_input":{"file_path":".env"}}' | ./protect-files.sh; echo "exit=$?"
-```
-
-Or use the bundled harness for a structured report (exit code + parsed stdout JSON + stderr) across multiple cases:
-
-```bash
-python scripts/test_hook.py --cmd "./protect-files.sh" --event PreToolUse \
-  --input '{"tool_name":"Edit","tool_input":{"file_path":".env"}}'
-```
-
-Then register it, run `/hooks` to confirm it appears under the right event, and trigger it live. If it misbehaves, see [references/recipes.md](references/recipes.md#debugging) for the debug log and common failures.
-
----
-
-## Output format when delivering a hook
+1. Test the hook manually using the provided test command.
+2. Run project-specific validation (e.g., `npm run test:node`).
+3. **Invoke `verification-before-completion`** to ensure the new hook doesn't break existing workflows or introduce latency issues.
 
 When you produce a hook for the user, always give all three:
 
