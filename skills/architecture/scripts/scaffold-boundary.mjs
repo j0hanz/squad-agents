@@ -216,6 +216,138 @@ export class ${pascal(domain)}Controller {
       },
     ],
   },
+
+  'clean-architecture': {
+    description: 'Clean Architecture — enterprise scale, strict dependency rule inward',
+    dirs: ['entities', 'use-cases', 'interfaces', 'frameworks'],
+    files: (domain) => [
+      {
+        rel: `entities/${domain}.ts`,
+        content: `// Enterprise Business Rules — independent of anything else
+export class ${pascal(domain)} {
+  constructor(public readonly id: string) {}
+}
+`,
+      },
+      {
+        rel: `use-cases/${domain}.interactor.ts`,
+        content: `import type { ${pascal(domain)} } from '../entities/${domain}';
+import type { I${pascal(domain)}Repository } from './${domain}.repository.interface';
+
+// Application Business Rules
+export class ${pascal(domain)}Interactor {
+  constructor(private readonly repo: I${pascal(domain)}Repository) {}
+  
+  async execute(id: string): Promise<${pascal(domain)} | null> {
+    return this.repo.findById(id);
+  }
+}
+`,
+      },
+      {
+        rel: `use-cases/${domain}.repository.interface.ts`,
+        content: `import type { ${pascal(domain)} } from '../entities/${domain}';
+
+export interface I${pascal(domain)}Repository {
+  findById(id: string): Promise<${pascal(domain)} | null>;
+  save(entity: ${pascal(domain)}): Promise<void>;
+}
+`,
+      },
+      {
+        rel: `interfaces/${domain}.controller.ts`,
+        content: `import type { ${pascal(domain)}Interactor } from '../use-cases/${domain}.interactor';
+
+// Interface Adapters — converts data from format convenient for use cases to format convenient for external agencies
+export class ${pascal(domain)}Controller {
+  constructor(private readonly interactor: ${pascal(domain)}Interactor) {}
+}
+`,
+      },
+      {
+        rel: `frameworks/${domain}.repository.ts`,
+        content: `import type { I${pascal(domain)}Repository } from '../use-cases/${domain}.repository.interface';
+import type { ${pascal(domain)} } from '../entities/${domain}';
+
+// Frameworks & Drivers — lowest level, DB specifics
+export class ${pascal(domain)}Repository implements I${pascal(domain)}Repository {
+  async findById(id: string): Promise<${pascal(domain)} | null> {
+    throw new Error('Not implemented');
+  }
+  async save(entity: ${pascal(domain)}): Promise<void> {
+    throw new Error('Not implemented');
+  }
+}
+`,
+      },
+    ],
+  },
+
+  cqrs: {
+    description: 'CQRS — separate read (queries) and write (commands) models',
+    dirs: ['commands', 'queries', 'models', 'events'],
+    files: (domain) => [
+      {
+        rel: `models/${domain}.write-model.ts`,
+        content: `// Write Model — optimized for domain logic and invariants
+export class ${pascal(domain)}WriteModel {
+  constructor(public readonly id: string) {}
+}
+`,
+      },
+      {
+        rel: `models/${domain}.read-model.ts`,
+        content: `// Read Model — optimized for queries, can be denormalized or flat
+export interface ${pascal(domain)}ReadModel {
+  id: string;
+  // fast lookup fields
+}
+`,
+      },
+      {
+        rel: `commands/create-${domain}.command.ts`,
+        content: `// Command — intent to mutate state
+export class Create${pascal(domain)}Command {
+  constructor(public readonly payload: any) {}
+}
+
+export class Create${pascal(domain)}Handler {
+  async handle(command: Create${pascal(domain)}Command): Promise<void> {
+    // 1. Load write model
+    // 2. Execute logic
+    // 3. Save write model
+    // 4. Dispatch event
+  }
+}
+`,
+      },
+      {
+        rel: `queries/get-${domain}.query.ts`,
+        content: `import type { ${pascal(domain)}ReadModel } from '../models/${domain}.read-model';
+
+// Query — intent to read state without mutating
+export class Get${pascal(domain)}Query {
+  constructor(public readonly id: string) {}
+}
+
+export class Get${pascal(domain)}Handler {
+  async handle(query: Get${pascal(domain)}Query): Promise<${pascal(domain)}ReadModel | null> {
+    // Read directly from DB or fast read replica, NO domain logic here
+    return null;
+  }
+}
+`,
+      },
+      {
+        rel: `events/${domain}-created.event.ts`,
+        content: `// Domain Event — a fact that occurred
+export class ${pascal(domain)}CreatedEvent {
+  constructor(public readonly id: string, public readonly payload: any) {}
+}
+`,
+      },
+    ],
+  },
 };
 
 function pascal(str) {
