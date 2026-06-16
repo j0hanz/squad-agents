@@ -229,7 +229,7 @@ Wait until logic is stable.
 2. **User Review**: Confirm set with user. Save to `<workspace>/trigger-eval.json`.
 3. **Optimize**:
    ```bash
-   python -m scripts.run_loop \
+   python '<skill-dir>/scripts/run_loop.py' \
      --eval-set <workspace>/trigger-eval.json \
      --skill-path <path-to-skill> \
      --model <current-session-model-id> \
@@ -244,7 +244,7 @@ Wait until logic is stable.
 If `present_files` is available:
 
 ```bash
-python -m scripts.package_skill <path/to/skill-folder>
+python '<skill-dir>/scripts/package_skill.py' <path/to/skill-folder>
 ```
 
 ---
@@ -269,5 +269,8 @@ python -m scripts.package_skill <path/to/skill-folder>
 - `agents/grader.md`: Grading pass/fail criteria.
 - `agents/comparator.md`: Blind A/B analysis.
 - `agents/analyzer.md`: Benchmark data interpretation.
+- `references/schemas.md`: JSON schema definitions.
+- `references/cowork.md`: Headless environment workflow.
+  agents/analyzer.md`: Benchmark data interpretation.
 - `references/schemas.md`: JSON schema definitions.
 - `references/cowork.md`: Headless environment workflow.

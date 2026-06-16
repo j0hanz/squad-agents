@@ -69,6 +69,8 @@ Agent instructions MUST be generated in strict `markdown-kv` format.
 
 ## 7. Delivery & Testing
 
+**Note on resolution:** use the absolute path of the directory containing this `SKILL.md` file as `<skill-dir>` (or `$CLAUDE_PLUGIN_ROOT/skills/create-agent` if available).
+
 1. **Deliver:** Complete agent definition in `markdown-kv` format. State the file path.
 2. **Validate:** Run `python <skill-dir>/scripts/validate_agent.py path/to/your-agent.md`. MUST yield zero ERRORs before presentation.
 3. **Test Prompt:** Provide a concrete test input and expected output schema.

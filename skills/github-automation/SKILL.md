@@ -38,6 +38,8 @@ GitHub Actions is a YAML-on-top-of-event-handlers product with a lot of footguns
 
 ### Workflow
 
+**Note on resolution:** use the absolute path of the directory containing this `SKILL.md` file as `<skill-dir>` (or `$CLAUDE_PLUGIN_ROOT/skills/github-automation` if available).
+
 Follow these steps in order. Don't skip validation — runtime-only feedback is what makes Actions painful.
 
 #### 1. Orient

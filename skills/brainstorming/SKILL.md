@@ -162,7 +162,9 @@ Before spawning design-proposer, spend 30 seconds on these three checks:
 
 If any answer is "yes" or "possibly" — surface it to the user in one sentence before spawning design-proposer. Include the finding in the context packet as a candidate approach. This one check prevents the most common failure mode: over-engineering a problem that already has a 5-line solution.
 
-## Phase 4: Design Proposal
+### Phase 4: Design Proposal
+
+**Note on resolution:** use the absolute path of the directory containing this `SKILL.md` file as `<skill-dir>` (or `$CLAUDE_PLUGIN_ROOT/skills/brainstorming` if available).
 
 Compress the Codebase Context Report before spawning:
 

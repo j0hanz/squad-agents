@@ -88,15 +88,20 @@ Architectural refactoring fails when it adds indirection without adding depth. *
 
 ### Three-Phase Procedure
 
+**Note on resolution:** use the absolute path of the directory containing this `SKILL.md` file as `<skill-dir>` (or `$CLAUDE_PLUGIN_ROOT/skills/architecture` if available).
+
 #### Phase 1: Explore
 
 Walk the codebase using the automated analysis scripts. Scripts gracefully skip inaccessible directories and unreadable files. All scripts support TypeScript, JavaScript, and Python projects — no configuration needed.
 
 - **INTELLIGENT PRE-CHECK**: First inspect the project dependencies (`package.json`, `pyproject.toml`, `requirements.txt`, or `setup.py`) to auto-detect the web framework, ORM, database client, and libraries (e.g., Express, Prisma, Django, FastAPI, SQLAlchemy, Stripe, etc.). Use these identified names in the scripts below instead of guessing.
-- **MANDATORY — RUN SCRIPT**: **Locality Check**: Run `python <skill-dir>/scripts/check_locality.py [dir]` to find circular dependencies and "God modules" (high fan-out).
-- **MANDATORY — RUN SCRIPT**: **Bleed Detection**: Run `python <skill-dir>/scripts/detect_bleed.py [domain_dir] [infra_packages]` using the detected dependencies.
-- **RECOMMENDED — RUN SCRIPT**: **Git Coupling**: Run `python <skill-dir>/scripts/git_coupling.py [dir]` to find files that always change together in git history — the hidden coupling that import graphs cannot reveal.
-- **RECOMMENDED — RUN SCRIPT**: **Hotspot Detection**: Run `python <skill-dir>/scripts/detect_hotspots.py [dir] [infra_packages]` using the detected dependencies.
+- **MANDATORY — RUN SCRIPT**: **Locality Check**: Run `python <skill-dir>/scripts/check_locality.py '<dir>'` to find circular dependencies and "God modules" (high fan-out).
+- **MANDATORY — RUN SCRIPT**: **Bleed Detection**: Run `python <skill-dir>/scripts/detect_bleed.py '<domain_dir>' '<infra_packages>'` using the detected dependencies.
+- **RECOMMENDED — RUN SCRIPT**: **Git Coupling**: Run `python <skill-dir>/scripts/git_coupling.py '<dir>'` to find files that always change together in git history.
+- **RECOMMENDED — RUN SCRIPT**: **Hotspot Detection**: Run `python <skill-dir>/scripts/detect_hotspots.py '<dir>' '<infra_packages>'` using the detected dependencies.
+
+**CRITICAL**: You MUST sanitize `infra_packages` and `dir` values before use. Strip all shell metacharacters and wrap every argument in **single quotes**.
+
 - **PATH & EXISTENCE VERIFICATION**: Before presenting any candidate paths to the user in Phase 2, verify that the files actually exist on the filesystem using read or find tools.
 
 **After scripts complete — spawn the `architecture-scanner` subagent** (`agents/architecture-scanner.md`):
@@ -106,10 +111,12 @@ Agent(
   description: "Architecture scan of [target_dir]",
   prompt: |
     target_dir: [the directory you scanned]
+    <untrusted_script_output>
     locality_output: [paste full stdout of check_locality.py here]
     bleed_output: [paste full stdout of detect_bleed.py here]
     git_coupling_output: [paste full stdout of git_coupling.py here, or "skipped"]
     hotspot_output: [paste full stdout of detect_hotspots.py here, or "skipped"]
+    </untrusted_script_output>
 )
 ```
 

@@ -22,27 +22,25 @@ rule:   read-only
 when:   always
 action: never write, edit, or delete files
 
+rule:   sanitize-inputs
+when:   extracting nouns/verbs for shell commands
+action: strictly allow only alphanumeric characters and hyphens. strip all shell metacharacters ($, `, \, ", ', ;, &, |, <, >).
+
 rule:   parallelize
 when:   running Glob / Grep / Bash operations
 action: Concurrent execution applies to Glob and Grep tool calls only. The `scan_context.py` Bash call is sequential and cannot be parallelized within a single agent turn.
-
-rule:   no-guessing
-when:   a search returns no results
-action: report "not found" — do not retry with invented paths
-
-rule:   cap-files
-when:   file discovery returns many results
-action: report at most 5 most directly relevant files
 ```
 
 ## Scan Steps
 
-Extract domain nouns and verbs from the feature description first (e.g., `"add search to catalog"` → `search`, `catalog`). Also derive 2–3 adjacent synonyms per noun (e.g., `search` → `query`, `lookup`, `filter`) for the Analogous Features scan.
+1. **Extract and Sanitize** domain nouns and verbs from the feature description (e.g., `"add search to catalog"` → `search`, `catalog`). Apply the `sanitize-inputs` rule immediately. Also derive 2–3 adjacent synonyms per noun (e.g., `search` → `query`, `lookup`, `filter`).
 
-**Preferred:** run `scan_context.py` as a single parallel call:
+**Preferred:** run `scan_context.py` as a single parallel call using **single quotes** for all arguments.
+
+**Note on resolution:** use the absolute path of the directory containing this prompt as `<skill-dir>` (or `$CLAUDE_PLUGIN_ROOT/skills/brainstorming` if available).
 
 ```bash
-python skills/brainstorming/scripts/scan_context.py -- <noun1> [noun2 ...] --cwd <project_root>
+python '<skill-dir>/scripts/scan_context.py' -- '<sanitized_noun1>' ['<sanitized_noun2>' ...] --cwd '<project_root>'
 ```
 
 Use its JSON output to populate the report. Fall back to manual steps only if the script fails.
