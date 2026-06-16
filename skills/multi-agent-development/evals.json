@@ -1,0 +1,40 @@
+{
+  "skill_name": "multi-agent-development",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement the plan in plan/skill-audit-remediation.plan.md",
+      "expected_output": "Skill recognizes the plan file, iterates through all tasks sequentially, dispatches a coder subagent for each task, followed by spec and quality review gates (detective subagents). After all tasks pass gates, it runs 'npm test' and 'npm run validate' before invoking verification-before-completion.",
+      "files": ["plan/skill-audit-remediation.plan.md", "plan/skill-audit-remediation.specs.md"],
+      "expectations": [
+        "Skill reads the plan file at the start",
+        "Skill dispatches subagents for TASK-001 PHASE-001 first",
+        "Skill dispatches Phase 2 (Spec Compliance) and Phase 3 (Quality) after the implementer returns DONE",
+        "Skill does not move to TASK-002 until TASK-001 passes all gates",
+        "Skill runs final validation (npm test) after the last task is complete",
+        "Skill invokes verification-before-completion as the final step"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Execute the spec and plan I just created for the auth feature.",
+      "expected_output": "Skill finds the most recently created or modified plan files in the plan/ directory and begins the sequential multi-agent execution loop.",
+      "files": ["plan/auth.specs.md", "plan/auth.plan.md"],
+      "expectations": [
+        "Skill identifies plan/auth.plan.md as the target",
+        "Skill starts the Phase 1 Implement ➔ Phase 2 Spec Gate ➔ Phase 3 Quality Gate loop",
+        "Skill dispatches coder with isolation: worktree"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Work through the plan tasks for the new API endpoint.",
+      "expected_output": "Skill initiates the multi-agent development workflow for the relevant plan.",
+      "files": [],
+      "expectations": [
+        "Skill triggers the multi-agent development loop",
+        "Skill asks for the plan file path if it cannot find an obvious candidate"
+      ]
+    }
+  ]
+}

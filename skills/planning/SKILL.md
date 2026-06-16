@@ -109,7 +109,11 @@ python <skill-dir>/scripts/validate.py "NAME" --review
 
 ### Step 5 — Handoff
 
-Export `plan/NAME.specs.md` + `plan/NAME.plan.md`. The spec says _what_ and _why_; the plan says _how_ and _in what order_. Pass the plan to `test-driven-development` for execution.
+Export `plan/NAME.specs.md` + `plan/NAME.plan.md`. The spec says _what_ and _why_; the plan says _how_ and _in what order_.
+
+**MANDATORY**: Write a `plan-brief.json` file to disk summarizing the plan. This is the standardized handoff artifact for implementation skills. The JSON MUST include: `plan_path`, `spec_path`, `total_tasks`, `critical_files`, and `first_task_id`.
+
+Pass the plan to `test-driven-development` or `multi-agent-development` for execution.
 
 ## Canonical Task Block
 

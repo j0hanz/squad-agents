@@ -171,7 +171,7 @@ Once the user picks a candidate, do NOT start writing code immediately.
 3. **Apply the Deletion Test aloud**, using the Decision Protocol: "If we deleted this module, what happens to its logic?"
 4. Wait for user approval before modifying files.
 5. **Migration Path:** Recommend the appropriate strategy (Strangler Fig, Branch by Abstraction) from **MIGRATION_STRATEGIES.md**.
-6. **Write Handoff Artifact**: Before invoking the next skill, write `architecture-brief.json` with these fields: `chosen_approach` (the pattern/strategy), `scope` (which files/modules change), `constraints` (what must stay the same), `interface` (the new boundary shape), `first_step` (the first concrete code change).
+6. **Write Handoff Artifact**: Before invoking the next skill, you **MUST** write `architecture-brief.json` to disk. This is the standardized handoff artifact for `refactor` or `planning`. The JSON MUST include these fields: `chosen_approach` (the pattern/strategy), `scope` (which files/modules change), `constraints` (what must stay the same), `interface` (the new boundary shape), `first_step` (the first concrete code change).
 7. **Handoff:** Invoke the `refactor` or `planning` skill for implementation.
 8. After any code change is implemented, invoke `verification-before-completion` before declaring done.
 
@@ -204,7 +204,7 @@ Before proposing a structure, run this diagnosis:
 
 #### Step 4: Scaffold (after user approves the design)
 
-**Write Handoff Artifact**: Before scaffolding, write `architecture-brief.json` with these fields: `chosen_approach` (the pattern selected), `scope` (which new modules/files), `constraints` (what constraints apply), `interface` (public API shape), `first_step` (the first implementation task).
+**Write Handoff Artifact**: Before scaffolding, you **MUST** write `architecture-brief.json` to disk. This is the standardized handoff artifact for `refactor` or `planning`. The JSON MUST include these fields: `chosen_approach` (the pattern selected), `scope` (which new modules/files), `constraints` (what constraints apply), `interface` (public API shape), `first_step` (the first implementation task).
 
 Load **MIGRATION_STRATEGIES.md** and name the appropriate strategy. Then offer to scaffold the boundary skeleton:
 

@@ -206,7 +206,7 @@ Ambiguous responses ("sounds good") → clarify which specific approach they're 
 
 1. Summarize the approved approach in one short paragraph: chosen option and key tradeoffs.
 2. If Phase 2 captured terms or Phase 3 captured risks: offer to write to `glossary.md` or `CONTEXT.md`. **If there are Open TBDs, offer to save them to `TODO.md` or a tracker.**
-3. Produce the Design Brief below and write a corresponding `design-brief.json` file to disk. Stop — do not invoke `/plan` or write code automatically. Conclude: "You can now use `/plan` to generate a detailed implementation plan based on this brief. Would you like me to start that for you?"
+3. **MANDATORY**: Produce the Design Brief below and write a corresponding `design-brief.json` file to disk. This JSON file is the standardized handoff artifact for the `planning` skill. Stop — do not invoke `/plan` or write code automatically. Conclude: "You can now use `/plan` to generate a detailed implementation plan based on this brief. Would you like me to start that for you?"
 
 **Required Markdown output format:**
 

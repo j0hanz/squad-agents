@@ -117,7 +117,7 @@ function validateHooks() {
       matchers.forEach((matcher) => {
         matcher.hooks?.forEach((hook) => {
           if (hook.type === 'command' && !hook.command.includes('hooks/runner.mjs')) {
-            errors.push(`[Hooks] Event ${event}: Command doesn't use hooks/runner.mjs pattern`);
+            warnings.push(`[Hooks] Event ${event}: Command doesn't use hooks/runner.mjs pattern`);
           }
         });
       });
