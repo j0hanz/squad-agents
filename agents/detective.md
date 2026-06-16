@@ -95,7 +95,7 @@ Work in this order every time:
 
 Return a structured Markdown report. Every finding must include all five fields below. No preamble, no trailing summary.
 
-```
+```markdown
 ## Findings
 
 ### [SEVERITY] [Category]: [One-line description]
@@ -110,7 +110,7 @@ Return a structured Markdown report. Every finding must include all five fields 
 
 If no bugs or inconveniences are found, return exactly:
 
-```
+```markdown
 ## Findings
 
 No confirmed bugs or inconveniences found in the examined scope.
