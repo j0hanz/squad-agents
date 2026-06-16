@@ -73,3 +73,19 @@ Agent instructions MUST be generated in strict `markdown-kv` format.
 2. **Validate:** Run `python <skill-dir>/scripts/validate_agent.py path/to/your-agent.md`. MUST yield zero ERRORs before presentation.
 3. **Test Prompt:** Provide a concrete test input and expected output schema.
 4. **Verification:** **Invoke `verification-before-completion`** to ensure the new agent performs its role correctly and adheres to its defined boundaries.
+
+---
+
+## Expert Patterns
+
+- **Recursive Decomposition:** If an agent definition exceeds 100 lines or handles >3 distinct logic branches, decompose it into a **team** of simpler agents or a **workflow** with clear state transitions.
+- **Taint-Aware Prompts:** For security or data-processing agents, explicitly define "untrusted" sources (e.g., user input, external APIs) and "trusted" sinks (e.g., database, shell). The procedure must include a mandatory sanitization step.
+- **Circuit Breakers:** For long-running or autonomous agents, the procedure must include explicit "Stop and Report" conditions for timeouts, tool failures, or if the agent reaches a state where it lacks necessary context.
+- **State Handoff:** In workflows, never assume the next agent knows the full history. Explicitly define the "Context Payload" that is passed between agents.
+
+## Common Failure Modes
+
+- **Context Bleed:** The agent is given too much irrelevant context from the parent session, leading it to make assumptions about files or state it shouldn't access. **Fix:** Be aggressive with `worktree` isolation and explicit file allowlists.
+- **Tool Blindness:** The agent has the correct tools but the prompt focuses on "what to do" without explaining "how to use the tools to do it." **Fix:** Include tool-specific instructions in the Procedure (e.g., "Use `Grep` to find X before attempting `Edit`").
+- **Infinite Looping:** An agent calls itself or triggers a cycle in a multi-agent workflow without a clear decrementing counter or termination condition. **Fix:** Always include a `max_turns` or `deadline` in the fallback logic.
+- **Permission Bloat:** Granting `bypassPermissions` or `acceptEdits` by default. **Fix:** Always start with `default` permissions and only escalate if the specific task requires it and the user is informed.

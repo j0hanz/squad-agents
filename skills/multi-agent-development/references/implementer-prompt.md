@@ -52,12 +52,12 @@ OUTPUT:
 
 ## Dispatcher Rules
 
-| Condition | Action |
-| :--- | :--- |
-| Spec ambiguous — multiple valid approaches exist | Return `NEEDS_CONTEXT`; do not guess |
-| Task writes files | Dispatch with `isolation: "worktree"` |
-| Security-sensitive, complex algorithmic, or adversarial edge cases | Use `model: "opus"` |
-| Standard implementation | Use `model: "sonnet"` (default) |
+| Condition                                                          | Action                                |
+| :----------------------------------------------------------------- | :------------------------------------ |
+| Spec ambiguous — multiple valid approaches exist                   | Return `NEEDS_CONTEXT`; do not guess  |
+| Task writes files                                                  | Dispatch with `isolation: "worktree"` |
+| Security-sensitive, complex algorithmic, or adversarial edge cases | Use `model: "opus"`                   |
+| Standard implementation                                            | Use `model: "sonnet"` (default)       |
 
 **constraint:** Never bundle two tasks into one implementer call.
 **constraint:** Return `NEEDS_CONTEXT` rather than guessing on any ambiguous design decision.

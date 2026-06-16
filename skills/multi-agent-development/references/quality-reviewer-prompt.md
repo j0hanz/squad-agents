@@ -64,21 +64,21 @@ OUTPUT:
 
 ## Verdict Rules
 
-| Verdict | Definition | Action |
-| :--- | :--- | :--- |
-| `QUALITY_PASS` | No CRITICAL or IMPORTANT issues | Advance to next task |
-| `CRITICAL` | Silent failure, broken abstraction, untested error path risking data loss or incorrect behavior | Fix before advancing; re-run Phase 3 |
-| `IMPORTANT` | Responsibility violation, tight coupling, test gap causing near-term pain | Fix before advancing |
-| `MINOR` | Style inconsistency, minor naming issue | Log; fix later |
+| Verdict        | Definition                                                                                      | Action                               |
+| :------------- | :---------------------------------------------------------------------------------------------- | :----------------------------------- |
+| `QUALITY_PASS` | No CRITICAL or IMPORTANT issues                                                                 | Advance to next task                 |
+| `CRITICAL`     | Silent failure, broken abstraction, untested error path risking data loss or incorrect behavior | Fix before advancing; re-run Phase 3 |
+| `IMPORTANT`    | Responsibility violation, tight coupling, test gap causing near-term pain                       | Fix before advancing                 |
+| `MINOR`        | Style inconsistency, minor naming issue                                                         | Log; fix later                       |
 
 ## Dispatcher Rules
 
-| Condition | Action |
-| :--- | :--- |
+| Condition                 | Action                                                  |
+| :------------------------ | :------------------------------------------------------ |
 | `CRITICAL` or `IMPORTANT` | Dispatch new coder with issues verbatim; re-run Phase 3 |
-| `MINOR` | Log; proceed to next task |
-| `QUALITY_PASS` | Mark task complete; move to next task |
-| 2nd failure | Surface to user |
+| `MINOR`                   | Log; proceed to next task                               |
+| `QUALITY_PASS`            | Mark task complete; move to next task                   |
+| 2nd failure               | Surface to user                                         |
 
 **constraint:** Max 2 quality-fix iterations before escalating to user.
 **constraint:** Supply AGENTS.md conventions — reviewer cannot infer them from code alone.

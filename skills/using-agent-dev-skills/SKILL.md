@@ -1,6 +1,6 @@
 ---
 name: using-agent-dev-skills
-description: "Entry-point meta-skill for the agent-dev plugin. Check at session start or when uncertain which skill to use. Routes tasks to the correct agent-dev skill: brainstorming, planning, test-driven-development, diagnose, code-review, refactor, architecture, create-agent, create-hook, skill-builder, github-automation, verification-before-completion, agents-maintainer. Trigger on 'where do I start', 'which skill', 'how does this work', 'let me build a new agent', 'about to open a PR', 'ready to merge', or at the beginning of any new task in this repo."
+description: "Entry-point meta-skill for the agent-dev plugin. Check at session start or when uncertain which skill to use. Routes tasks to the correct agent-dev skill: brainstorming, planning, test-driven-development, multi-agent-development, multi-agent-dispatch, diagnose, code-review, refactor, architecture, create-agent, create-hook, skill-builder, github-automation, verification-before-completion, agents-maintainer. Trigger on 'where do I start', 'which skill', 'how does this work', 'about to open a PR', 'ready to merge', or at the beginning of any new task in this repo."
 ---
 
 <SUBAGENT-STOP>
@@ -30,7 +30,7 @@ Any thought like "this is simple", "I already know this", "just a quick question
 
 | Task signal                                                                                                                                                       | Skill                            |
 | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- |
-| "let's build X", "add feature", ambiguous design, unclear terminology                                                                                             | `brainstorming`                  |
+| "let's build X", "new feature", ambiguous design, unclear terminology                                                                                             | `brainstorming`                  |
 | "write a spec", "create a plan", "define requirements"                                                                                                            | `planning`                       |
 | Implementing code, writing functions, any non-trivial implementation                                                                                              | `test-driven-development` ⚠️     |
 | "broken", "debug", "why is X failing", unexpected output, production error                                                                                        | `diagnose`                       |

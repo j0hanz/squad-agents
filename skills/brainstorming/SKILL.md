@@ -1,19 +1,19 @@
 ---
 name: brainstorming
-description: "Structured requirements discovery before implementation. Trigger on 'let's build', 'add a feature', 'we need a new', 'I want to implement', 'add X to', 'create a Y', ambiguous design, or unclear terminology — even when the user says 'just build it'. Proactively offer before any implementation begins. Prevents rework by catching problems early."
+description: "Structured requirements discovery before implementation. Trigger on 'let's build', 'new feature', 'we need a new', 'I want to implement', 'add X to', 'create a Y', ambiguous design, or unclear terminology — even when the user says 'just build it'. Proactively offer before any implementation begins. Prevents rework by catching problems early."
 ---
 
 ## Routing
 
-| Condition                                                                                                   | Action                                      |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| "let's build X", "add a feature", "we need a new Y", "I want to implement Z", any new component or behavior | **Run** — even if user says "just build it" |
-| Domain terminology ambiguous, foundational assumptions unvalidated                                          | **Run**                                     |
-| User unsure how to approach a design problem                                                                | **Run**                                     |
-| Bug fix with clearly defined problem and root cause                                                         | **Skip**                                    |
-| Pure refactor with no behavior change                                                                       | **Skip**                                    |
-| Documentation-only update                                                                                   | **Skip**                                    |
-| Design already explicitly approved, implementation is the next step                                         | **Skip**                                    |
+| Condition                                                                                                 | Action                                      |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| "let's build X", "new feature", "we need a new Y", "I want to implement Z", any new component or behavior | **Run** — even if user says "just build it" |
+| Domain terminology ambiguous, foundational assumptions unvalidated                                        | **Run**                                     |
+| User unsure how to approach a design problem                                                              | **Run**                                     |
+| Bug fix with clearly defined problem and root cause                                                       | **Skip**                                    |
+| Pure refactor with no behavior change                                                                     | **Skip**                                    |
+| Documentation-only update                                                                                 | **Skip**                                    |
+| Design already explicitly approved, implementation is the next step                                       | **Skip**                                    |
 
 # Brainstorming
 

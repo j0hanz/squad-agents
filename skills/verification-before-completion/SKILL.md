@@ -59,4 +59,20 @@ Once all applicable checklist items are confirmed (whether verified by you or re
 - **For non-trivial changes:** invoke `code-review` before finishing
 - **When moving to PR or delivery:** prompt the user to run `/github-automation` — this skill requires user invocation and cannot be triggered automatically
 
+---
+
+## Expert Patterns
+
+- **The "N-1" Test:** To prove a fix works, delete the changed code, run the tests to confirm they FAIL (reproduction), then re-apply the changes and confirm they PASS. This eliminates "false greens" where the test wasn't actually checking the fix.
+- **Edge Case Blitz:** Beyond the happy path, explicitly test for `null`, `undefined`, empty strings, zero values, and boundary conditions (e.g., max integer, empty arrays).
+- **Log Diffing:** For changes with side effects (e.g., database writes, network calls), check the logs _before_ and _after_ the change. Ensure no new error levels or unexpected warnings are being emitted silently.
+- **Environment Parity Check:** If the bug is machine-specific or only happens in CI, document exactly how your local environment differs (OS, Node version, env vars) to help the reviewer understand why a local pass might not guarantee a CI pass.
+
+## Common Failure Modes
+
+- **Green-Wash:** All tests pass, but the tests were the wrong ones, had no assertions, or were mocking away the very behavior you intended to fix. **Fix:** Review the test code as carefully as the implementation code.
+- **Shadow Regressions:** The primary tests pass, but a distant, unmonitored part of the system is failing due to a shared dependency or global state change. **Fix:** Run a broad, shallow "smoke test" of the entire application if the change touches global state.
+- **The "Works on my machine" Trap:** Relying on local state (e.g., a local database, untracked files, specific environment variables) that won't exist in production or CI. **Fix:** Use `git status` to ensure all necessary files are tracked and check `.env.example` matches your local setup.
+- **Verification Fatigue:** Skipping the full test suite because "it's just a one-line change." **Fix:** Automate the "run everything relevant" command and make it part of your muscle memory.
+
 A clean test run is necessary but not sufficient for shipping. The transition steps exist to catch issues that verification alone doesn't surface.
