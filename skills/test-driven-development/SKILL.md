@@ -68,13 +68,13 @@ Tests written in bulk verify _imagined_ behavior. By the time you implement the 
 2. Consolidate logic, extract deep modules, and remove duplication.
 3. **NEVER** write implementation and refactor in the same turn. Green code and refactoring must be separate tool calls so you can run the test suite between them to catch regressions.
 
-## Absolute NEVERs for LLM Agents
-
-- **NEVER mock internal collaborators.** Agents often use `unittest.mock` or `jest.mock` on internal imports to avoid building actual objects. This creates brittle tests that test the mock, not the system. **Mock at system boundaries only** (external APIs, DBs, Time, I/O).
-- **NEVER bypass the public interface to set up test state.** (e.g., directly mutating a private class property or inserting raw database rows for a unit test). If an internal state is unreachable via the public interface, the public interface is incomplete or the test is invalid.
-- **NEVER ignore the test runner output.** Read the actual traceback. If it says `ModuleNotFoundError`, do not rewrite the business logic.
-- **NEVER write a test that only verifies internal implementation details.** A test that fails when you rename a private variable but passes when the public behavior is broken is worse than no test — it creates noise and false confidence.
-- **NEVER skip `run the test` between RED and GREEN.** Writing the test and immediately writing the implementation without running in between means you never confirmed the test actually failed — it may have been a tautology from the start.
+<constitutional_constraints>
+<rule id="1" severity="CRITICAL">You MUST NOT mock internal collaborators. Mock at system boundaries only (external APIs, DBs, Time, I/O).</rule>
+<rule id="2" severity="CRITICAL">You MUST NOT bypass the public interface to set up test state.</rule>
+<rule id="3" severity="HIGH">You MUST NOT ignore the test runner output. Read the actual traceback.</rule>
+<rule id="4" severity="HIGH">You MUST NOT write a test that only verifies internal implementation details.</rule>
+<rule id="5" severity="CRITICAL">You MUST NOT skip `run the test` between RED and GREEN phases.</rule>
+</constitutional_constraints>
 
 ## Pre-TDD: Document Public Interface
 
@@ -220,10 +220,10 @@ When a test fails, identify the failure type and respond appropriately:
 The principle: implement exactly what the test requires, nothing more.
 
 **When you need patterns for a specific domain** (math functions, validators, parsers, classes):
-**MANDATORY — READ ENTIRE FILE**: `references/minimal-impl-examples.md`
+Use semantic search or `grep_search` on `references/minimal-impl-examples.md` to retrieve the specific pattern you need, rather than reading the whole file.
 
 **Working in JavaScript or TypeScript** (Jest, Vitest, Mocha, async tests, TypeScript type errors as RED):
-**MANDATORY — READ ENTIRE FILE**: `references/js-ts-patterns.md`
+Use semantic search or `grep_search` on `references/js-ts-patterns.md` to retrieve the specific pattern you need, rather than reading the whole file.
 
 ---
 

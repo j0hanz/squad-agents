@@ -230,4 +230,9 @@ Do not merge or submit the pull request until code review returns PASS with zero
 
 Do NOT load these by default. Load only when needed:
 
+- **Extended pattern catalog with code examples:** Use semantic search or `grep_search` on `references/patterns.md` to retrieve the specific pattern you need, rather than reading the whole file.
+  ional Loading)
+
+Do NOT load these by default. Load only when needed:
+
 - **Extended pattern catalog with code examples:** MANDATORY — READ ENTIRE FILE: [`references/patterns.md`](references/patterns.md) when a finding needs a precise name, canonical anti-pattern description, or example fix.

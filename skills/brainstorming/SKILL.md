@@ -31,12 +31,12 @@ If the user declines brainstorming, OR Phase 1 scan returns Scope S with no Key 
 
 **Scope XL check:** If scanner returns Scope XL, pause before Phase 2. Ask: "This appears to span 10+ files or multiple modules. Should we split into phases and tackle one slice first?"
 
-## Do Not
-
-- **Ask leading questions** — let the user define the domain.
-- **Assume two terms mean the same thing** — inventory ALL contexts before drilling into any one.
-- **Capture implementation details** during discovery — capture WHAT a concept IS, not HOW it is built.
-- **Write code or scaffolding before design is approved.**
+<constitutional_constraints>
+<rule id="1" severity="HIGH">You MUST NOT ask leading questions — let the user define the domain.</rule>
+<rule id="2" severity="HIGH">You MUST NOT assume two terms mean the same thing — inventory ALL contexts before drilling into any one.</rule>
+<rule id="3" severity="HIGH">You MUST NOT capture implementation details during discovery — capture WHAT a concept IS, not HOW it is built.</rule>
+<rule id="4" severity="CRITICAL">You MUST NOT write code or scaffolding before design is approved.</rule>
+</constitutional_constraints>
 
 ## Red Flags
 
@@ -276,3 +276,4 @@ Prefer `planning` skill when requirements are clear. Prefer direct implementatio
 - **Requirements feel incomplete** — Ask to explore edge cases, failure modes, or "what should NOT happen."
 - **Brainstorm diverges from goal** — Add a constraint upfront (e.g., "only changes within the hook layer, no new agents").
 - **Success Criteria** — All ambiguous terms defined, scope boundaries clear, key design decisions documented with rationale, no open questions remain.
+  daries clear, key design decisions documented with rationale, no open questions remain.

@@ -89,7 +89,15 @@ The system prompt **is** the agent — for a subagent it _replaces_ the default 
 
 - **Self-contained.** A subagent gets no parent conversation history. Everything it needs must be in its system prompt or the invocation prompt. Never assume it "knows what we were doing."
 - **Imperative, not aspirational.** "Read the file before editing" — not "you should try to read files."
-- **Design the handoff.** State exactly what the agent returns, because that final message is the _only_ thing the parent keeps. Tool calls and intermediate reasoning are discarded.
+- **Design the handoff.** State exactly what the agent returns, because that final message is the _only_ thing the parent keeps. Tool calls and intermediate reasoning are discarded. When invoking subagents, use a strict XML template to ensure no context is lost:
+  ```xml
+  <handoff_context>
+    <task_objective>...</task_objective>
+    <parent_constraints>...</parent_constraints>
+    <relevant_file_state>...</relevant_file_state>
+    <expected_output_schema>...</expected_output_schema>
+  </handoff_context>
+  ```
 - **One job, fenced.** Boundaries prevent the classic failure: an agent asked to review code that starts rewriting it.
 - **No angle brackets in `description`.** The `description` field must not contain `<` or `>` — use plain words instead of `<example>` tags or `<field-name>` placeholders. `validate_agent.py` warns on `DESC003`; avoid triggering it.
 - **Dead-Letter & Timeout Handling:** If the agent delegates to a subagent or a potentially slow external tool, the system prompt MUST define an explicit fallback procedure. Instruct the agent to fall back to shallow heuristics (like regex search) or partial data if the delegated task times out, ensuring the workflow does not fail completely.

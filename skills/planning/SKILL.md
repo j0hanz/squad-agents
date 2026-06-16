@@ -71,99 +71,15 @@ If triggered, ask in order, one at a time:
 
 Document all answers inline. Mark unknowns `UNKNOWN: [what and why]` — don't guess.
 
-### Step 2 — Scaffold
+### Step 2 — Output Plan Intent (JSON)
 
 **If `--from-spec <file>` was passed:**
 
 - Verify the file exists.
 - If missing: output `"Spec file not found: <path>. Create it first or omit --from-spec."` and stop.
-- If exists: skip Steps 2–3 and go directly to Step 4 (Sync).
 
 **Otherwise (normal flow):**
-
-```bash
-python <skill-dir>/scripts/scaffold.py "NAME" --depth contract [--domain api|cli] [--goal "..."]
-```
-
-Creates `plan/NAME.specs.md` and `plan/NAME.plan.md` with matching ID skeletons.
-
-### Step 3 — Author spec
-
-Fill `NAME.specs.md`. Use `REQ-###`/`SEC-###`/`PERF-###`/`CON-###`/`AC-###`/`VAL-###` labels exactly as placed by scaffold. Never invent IDs by hand.
-
-**GATE:** Run `validate.py --spec` — resolve all ERRORS before continuing.
-
-```bash
-python <skill-dir>/scripts/validate.py "NAME" --spec --level <depth>
-```
-
-**Self-check:** Use the checklist in `references/spec-template.md` to catch what the validator cannot: unmeasured adjectives, compound REQs, and missing interface error cases. Fix all before proceeding.
-
-### Step 4 — Sync plan stubs
-
-```bash
-python <skill-dir>/scripts/sync.py "plan/NAME.specs.md"
-```
-
-Populates `NAME.plan.md` with one stub per requirement, `Satisfies:` pre-filled. Idempotent.
-
-### Step 5 — Discover paths & symbols
-
-For each task that touches real files, run:
-
-```bash
-python <skill-dir>/scripts/discover.py --files "src/**/*.ts" --names "functionName"
-```
-
-Paste the markdown link output directly into the task `Files:` and `Symbols:` fields.
-
-**new-feature:** If `discover.py` returns "No matches", document intended paths using conventional project structure (e.g., `src/routes/auth.ts`). Prefix with `[UNVERIFIED]`. The anti-pattern applies only to modifications of existing code.
-
-### Step 6 — Author plan tasks
-
-Fill each stub's `Action`, `Validate`, and `Expected result`. Rules:
-
-- One task = one observable outcome (no "and" joining two outcomes)
-- `Validate:` must be a verbatim shell command in backticks
-- `Files:` and `Symbols:` must be markdown links `[name](path#L42)`
-- Do NOT edit the `Satisfies:` field — it was set by sync.py
-
-**GATE:** Run `validate.py --plan` — resolve all ERRORS.
-
-```bash
-python <skill-dir>/scripts/validate.py "NAME" --plan
-```
-
-### Step 7 — Cross-validate
-
-```bash
-python <skill-dir>/scripts/validate.py "NAME" --cross
-```
-
-Checks: every spec requirement covered by ≥1 task; every `Satisfies:` ID exists in spec; every AC mapped. Fix all ERRORS — do not proceed with an uncovered requirement or orphan task.
-
-### Step 8 — Reviewer (REQUIRED GATE)
-
-Spawn `agents/reviewer.md` with this exact prompt:
-
-```
-spec_path: plan/<name>.specs.md
-plan_path: plan/<name>.plan.md
-```
-
-It scores spec quality, plan quality, and traceability together and writes findings to `plan/NAME.review.md` with a `ready_for_execution: true|false` field.
-
-This step is REQUIRED — handoff is incomplete without a review file. Verify:
-
-```bash
-python <skill-dir>/scripts/validate.py "NAME" --review
-```
-
-`--review` mode checks that `plan/NAME.review.md` exists with `ready_for_execution: true`. Only then proceed to handoff.
-
-### Step 9 — Handoff
-
-Export `plan/NAME.specs.md` + `plan/NAME.plan.md`. Additionally, generate and write a `plan/NAME.plan.json` containing the structured array of tasks, dependencies, and requirements mapped from the markdown plan. The spec says _what_ and _why_; the plan says _how_ and _in what order_. Pass the plan to `test-driven-development` for execution.
+Based on the intake, formulate the entire plan in `plan/NAME.plan.json`. This must include the structured array of tasks, dependencies, and requirements mapped for the feature.
 
 **Required JSON output format (`plan/NAME.plan.json`):**
 Write this structure to `plan/NAME.plan.json` to make inter-skill data extraction deterministic:
@@ -187,6 +103,48 @@ Write this structure to `plan/NAME.plan.json` to make inter-skill data extractio
 }
 ```
 
+### Step 3 — Author Markdown Artifacts
+
+After outputting the JSON intent, manually author the `plan/NAME.specs.md` and `plan/NAME.plan.md` artifacts.
+
+1. Run `python <skill-dir>/scripts/scaffold.py "NAME" --depth contract` to generate skeletons.
+2. Fill `NAME.specs.md` with the requirements.
+3. Fill `NAME.plan.md` tasks corresponding to the JSON.
+   _Note: Use `discover.py` if needed to find paths._
+
+### Step 4 — Run Validation Pipeline
+
+Instead of running individual validation and sync scripts manually, use the consolidated pipeline tool to validate your artifacts:
+
+```bash
+python <skill-dir>/scripts/execute_plan_pipeline.py --input plan/NAME.plan.json
+```
+
+**GATE:** Resolve any ERRORS output by the pipeline. Do not proceed until the pipeline returns a success state.
+
+### Step 5 — Reviewer (REQUIRED GATE)
+
+Spawn `agents/reviewer.md` with this exact prompt:
+
+```
+spec_path: plan/<name>.specs.md
+plan_path: plan/<name>.plan.md
+```
+
+It scores spec quality, plan quality, and traceability together and writes findings to `plan/NAME.review.md` with a `ready_for_execution: true|false` field.
+
+This step is REQUIRED — handoff is incomplete without a review file. Verify:
+
+```bash
+python <skill-dir>/scripts/validate.py "NAME" --review
+```
+
+`--review` mode checks that `plan/NAME.review.md` exists with `ready_for_execution: true`. Only then proceed to handoff.
+
+### Step 6 — Handoff
+
+Export `plan/NAME.specs.md` + `plan/NAME.plan.md` + `plan/NAME.plan.json`. The spec says _what_ and _why_; the plan says _how_ and _in what order_. Pass the plan to `test-driven-development` for execution.
+
 ## Canonical Task Block
 
 ```
@@ -201,14 +159,14 @@ Validate: `npm test -- path/to/file.test.ts`
 Expected result: Observable success signal (e.g., "All 8 tests pass").
 ```
 
-## Anti-Patterns
-
-- **Never execute bash commands containing user-provided variables without properly wrapping them in quotes.**
-- **Never hand-type a spec ID** — run `scaffold.py` to generate them. If scaffold already ran and you need a new ID, re-run it with the same NAME (idempotent).
-- **Never hand-type a file path** — use `discover.py` output. For new (non-existent) files, document the intended path with an `[UNVERIFIED]` prefix (see Step 5).
-- **Never edit `Satisfies:` manually** — re-run `sync.py` if requirements change.
-- **Never skip `validate.py --cross`** — a plan that passes `--spec` and `--plan` can still have uncovered requirements.
-- **Never hand the plan to an executor before all three validators pass.**
+<constitutional_constraints>
+<rule id="1" severity="CRITICAL">You MUST NOT execute bash commands containing user-provided variables without properly wrapping them in quotes.</rule>
+<rule id="2" severity="HIGH">You MUST NOT hand-type a spec ID — run `scaffold.py` to generate them. If scaffold already ran and you need a new ID, re-run it with the same NAME.</rule>
+<rule id="3" severity="HIGH">You MUST NOT hand-type a file path — use `discover.py` output. For new files, document intended path with `[UNVERIFIED]` prefix.</rule>
+<rule id="4" severity="HIGH">You MUST NOT edit `Satisfies:` manually — re-run `sync.py` if requirements change.</rule>
+<rule id="5" severity="CRITICAL">You MUST NOT skip validation. A plan that passes individual checks can still have uncovered requirements.</rule>
+<rule id="6" severity="CRITICAL">You MUST NOT hand the plan to an executor before all validators pass.</rule>
+</constitutional_constraints>
 
 ## Reference Docs
 

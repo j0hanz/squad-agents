@@ -38,7 +38,7 @@ The value of this methodology is that it forces you to know — not guess — be
 
 ### Phase 1: Build Feedback Loop
 
-**MANDATORY — READ ENTIRE FILE**: `references/feedback-loops.md` before writing the reproduction harness.
+Use semantic search or `grep_search` on `references/feedback-loops.md` to retrieve specific harness patterns before writing the reproduction harness, rather than reading the whole file.
 
 - **Goal:** Create a deterministic pass/fail signal.
 - **Actions:** Write test, shell script, or minimal harness.
