@@ -26,6 +26,17 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "complete_task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/workflow-state.sh\"",
+            "timeout": 5,
+            "async": false
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
