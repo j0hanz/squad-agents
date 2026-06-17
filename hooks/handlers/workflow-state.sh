@@ -7,7 +7,7 @@ set -euo pipefail
 source "${BASH_SOURCE[0]%/*}/../lib.sh"
 
 INPUT=$(cat)
-TOOL=$(jq -r '.tool_name // ""' <<< "$INPUT")
+TOOL=$(safe_jq '.tool_name // ""' "$INPUT")
 
 # Only intercept complete_task (case insensitive check or exact)
 if [[ "$TOOL" != "complete_task" ]]; then
@@ -20,7 +20,7 @@ STATE_FILE="${PROJECT_DIR}/.claude/state/workflow.json"
 # Default to false if file missing or invalid
 PASSED="false"
 if [[ -f "$STATE_FILE" ]]; then
-    PASSED=$(jq -r '.verification_passed' "$STATE_FILE" 2>/dev/null)
+    PASSED=$(safe_jq '.verification_passed' "$(cat "$STATE_FILE" 2>/dev/null)" "false")
 fi
 
 if [[ "$PASSED" != "true" ]]; then

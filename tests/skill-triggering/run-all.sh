@@ -22,7 +22,16 @@ RESULTS=()
 echo "=== Running All Skill Triggering Tests ==="
 echo ""
 
-for prompt_file in "$PROMPTS_DIR"/*.txt; do
+shopt -s nullglob
+prompt_files=("$PROMPTS_DIR"/*.txt)
+shopt -u nullglob
+
+if [ ${#prompt_files[@]} -eq 0 ]; then
+    echo "ERROR: no .txt prompt files found in $PROMPTS_DIR"
+    exit 1
+fi
+
+for prompt_file in "${prompt_files[@]}"; do
     skill_name="$(basename "$prompt_file" .txt)"
 
     echo "Testing: $skill_name"

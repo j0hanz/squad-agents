@@ -48,9 +48,9 @@ cp "$PROMPT_FILE" "$OUTPUT_DIR/prompt.txt"
 LOG_FILE="$OUTPUT_DIR/claude-output.json"
 cd "$OUTPUT_DIR"
 
-EXTRA_FLAGS=""
+EXTRA_FLAGS=()
 if [ "$SKIP_PERMISSIONS" = "1" ]; then
-    EXTRA_FLAGS="--dangerously-skip-permissions"
+    EXTRA_FLAGS+=(--dangerously-skip-permissions)
 fi
 
 echo "Running claude -p with plugin-dir: $PLUGIN_DIR"
@@ -58,13 +58,14 @@ timeout 300 claude -p "$PROMPT" \
     --plugin-dir "$PLUGIN_DIR" \
     --max-turns "$MAX_TURNS" \
     --output-format stream-json \
-    $EXTRA_FLAGS \
+    "${EXTRA_FLAGS[@]}" \
     > "$LOG_FILE" 2>&1 || true
 
 echo ""
 echo "=== Results ==="
 
-SKILL_PATTERN='"skill":"([^"]*:)?'"${SKILL_NAME}"'"'
+ESCAPED_NAME=$(printf '%s' "$SKILL_NAME" | sed 's/[.[\*^$()+?{}|\\]/\\&/g')
+SKILL_PATTERN='"skill":"([^"]*:)?'"${ESCAPED_NAME}"'"'
 if grep -q '"name":"Skill"' "$LOG_FILE" && grep -qE "$SKILL_PATTERN" "$LOG_FILE"; then
     echo "✅ PASS: Skill '$SKILL_NAME' was triggered"
     TRIGGERED=true

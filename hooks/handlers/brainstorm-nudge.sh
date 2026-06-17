@@ -7,11 +7,11 @@ source "${BASH_SOURCE[0]%/*}/../lib.sh"
 [[ "${AGENT_DEV_BRAINSTORM_NUDGE:-1}" == "0" ]] && exit 0
 
 INPUT=$(cat)
-EVENT=$(jq -r '.hook_event_name // "UserPromptSubmit"' <<< "$INPUT")
-PROMPT=$(jq -r '.prompt // ""' <<< "$INPUT")
+EVENT=$(safe_jq '.hook_event_name // "UserPromptSubmit"' "$INPUT" "UserPromptSubmit")
+PROMPT=$(safe_jq '.prompt // ""' "$INPUT")
 PROMPT="${PROMPT#"${PROMPT%%[![:space:]]*}"}"  # ltrim
 PROMPT="${PROMPT%"${PROMPT##*[![:space:]]}"}"  # rtrim
-SESSION=$(jq -r '.session_id // "unknown"' <<< "$INPUT")
+SESSION=$(safe_jq '.session_id // "unknown"' "$INPUT" "unknown")
 
 STARTED=$(date +%s%3N)
 

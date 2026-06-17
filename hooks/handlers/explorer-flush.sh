@@ -5,7 +5,7 @@ set -euo pipefail
 source "${BASH_SOURCE[0]%/*}/../lib.sh"
 
 INPUT=$(cat)
-EVENT=$(jq -r '.hook_event_name // "SessionEnd"' <<< "$INPUT")
+EVENT=$(safe_jq '.hook_event_name // "SessionEnd"' "$INPUT" "SessionEnd")
 
 STARTED=$(date +%s%3N)
 

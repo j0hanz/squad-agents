@@ -6,8 +6,8 @@ set -euo pipefail
 source "${BASH_SOURCE[0]%/*}/../lib.sh"
 
 INPUT=$(cat)
-EVENT=$(jq -r '.hook_event_name // "PreToolUse"' <<< "$INPUT")
-URL=$(jq -r '.tool_input.url // ""' <<< "$INPUT")
+EVENT=$(safe_jq '.hook_event_name // "PreToolUse"' "$INPUT" "PreToolUse")
+URL=$(safe_jq '.tool_input.url // ""' "$INPUT")
 
 STARTED=$(date +%s%3N)
 

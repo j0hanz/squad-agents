@@ -12,6 +12,14 @@ debug() {
   [[ "${CLAUDE_HOOKS_DEBUG:-0}" == "1" ]] && printf '[hook] %s\n' "$*" >&2
 }
 
+# safe_jq <filter> <json> [default]
+# jq wrapper that survives malformed/empty JSON under `set -e` instead of
+# aborting the caller — falls back to <default> (empty string if omitted).
+safe_jq() {
+  local filter="$1" json="$2" default="${3:-}"
+  jq -r "$filter" <<< "$json" 2>/dev/null || printf '%s' "$default"
+}
+
 # ---------------------------------------------------------------------------
 # JSONL file helpers
 # ---------------------------------------------------------------------------

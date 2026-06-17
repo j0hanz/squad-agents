@@ -5,14 +5,13 @@ set -euo pipefail
 source "${BASH_SOURCE[0]%/*}/../lib.sh"
 
 INPUT=$(cat)
-EVENT=$(jq -r '.hook_event_name // "PreToolUse"' <<< "$INPUT")
-COMMAND=$(jq -r '.tool_input.command // empty' <<< "$INPUT")
+EVENT=$(safe_jq '.hook_event_name // "PreToolUse"' "$INPUT" "PreToolUse")
+COMMAND=$(safe_jq '.tool_input.command // empty' "$INPUT")
 
 STARTED=$(date +%s%3N)
 
 warn=""
 if [[ -n "$COMMAND" ]]; then
-  declare -A _checks
   checks=(
     'rm\s+(-[a-z]*r[a-z]*f[a-z]*|-[a-z]*f[a-z]*r[a-z]*|--recursive\s+--force|--force\s+--recursive|-r\s+-f|-f\s+-r):force-remove pattern'
     'git\s+push\b.*(\s-f\b|--force\b|--force-with-lease\b):force-push pattern'
