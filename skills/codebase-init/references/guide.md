@@ -33,6 +33,12 @@ Use **pnpm** — `pnpm install`, `pnpm dev`, `pnpm test`. `npm install` will bre
 - Errors thrown from handlers are caught by `src/middleware/error.ts`
 - DB migrations: `pnpm migrate create <name>`, never edit applied migrations
 
+## Hard Rules
+
+- **Commit policy:** [commit policy bullet — derived from the Phase 0 commit & attribution answer]
+- **Project maturity:** [project maturity bullet — derived from the Phase 0 maturity answer]
+- **Testing rigor:** [testing rigor bullet — derived from the Phase 0 testing answer]
+
 ## Commit Attribution
 
 AI commits MUST include a `Co-Authored-By:` trailer with the agent model's name and byline.
@@ -119,6 +125,12 @@ Use **uv** — `uv sync`, `uv run pytest`, `uv add <pkg>`. Don't use raw `pip in
 - Public API lives in `src/<pkg>/__init__.py` — keep `__all__` in sync
 - Settings: `src/<pkg>/config.py` uses pydantic-settings.
 
+## Hard Rules
+
+- **Commit policy:** [commit policy bullet — derived from the Phase 0 commit & attribution answer]
+- **Project maturity:** [project maturity bullet — derived from the Phase 0 maturity answer]
+- **Testing rigor:** [testing rigor bullet — derived from the Phase 0 testing answer]
+
 ## Commit Attribution
 
 AI commits MUST include a `Co-Authored-By:` trailer.
@@ -150,6 +162,12 @@ Use **Go Modules** — `go mod tidy`, `go build`, `go test`.
 - Place binaries in `cmd/`
 - Follow idiomatic Go error handling: `if err != nil { return err }`
 
+## Hard Rules
+
+- **Commit policy:** [commit policy bullet — derived from the Phase 0 commit & attribution answer]
+- **Project maturity:** [project maturity bullet — derived from the Phase 0 maturity answer]
+- **Testing rigor:** [testing rigor bullet — derived from the Phase 0 testing answer]
+
 ## Commit Attribution
 
 AI commits MUST include a `Co-Authored-By:` trailer.
@@ -179,6 +197,12 @@ Use **Cargo** — `cargo build`, `cargo test`, `cargo clippy`.
 
 - Use `Result<T, E>` for error handling.
 - Documentation comments should use `///`.
+
+## Hard Rules
+
+- **Commit policy:** [commit policy bullet — derived from the Phase 0 commit & attribution answer]
+- **Project maturity:** [project maturity bullet — derived from the Phase 0 maturity answer]
+- **Testing rigor:** [testing rigor bullet — derived from the Phase 0 testing answer]
 
 ## Commit Attribution
 
@@ -213,6 +237,12 @@ Use **Maven** — `mvn clean install`, `mvn test`. Or **Gradle** — `gradle bui
 - Database migrations: Use Flyway or Liquibase in `src/main/resources/db/migration/`
 - Dependency injection: Prefer constructor injection over field injection
 
+## Hard Rules
+
+- **Commit policy:** [commit policy bullet — derived from the Phase 0 commit & attribution answer]
+- **Project maturity:** [project maturity bullet — derived from the Phase 0 maturity answer]
+- **Testing rigor:** [testing rigor bullet — derived from the Phase 0 testing answer]
+
 ## Commit Attribution
 
 AI commits MUST include a `Co-Authored-By:` trailer.
@@ -246,6 +276,12 @@ Use **dotnet** — `dotnet restore`, `dotnet build`, `dotnet test`.
 - Error handling: Custom exception types; use `Result<T>` or exceptions (pick one consistently)
 - Migrations (EF Core): `dotnet ef migrations add <name>`, never edit applied migrations
 
+## Hard Rules
+
+- **Commit policy:** [commit policy bullet — derived from the Phase 0 commit & attribution answer]
+- **Project maturity:** [project maturity bullet — derived from the Phase 0 maturity answer]
+- **Testing rigor:** [testing rigor bullet — derived from the Phase 0 testing answer]
+
 ## Commit Attribution
 
 AI commits MUST include a `Co-Authored-By:` trailer.
@@ -276,6 +312,12 @@ Use **bun** — `bun install`, `bun run`, `bun test`. Fast JavaScript runtime.
 - Test runner: Built-in, no Jest config needed
 - Prefer native Bun APIs (`Bun.file()`, `Bun.write()`) over Node equivalents when possible
 - Scripts run with `--hot` flag for file-watch mode
+
+## Hard Rules
+
+- **Commit policy:** [commit policy bullet — derived from the Phase 0 commit & attribution answer]
+- **Project maturity:** [project maturity bullet — derived from the Phase 0 maturity answer]
+- **Testing rigor:** [testing rigor bullet — derived from the Phase 0 testing answer]
 
 ## Commit Attribution
 
