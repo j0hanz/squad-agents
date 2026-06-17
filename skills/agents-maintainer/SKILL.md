@@ -132,18 +132,29 @@ The linter checks:
 
 **If linter fails:** Fix issues and rerun. Don't proceed to Pass 2 until PASS.
 
-**After Pass 1 PASS — spawn the `reviewer` subagent** (`agents/reviewer.md`):
+**After Pass 1 PASS — dispatch a `general-purpose` subagent for semantic review:**
 
 ```
 Agent(
+  subagent_type: "general-purpose",
   description: "Semantic quality review of AGENTS.md",
   prompt: |
-    agents_md_path: [absolute path to the AGENTS.md file]
-    project_root: [project root directory, if available]
+    SCOPE: Read [absolute path to the AGENTS.md file] in full. Read [project root, if available] only to verify claims.
+    OBJECTIVE: Score the file on five quality dimensions and return ranked improvement suggestions with direct quotes.
+    CONTEXT:
+      1. Signal Density — does every line tell the agent something not derivable from code?
+      2. Convention Specificity — does each bullet answer WHAT/WHERE/WHY with concrete patterns?
+      3. Command Completeness — are typecheck/lint/test commands runnable verbatim?
+      4. Progressive Disclosure — is the file focused and under 100 lines (linking out for depth)?
+      5. Anti-pattern Freedom — free of filler, auto-discovery refs, linter-restating?
+    CONSTRAINTS:
+      - PASS on any dimension requires direct observable evidence in the file — not intent or inference.
+      - Propose the concrete rewrite for every suggestion — never just "improve this".
+    OUTPUT: JSON ONLY — no prose, no markdown wrappers. Fields: scores (0-10 per dimension), strengths[], improvement_suggestions[] each with {priority: high|medium|low, quote, rewrite}.
 )
 ```
 
-The agent scores the file on five semantic dimensions (signal density, convention specificity, command completeness, progressive disclosure, anti-pattern freedom) that the structural linter cannot catch. Review the returned `improvement_suggestions` sorted by `priority`. **Address all `high`-priority suggestions before Pass 2.** The `strengths` array confirms what to keep.
+Review the returned `improvement_suggestions` sorted by `priority`. **Address all `high`-priority suggestions before Pass 2.** The `strengths` array confirms what to keep.
 
 #### Pass 2: Manual Checklist (Thorough)
 

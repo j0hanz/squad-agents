@@ -1,6 +1,6 @@
 ---
 name: multi-agent-dispatch
-description: "Fan out independent work to agent-dev subagents (explorer, detective, coder, documenter) running concurrently in one batch, then integrate their results. Trigger on 'in parallel', 'dispatch agents', 'fan out', 'run these at once', 'split across agents', 'parallelize this', 'multiple agents', 'scatter-gather', or whenever 2+ independent domains (separate files, separate bugs, separate research questions, separate hypotheses) can progress with no shared mutable state. Canonical how-to for the parallel-execution step inside diagnose, brainstorming, code-review, and refactor. Spawn only when the user asks for parallel/agent work or a parent skill phase calls for it."
+description: "Fan out independent work to general-purpose subagents running concurrently in one batch, then integrate their results. Trigger on 'in parallel', 'dispatch agents', 'fan out', 'run these at once', 'split across agents', 'parallelize this', 'multiple agents', 'scatter-gather', or whenever 2+ independent domains (separate files, separate bugs, separate research questions, separate hypotheses) can progress with no shared mutable state. Canonical how-to for the parallel-execution step inside diagnose, brainstorming, code-review, refactor, and any skill that used to spawn its own custom subagent. Spawn only when the user asks for parallel/agent work or a parent skill phase calls for it."
 disable-model-invocation: false
 argument-hint: '[the independent tasks to split across agents]'
 ---
@@ -37,23 +37,28 @@ When in doubt, or when failures are interconnected — do not dispatch. Investig
 4. INTEGRATE  Collect final messages → reconcile conflicts → run full validation → hand to verification-before-completion.
 ```
 
-## Step 2 — Select the agent per domain
+## Step 2 — Configure the agent per domain
 
-| Domain                                  | Agent                        | Mode                                      | Use for                                              |
-| :-------------------------------------- | :--------------------------- | :---------------------------------------- | :--------------------------------------------------- |
-| Search / explore code or docs           | `explorer`                   | read-only                                 | find files, symbols, usages, library docs            |
-| Root-cause a bug / falsify a hypothesis | `detective`                  | read-only · returns diff, applies nothing | trace crashes & logic bugs, one hypothesis per agent |
-| Implement / fix / refactor              | `coder`                      | writes in its own `worktree`              | one disjoint feature or fix per agent                |
-| Write / sync docs                       | `documenter`                 | writes docs only                          | README, ADRs, skill/agent/hook docs                  |
-| Broad multi-location search             | `Explore` (built-in)         | read-only                                 | fan-out grep across many naming conventions          |
-| Design a plan for one sub-area          | `Plan` (built-in)            | read-only                                 | implementation strategy, no edits                    |
-| Run experiments / instrumentation       | `coder` or `general-purpose` | has Bash                                  | when falsifying a hypothesis needs running code      |
+Every dispatch uses `subagent_type: "general-purpose"`. There is no separate explorer/detective/coder/
+documenter agent anymore — the role lives entirely in the prompt you write for that dispatch. Pick the
+role below and write its constraints directly into the prompt's CONSTRAINTS field.
+
+| Domain                                  | Role to write into the prompt                                                                                                                              | Use for                                              |
+| :-------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- |
+| Search / explore code or docs           | Read-only: "Use Read, Glob, Grep only — never Write, Edit, or Bash. Report file paths, line numbers, and a concise explanation."                           | find files, symbols, usages, library docs            |
+| Root-cause a bug / falsify a hypothesis | Read-only investigator: "Never modify files. Trace the call chain to the root cause, classify severity, return the fix as a code block — do not apply it." | trace crashes & logic bugs, one hypothesis per agent |
+| Implement / fix / refactor              | Writer: "Read every in-scope file before editing. Implement exactly what the spec states. Report files changed." Dispatch with `isolation: "worktree"`.    | one disjoint feature or fix per agent                |
+| Write / sync docs                       | Doc writer: "Read before writing (Glob/Grep/Read target area). Verify every claim against source. Stay in the docs lane — no source refactors, no tests."  | README, ADRs, skill/hook docs                        |
+| Broad multi-location search             | Use the built-in `Explore` agent instead (already read-only by design)                                                                                     | fan-out grep across many naming conventions          |
+| Design a plan for one sub-area          | Use the built-in `Plan` agent instead (already read-only by design)                                                                                        | implementation strategy, no edits                    |
+| Run experiments / instrumentation       | Writer-with-Bash: same as Implement role, plus "run and report command output"                                                                             | when falsifying a hypothesis needs running code      |
 
 Rules:
 
-- **Reads are free and conflict-free** — fan out `explorer` / `detective` / `Explore` liberally.
-- **Writes need disjoint file sets** — never point two writers (`coder` / `documenter`) at the same files. `coder` `isolation: worktree` prevents working-tree collisions, but you still reconcile each result.
-- Preloaded skills are already wired — `coder`→refactor+diagnose, `detective`→diagnose, `documenter`→architecture. Do not re-explain them in the prompt.
+- **Reads are free and conflict-free** — fan out read-only `general-purpose` dispatches (or `Explore`) liberally.
+- **Writes need disjoint file sets** — never point two writer dispatches at the same files. `isolation: "worktree"` prevents working-tree collisions, but you still reconcile each result.
+- **General-purpose has every tool by default** — a read-only role is a prompt constraint, not a tool restriction. State "never use Write/Edit/Bash" explicitly in every read-only dispatch; nothing else enforces it.
+- If the task needs a skill (e.g. `refactor`, `diagnose`, `architecture`), tell the subagent to invoke it explicitly in the prompt — nothing is preloaded automatically.
 
 ## Step 3 — Launch one concurrent batch
 
@@ -99,12 +104,13 @@ To continue one agent with its context intact, use **SendMessage** with its id/n
 
 ## Integration with agent-dev skills
 
-| Caller                              | What this skill supplies                                                                       |
-| :---------------------------------- | :--------------------------------------------------------------------------------------------- |
-| `diagnose` Phase 3 (Scatter-Gather) | one `detective` per ranked hypothesis (read-only trace); `coder` when instrumentation must run |
-| `brainstorming` Dispatch Agents     | parallel `explorer` for codebase context + library research                                    |
-| `code-review`                       | parallel `detective` audits across changed file clusters                                       |
-| `refactor` / large TDD change       | parallel `coder` on disjoint modules, then reconcile and validate                              |
+| Caller                                                                                    | What this skill supplies                                                                                                   |
+| :---------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `diagnose` Phase 3 (Scatter-Gather)                                                       | one read-only investigator per ranked hypothesis (returns a diff, applies nothing); a writer when instrumentation must run |
+| `brainstorming` Dispatch Agents                                                           | parallel read-only `general-purpose` for codebase context + library research                                               |
+| `code-review`                                                                             | parallel read-only investigator audits across changed file clusters                                                        |
+| `refactor` / large TDD change                                                             | parallel writers (`isolation: worktree`) on disjoint modules, then reconcile and validate                                  |
+| `agents-maintainer` / `architecture` / `github-automation` / `planning` / `skill-builder` | their own semantic-review dispatch — see each skill's SKILL.md for the embedded prompt template                            |
 
 Lifecycle after integration: `verification-before-completion` → `code-review` → `github-automation`.
 
@@ -114,10 +120,10 @@ Lifecycle after integration: `verification-before-completion` → `code-review` 
 Symptom: `npm test` fails in hooks/runner.test.mjs, the format handler, and a Python skill test.
 
 GROUP   → 3 domains, no shared files.
-SELECT  → detective ×3 (read-only root cause, returns a diff each).
+SELECT  → general-purpose ×3, each configured read-only investigator (returns a diff each).
 LAUNCH  → ONE message, 3 Agent calls:
-  Agent(detective, "diagnose runner test")  prompt scopes hooks/runner.mjs + runner.test.mjs → root cause + diff
-  Agent(detective, "diagnose format hook")  prompt scopes hooks/handlers/format.mjs          → root cause + diff
-  Agent(detective, "diagnose python skill") prompt scopes skills/<name>/tests                → root cause + diff
+  Agent(subagent_type: "general-purpose", description: "diagnose runner test")  prompt scopes hooks/runner.mjs + runner.test.mjs, read-only → root cause + diff
+  Agent(subagent_type: "general-purpose", description: "diagnose format hook")  prompt scopes hooks/handlers/format.mjs, read-only          → root cause + diff
+  Agent(subagent_type: "general-purpose", description: "diagnose python skill") prompt scopes skills/<name>/tests, read-only                → root cause + diff
 INTEGRATE → apply the 3 diffs (disjoint files) → run `npm test` → verification-before-completion.
 ```

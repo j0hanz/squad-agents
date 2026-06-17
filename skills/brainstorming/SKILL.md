@@ -25,7 +25,7 @@ description: "Structured requirements discovery before implementation. Trigger o
 If the user declines brainstorming, OR Phase 1 scan returns Scope S with no Key Unknowns and no ambiguous terminology:
 
 1. Acknowledge the request for speed.
-2. Spawn `codebase-scanner`.
+2. Dispatch a `general-purpose` subagent loaded with `references/codebase-scanner-prompt.md`.
 3. Present a **single, grounded proposal** based on the scanner's report.
 4. If approved, skip to Phase 5.
 
@@ -54,12 +54,12 @@ If the user declines brainstorming, OR Phase 1 scan returns Scope S with no Key 
 
 ## Dispatch Agents
 
-Spawn via Agent tool. Do not redo their work manually.
+Both dispatches below use `Agent(subagent_type: "general-purpose", ...)`. Load the referenced template, fill in the `[FIELD]` placeholders, then dispatch. Do not redo their work manually.
 
-| Agent              | File                         | When to spawn                                  |
-| ------------------ | ---------------------------- | ---------------------------------------------- |
-| `codebase-scanner` | `agents/codebase-scanner.md` | Start of Phase 1, before asking any questions  |
-| `design-proposer`  | `agents/design-proposer.md`  | Start of Phase 4, before presenting approaches |
+| Role             | Template                                | When to spawn                                  |
+| ---------------- | --------------------------------------- | ---------------------------------------------- |
+| Codebase scanner | `references/codebase-scanner-prompt.md` | Start of Phase 1, before asking any questions  |
+| Design proposer  | `references/design-proposer-prompt.md`  | Start of Phase 4, before presenting approaches |
 
 For parallel codebase scanning across multiple hypotheses, use the `multi-agent-dispatch` skill.
 
@@ -67,8 +67,8 @@ For parallel codebase scanning across multiple hypotheses, use the `multi-agent-
 
 **Stakeholder probe:** If who will use the feature is not evident from context, ask this one question while the scanner runs: "Who interacts with this feature most — end users, internal teams, or other systems?" This single answer changes Phase 4 design tradeoffs significantly.
 
-Spawn `codebase-scanner` — pass the feature description exactly as stated. Wait for the Codebase Context Report.
-**Timeout / Dead-Letter Fallback:** If `codebase-scanner` times out or fails (e.g. due to repository size), do not fail the workflow. Instead, automatically fall back to shallow regex heuristics: use `grep_search` and `glob` with strict depth limits to map the immediate domain, or explicitly request the user to limit the scope.
+Dispatch the codebase scanner (`references/codebase-scanner-prompt.md`) — pass the feature description exactly as stated. Wait for the Codebase Context Report.
+**Timeout / Dead-Letter Fallback:** If the scan times out or fails (e.g. due to repository size), do not fail the workflow. Instead, automatically fall back to shallow regex heuristics: use `grep_search` and `glob` with strict depth limits to map the immediate domain, or explicitly request the user to limit the scope.
 
 Summarize your understanding in one paragraph, drawing from the report: what was found, what constraints exist, what Key Unknowns were flagged, and what you don't know yet. Ask the user to confirm.
 
@@ -176,7 +176,7 @@ echo '<report-json>' | python <skill-dir>/scripts/compress_report.py
 
 If the script fails, pass the raw report as-is.
 
-Spawn `design-proposer` with a context packet containing:
+Dispatch the design proposer (`references/design-proposer-prompt.md`) with a context packet containing:
 
 - Feature description (confirmed in Phase 1)
 - Stakeholder type (from Phase 1 probe, or "not specified")

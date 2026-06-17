@@ -2,11 +2,11 @@
 
 [![License](https://img.shields.io/github/license/j0hanz/claude-agent-dev-plugin?style=for-the-badge)](https://github.com/j0hanz/claude-agent-dev-plugin/blob/master/LICENSE) [![Latest release](https://img.shields.io/github/v/release/j0hanz/claude-agent-dev-plugin?style=for-the-badge&include_prereleases&sort=semver)](https://github.com/j0hanz/claude-agent-dev-plugin/releases) [![Node.js](https://img.shields.io/badge/node-%3E%3D22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org) [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org) [![GitHub stars](https://img.shields.io/github/stars/j0hanz/claude-agent-dev-plugin?style=for-the-badge&logo=github)](https://github.com/j0hanz/claude-agent-dev-plugin/stargazers)
 
-A Claude Code plugin for authoring and maintaining agents, skills, and hooks — structured workflows, managed subagents, and lifecycle hooks that guide Claude through the full agent development lifecycle.
+A Claude Code plugin for authoring and maintaining skills and hooks — structured workflows and lifecycle hooks that guide Claude through the full agent development lifecycle.
 
 ## Overview
 
-Agent Dev Plugin extends Claude Code with 14 skills, 4 managed subagents, and 8 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on every session event to keep development disciplined; agents handle specialized tasks in scoped, isolated environments.
+Agent Dev Plugin extends Claude Code with 14 skills and 8 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on every session event to keep development disciplined. Multi-step or parallel work is delegated to the built-in `general-purpose` agent — configured per task via the prompt — orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
@@ -18,12 +18,12 @@ Agent Dev Plugin extends Claude Code with 14 skills, 4 managed subagents, and 8 
 
 ## Highlights
 
-| Feature                  | Description                                                         |
-| :----------------------- | :------------------------------------------------------------------ |
-| 14 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`        |
-| 4 specialized subagents  | Scoped tool access — executor, debugger, documenter, researcher     |
-| 8 lifecycle hooks        | Fire on session events to enforce workflow discipline automatically |
-| Marketplace install      | One-command install from GitHub — no manual clone required          |
+| Feature                  | Description                                                                                                                                    |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| 14 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`                                                                                   |
+| Subagent orchestration   | `multi-agent-dispatch` and `multi-agent-development` drive every `general-purpose` subagent dispatch — no custom agent definitions to maintain |
+| 8 lifecycle hooks        | Fire on session events to enforce workflow discipline automatically                                                                            |
+| Marketplace install      | One-command install from GitHub — no manual clone required                                                                                     |
 
 ## Installation
 
@@ -92,19 +92,17 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `using-agent-dev-skills`         | (meta-routing)                                             | Routes to the right skill based on context                     |
 | `agents-maintainer`              | "update AGENTS.md", "update CLAUDE.md"                     | Authoring AGENTS.md and CLAUDE.md files                        |
 
-### Agents (4)
+### Subagent Dispatch
 
-Specialized subagents Claude can invoke automatically or you can request directly.
+There are no custom agent definitions in this plugin. Every dispatch uses the built-in `general-purpose` agent, configured per task through the prompt — read-only investigator, worktree-isolated implementer, doc writer, etc. Two skills own this:
 
-| Agent        | Role                                                                        | Tools                                                 |
-| :----------- | :-------------------------------------------------------------------------- | :---------------------------------------------------- |
-| `coder`      | Autonomous code executor — implements, refactors, runs tests                | Bash, Read, Write, Edit, Glob, Grep, Skill, TodoWrite |
-| `detective`  | Debugging specialist — root-cause analysis, proposes fixes without applying | Read, Glob, Grep, Skill, TodoWrite                    |
-| `documenter` | Documentation maintainer — audits, writes, syncs docs with code             | Read, Write, Edit, Glob, Grep, Skill                  |
-| `explorer`   | Research agent — finds files, symbols, and external docs                    | Read, Glob, Grep, context7 docs                       |
+| Skill                     | Pattern                                                                          |
+| :------------------------ | :------------------------------------------------------------------------------- |
+| `multi-agent-dispatch`    | Parallel fan-out — one `general-purpose` agent per independent domain, one batch |
+| `multi-agent-development` | Sequential — one `general-purpose` implementer per plan task, two review gates   |
 
 > [!NOTE]
-> `coder` runs in an isolated git worktree. `explorer` and `detective` are strictly read-only.
+> Read-only roles (investigator, scanner) are a prompt constraint, not a tool restriction — the dispatching skill must state "never use Write/Edit/Bash" explicitly. Implementer roles run in an isolated git worktree (`isolation: "worktree"`).
 
 ### Hooks
 
@@ -122,13 +120,12 @@ Lifecycle hooks fire automatically during every Claude Code session.
 
 ### MCP Server
 
-[context7](https://context7.com) is bundled and available to the `explorer` agent for live library documentation lookups.
+[context7](https://context7.com) is bundled and available to any dispatched subagent for live library documentation lookups.
 
 ## Project Structure
 
 ```text
 .
-├── agents/                 # Subagent definitions and eval suites
 ├── bin/                    # Validation scripts
 ├── hooks/                  # Hook runner and handlers
 │   ├── handlers/
@@ -143,7 +140,6 @@ Lifecycle hooks fire automatically during every Claude Code session.
 
 | Directory   | Purpose                                                          |
 | :---------- | :--------------------------------------------------------------- |
-| `agents/`   | Markdown prompt files and eval suites for each subagent          |
 | `hooks/`    | Hook runner, event handlers, and the hooks manifest              |
 | `skills/`   | One directory per skill, each containing a `SKILL.md` definition |
 | `monitors/` | Experimental live watchers for tests and telemetry               |

@@ -73,12 +73,12 @@ OUTPUT:
 
 ## Dispatcher Rules
 
-| Condition                 | Action                                                  |
-| :------------------------ | :------------------------------------------------------ |
-| `CRITICAL` or `IMPORTANT` | Dispatch new coder with issues verbatim; re-run Phase 3 |
-| `MINOR`                   | Log; proceed to next task                               |
-| `QUALITY_PASS`            | Mark task complete; move to next task                   |
-| 2nd failure               | Surface to user                                         |
+| Condition                 | Action                                                                          |
+| :------------------------ | :------------------------------------------------------------------------------ |
+| `CRITICAL` or `IMPORTANT` | Dispatch new implementer (general-purpose) with issues verbatim; re-run Phase 3 |
+| `MINOR`                   | Log; proceed to next task                                                       |
+| `QUALITY_PASS`            | Mark task complete; move to next task                                           |
+| 2nd failure               | Surface to user                                                                 |
 
 **constraint:** Max 2 quality-fix iterations before escalating to user.
 **constraint:** Supply AGENTS.md conventions — reviewer cannot infer them from code alone.

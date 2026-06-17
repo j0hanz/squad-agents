@@ -92,11 +92,27 @@ python <skill-dir>/scripts/execute_plan_pipeline.py --name "NAME"
 | `contract`  | Recommended. Skip with `--no-review` if the plan is still in active iteration. |
 | `blueprint` | **REQUIRED** — handoff is blocked until `ready_for_execution: true`.           |
 
-For `contract` (when running) and `blueprint`: spawn `agents/reviewer.md` with this exact prompt:
+For `contract` (when running) and `blueprint`: dispatch a `general-purpose` subagent:
 
 ```
-spec_path: plan/<name>.specs.md
-plan_path: plan/<name>.plan.md
+Agent(
+  subagent_type: "general-purpose",
+  description: "Semantic quality audit of plan/<name>",
+  prompt: |
+    SCOPE: spec_path: plan/<name>.specs.md. plan_path: plan/<name>.plan.md.
+    OBJECTIVE: Read the spec and plan, run skills/planning/scripts/validate.py, then apply semantic
+      checks static validation cannot catch. Write findings to plan/<name>.review.md (overwrite if it
+      exists; never modify the spec or plan themselves).
+    CONTEXT:
+      Spec checks — vague goals, passive voice in requirements, missing error cases in interfaces,
+        missing validation commands.
+      Plan checks — multi-outcome tasks, non-runnable validation fields, broken task references,
+        circular dependencies.
+      Severity: [BLOCKER] for structural gaps causing failure; [WARN] for quality issues.
+    CONSTRAINTS:
+      - Set `ready_for_execution: true` only if there are ZERO [BLOCKER] findings AND validate.py exits 0.
+    OUTPUT: A brief markdown summary of findings and the final verdict, plus the written review file path.
+)
 ```
 
 It writes findings to `plan/NAME.review.md`. Verify:

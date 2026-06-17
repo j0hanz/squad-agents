@@ -57,6 +57,7 @@ N/A — this is a documentation/skill-definition maintenance task. All "interfac
 ## 7. Examples & Edge Cases
 
 **Positive example (REQ-003):**
+
 ```
 Before: "5. invoke github-automation to open PR"
 After:  "5. Prompt the user to run `/github-automation` to open the PR — it requires user invocation and cannot be triggered automatically."

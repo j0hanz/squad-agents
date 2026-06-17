@@ -292,7 +292,7 @@ def validate_review(spec_path: Path) -> tuple[list[str], list[str]]:
 
     if not review_path.exists():
         errors.append(
-            f"[REVIEW] Review file not found: {review_path}. Spawn agents/reviewer.md before handoff."
+            f"[REVIEW] Review file not found: {review_path}. Dispatch the planning reviewer (see SKILL.md Step 4) before handoff."
         )
         return errors, warnings
 

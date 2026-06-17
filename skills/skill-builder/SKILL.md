@@ -63,7 +63,7 @@ For users new to skill-building, add one orienting sentence before the draft.
 
 1. `name` — must be kebab-case (lowercase, digits, hyphens only), max 64 chars. If invalid (spaces, uppercase), convert immediately and note inline. Do not ask for confirmation.
 2. `description` — must have no angle brackets (`<` or `>`), max 1024 chars.
-3. **MANDATORY**: Invoke the prompt-auditor agent to audit the draft. Call `Agent(description: "Audit SKILL.md prompt quality", prompt: "SCOPE: Review SKILL.md frontmatter and body for triggering effectiveness, clarity, and completeness. OBJECTIVE: Identify vague instructions, missing examples, or weak trigger phrases. CONTEXT: Skill name and description. CONSTRAINTS: Focus on language clarity and trigger phrase strength; do not evaluate logic. OUTPUT: JSON with fields {issues: [{severity, description, location}], pass: bool, summary: string}")`. Note findings and remediations.
+3. **MANDATORY**: Dispatch a `general-purpose` subagent to audit the draft. Call `Agent(subagent_type: "general-purpose", description: "Audit SKILL.md prompt quality", prompt: "SCOPE: Review SKILL.md frontmatter and body for triggering effectiveness, clarity, and completeness. OBJECTIVE: Identify vague instructions, missing examples, or weak trigger phrases. CONTEXT: Skill name and description. CONSTRAINTS: Focus on language clarity and trigger phrase strength; do not evaluate logic. OUTPUT: JSON with fields {issues: [{severity, description, location}], pass: bool, summary: string}")`. Note findings and remediations.
 4. Skill body — imperative form throughout. No "you should", "you might", "maybe".
 
 Fill in these components based on the interview:
@@ -179,12 +179,12 @@ Save `total_tokens` and `duration_ms` from the completion notification to `timin
 
 ### 4. Grade, Aggregate, and Review
 
-1. **Grade**: Invoke the grader agent to evaluate assertions against outputs. Call `Agent(description: "Grade eval results", prompt: "SCOPE: Evaluate test case outputs against recorded assertions. OBJECTIVE: Determine pass/fail for each assertion with evidence. CONTEXT: Assertions list and actual outputs. CONSTRAINTS: Objective scoring only; boolean pass/fail per assertion. OUTPUT: JSON with {assertions_evaluated: int, passed: int, failed: int, details: [{assertion, passed: bool, evidence}]}")`. Save to `grading.json`.
+1. **Grade**: Dispatch a `general-purpose` subagent to evaluate assertions against outputs. Call `Agent(subagent_type: "general-purpose", description: "Grade eval results", prompt: "SCOPE: Evaluate test case outputs against recorded assertions. OBJECTIVE: Determine pass/fail for each assertion with evidence. CONTEXT: Assertions list and actual outputs. CONSTRAINTS: Objective scoring only; boolean pass/fail per assertion. OUTPUT: JSON with {assertions_evaluated: int, passed: int, failed: int, details: [{assertion, passed: bool, evidence}]}")`. Save to `grading.json`.
 2. **Aggregate**:
    ```bash
    python -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>
    ```
-3. **Analyze**: Invoke the analyzer agent to identify patterns and outliers. Call `Agent(description: "Analyze skill quality", prompt: "SCOPE: Analyze eval results for patterns, outliers, and statistical significance. OBJECTIVE: Compute pass-rate delta and determine if improvement is significant. CONTEXT: Grading results and baseline comparison. CONSTRAINTS: Apply 95% CI significance threshold; reject deltas where CI includes 0. OUTPUT: JSON with {pass_rate_with_skill: float, pass_rate_baseline: float, delta: float, pass_rate_significant: bool, patterns: [str], recommendations: [str]}")`. Report the pass-rate delta WITH its significance verdict (`pass_rate_significant`); never present a delta as "the skill helps" if the 95% CI includes 0 — increase runs first.
+3. **Analyze**: Dispatch a `general-purpose` subagent to identify patterns and outliers. Call `Agent(subagent_type: "general-purpose", description: "Analyze skill quality", prompt: "SCOPE: Analyze eval results for patterns, outliers, and statistical significance. OBJECTIVE: Compute pass-rate delta and determine if improvement is significant. CONTEXT: Grading results and baseline comparison. CONSTRAINTS: Apply 95% CI significance threshold; reject deltas where CI includes 0. OUTPUT: JSON with {pass_rate_with_skill: float, pass_rate_baseline: float, delta: float, pass_rate_significant: bool, patterns: [str], recommendations: [str]}")`. Report the pass-rate delta WITH its significance verdict (`pass_rate_significant`); never present a delta as "the skill helps" if the 95% CI includes 0 — increase runs first.
 4. **Launch Viewer**:
    ```bash
    python -u "<skill-builder-dir>/eval-viewer/generate_review.py" \
@@ -215,9 +215,9 @@ Read `feedback.json` after user review. Focus on specific critiques.
 
 For rigorous testing, invoke two agents in sequence:
 
-1. Call `Agent(description: "Compare eval results", prompt: "SCOPE: Perform blind A/B comparison of with-skill vs baseline eval outputs. OBJECTIVE: Identify which outputs are better, worse, or equivalent without knowing assignment. CONTEXT: Paired outputs from both conditions. CONSTRAINTS: Blinded scoring only; no confidence score, only preference. OUTPUT: JSON with {comparisons: [{better_output, worse_output, reasoning}], overall_preference: string}")`.
+1. Call `Agent(subagent_type: "general-purpose", description: "Compare eval results", prompt: "SCOPE: Perform blind A/B comparison of with-skill vs baseline eval outputs. OBJECTIVE: Identify which outputs are better, worse, or equivalent without knowing assignment. CONTEXT: Paired outputs from both conditions. CONSTRAINTS: Blinded scoring only; no confidence score, only preference. OUTPUT: JSON with {comparisons: [{better_output, worse_output, reasoning}], overall_preference: string}")`.
 
-2. Call `Agent(description: "Analyze skill quality", prompt: "SCOPE: Synthesize comparison and grading results. OBJECTIVE: Determine overall significance of skill improvement. CONTEXT: Blind comparison and grading results. CONSTRAINTS: Use statistical evidence, not anecdotes. OUTPUT: JSON with {recommendation: string, significance_verdict: bool}")` .
+2. Call `Agent(subagent_type: "general-purpose", description: "Analyze skill quality", prompt: "SCOPE: Synthesize comparison and grading results. OBJECTIVE: Determine overall significance of skill improvement. CONTEXT: Blind comparison and grading results. CONSTRAINTS: Use statistical evidence, not anecdotes. OUTPUT: JSON with {recommendation: string, significance_verdict: bool}")` .
 
 ---
 
@@ -266,8 +266,5 @@ python '<skill-dir>/scripts/package_skill.py' <path/to/skill-folder>
 
 ## Reference Map
 
-- `agents/grader.md`: Grading pass/fail criteria.
-- `agents/comparator.md`: Blind A/B analysis.
-- `agents/analyzer.md`: Benchmark data interpretation.
-- `references/schemas.md`: JSON schema definitions.
+- `references/schemas.md`: JSON schema definitions. Grading, blind-comparison, and analysis criteria are embedded directly in the `Agent()` prompts above (Sections 4 and "Advanced: Blind Comparison").
 - `references/cowork.md`: Headless environment workflow.

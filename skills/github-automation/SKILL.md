@@ -116,14 +116,28 @@ python <skill-dir>/scripts/lint.py .github/workflows/<file>.yml
 
 **Do not report the task complete until lint passes. ALWAYS report which linter tier was used (e.g., "actionlint" or "built-in Python checks").**
 
-**After lint passes — spawn the `workflow-security-auditor` subagent** (`agents/workflow-security-auditor.md`) for semantic security review that rule-based linting cannot catch. (Note: `disable-model-invocation: true` in this skill's frontmatter only prevents skill preloading into subagents — it does NOT block `Agent()` calls. Spawning the security auditor via `Agent()` works normally.)
+**After lint passes — dispatch a `general-purpose` subagent** for semantic security review that rule-based linting cannot catch. (Note: `disable-model-invocation: true` in this skill's frontmatter only prevents skill preloading into subagents — it does NOT block `Agent()` calls.)
 
 ```
 Agent(
+  subagent_type: "general-purpose",
   description: "Security audit of [workflow filename]",
   prompt: |
-    workflow_path: [absolute path to the .github/workflows/*.yml file]
-    project_root: [repository root, for resolving composite action paths]
+    SCOPE: workflow_path: [absolute path to the .github/workflows/*.yml file]. project_root: [repository
+      root, for resolving composite action paths]. Read-only — Read, Glob only.
+    OBJECTIVE: Perform semantic security analysis on the workflow YAML that static linters miss, and
+      produce a severity-ranked JSON findings report.
+    CONTEXT: Audit dimensions —
+      OIDC Trust: unscoped trust policies.
+      Repo-jacking: unsafe `pull_request_target` usage.
+      Blast Radius: over-scoped tokens or secrets.
+      Injection: unsanitized dispatch inputs or artifact names.
+    CONSTRAINTS:
+      - Quote the exact YAML line or key path for every finding; include an attack scenario for
+        critical/high findings.
+      - Do NOT re-report what linters already catch (SHA pinning, missing permissions blocks).
+      - Use the schema in skills/github-automation/references/schemas.md.
+    OUTPUT: JSON ONLY — no prose, no markdown wrappers.
 )
 ```
 

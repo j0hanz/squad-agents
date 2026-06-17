@@ -53,11 +53,11 @@ OUTPUT:
 
 ## Dispatcher Rules
 
-| Condition       | Action                                                                             |
-| :-------------- | :--------------------------------------------------------------------------------- |
-| `SPEC_PASS`     | Advance to Phase 3                                                                 |
-| `SPEC_FAIL`     | Dispatch new coder with MISSING_REQUIREMENTS + EXTRA_WORK verbatim; re-run Phase 2 |
-| 2nd `SPEC_FAIL` | Surface to user — spec is ambiguous or conflicting                                 |
+| Condition       | Action                                                                                                     |
+| :-------------- | :--------------------------------------------------------------------------------------------------------- |
+| `SPEC_PASS`     | Advance to Phase 3                                                                                         |
+| `SPEC_FAIL`     | Dispatch new implementer (general-purpose) with MISSING_REQUIREMENTS + EXTRA_WORK verbatim; re-run Phase 2 |
+| 2nd `SPEC_FAIL` | Surface to user — spec is ambiguous or conflicting                                                         |
 
 **constraint:** Max 2 fix iterations before escalating to user.
 **constraint:** Provide task spec verbatim — never paraphrase.

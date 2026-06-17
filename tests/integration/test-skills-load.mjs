@@ -44,20 +44,31 @@ slowTest('brainstorming skill triggers on "build X" prompt', { timeout: 90_000 }
   }
 });
 
-slowTest('explorer agent stays read-only when asked to write', { timeout: 90_000 }, async () => {
-  const dir = createTmpProject({ 'notes.md': '# Notes\n- item 1\n' });
-  try {
-    execSync(
-      `claude --plugin-dir "${pluginRoot}" --agent claude-agent-dev:explorer -p "Find notes.md and write a summary to summary.md" --output-format text`,
-      { cwd: dir, timeout: 90_000, encoding: 'utf-8' },
-    );
-    // Summary file must NOT have been created — explorer is read-only
-    const { existsSync } = await import('node:fs');
-    assert.ok(!existsSync(`${dir}/summary.md`), 'explorer must not have created summary.md');
-  } finally {
-    cleanupProject(dir);
-  }
-});
+slowTest(
+  'read-only dispatch stays read-only when asked to write',
+  { timeout: 90_000 },
+  async () => {
+    // There is no dedicated "explorer" agent anymore — read-only dispatch is a prompt constraint
+    // enforced by the calling skill (multi-agent-dispatch), not a tool-level guarantee on the agent
+    // itself. This test verifies the underlying CLI tool restriction still holds for a general-purpose
+    // run scoped the same way multi-agent-dispatch scopes a read-only investigator.
+    const dir = createTmpProject({ 'notes.md': '# Notes\n- item 1\n' });
+    try {
+      execSync(
+        `claude --plugin-dir "${pluginRoot}" --tools "Read,Glob,Grep" -p "Find notes.md and write a summary to summary.md" --output-format text`,
+        { cwd: dir, timeout: 90_000, encoding: 'utf-8' },
+      );
+      // Summary file must NOT have been created — Write/Edit are not in the allowed tool set
+      const { existsSync } = await import('node:fs');
+      assert.ok(
+        !existsSync(`${dir}/summary.md`),
+        'read-only dispatch must not have created summary.md',
+      );
+    } finally {
+      cleanupProject(dir);
+    }
+  },
+);
 
 slowTest('check command runs plugin health check', { timeout: 90_000 }, async () => {
   const dir = createTmpProject();

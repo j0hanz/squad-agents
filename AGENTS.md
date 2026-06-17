@@ -20,10 +20,10 @@ Use **npm** — Node.js ≥22, Python ≥3.10. `npm test` runs the full suite (v
 
 ## Key Conventions
 
-- **Skills:** Only `SKILL.md` is required; add `scripts/`, `evals/`, `references/`, `agents/` subdirs as needed. Each skill lives in `skills/<name>/`
+- **Skills:** Only `SKILL.md` is required; add `scripts/`, `evals/`, `references/` subdirs as needed. Each skill lives in `skills/<name>/`
 - **Hooks:** Config in `hooks/hooks.json`; handlers in `hooks/handlers/*.sh` (Bash only — no `.mjs` or `.py` handlers) — no `console.log` in hook files (ESLint `no-console` warns)
 - **Node scripts:** Use `.mjs` extension with ESM (`import`/`export`); no `require()` or CommonJS
-- **Agents:** Definition files in `agents/<name>.md`; eval cases in `agents/evals/*.yaml`
+- **Subagents:** No custom agent definitions — every dispatch uses the built-in `general-purpose` agent, configured per-task via the prompt. See `skills/multi-agent-dispatch` (parallel fan-out) and `skills/multi-agent-development` (sequential, gate-checked implementation).
 - **Validation gate:** Run `npm run validate` before committing plugin changes — validates `.claude-plugin/plugin.json` via `bin/validate-plugin.mjs`
 - **Python tests:** Pytest discovers tests under `skills/`; new test files follow `test_<module>.py` naming
 

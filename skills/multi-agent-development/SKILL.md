@@ -1,13 +1,13 @@
 ---
 name: multi-agent-development
-description: "Orchestrate sequential implementation of a multi-task plan by delegating each task to a focused coder subagent and running two review gates (spec compliance, then code quality) before advancing. Trigger on 'implement the plan', 'execute this spec', 'build all tasks', 'work through the plan tasks', 'delegate implementation', 'agentic development', 'orchestrate these tasks', 'build each task with review', or whenever a planning output exists and implementation needs structured gate-checked execution. Distinct from multi-agent-dispatch: this skill runs tasks sequentially with per-task quality gates; use multi-agent-dispatch for concurrent fan-out of independent work."
+description: "Orchestrate sequential implementation of a multi-task plan by delegating each task to a focused general-purpose implementer subagent and running two review gates (spec compliance, then code quality) before advancing. Trigger on 'implement the plan', 'execute this spec', 'build all tasks', 'work through the plan tasks', 'delegate implementation', 'agentic development', 'orchestrate these tasks', 'build each task with review', or whenever a planning output exists and implementation needs structured gate-checked execution. Distinct from multi-agent-dispatch: this skill runs tasks sequentially with per-task quality gates; use multi-agent-dispatch for concurrent fan-out of independent work."
 disable-model-invocation: false
 argument-hint: '[path to plan file OR paste plan tasks]'
 ---
 
 # Multi-Agent Development
 
-**Mindset:** One coder per task, two review gates per task, zero context pollution between tasks. Run the full loop autonomously — do not pause for check-ins between tasks unless the implementer returns BLOCKED or NEEDS_CONTEXT.
+**Mindset:** One implementer per task, two review gates per task, zero context pollution between tasks. Run the full loop autonomously — do not pause for check-ins between tasks unless the implementer returns BLOCKED or NEEDS_CONTEXT.
 
 ## Prerequisites
 
@@ -40,13 +40,13 @@ For each task in the plan, execute Phases 1 → 2 → 3 in strict order. Do NOT 
 
 ```text
 TASK N
-  Phase 1: Implement  → dispatch coder subagent (worktree isolated)
+  Phase 1: Implement  → dispatch general-purpose subagent as implementer (worktree isolated)
            if BLOCKED / NEEDS_CONTEXT → surface to user; resolve; re-dispatch
-  Phase 2: Spec Gate  → dispatch detective subagent (spec compliance)
-           if SPEC_FAIL → dispatch coder to fix → re-run Phase 2
+  Phase 2: Spec Gate  → dispatch general-purpose subagent as spec reviewer (read-only)
+           if SPEC_FAIL → dispatch implementer to fix → re-run Phase 2
            if SPEC_FAIL after 2 fix attempts → surface to user as BLOCKED
-  Phase 3: Quality Gate → dispatch detective subagent (code quality)
-           if CRITICAL/IMPORTANT → dispatch coder to fix → re-run Phase 3
+  Phase 3: Quality Gate → dispatch general-purpose subagent as quality reviewer (read-only)
+           if CRITICAL/IMPORTANT → dispatch implementer to fix → re-run Phase 3
            if CRITICAL after 2 fix attempts → surface to user as BLOCKED
   TASK N COMPLETE → immediately dispatch Task N+1 Phase 1 (no pause, no check-in)
 
@@ -59,7 +59,7 @@ After ALL tasks pass both gates:
 
 ## Phase 1 — Implement
 
-Dispatch a `coder` subagent with `isolation: "worktree"`. Load the full prompt from `references/implementer-prompt.md` and fill in all fields.
+Dispatch a `general-purpose` subagent with `isolation: "worktree"`, configured as implementer. Load the full prompt from `references/implementer-prompt.md` and fill in all fields.
 
 **Every prompt field is required — subagents start cold with zero parent context.**
 
@@ -86,9 +86,9 @@ Dispatch a `coder` subagent with `isolation: "worktree"`. Load the full prompt f
 
 ## Phase 2 — Spec Compliance Gate
 
-Immediately after `DONE` or `DONE_WITH_CONCERNS`, dispatch a `detective` subagent. Load prompt from `references/spec-reviewer-prompt.md`.
+Immediately after `DONE` or `DONE_WITH_CONCERNS`, dispatch a `general-purpose` subagent configured as a read-only spec reviewer. Load prompt from `references/spec-reviewer-prompt.md`.
 
-**The detective reads actual code — never trusts the implementer's summary.**
+**The reviewer reads actual code — never trusts the implementer's summary.**
 
 Reviewer checks:
 
@@ -99,7 +99,7 @@ Reviewer checks:
 **Fix loop:**
 
 ```text
-SPEC_FAIL → dispatch coder with MISSING_REQUIREMENTS + EXTRA_WORK listed verbatim
+SPEC_FAIL → dispatch implementer (general-purpose, worktree) with MISSING_REQUIREMENTS + EXTRA_WORK listed verbatim
          → re-run Phase 2
          → SPEC_FAIL again after 2nd attempt → surface as BLOCKED (spec is ambiguous)
 SPEC_PASS → immediately dispatch Phase 3
@@ -109,7 +109,7 @@ SPEC_PASS → immediately dispatch Phase 3
 
 ## Phase 3 — Code Quality Gate
 
-Immediately after `SPEC_PASS`, dispatch a `detective` subagent. Load prompt from `references/quality-reviewer-prompt.md`.
+Immediately after `SPEC_PASS`, dispatch a `general-purpose` subagent configured as a read-only quality reviewer. Load prompt from `references/quality-reviewer-prompt.md`.
 
 Reviewer checks:
 
@@ -122,9 +122,9 @@ Reviewer checks:
 **Fix loop:**
 
 ```text
-CRITICAL  → dispatch coder with issues listed verbatim → re-run Phase 3
+CRITICAL  → dispatch implementer (general-purpose, worktree) with issues listed verbatim → re-run Phase 3
            → still CRITICAL after 2nd attempt → surface as BLOCKED
-IMPORTANT → dispatch coder with issues listed verbatim → re-run Phase 3
+IMPORTANT → dispatch implementer (general-purpose, worktree) with issues listed verbatim → re-run Phase 3
            → still IMPORTANT after 2nd attempt → surface as BLOCKED
 MINOR     → log the issues; do NOT block advancement; fix in a later refactor pass
 QUALITY_PASS → mark task complete → immediately dispatch Task N+1 Phase 1
@@ -166,7 +166,7 @@ Load each template, fill in the `[FIELD]` placeholders, remove annotations, then
 ```text
 Phase 1 — Implement:
   Agent(
-    subagent_type: "coder",
+    subagent_type: "general-purpose",
     description: "Implement Task N: [title]",
     isolation: "worktree",
     prompt: [filled implementer-prompt.md]
@@ -174,14 +174,14 @@ Phase 1 — Implement:
 
 Phase 2 — Spec compliance:
   Agent(
-    subagent_type: "detective",
+    subagent_type: "general-purpose",
     description: "Spec review Task N",
     prompt: [filled spec-reviewer-prompt.md]
   )
 
 Phase 3 — Code quality:
   Agent(
-    subagent_type: "detective",
+    subagent_type: "general-purpose",
     description: "Quality review Task N",
     prompt: [filled quality-reviewer-prompt.md]
   )
@@ -208,13 +208,13 @@ Phase 3 — Code quality:
 | `planning`      | Task list with specs — feed directly into this skill's loop     |
 | `brainstorming` | Acceptance criteria — inform CONSTRAINTS in implementer prompts |
 
-| Successor                        | When to invoke                                       |
-| :------------------------------- | :--------------------------------------------------- |
-| `verification-before-completion` | After all tasks pass both gates and tests pass       |
-| `code-review`                    | After verification passes                            |
+| Successor                        | When to invoke                                                                        |
+| :------------------------------- | :------------------------------------------------------------------------------------ |
+| `verification-before-completion` | After all tasks pass both gates and tests pass                                        |
+| `code-review`                    | After verification passes                                                             |
 | `github-automation`              | Prompt the user to run `/github-automation` to open the PR — requires user invocation |
-| `diagnose`                       | When npm test fails after all tasks                  |
-| `multi-agent-dispatch`           | For any tasks in the plan that are fully independent |
+| `diagnose`                       | When npm test fails after all tasks                                                   |
+| `multi-agent-dispatch`           | For any tasks in the plan that are fully independent                                  |
 
 ---
 
@@ -225,7 +225,7 @@ Phase 3 — Code quality:
 - **NEVER** trust an implementer's DONE claim — read the actual code, not the summary.
 - **NEVER** let a BLOCKED status auto-resolve — always surface to the user.
 - **NEVER** reuse the same subagent across tasks — each task gets a fresh agent.
-- **NEVER** dispatch two coders to overlapping files in the same task slot.
+- **NEVER** dispatch two implementer subagents to overlapping files in the same task slot.
 - **NEVER** use unvalidated paths in `SCOPE` — ensure all paths exist within the project root.
 - **NEVER** start parallel implementation without verifying disjoint file sets via `ls` or `git ls-files`.
 
