@@ -813,29 +813,27 @@ def validate_hooks_config(hooks_file: Path) -> ValidationResult:
                 if not cmd:
                     continue
 
+                parts = shlex.split(cmd, posix=(os.name != "nt"))
+
                 if "runner.mjs" in cmd:
-                    parts = shlex.split(cmd)
-                    try:
-                        domain_idx = (
-                            next(i for i, p in enumerate(parts) if "runner.mjs" in p)
-                            + 1
-                        )
-                        domain = parts[domain_idx]
-                        handler_path = (
-                            plugin_root / "hooks" / "handlers" / f"{domain}.mjs"
-                        )
-                        if not handler_path.exists():
-                            issues.append(
-                                ValidationIssue(
-                                    level=IssueLevel.FAIL,
-                                    message=f"Missing handler for hook '{event}': {handler_path}",
-                                )
-                            )
-                    except (ValueError, IndexError):
+                    domain_idx_match = next(
+                        (i for i, p in enumerate(parts) if "runner.mjs" in p), None
+                    )
+                    if domain_idx_match is None or domain_idx_match + 1 >= len(parts):
                         issues.append(
                             ValidationIssue(
                                 level=IssueLevel.WARN,
                                 message=f"Could not determine handler for hook '{event}': {cmd!r}",
+                            )
+                        )
+                        continue
+                    domain = parts[domain_idx_match + 1]
+                    handler_path = plugin_root / "hooks" / "handlers" / f"{domain}.mjs"
+                    if not handler_path.exists():
+                        issues.append(
+                            ValidationIssue(
+                                level=IssueLevel.FAIL,
+                                message=f"Missing handler for hook '{event}': {handler_path}",
                             )
                         )
 
@@ -844,7 +842,7 @@ def validate_hooks_config(hooks_file: Path) -> ValidationResult:
                     or "hooks/handlers" in cmd
                     or "${CLAUDE_PLUGIN_ROOT}" in cmd
                 ):
-                    script_path_str = shlex.split(cmd)[-1].replace(
+                    script_path_str = parts[-1].replace(
                         "${CLAUDE_PLUGIN_ROOT}", str(plugin_root)
                     )
                     if not Path(script_path_str).exists():
