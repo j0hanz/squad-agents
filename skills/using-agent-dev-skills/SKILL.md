@@ -17,6 +17,7 @@ Global entry point for agent-dev plugin coordination. Follow this gated diagnost
 ## Diagnostic Decision Tree
 
 ### Gate 1: Is the task fully defined?
+
 - **IF** the user has a vague idea, OR if there is no documented specification:
   -> **ROUTE TO:** `brainstorming`
 - **IF** there is an idea, but we need a concrete execution plan and architecture:
@@ -25,6 +26,7 @@ Global entry point for agent-dev plugin coordination. Follow this gated diagnost
   -> **Proceed to Gate 2.**
 
 ### Gate 2: Is this a systemic issue or localized?
+
 - **IF** the code has circular dependencies, "God classes", or boundary violations:
   -> **ROUTE TO:** `architecture`
 - **IF** the issue is localized to a messy function or single file:
@@ -35,6 +37,7 @@ Global entry point for agent-dev plugin coordination. Follow this gated diagnost
   -> **Proceed to Gate 3.**
 
 ### Gate 3: Execution Strategy
+
 - **IF** tasks are completely independent (no shared state):
   -> **ROUTE TO:** `multi-agent-dispatch`
 - **IF** tasks must be done sequentially:
@@ -59,27 +62,27 @@ graph TD
     G1 -- No/Vague --> B[brainstorming]
     G1 -- Needs Plan --> P[planning]
     G1 -- Yes --> G2{Gate 2: Scope?}
-    
+
     B --> P
     P --> G2
-    
+
     G2 -- Systemic --> ARC[architecture]
     G2 -- Localized --> REF[refactor]
     G2 -- Debugging --> DIAG[diagnose]
     G2 -- Feature --> G3{Gate 3: Strategy}
-    
+
     ARC --> G3
     REF --> G3
     DIAG --> G3
-    
+
     G3 -- Parallel --> MAD[multi-agent-dispatch]
     G3 -- Sequential --> MDEV[multi-agent-development]
     G3 -- Standard --> TDD[test-driven-development]
-    
+
     MAD --> V[verification-before-completion]
     MDEV --> V
     TDD --> V
-    
+
     V --> CR[code-review]
     CR --> GH[github-automation]
 ```

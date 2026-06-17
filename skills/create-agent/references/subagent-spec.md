@@ -8,6 +8,7 @@ The complete authoring reference for `.claude/agents/*.md` subagents.
 - [Frontmatter fields](#frontmatter-fields)
 - [Permission modes](#permission-modes)
 - [Tools available to subagents](#tools-available-to-subagents)
+- [Advanced Role Profiles](#advanced-role-profiles)
 - [Restricting which agents it can spawn](#restricting-which-agents-it-can-spawn)
 - [Model resolution order](#model-resolution-order)
 - [Scope & priority](#scope--priority)
@@ -99,8 +100,8 @@ Common profiles:
 
 Specialized agent configurations for complex workflows and "Team of Teams" orchestration.
 
-| Role          | Responsibilities                                                                                                                                                  | Capabilities                                                                                                                                                                 |
-| :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Role          | Responsibilities                                                                                                                                                   | Capabilities                                                                                                                                                                 |
+| :------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `FeatureLead` | Orchestrates complex features by breaking them down into sub-tasks. Manages worker agents through hierarchical dispatch. Ensures alignment across multiple agents. | Permitted to use `multi-agent-dispatch` and `multi-agent-development` skills. Utilizes the **Shared Context Blackboard** for inter-agent communication and state management. |
 
 ---
