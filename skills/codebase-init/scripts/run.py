@@ -318,6 +318,8 @@ def should_ignore(path: Path, patterns: set[str], root: Path) -> bool:
 
     rel_str = str(rel_path).replace("\\", "/")
     for pattern in patterns:
+        if "/" not in pattern and path.name == pattern.rstrip("/"):
+            return True
         if rel_str == pattern or rel_str.startswith(pattern + "/"):
             return True
         if "*" in pattern:
@@ -654,7 +656,7 @@ def render_agents_md_skeleton(
 
 
 _HARD_RULES_SECTION_RE = re.compile(r"^##\s+Hard Rules\b", re.IGNORECASE | re.MULTILINE)
-_PACKAGE_OVERRIDE_RE = re.compile(r"See root\s+(?:`)?\S*AGENTS\.md", re.IGNORECASE)
+_PACKAGE_OVERRIDE_RE = re.compile(r"See\s+\[AGENTS\.md\]", re.IGNORECASE)
 
 
 def is_package_level_override(content: str) -> bool:
@@ -837,7 +839,11 @@ def validate_hooks_config(hooks_file: Path) -> ValidationResult:
                             )
                         )
 
-                elif "scripts" in cmd:
+                elif (
+                    "scripts" in cmd
+                    or "hooks/handlers" in cmd
+                    or "${CLAUDE_PLUGIN_ROOT}" in cmd
+                ):
                     script_path_str = shlex.split(cmd)[-1].replace(
                         "${CLAUDE_PLUGIN_ROOT}", str(plugin_root)
                     )
@@ -1018,7 +1024,7 @@ def _resolve_target(raw: Path | None, fallback: Path) -> Path:
     return (raw or fallback).resolve()
 
 
-def main() -> int:
+def _setup_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Consolidated plugin maintenance utilities."
     )
@@ -1137,6 +1143,11 @@ def main() -> int:
     scaffold_parser.add_argument(
         "--out", type=Path, default=None, help="Write to this file instead of stdout."
     )
+    return parser
+
+
+def main() -> int:
+    parser = _setup_parser()
 
     args = parser.parse_args()
     root = Path(".").resolve()

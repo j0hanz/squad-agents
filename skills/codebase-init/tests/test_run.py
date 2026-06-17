@@ -36,10 +36,7 @@ def test_hard_rules_section_required_fails(tmp_path: Path) -> None:
 
 
 def test_package_override_exempt_from_hard_rules(tmp_path: Path) -> None:
-    body = (
-        _BASE_BODY
-        + "\nSee root `/AGENTS.md` for shared setup and workspace commands.\n"
-    )
+    body = _BASE_BODY + "\n# See [AGENTS.md](../AGENTS.md)\n"
     path = _write_agents_md(tmp_path, body)
     result = validate_agents_md_file(path)
     assert not any("Hard Rules" in str(issue) for issue in result.issues)
