@@ -7,20 +7,49 @@ description: "Structured requirements discovery before implementation. Trigger o
 
 Structured discovery to prevent rework. Always run for new features or ambiguous requirements.
 
+Default subagent type for every dispatch below: `general-purpose`. Type is only called out where it differs.
+
+## Process Flow
+
+```dot
+digraph brainstorming {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Discovery        [label="1. Discovery"];
+  DomainClarity    [label="2. Domain Clarity"];
+  ExpertClarify    [label="3. Expert Clarification"];
+  DesignProposal   [label="4. Design Proposal"];
+  StructuredReview [label="5. Structured Review"];
+  DesignBrief      [label="6. Design Brief"];
+
+  Discovery -> DomainClarity    [label="ambiguous terms"];
+  Discovery -> ExpertClarify    [label="needs clarification"];
+  Discovery -> DesignProposal   [label="scope S, no unknowns"];
+  DomainClarity -> ExpertClarify;
+  ExpertClarify -> DesignProposal;
+  DesignProposal -> StructuredReview [label="flagged: scope L/XL,\nhigh risk, or attack surface"];
+  DesignProposal -> DesignBrief      [label="not flagged"];
+  StructuredReview -> DesignBrief    [label="approved"];
+  StructuredReview -> DesignProposal [label="rejected", style=dashed];
+}
+```
+
 ## Phase 1: Discovery
 
 1. **Stakeholder Probe:** Ask who uses the feature (end users, internal, systems?).
 2. **Codebase Scan:**
    - Read `references/codebase-scanner-prompt.md` before dispatching.
-   - Dispatch `general-purpose` subagent with the prompt.
-   - **Integration**: Upon subagent completion, extract the "Interface Shapes," "Technical Constraints," "Analogous Features," and "Key Unknowns" sections. These MUST be used to ground the Understanding Statement.
-   - **Zero-Code Exit**: If the scanner finds an existing feature or configuration that satisfies the request, present it immediately and offer to exit.
-3. **Understanding Statement:** Summarize what was found, constraints, and Key Unknowns. Ask for confirmation.
+   - Dispatch the subagent with the prompt.
+   - **Integration:** Extract "Interface Shapes," "Technical Constraints," "Analogous Features," and "Key Unknowns" from the result. Ground the Understanding Statement in these.
+   - **Zero-Code Exit:** If the scan finds an existing feature or config that satisfies the request, present it and offer to exit.
+3. **Understanding Statement:** Summarize findings, constraints, and Key Unknowns. Get user confirmation.
 4. **Adaptive Routing:**
-   - **Scope S + No Unknowns:** Jump to Phase 4 (Design).
+   - **Scope S + No Unknowns:** Skip to Phase 4.
    - **Scope XL:** Offer to split into sub-features.
-   - **Ambiguous Terms:** Run Phase 2 (Clarity).
-   - **Scope L/XL or High Blast Radius** (auth, payments, data deletion, external-facing API): Flag now for Phase 5 (Structured Review) — confirm the flag before Phase 4 so the user isn't surprised by the extra step later.
+   - **Ambiguous Terms:** Run Phase 2.
+   - **Scope L/XL or High Blast Radius** (auth, payments, data deletion, external-facing API): Set the Phase 5 flag. Confirm it with the user before Phase 4.
 
 ## Phase 2: Domain Clarity (Term Definition)
 
@@ -36,40 +65,40 @@ Select 1-2 techniques (max 4 questions total):
 - **Premortem:** Imagine failure — what went wrong?
 - **Success Logic:** Define success behavior without using "functional".
 - **Anti-Scope:** Explicitly what we are NOT building.
-- **Trust Breach:** How would an attacker abuse this? If this surfaces a concrete attack surface or sensitive data flow, flag for Phase 5 (Structured Review).
+- **Trust Breach:** How would an attacker abuse this? A concrete attack surface or sensitive data flow sets the Phase 5 flag.
 
 ## Creative Checkpoint (Before Design)
 
 - Is there a zero-code solution (config, existing extension)?
 - Did an analogous feature already solve this?
 - What is the 10x simpler version?
-- **Proactive Filter**: If a zero-code or analogous solution is found, it MUST be presented as "Approach A" in Phase 4.
+- **Proactive Filter:** A zero-code or analogous solution found here becomes "Approach A" in Phase 4 — present it, do not silently drop it.
 
 ## Phase 4: Design Proposal
 
-1. **Dispatch:** Spawn `general-purpose` agent (`references/design-proposer-prompt.md`) with compressed scan report and discovery findings.
+1. **Dispatch:** Spawn the subagent (`references/design-proposer-prompt.md`) with the compressed scan report and discovery findings.
 2. **Present:** Offer 2-3 competing approaches with grounded tradeoffs.
 3. **Approval Gate:** Wait for explicit commitment to one approach. Do not guess.
-4. **Review Check:** If Phase 1 or Phase 3 flagged this design (Scope L/XL, high blast radius, or concrete attack surface), proceed to Phase 5 before the brief. Otherwise skip to Phase 6.
+4. **Review Check:** Phase 5 flag set → run Phase 5 before the brief. Not set → skip to Phase 6.
 
 ## Phase 5: Structured Review (Conditional)
 
-Only runs when flagged in Phase 1 or Phase 3, or when the user explicitly asks to "stress test" or "review" the design.
+Runs only if the Phase 5 flag is set, or the user explicitly asks to "stress test" or "review" the design.
 
-**Parallel Adversarial Loop**: To ensure objectivity and reduce latency, reviewers run concurrently.
+**Parallel Adversarial Loop:** Reviewers run concurrently for objectivity and lower latency.
 
-1. **Dispatch Parallel Stress-Test:** Using `multi-agent-dispatch`, spawn three independent reviewers who only see the design and context packet — they do NOT see each other's objections or your internal reasoning.
-   - **Skeptic** (`general-purpose`) — assumes the design fails in production; surfaces weaknesses, edge cases, YAGNI violations.
-   - **Constraint Guardian** (`general-purpose`) — checks performance, scalability, security/privacy against the Codebase Context Report.
-   - **User Advocate** (`general-purpose`) — checks usability, cognitive load, error handling from the end user's view.
-2. **Consolidate & Respond**:
-   - Collect all objections into a **Response Log** (Objection | Source | Severity | Designer Response | Resolution).
-   - You MUST address every objection: either **Accept & Revise** (updating the design) or **Reject** with a technical rationale.
-3. **Arbiter Gate**:
-   - Dispatch the **Arbiter** (`general-purpose`) with the original design, the revised design, and the full Response Log.
-   - The Arbiter evaluates if your rejections are valid and if your revisions actually mitigate the concerns.
-   - It returns `APPROVED`, `REVISE` (back to step 2), or `REJECT` (back to Phase 4).
-4. **Exit gate**: all reviewers invoked; Response Log is complete; Arbiter disposition is `APPROVED`.
+1. **Dispatch Parallel Stress-Test:** Use `multi-agent-dispatch` to spawn three independent reviewers. Each sees only the design and context packet — none sees the others' objections or your internal reasoning.
+   - **Skeptic** — assumes the design fails in production; surfaces weaknesses, edge cases, YAGNI violations.
+   - **Constraint Guardian** — checks performance, scalability, security/privacy against the Codebase Context Report.
+   - **User Advocate** — checks usability, cognitive load, error handling from the end user's view.
+2. **Consolidate & Respond:**
+   - Log every objection in a **Response Log** (Objection | Source | Severity | Designer Response | Resolution).
+   - Resolve each row: **Accept & Revise** (update the design) or **Reject** (give a technical rationale). No row may stay open.
+3. **Arbiter Gate:**
+   - Dispatch the **Arbiter** with the original design, the revised design, and the full Response Log.
+   - It judges whether rejections are valid and revisions actually mitigate the concerns.
+   - Returns `APPROVED`, `REVISE` (back to step 2), or `REJECT` (back to Phase 4).
+4. **Exit Gate:** All reviewers invoked, Response Log complete, Arbiter disposition `APPROVED`.
 
 ## Phase 6: Transition (Design Brief)
 
@@ -94,4 +123,3 @@ Produce mandatory `markdown-kv` brief:
 - **Arbiter Rubber-stamping**: Arbiter approving with unresolved High-severity objections or rejections without rationale.
 - **Context Drift**: Design ignores architectural constraints found in Phase 1.
 - **Subagent Role Bleed**: Reviewers proposing redesigns instead of identifying flaws.
-- **NEVER** proceed without an explicit Approval Gate.
