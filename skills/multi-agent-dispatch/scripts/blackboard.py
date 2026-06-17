@@ -5,8 +5,8 @@ import sys
 import argparse
 from pathlib import Path
 
-# In this project, we know the root is C:\agent-dev
-PROJECT_ROOT = Path("C:/agent-dev")
+# Detect PROJECT_ROOT relative to this script
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 BLACKBOARD_FILE = PROJECT_ROOT / ".agent_blackboard.json"
 LOCK_FILE = BLACKBOARD_FILE.with_suffix(".json.lock")
 
@@ -21,11 +21,9 @@ def acquire_lock(timeout=10, retry_interval=0.05):
             # os.O_CREAT | os.O_EXCL ensures atomicity
             fd = os.open(str(LOCK_FILE), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             try:
-                with os.fdopen(fd, 'w') as f:
-                    f.write(str(os.getpid()))
-            except Exception:
+                os.write(fd, str(os.getpid()).encode('utf-8'))
+            finally:
                 os.close(fd)
-                raise
             return True
         except FileExistsError:
             time.sleep(retry_interval)
@@ -57,7 +55,8 @@ def read_blackboard():
                 return {}
             return json.loads(content)
     except (json.JSONDecodeError, IOError):
-        return {}
+        # Re-raise to avoid overwriting blackboard with {} on transient read failures
+        raise
 
 def write_blackboard(data):
     """
@@ -68,10 +67,8 @@ def write_blackboard(data):
     with open(temp_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     
-    # Atomic replace (as much as possible on OS)
-    if BLACKBOARD_FILE.exists():
-        BLACKBOARD_FILE.unlink()
-    temp_file.rename(BLACKBOARD_FILE)
+    # Atomic replace
+    os.replace(temp_file, BLACKBOARD_FILE)
 
 def read(key):
     """

@@ -7,7 +7,7 @@ from pathlib import Path
 import json
 
 # Path to blackboard.py
-PROJECT_ROOT = Path("C:/agent-dev")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 BLACKBOARD_SCRIPT = PROJECT_ROOT / "skills" / "multi-agent-dispatch" / "scripts" / "blackboard.py"
 BLACKBOARD_FILE = PROJECT_ROOT / ".agent_blackboard.json"
 
