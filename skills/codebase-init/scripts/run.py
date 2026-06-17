@@ -444,7 +444,7 @@ def has_hard_rules_marker(content: str) -> bool:
 
 
 _HARD_RULES_SECTION_RE = re.compile(r"^##\s+Hard Rules\b", re.IGNORECASE | re.MULTILINE)
-_PACKAGE_OVERRIDE_RE = re.compile(r"See root[\s\S]*?AGENTS\.md", re.IGNORECASE)
+_PACKAGE_OVERRIDE_RE = re.compile(r"See root\s+(?:`)?\S*AGENTS\.md", re.IGNORECASE)
 
 
 def is_package_level_override(content: str) -> bool:
