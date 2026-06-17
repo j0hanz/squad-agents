@@ -443,6 +443,15 @@ def has_hard_rules_marker(content: str) -> bool:
     return bool(_HARD_RULES_MARKER_RE.search(content))
 
 
+_HARD_RULES_SECTION_RE = re.compile(r"^##\s+Hard Rules\b", re.IGNORECASE | re.MULTILINE)
+_PACKAGE_OVERRIDE_RE = re.compile(r"See root[\s\S]*?AGENTS\.md", re.IGNORECASE)
+
+
+def is_package_level_override(content: str) -> bool:
+    """Return True if content is a recognized package-level AGENTS.md override."""
+    return bool(_PACKAGE_OVERRIDE_RE.search(content))
+
+
 def validate_agents_md_file(file_path: Path) -> ValidationResult:
     """Validate the AGENTS.md file."""
     if not file_path.exists():
@@ -518,6 +527,23 @@ def validate_agents_md_file(file_path: Path) -> ValidationResult:
                 ValidationIssue(
                     level=IssueLevel.FAIL,
                     message='Missing mandatory "File-scoped commands" table.',
+                )
+            )
+
+        has_hard_rules_section = bool(_HARD_RULES_SECTION_RE.search(content))
+        if not has_hard_rules_section and not is_package_level_override(content):
+            issues.append(
+                ValidationIssue(
+                    level=IssueLevel.FAIL,
+                    message='Missing mandatory "## Hard Rules" section.',
+                )
+            )
+        elif has_hard_rules_section and not has_hard_rules_marker(content):
+            issues.append(
+                ValidationIssue(
+                    level=IssueLevel.WARN,
+                    message='"## Hard Rules" section present but missing/malformed '
+                    "codebase-init:hard-rules v1 marker comment.",
                 )
             )
     except (OSError, UnicodeDecodeError) as e:
