@@ -54,10 +54,13 @@ digraph planning {
 
 If a **Design Brief** (from `brainstorming`) is present, map fields and skip corresponding questions:
 
+- **Brief Why** (Key Tradeoff) → Goal / Rationale
 - **Brief Scope** → Scope
+- **Brief Success Criteria** → Success Criteria
 - **Brief Constraints** → Constraints
-- **Brief Interface** → Interface
-- **Brief Acceptance Criteria** → Success Criteria
+- **Brief Architecture** → Components & Responsibilities
+- **Brief Risk Register** → Notes & Risks
+- **Brief Interface** → Interfaces
 - **Brief Chosen Approach** → Goal
 
 **Interview (if needed):** Ask only missing **Goal** (One sentence) and **Interface** (Inputs/Outputs). Mark others as `UNKNOWN: [what and why]`.

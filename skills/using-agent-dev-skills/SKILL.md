@@ -50,9 +50,10 @@ digraph using_agent_dev_skills {
 ## Rules
 
 1. **Run Diagnostic Gates:** Evaluate the current task through the 3-Gate decision tree before any action.
-2. **Invoke Immediately:** Once a route is identified, immediately activate and follow that skill.
-3. **Notify:** Output one line: `Routing to \`<skill-name>\`: <reason>.`
-4. **No Skips:** Do NOT skip because a task seems \"simple\" or \"quick\". Every change deserves the appropriate rigor.
+2. **Skill Shadowing Check:** Before invoking a skill, verify that the local version in `skills/` is active. If the system is using a global version (e.g. from `~/.gemini/skills/`) that differs from the local one, warn the user.
+3. **Invoke Immediately:** Once a route is identified, immediately activate and follow that skill.
+4. **Notify:** Output one line: `Routing to \`<skill-name>\`: <reason>.`
+5. **No Skips:** Do NOT skip because a task seems \"simple\" or \"quick\". Every change deserves the appropriate rigor.
 
 ## Diagnostic Decision Tree
 

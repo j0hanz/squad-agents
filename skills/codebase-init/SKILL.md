@@ -132,6 +132,14 @@ Every drafted `AGENTS.md` must satisfy the Required Sections below, in order —
 
 If the user only wants to validate an existing `AGENTS.md` (no regeneration), skip Phases 0/1/1.5/2 entirely: run `python "$CLAUDE_PLUGIN_ROOT/skills/codebase-init/scripts/run.py" lint-agents-md AGENTS.md` and report the issues found.
 
+## Failure Recovery
+
+If any analysis script, scaffold command, or wiring step fails:
+
+1. Stop execution.
+2. Invoke `diagnose` with the script's `stderr` and the current state of `AGENTS.md`.
+3. Do not attempt manual fixes until `diagnose` confirms the root cause (e.g., missing dependencies, wrong Python version).
+
 ## NEVER
 
 - **NEVER** hallucinate tools or commands: Only document what is actually present in the project.

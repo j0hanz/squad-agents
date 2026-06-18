@@ -78,6 +78,7 @@ digraph diagnose {
 | `verification-before-completion` | Re-verify in same skill |
 | `test-driven-development`        | Current task/phase      |
 | `multi-agent-development`        | Current task/phase      |
+| `refactor`                       | Resume refactor cycle   |
 
 ## Output Format
 

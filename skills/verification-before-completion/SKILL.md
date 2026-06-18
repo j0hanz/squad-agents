@@ -80,8 +80,8 @@ digraph verification_before_completion {
 
 ## 5. Expert Patterns
 
-**action:** Use N-1 test to eliminate false greens (Revert → Fail → Fix → Pass).
-**action:** Test `null`, `undefined`, empty collections, and boundaries.
+**action:** Use N-1 test (as defined in `test-driven-development`) to eliminate false greens (Revert → Fail → Fix → Pass).
+**action:** Test `null`, `undefined`, empty collections, and boundary cases to ensure robust coverage.
 
 ## Transition
 

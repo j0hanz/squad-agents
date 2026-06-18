@@ -86,3 +86,4 @@ digraph github_automation {
 ## Transition
 
 1. **Fail:** Invoke `diagnose` or `refactor` based on blocking issue type.
+2. **Script Error:** If any `gh` or automation script fails, immediately handoff to `diagnose` with the error trace.
