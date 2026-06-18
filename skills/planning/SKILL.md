@@ -11,6 +11,27 @@ argument-hint: '[--depth sketch|contract|blueprint] [--spec-only] [--from-spec <
 
 Paired `plan/NAME.specs.md` (What/Why/Acceptance) and `plan/NAME.plan.md` (Atomic/Ordered tasks).
 
+## Process Flow
+
+```dot
+digraph planning {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Step1 [label="Step 1: Intake & Mapping\n(Brainstorming Brief / Interview)"];
+  Step2 [label="Step 2: Artifact Authoring\n(Scaffold / Draft Spec & Plan)"];
+  Step3 [label="Step 3: Validation Pipeline\n(scripts/validate.py)"];
+  Step4 [label="Step 4: Semantic Review\n(Contract / Blueprint depth)"];
+  Step5 [label="Step 5: Handoff\n(TDD / Multi-agent dev)"];
+
+  Step1 -> Step2 -> Step3;
+  Step3 -> Step4 [label="depth > sketch"];
+  Step3 -> Step5 [label="depth == sketch"];
+  Step4 -> Step5 [label="Approved"];
+}
+```
+
 ## NEVER Do This
 
 - **NEVER** execute unsanitized bash commands with user variables. Wrap in single quotes.

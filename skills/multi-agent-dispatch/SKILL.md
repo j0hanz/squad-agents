@@ -9,6 +9,41 @@ argument-hint: '[the independent tasks to parallelize]'
 
 Maximize efficiency through parallel execution across isolated problem domains.
 
+## When to Use
+
+```dot
+digraph when_to_use {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontname="Helvetica"];
+    edge [fontname="Helvetica", fontsize=10];
+
+    TaskType [label="Task Relationship", shape=diamond];
+
+    TaskType -> "Parallel (this skill)" [label="Independent domains\n(No shared state)"];
+    TaskType -> "Sequential (multi-agent-dev)" [label="Shared mutable state\n/ Dependencies"];
+
+    "Parallel (this skill)" [shape=box];
+    "Sequential (multi-agent-dev)" [shape=box];
+}
+```
+
+## Process Flow
+
+```dot
+digraph multi_agent_dispatch {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Step1 [label="1. GROUP\n(Disjoint Domains)"];
+  Step2 [label="2. SELECT\n(Configure Agents)"];
+  Step3 [label="3. LAUNCH\n(Concurrent Agents)"];
+  Step4 [label="4. INTEGRATE\n(Reconcile & Verify)"];
+
+  Step1 -> Step2 -> Step3 -> Step4;
+}
+```
+
 ## NEVER Do This
 
 - **NEVER** launch parallel subagents if their write-paths overlap. **WHY:** This causes race conditions and git conflicts. **FIX:** Use `multi-agent-development` for sequential execution.

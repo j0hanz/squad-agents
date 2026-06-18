@@ -9,6 +9,36 @@ allowed-tools: Bash(python *) Bash(python3 *)
 
 Secure, high-performance GitHub automation.
 
+## Process Flow
+
+```dot
+digraph github_automation {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Trigger [label="Trigger: Workflow/CLI Request", shape=diamond];
+  PathA [label="Path A: ACTIONS\n(YAML Workflows)"];
+  PathB [label="Path B: CLI\n(gh scripts/API)"];
+
+  // Path A Flow
+  ClassifyA [label="1. Classify Intent"];
+  AuthorA   [label="2. Author & Harden\n(SHA-Pinning/OIDC)"];
+  ValidateA [label="3. Validate & Audit\n(Lint/Security Review)"];
+
+  // Path B Flow
+  ModeB     [label="1. Mode Selection\n(Inline vs Script)"];
+  StandardsB [label="2. Headless Standards\n(Auth/Paginate)"];
+  SafetyB    [label="3. Safety & Idempotency\n(Snapshot/Check existence)"];
+
+  Trigger -> PathA [label="yml / CI"];
+  Trigger -> PathB [label="gh / API"];
+
+  PathA -> ClassifyA -> AuthorA -> ValidateA;
+  PathB -> ModeB -> StandardsB -> SafetyB;
+}
+```
+
 ## NEVER Do This
 
 - **NEVER** interpolate `${{ github.event... }}` directly into `run:`. **WHY:** This allows attackers to inject malicious shell commands if they control event data (e.g., PR titles). **FIX:** Always pipe inputs through `env:`.

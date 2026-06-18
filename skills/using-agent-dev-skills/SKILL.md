@@ -7,6 +7,46 @@ description: Semantic orchestrator for the agent-dev plugin. Analyzes task matur
 
 Global entry point for agent-dev plugin coordination. Follow this gated diagnostic flow for ALL tasks to ensure optimal skill routing.
 
+## When to Use
+
+```dot
+digraph using_agent_dev_skills {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Start [label="Start: New Task", shape=diamond];
+
+  Gate1 [label="Gate 1: Fully Defined?", shape=diamond];
+  Brainstorm [label="brainstorming"];
+  Planning [label="planning"];
+
+  Gate2 [label="Gate 2: Systemic Issue?", shape=diamond];
+  Arch [label="architecture"];
+  Refactor [label="refactor"];
+  Diagnose [label="diagnose"];
+
+  Gate3 [label="Gate 3: Execution Strategy", shape=diamond];
+  Dispatch [label="multi-agent-dispatch"];
+  Dev [label="multi-agent-development"];
+  TDD [label="test-driven-development"];
+
+  Start -> Gate1;
+  Gate1 -> Brainstorm [label="vague/no spec"];
+  Gate1 -> Planning [label="idea only"];
+  Gate1 -> Gate2 [label="spec+plan exist"];
+
+  Gate2 -> Arch [label="boundary/God class"];
+  Gate2 -> Refactor [label="messy function"];
+  Gate2 -> Diagnose [label="crash/bug"];
+  Gate2 -> Gate3 [label="new feature"];
+
+  Gate3 -> Dispatch [label="independent"];
+  Gate3 -> Dev [label="sequential/complex"];
+  Gate3 -> TDD [label="standard/focused"];
+}
+```
+
 ## Rules
 
 1. **Run Diagnostic Gates:** Evaluate the current task through the 3-Gate decision tree before any action.

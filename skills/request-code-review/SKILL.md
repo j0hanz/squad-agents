@@ -11,6 +11,40 @@ disallowed-tools: Write, Edit
 
 Get an unbiased review by dispatching a fresh-context subagent. Never review your own work in the same thread that wrote it — you already rationalized every decision once; a subagent with no memory of the implementation reads the diff cold, the way a human reviewer would.
 
+## Process Flow
+
+```dot
+digraph request_code_review {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Start [label="Start: Review Request", shape=diamond];
+  Confirm [label="0. Confirm with User\n(Wait for prompt)"];
+  PreCheck [label="Pre-Review Checkpoint\n(Tests, Context, Diffable)"];
+
+  Stat [label="1. Stat Check\n(git diff --stat)"];
+  Dispatch [label="2. Dispatch Agent\n(general-purpose)"];
+
+  Result [label="3. Check Result Shape", shape=diamond];
+  Retry [label="Retry Dispatch (once)"];
+  Escalate [label="Escalate to User"];
+
+  Final [label="4. Hand Off Result", shape=diamond];
+  PR [label="Handoff:\ngithub-automation"];
+  Receive [label="Handoff:\nreceive-code-review"];
+
+  Start -> Confirm -> PreCheck -> Stat -> Dispatch -> Result;
+  Result -> Retry [label="malformed"];
+  Retry -> Result;
+  Result -> Escalate [label="failed twice"];
+  Result -> Final [label="well-formed"];
+
+  Final -> PR [label="PASS"];
+  Final -> Receive [label="FAIL (blocking)"];
+}
+```
+
 ## Step 0: Confirm
 
 State that this starts an autonomous review session and wait for explicit user confirmation before scanning.

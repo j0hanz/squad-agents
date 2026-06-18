@@ -10,6 +10,41 @@ allowed-tools: Bash(python *) Bash(python3 *)
 
 Maintain lean, high-signal `AGENTS.md`. `CLAUDE.md`/`GEMINI.md` are one-line redirect stubs to it — never duplicates. Optimized for agent context injection, not human reading. Target: < 100 lines. Body style: markdown-kv (`key: value` lines), not prose paragraphs.
 
+## Process Flow
+
+```dot
+digraph codebase_init {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Trigger [label="Trigger: Init/Audit Request", shape=diamond];
+  AuditMode [label="Audit Mode"];
+  InitMode [label="Init Mode"];
+
+  // Audit Flow
+  LintAudit [label="Lint AGENTS.md"];
+  ReportAudit [label="Report Issues"];
+
+  // Init Flow
+  Phase0 [label="Phase 0: Hard Rule Survey\n(Check Marker / Ask Questions)"];
+  Phase1 [label="Phase 1: Environment Discovery\n(Analyze Toolchain / Structure)"];
+  Phase1_5 [label="Phase 1.5: Architecture Mapping\n(Detect Patterns)"];
+  Phase2 [label="Phase 2: Draft\n(Scaffold AGENTS.md)"];
+  Phase3 [label="Phase 3: Write, Wire, Validate\n(Wire variants, Lint)"];
+
+  Trigger -> AuditMode [label="audit only"];
+  Trigger -> InitMode [label="full init"];
+
+  AuditMode -> LintAudit -> ReportAudit;
+
+  InitMode -> Phase0 [label="marker absent"];
+  Phase0 -> Phase1 [label="survey complete"];
+  InitMode -> Phase1 [label="marker present"];
+  Phase1 -> Phase1_5 -> Phase2 -> Phase3;
+}
+```
+
 ## Phase 0: Hard Rule Survey
 
 Before any analysis or drafting, determine whether the repo owner's policy decisions are already known.

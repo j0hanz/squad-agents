@@ -8,59 +8,81 @@ disable-model-invocation: false
 
 Guarantee operational correctness through execution evidence. **NEVER** confirm based on reading code alone.
 
-## 0. Evidence Standards
+## Process Flow
 
-Verification is valid ONLY when:
+```dot
+digraph verification_before_completion {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
 
-- **Developer Reports:** \"Tests pass, manually verified, no debug logs found.\" (Accept this).
-- **Execution Proof:** Test runner output or manual interaction log (Preferred).
+  Start [label="Start: Ready to Complete", shape=diamond];
 
-### Manual Exercise Evidence Template
+  Checklist [label="1. Mandatory Checklist\n(Tests, Manual, Sweep, Diff)"];
+  Evidence [label="2. Gather Evidence\n(Runner output / Exercise log)"];
 
-When documenting manual verification, use this format:
+  Logic [label="3. Decision Logic", shape=diamond];
+  Diagnose [label="Handoff:\ndiagnose"];
+  Blocked [label="State: Blocked/Incomplete"];
+  Review [label="Handoff:\nrequest-code-review"];
+
+  Start -> Checklist -> Evidence -> Logic;
+  Logic -> Diagnose [label="regression found"];
+  Logic -> Blocked [label="no test suite /\nCI-only"];
+  Logic -> Review [label="verified clean"];
+}
+```
+
+**trigger:** user says "ready", "mark as done", "looks good", or task is complete.
+**constraint:** never confirm based on reading code alone.
+**output:** verification evidence (test results or manual log).
+
+## 1. Mandatory Checklist
+
+**action:** Verify all items before completion.
+
+- [ ] **Tests:** Targeted tests and regression suite pass.
+- [ ] **Manual:** Documented inputs/outputs if no automation.
+- [ ] **Bug Fix:** Confirm reproduction failure then confirm success.
+- [ ] **Clean:** `grep` sweep for debug logs/tags (`debugger`, `pdb`, `TODO`).
+- [ ] **Lint:** No new unused imports or variables.
+- [ ] **Diff:** Audit every change for intent.
+
+## 2. Decision Logic
+
+| Status             | Action                                            |
+| :----------------- | :------------------------------------------------ |
+| **CI-Only**        | Stop. Report: "Blocked by CI. Wait for pipeline." |
+| **No Test Suite**  | Mark as **INCOMPLETE**. Document rationale.       |
+| **Regression**     | Stop. Invoke `diagnose`.                          |
+| **Verified Clean** | Transition to `request-code-review`.              |
+
+## 3. Manual Verification Template
+
+**format:**
 
 ```markdown
 ### Manual Verification
 
-- **Input:** [Specific values or actions]
-- **Expected:** [Observed side-effect or return]
-- **Observed:** [Actual behavior]
-- **Status:** PASS/FAIL
+**input:** [Specific values]
+**expected:** [Observed side-effect]
+**observed:** [Actual behavior]
+**status:** PASS/FAIL
 ```
 
-## 1. Mandatory Checklist
+## 4. Critical Failure Modes
 
-Before declaring any task done, verify ALL:
+**avoid:**
 
-- [ ] **Targeted Tests:** Specific tests for changed code MUST pass.
-- [ ] **Regression Suite:** Full test suite runs clean.
-- [ ] **Manual Exercise:** If no automated tests, document inputs/outputs observed using the template above.
-- [ ] **Reproduction Proof:** If fixing a bug, confirm original failure was observed, then confirm it is gone.
-- [ ] **Debug Sweep:** `grep` for `console.log`, `debugger`, `print`, `pdb`, `TODO`, `FIXME`.
-- [ ] **Linter Sweep:** Ensure no new unused imports or variables were introduced.
-- [ ] **Diff Audit:** Confirm every change is intentional. No accidental files staged.
+- **Confidence:** "It should work" is not evidence.
+- **Green-Wash:** Mocks hiding actual logic or missing assertions.
+- **Shadow Regressions:** Distant modules broken by global state changes.
 
-## 2. Decision Logic
+## 5. Expert Patterns
 
-| Status             | Action                                                          |
-| :----------------- | :-------------------------------------------------------------- |
-| **CI-Only?**       | State: \"Blocked by CI. Wait for pipeline GREEN.\"              |
-| **No Test Suite?** | Document changes and expected behavior. Mark as **INCOMPLETE**. |
-| Regression Found?  | Stop. Invoke `diagnose`. Return here once fixed.                |
-| **Complete?**      | Transition to `request-code-review`.                            |
-
-## 3. Critical Failure Modes
-
-- **Confidence != Evidence:** \"It should work\" or \"I'm confident\" are not completion signals.
-- **Green-Wash:** Tests passing but they mock away the actual logic or have no assertions.
-- **Shadow Regressions:** Global state changes breaking distant, unmonitored modules.
+**action:** Use N-1 test to eliminate false greens (Revert → Fail → Fix → Pass).
+**action:** Test `null`, `undefined`, empty collections, and boundaries.
 
 ## Transition
 
-1. **Non-trivial changes:** Invoke `request-code-review`. (`request-code-review` owns the final delivery handoff prompt.)
-
-## Expert Patterns
-
-- **N-1 Test:** Revert fix → Confirm FAIL → Re-apply fix → Confirm PASS. Eliminates \"false greens\".
-  - **Automation Pattern:** `git stash push -m "temp_fix" && <run_tests> && git stash pop && <run_tests>`
-- **Edge Case Blitz:** Explicitly test `null`, `undefined`, boundary integers, and empty collections.
+**next:** Invoke `request-code-review` for all non-trivial changes.

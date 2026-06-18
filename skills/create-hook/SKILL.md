@@ -9,6 +9,48 @@ argument-hint: '[the deterministic guarantee to implement]'
 
 Transform a natural language requirement into a deterministic lifecycle hook. A hook trades latency for a **guarantee**: an action that occurs every time, instead of relying on model judgment.
 
+## When to Use
+
+```dot
+digraph when_to_use {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontname="Helvetica"];
+    edge [fontname="Helvetica", fontsize=10];
+
+    Req [label="Requirement Type", shape=diamond];
+
+    Req -> "Hook" [label="Rule-based /\nDeterministic"];
+    Req -> "Prompt/Agent Hook" [label="Needs Judgment /\nReasoning"];
+    Req -> "Skill" [label="Instruction /\nCapability"];
+    Req -> "CLAUDE.md" [label="Global Context"];
+
+    "Hook" [shape=box];
+    "Prompt/Agent Hook" [shape=box];
+    "Skill" [shape=box];
+    "CLAUDE.md" [shape=box];
+}
+```
+
+## Process Flow
+
+```dot
+digraph create_hook {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Step0 [label="0. Tool Selection\n(Is a hook optimal?)"];
+  Step1 [label="1. Name the Guarantee"];
+  Step2 [label="2. Pick the Event"];
+  Step3 [label="3. Pick Handler Type"];
+  Step4 [label="4. Pick Matcher / Scope"];
+  Step5 [label="5. Write Handler\n(I/O Contract)"];
+  Step6 [label="6. Test Before Shipping"];
+
+  Step0 -> Step1 -> Step2 -> Step3 -> Step4 -> Step5 -> Step6;
+}
+```
+
 ## 0. Tool Selection
 
 Evaluate if a hook is the optimal tool:

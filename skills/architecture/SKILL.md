@@ -7,56 +7,82 @@ allowed-tools: Bash(node *), Bash(python *), AskUserQuestion
 
 # architecture
 
-System-level structural design focused on Reversibility and Boundary Integrity.
+```dot
+digraph architecture {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
 
-## Decision Protocol (Mandatory for ALL Questions)
+  Trigger [label="Trigger: Review/Design Request", shape=diamond];
+  ModeA [label="Mode A: DIAGNOSE\n(Existing Code)"];
+  ModeB [label="Mode B: DESIGN\n(New Feature)"];
 
-Route, interview, and confirm via `AskUserQuestion` (or 3-option markdown block) using this exact template:
+  // Mode A Flow
+  ExploreA [label="1. Explore\n(Scripts/Manual)"];
+  PresentA [label="2. Present\nOpportunities"];
+  AlignA   [label="3. Align\n(Interview/Seam)"];
+  HandoffA [label="Handoff:\nrefactor/planning"];
 
-1. **✅ Recommended — [Concrete Answer]**: Based on [specific evidence: import count, file size, churn, framework].
-2. **Also likely — [Plausible Alternative]**: Condition under which this becomes the right call.
-3. **Something else (your call)**: Custom user response.
+  // Mode B Flow
+  IdentifyB [label="1. Identify\nDomain vs Mechanism"];
+  SelectB   [label="2. Select Pattern"];
+  StressB   [label="3. Stress Test\n(Swap Test)"];
+  ScaffoldB [label="4. Scaffold\n(Brief/Scripts)"];
 
-## Mode Selection
+  Trigger -> ModeA [label="existing code"];
+  Trigger -> ModeB [label="new module"];
 
-- **Mode A: DIAGNOSE**: Existing codebase. Focus: Circular deps, God modules, bleed detection, git coupling.
-- **Mode B: DESIGN**: New feature/module. Focus: Boundary integrity, reversibility, pattern selection.
+  ModeA -> ExploreA -> PresentA -> AlignA -> HandoffA;
+  ModeB -> IdentifyB -> SelectB -> StressB -> ScaffoldB;
+}
+```
 
-## MODE A — DIAGNOSE: Procedure
+**trigger:** Architecture review, design request, or structural issues (God modules, circular deps).
 
-1. **Explore (Phase 1)**:
-   - Detect tech stack (`package.json`, etc.).
-   - Run `check_locality.py`, `detect_bleed.py`, `git_coupling.py`, and `detect_hotspots.py`.
-   - **Fallback**: If scripts fail to run, manually analyze imports for circularities, use `grep` to find "God" modules (>500 lines or 20+ exports), and check file history for coupling.
-   - Read `references/dispatch-template.md` before dispatching.
-   - Dispatch `general-purpose` agent with the template for structural analysis.
-2. **Present (Phase 2)**: List 3-6 deepening opportunities. Format: [Short Name], [Files], [The Bleed], [The Deepening], [Impact], [Risk], [Mermaid Diagram].
-3. **Align (Phase 3)**:
-   - Read `references/DOMAIN_INTERVIEW.md` and conduct the interview.
-   - Propose the Seam (New Interface Shape).
-     - **Requirement**: The proposal MUST include a TypeScript/Python interface definition, a description of the data flow, and a "Before vs. After" dependency graph (Mermaid).
-   - Write `architecture-brief.json` (approach, scope, constraints, interface, first_step).
+**action: Route & Confirm**
+Route and confirm via `AskUserQuestion` (or 3-option markdown block):
+
+1. ✅ **Recommended** — [Concrete Answer] based on [evidence: imports, size, churn].
+2. **Alternative** — [Plausible Option] + condition for use.
+3. **Other** — Custom response.
+
+**routing:**
+| Mode | Focus |
+| :--- | :--- |
+| **A: DIAGNOSE** | Existing code. God modules, bleed, git coupling, circular deps. |
+| **B: DESIGN** | New feature/module. Boundary integrity, reversibility, patterns. |
+
+**action: MODE A — DIAGNOSE**
+
+1. **Explore**:
+   - Detect tech stack.
+   - Run `check_locality.py`, `detect_bleed.py`, `git_coupling.py`, `detect_hotspots.py`.
+   - **Fallback**: Manually analyze imports, "God" modules (>500 lines/20+ exports), and history.
+   - Dispatch `general-purpose` agent using `references/dispatch-template.md`.
+2. **Present**: List 3-6 opportunities: [Name], [Files], [Bleed], [Deepening], [Impact], [Risk], [Mermaid].
+3. **Align**:
+   - Interview via `references/DOMAIN_INTERVIEW.md`.
+   - Propose Seam: Interface definition, data flow, "Before vs After" Mermaid graph.
+   - Write `architecture-brief.json`.
    - Handoff to `refactor` or `planning`.
 
-## MODE B — DESIGN: Procedure
+**action: MODE B — DESIGN**
 
-1. **Diagnose**: Identify Core Domain vs. Mechanism.
-2. **Select Pattern**:
-   - Read `references/architecture-patterns.md` before proceeding.
-3. **Stress Test**: Apply Swap Test (If we swap [mechanism], what changes?).
-4. **Scaffold**: Write `architecture-brief.json` and run `scaffold_boundary.py`.
-   - **Fallback**: If `scaffold_boundary.py` fails, manually create the directory structure and interface files based on the brief.
+1. **Diagnose**: Identify Core Domain vs Mechanism.
+2. **Select Pattern**: Use `references/architecture-patterns.md`.
+3. **Stress Test**: Apply Swap Test (If [mechanism] changes, what breaks?).
+4. **Scaffold**: Write `architecture-brief.json`. Run `scaffold_boundary.py` or manually create structure.
 
-## Core Heuristics
+**heuristics:**
 
-- **Deletion Test**: Would removing this module scatter complexity across callers?
-- **Seam Test**: Can business logic be tested without I/O (DB/HTTP)?
-- **Locality Test**: Can a maintainer understand the module without reading 5+ dependents?
-- **Stability Rule**: Outer layers (UI, DB) depend on Domain (Logic), NEVER the reverse.
+- **Deletion:** Would removal scatter complexity across callers?
+- **Seam:** Is logic testable without I/O (DB/HTTP)?
+- **Locality:** Can module be understood without reading 5+ dependents?
+- **Stability:** UI/DB depends on Domain; never reverse.
 
-## NEVER
+**constraint:**
 
-- No PubSub for direct coupling (use composition).
-- No `utils/`, `common/`, or `shared/` grouping (use domain-based grouping).
-- No extract base class if composition is possible.
-- No shared DB schemas across bounded contexts.
+- Never use PubSub for direct coupling (use composition).
+- Never use `utils/`, `common/`, or `shared/` (use domain-based grouping).
+- Never extract base class if composition is possible.
+- Never share DB schemas across bounded contexts.

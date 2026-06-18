@@ -8,69 +8,94 @@ user-invocable: true
 
 Autonomous TDD execution. **HARD GATE:** No implementation code WITHOUT a failing test.
 
+## Process Flow
+
+```dot
+digraph test_driven_development {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Start [label="Start: TDD Request", shape=diamond];
+  Confirm [label="0. Confirm with User\n(Wait for prompt)"];
+  PreTDD [label="Pre-TDD: Interface\n(Signatures, Errors, Examples)"];
+
+  Loop [label="TDD Cycle", shape=ellipse];
+
+  Red [label="1. RED\n(Write failing test + minimal stub)"];
+  RunRed [label="Run Test: Confirm Failure", shape=diamond];
+
+  Green [label="2. GREEN\n(Write MINIMAL implementation)"];
+  RunGreen [label="Run Test: Confirm Pass", shape=diamond];
+
+  Refactor [label="3. REFACTOR\n(Surgical cleanup)"];
+  RunRefactor [label="Run Test: Stay passing", shape=diamond];
+
+  Stuck [label="Stuck? (3+ attempts)", shape=diamond];
+  Diagnose [label="Handoff:\ndiagnose/planning"];
+
+  CheckDone [label="All scenarios covered?", shape=diamond];
+  Done [label="Handoff:\nverification-before-completion"];
+
+  Start -> Confirm -> PreTDD -> Loop;
+  Loop -> Red -> RunRed;
+  RunRed -> Green [label="failure confirmed"];
+  Green -> RunGreen;
+  RunGreen -> Stuck;
+  Stuck -> Diagnose [label="yes"];
+  Stuck -> Refactor [label="no"];
+  Refactor -> RunRefactor -> CheckDone;
+  CheckDone -> Loop [label="no"];
+  CheckDone -> Done [label="yes"];
+}
+```
+
+**trigger:** TDD, write tests, implement feature, build this.
+**constraint:** No implementation code WITHOUT a failing test.
+**constraint:** Execute exactly ONE scenario per cycle. No horizontal slicing.
+
 ## Step 0: Confirm
 
-This will start an autonomous session (~N calls). Proceed? Wait for explicit user confirmation before writing any test.
+**action:** Output "This will start an autonomous session (~N calls). Proceed?"
+**gate:** Wait for explicit user confirmation.
 
-## 0. Pre-TDD: Interface Definition
+## Step 1: Pre-TDD Interface
 
-Document the public surface before writing tests:
+**action:** Document public surface:
 
 1. **Signatures:** `name(params) -> return_type`
-2. **Error Cases:** Explicit exception types or error returns.
-3. **Usage Examples:** 2-3 realistic scenarios.
-4. **Target:** Identify test file path (e.g., `tests/test_NAME.py`).
+2. **Error Cases:** Explicit exception types.
+3. **Usage:** 2-3 realistic scenarios.
+4. **Target:** Identify test file path.
 
-## 1. Execution Loop: RED → GREEN → REFACTOR
+## Step 2: RED (Failing Test)
 
-Execute exactly ONE scenario per cycle. **NEVER** batch tests (No horizontal slicing).
+**action:** Write simplest test for single core behavior.
+**action:** Write minimal stub to allow compilation (e.g., `pass`, `return null`).
+**action:** Run test.
+**gate:** Confirm failure (Assertion Fail). If pass, delete and rewrite.
 
-### Phase 1: RED (The Failing Test)
+## Step 3: GREEN (Minimal Implementation)
 
-1. Write the simplest possible test for a single core behavior.
-2. **Stubbing:** Write the **minimal** stub (e.g., `pass` in Python, `return null` in TS) to allow the test to compile and run. **DO NOT** implement any logic yet.
-3. **Run Test:** Execute the runner.
-   - **Runner Integration:**
-     - **pytest:** Look for `FAILED` or `ERROR`. Check `Captured stderr` for logs.
-     - **vitest/jest:** Look for `FAIL`. Check `AssertionError` diffs.
-     - **go test:** Look for `--- FAIL`.
-4. **Analyze Failure:**
-   - **Environment Fail:** (Missing module/import) → Fix environment → Rerun.
-   - **Assertion Fail:** (Correct RED) → Proceed to Green.
-   - **Pass?** → Delete and rewrite (tautology check).
+**action:** Commit/stash before editing.
+**action:** Write **absolute minimum** code to pass the test.
+**constraint:** No speculative abstractions or "just-in-case" logic.
+**escalation:** If stuck 3+ attempts, revert and write a smaller test.
+**escalation:** If still stuck, invoke `diagnose` or `planning`.
 
-### Phase 2: GREEN (Minimal Implementation)
+## Step 4: REFACTOR (Cleanup)
 
-1. **Checkpoint:** Commit/stash before editing.
-2. **Action:** Write the **absolute minimum** code to pass the specific test.
-3. **Constraint:** No speculative abstractions or \"just-in-case\" logic.
-4. **Failure:** If stuck for 3+ attempts, revert implemention and write a smaller test.
-5. **Escalation:** If a smaller test still fails 3+ times on the same scenario, STOP looping. Invoke `diagnose` if the implementation is the blocker, or return to `planning` if the spec/scenario itself is ambiguous or conflicting.
-
-### Phase 3: REFACTOR (Cleanup)
-
-1. Enter ONLY when current tests are GREEN.
-2. **Action:** Perform surgical improvements.
-   - **Refactoring Candidates:**
-     - **Rename:** Misnamed variables or functions.
-     - **Decompose:** Large functions into smaller ones.
-     - **Flatten:** Nested if/else blocks (use guard clauses).
-     - **DRY:** Extract common logic to helpers.
-3. **Rule:** Refactor and Implementation MUST be separate tool calls. Run tests between them.
+**gate:** Enter ONLY when tests are GREEN.
+**action:** Perform surgical improvements (Rename, Decompose, Flatten, DRY).
+**constraint:** Refactor and Implementation must be separate tool calls. Run tests between them.
 
 ## Mandatory Rules
 
-- **NEVER** mock internal collaborators. Mock only at system boundaries (API, DB, I/O).
-- **NEVER** bypass public interfaces for setup.
-- **NEVER** write multiple tests before implementing the first one.
-- **NEVER** skip the \"Run Test\" step between RED and GREEN.
-
-## When to Stop
-
-- Contract covered (all requirements + edge cases from spec).
-- Final GREEN cycle confirmed.
-- Code is readable without comments.
+**constraint:** Never mock internal collaborators. Mock only at system boundaries (API, DB, I/O).
+**constraint:** Never bypass public interfaces for setup.
+**constraint:** Never write multiple tests before implementing the first one.
+**constraint:** Never skip "Run Test" between RED and GREEN.
 
 ## Transition
 
-Invoke `verification-before-completion` after the final REFACTOR pass.
+**next:** Invoke `verification-before-completion` after final REFACTOR pass.

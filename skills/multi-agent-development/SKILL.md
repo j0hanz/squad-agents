@@ -9,6 +9,51 @@ argument-hint: '[path to plan file]'
 
 Orchestrate sequential task execution with zero context pollution and high quality-assurance.
 
+## When to Use
+
+```dot
+digraph when_to_use {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontname="Helvetica"];
+    edge [fontname="Helvetica", fontsize=10];
+
+    TaskType [label="Task Relationship", shape=diamond];
+
+    TaskType -> "Sequential (this skill)" [label="Dependencies or\nshared state"];
+    TaskType -> "Parallel (multi-agent-dispatch)" [label="Independent\ntasks"];
+
+    "Sequential (this skill)" [shape=box];
+    "Parallel (multi-agent-dispatch)" [shape=box];
+}
+```
+
+## Process Flow
+
+```dot
+digraph multi_agent_dev {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Start [label="Start Loop (Per Task)"];
+  Phase1 [label="Phase 1: Implement\n(General-purpose subagent)"];
+  Phase2 [label="Phase 2: Spec Compliance\n(Read-only reviewer)"];
+  Phase3 [label="Phase 3: Code Quality\n(Read-only auditor)"];
+  Next [label="Next Task?", shape=diamond];
+  Final [label="Final Validation\n(Test & Verify)"];
+
+  Start -> Phase1 -> Phase2;
+  Phase2 -> Phase3 [label="SPEC_PASS"];
+  Phase2 -> Phase1 [label="SPEC_FAIL", style=dashed];
+
+  Phase3 -> Next [label="QUALITY_PASS"];
+  Phase3 -> Phase1 [label="CRITICAL / IMPORTANT", style=dashed];
+
+  Next -> Start [label="yes"];
+  Next -> Final [label="no"];
+}
+```
+
 ## NEVER Do This
 
 - **NEVER** skip Phase 2 or 3 to save time. **WHY:** Bypassing gates leads to regression and spec drift.

@@ -7,72 +7,90 @@ argument-hint: '[symptom description or error trace]'
 
 # diagnose
 
-Identify the true root cause through systematic falsification. **DO NOT GUESS.** A hypothesis is a guess until it survives Phase 3.
+Identify true root cause through systematic falsification. **DO NOT GUESS.**
+
+## Process Flow
+
+```dot
+digraph diagnose {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Phase1 [label="Phase 1: Build Feedback Loop\n(Pass/Fail Signal)"];
+  Phase2 [label="Phase 2: Reproduce\n(Confirm Bug)"];
+  Phase3 [label="Phase 3: Hypothesize & Falsify\n(3-5 Hypotheses)"];
+  Phase4 [label="Phase 4: Instrumentation\n(Targeted Probes)"];
+  Phase5 [label="Phase 5: Red-Green Fix\n(Regression Test)"];
+  Phase6 [label="Phase 6: Finalization\n(De-instrument / Verify)"];
+
+  Phase1 -> Phase2 -> Phase3 -> Phase4 -> Phase5 -> Phase6;
+
+  Phase3 -> Phase3 [label="falsified", style=dashed];
+}
+```
+
+**trigger:** debug, fix crash, unexpected behavior.
+**constraint:** never apply multiple changes simultaneously. One hypothesis per run.
+**constraint:** never modify original source directly. Use working copy.
+**constraint:** never accept "works on my machine" as root cause.
 
 ## Phase 1: Build Feedback Loop
 
-Create a deterministic pass/fail signal.
-
-- **Requirement:** Target < 2s execution.
-- **Isolation:** Isolate filesystem, pin seeds/time.
-- **Gate:** If you cannot run code, request logs/telemetry. DO NOT proceed without a loop.
+**action:** Create deterministic < 2s pass/fail signal.
+**action:** Isolate filesystem, pin seeds/time.
+**gate:** If no code execution, request logs/telemetry. Do not proceed without loop.
 
 ## Phase 2: Reproduce
 
-Confirm the bug matches the report. Achievement of >50% reproduction rate is mandatory before hypothesis testing.
+**action:** Achieve >50% reproduction rate before hypothesis testing.
 
-## Phase 3: Hypothesize & Falsify (Parallel Split)
+## Phase 3: Hypothesize & Falsify
 
-- Read `references/phases.md` for guidance on the scientific falsification method before generating hypotheses.
+**action:** Read `references/phases.md` for scientific method.
+**action:** Generate 3-5 falsifiable hypotheses (Recent Changes > Logic > Env).
+**format:** "If [X] is the cause, then [Y] will change when I do [Z]."
+**dispatch:** If hypotheses are independent, use `multi-agent-dispatch`.
 
-1. **Generate Hypotheses:** 3-5 falsifiable hypotheses using Bayesian priors (Recent Changes > Logic > Env).
-2. **Format:** \"If [X] is the cause, then [Y] will change when I do [Z].\"
-3. **Dispatch Gate:** If hypotheses are independent (i.e., they test different modules, layers, or subsystems that don't share state), invoke `multi-agent-dispatch` to test in parallel.
+## Phase 4: Instrumentation
 
-## Phase 4: Instrumentation (Targeted Probes)
-
-Instrument code dynamically.
-
-- **Tagging:** Prefix all debug logs with `[DEBUG-XXXX]`.
-- **Method:** Use targeted probes (logs/REPL) at decision boundaries. NEVER \"log everything.\"
-- **Performance:** Use profilers (`time.perf_counter`), NOT logs.
+**action:** Instrument code dynamically at decision boundaries.
+**format:** Prefix debug logs with `[DEBUG-XXXX]`.
+**constraint:** Never "log everything." Use profilers (`time.perf_counter`) for perf issues.
 
 ## Phase 5: Red-Green Fix
 
-1. **Write Regression Test:** Target the failing seam **before** the fix.
-2. **Confirm RED:** Confirm the test fails.
-3. **Apply Fix:** Implement minimal changes on a working copy.
-4. **Confirm GREEN:** Confirm the test passes.
+**action:** Write regression test targeting failing seam **before** fix.
+**action:** Confirm RED (test fails).
+**action:** Apply minimal fix on working copy.
+**action:** Confirm GREEN (test passes).
 
 ## Phase 6: Finalization
 
-- [ ] **De-instrument:** Remove all `[DEBUG-XXXX]` tags.
-- [ ] **Verification:** Verify fix via the Phase 1 loop.
-- [ ] **Clean-up:** Delete throwaway scripts or promote to test suite.
+**action:** Remove all `[DEBUG-XXXX]` tags.
+**action:** Verify fix via Phase 1 loop.
+**action:** Delete throwaway scripts or promote to test suite.
 
 ## Transition
 
-- **From Verification:** If triggered by a regression in `verification-before-completion`, return to that skill after Phase 6 for re-verification.
-- **From Implementation:** If triggered during `test-driven-development` or `multi-agent-development`, return to the current task/phase in the parent skill.
+| Triggering Skill                 | Return Destination      |
+| :------------------------------- | :---------------------- |
+| `verification-before-completion` | Re-verify in same skill |
+| `test-driven-development`        | Current task/phase      |
+| `multi-agent-development`        | Current task/phase      |
 
-## Required Final Output
+## Output Format
 
 ```markdown
 ## Diagnosis Summary
 
-- **Symptom:** [Description]
-- **Root Cause:** [Correct Hypothesis]
-- **Fix:** [Changes]
-- **Feedback Loop:** [Reproduction Script]
+**symptom:** [Description]
+**root_cause:** [Correct Hypothesis]
+**fix:** [Changes]
+**feedback_loop:** [Reproduction Script]
 
 ## Post-Mortem
 
-- **Prevention:** [Architecture/Test improvement]
-- **Next Steps:** [Follow-up tasks]
+**prevention:** [Architecture/Test improvement]
+**next_steps:** [Follow-up tasks]
 ```
-
-## Critical Rules
-
-- **NEVER** apply multiple changes simultaneously. One hypothesis per run.
-- **NEVER** modify the original source directly. Use a working copy.
-- **NEVER** accept \"works on my machine\" as a root cause. The environment delta IS the bug.

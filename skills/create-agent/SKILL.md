@@ -10,6 +10,47 @@ allowed-tools: Bash(python *) Bash(python3 *)
 
 Agents are high-cost primitives. Use only for isolation, parallelism, or reusable roles. Use **skills** for inline instructions and **hooks** for fixed lifecycle actions.
 
+## When to Use
+
+```dot
+digraph when_to_use {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontname="Helvetica"];
+    edge [fontname="Helvetica", fontsize=10];
+
+    Need [label="What do you need?", shape=diamond];
+
+    Need -> "Skill" [label="inline instructions"];
+    Need -> "Hook" [label="fixed lifecycle action"];
+    Need -> "Agent Primitive" [label="isolation, parallelism,\nor reusable role"];
+
+    "Agent Primitive" -> "Subagent" [label="context isolation"];
+    "Agent Primitive" -> "Agent Team" [label="parallel tasks"];
+    "Agent Primitive" -> "Workflow" [label="orchestration"];
+    "Agent Primitive" -> "Managed Agent" [label="external API"];
+}
+```
+
+## Process Flow
+
+```dot
+digraph create_agent {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Step0 [label="0. Decision Tree\n(Select Primitive)"];
+  Step1 [label="1. Job Definition"];
+  Step2 [label="2. System Prompt\n(markdown-kv)"];
+  Step3 [label="3. Tools & Permissions"];
+  Step4 [label="4. Model & Effort"];
+  Step5 [label="5. Composition\n(Isolation/Memory)"];
+  Step6 [label="6. Validation\n(validate_agent.py)"];
+
+  Step0 -> Step1 -> Step2 -> Step3 -> Step4 -> Step5 -> Step6;
+}
+```
+
 ## 0. Decision Tree
 
 - **Context Flooding / Isolation:** Subagent

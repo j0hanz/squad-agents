@@ -8,6 +8,36 @@ disable-model-invocation: false
 
 Lifecycle management for Claude Agent Skills. Optimized for performance and triggering reliability.
 
+## Process Flow
+
+```dot
+digraph skill_builder {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Start [label="Start: Skill Request", shape=diamond];
+  Route [label="0. Intent Routing\n(New / Improve / Workflow)"];
+
+  Draft [label="1. Interview & Draft\n(SKILL.md, description, audit)"];
+  Test [label="2. Test Definition\n(evals.json, negative cases)"];
+
+  EvalLoop [label="3. Eval Loop", shape=ellipse];
+  Init [label="Setup\n(init_eval.py)"];
+  Execute [label="Parallel Run\n(with_skill vs baseline)"];
+  Grade [label="Grading\n(aggregate_benchmark)"];
+  Review [label="Viewer\n(generate_review.py)"];
+
+  Improve [label="4. Improvement Loop\n(Diagnose & Refine)"];
+  Done [label="Skill Published", shape=doublecircle];
+
+  Start -> Route -> Draft -> Test -> EvalLoop;
+  EvalLoop -> Init -> Execute -> Grade -> Review;
+  Review -> Improve -> Draft [label="re-iterate"];
+  Review -> Done [label="passing"];
+}
+```
+
 ## 0. Intent Routing
 
 - **New Skill:** [Interview and Draft](#step-1-interview--draft)

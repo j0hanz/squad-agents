@@ -8,6 +8,37 @@ disable-model-invocation: false
 
 Code review feedback requires technical evaluation, not emotional performance or blind compliance. Verify before implementing. Ask before assuming.
 
+## Process Flow
+
+```dot
+digraph receive_code_review {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Start [label="Start: Feedback Received", shape=diamond];
+  Identify [label="1. Identify Source\n(Subagent, Human, Bot)"];
+  Read [label="2. Read & Clarify\n(Stop if ambiguous)"];
+
+  Verify [label="3. Verify Finding\n(MANDATORY)"];
+  CheckMatch [label="Match Codebase?\nNo Regressions?\nNo Conflicts?", shape=diamond];
+
+  Respond [label="4. Respond\n(Technical/Fact-based)"];
+  Implement [label="5. Implement\n(Severity Order)"];
+  Test [label="6. Test Individual Fix"];
+  Loop [label="Repeat for each item", shape=ellipse];
+
+  Done [label="Handoff:\nverification-before-completion"];
+
+  Start -> Identify -> Read -> Verify;
+  Verify -> CheckMatch;
+  CheckMatch -> Respond [label="Verified or\nPushback"];
+  Respond -> Implement -> Test;
+  Test -> Loop -> Verify [label="Next item"];
+  Loop -> Done [label="All items fixed"];
+}
+```
+
 ## NEVER Do This
 
 - **NEVER** write a performative-agreement phrase or thank the reviewer (e.g., \"you're right\", \"great catch\"). **WHY:** LLM sycophancy masks technical gaps. The fix is the acknowledgment.

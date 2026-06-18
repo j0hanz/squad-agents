@@ -8,6 +8,38 @@ disable-model-invocation: false
 
 Improve structure without changing behavior. Focus on readability, testability, and extensibility.
 
+## Process Flow
+
+```dot
+digraph refactor {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Start [label="Start: Refactor Request", shape=diamond];
+  Baseline [label="1. Baseline Analysis\n(Grep, Invariants, Tests)"];
+  Map [label="2. Pain Point Mapping\n(Smell Catalog)"];
+  Priority [label="3. Priority & Risk\n(Low -> Med -> High)"];
+
+  Loop [label="Execution Cycle", shape=ellipse];
+  Tools [label="Automated Tools\n(Prettier, ESLint)"];
+  Change [label="Small Change"];
+  Verify [label="Verify\n(Diff, Tests, Typecheck)"];
+
+  BugCheck [label="Bug Discovered?", shape=diamond];
+  Diagnose [label="Handoff:\ndiagnose"];
+
+  Done [label="Handoff:\nverification-before-completion"];
+
+  Start -> Baseline -> Map -> Priority -> Loop;
+  Loop -> Tools -> Change -> Verify;
+  Verify -> BugCheck;
+  BugCheck -> Diagnose [label="yes"];
+  BugCheck -> Loop [label="no (next change)"];
+  Loop -> Done [label="all changes complete"];
+}
+```
+
 ## Step 1: Baseline Analysis
 
 Build a mental model before touching code:
