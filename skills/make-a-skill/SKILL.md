@@ -1,12 +1,12 @@
 ---
 name: make-a-skill
-description: "Scaffold and validate new Claude Code skills in any project. Generates a SKILL.md skeleton with every body section as a placeholder and the description left blank until the body is drafted, then validates the result against the Anthropic skill spec and general best practice (structure, placeholders, dangling references, vague/passive language, token budget, evals.json shape). Not for editing an existing finished skill's prose. Trigger on: 'make a skill', 'build a skill', 'create a skill', 'scaffold a skill', 'new skill', 'make-a-skill', 'validate this skill', 'lint this skill'."
+description: "Scaffolds and validates a new Claude Code skill's structure: file layout, placeholders, dangling references, vague/passive language, token budget, evals.json shape. Not for editing an existing finished skill's prose. Trigger on: 'make a skill', 'build a skill', 'create a skill', 'scaffold a skill', 'new skill', 'make-a-skill', 'validate this skill', 'lint this skill'."
 disable-model-invocation: false
 ---
 
 # make-a-skill
 
-Scaffold a new skill from a template, draft its body, then validate it before calling it done. Works in any project this plugin is installed in.
+Scaffold a new skill from a template, draft its body, then validate it before calling it done.
 
 ## Process Flow
 
@@ -20,14 +20,13 @@ digraph make_a_skill {
   Draft [label="2. Draft Body\n(fill placeholders,\nleave description)"];
   Validate1 [label="3. Validate\n(validate_skill.py)"];
   ErrCheck [label="Errors?", shape=diamond];
-  Describe [label="4. Write Real Description\n(now that the body is finished)"];
-  Validate2 [label="5. Final Validate"];
+  Describe [label="4. Write Real Description\n+ revalidate"];
   Done [label="Done"];
 
   Scaffold -> Draft -> Validate1 -> ErrCheck;
   ErrCheck -> Draft [label="yes"];
   ErrCheck -> Describe [label="no"];
-  Describe -> Validate2 -> Done;
+  Describe -> Done;
 }
 ```
 
@@ -51,11 +50,9 @@ python "$CLAUDE_PLUGIN_ROOT/skills/make-a-skill/scripts/validate_skill.py" <name
 
 Fix every `[X]` ERROR before continuing — these include leftover `{{FILL` placeholders, a `name`/directory mismatch, and dangling links to `references/`/`scripts/`/`evals/` files that don't exist. Review `[!]` WARNINGs (vague adjectives, passive voice, an unreferenced sibling file, a too-long body with no `references/` split) but they don't block progress on their own — use judgment.
 
-## Step 4: Write the real description
+## Step 4: Write the real description, then revalidate
 
 Only now, with the body finished, replace the placeholder `description`. It must be third person, state what the skill is for, name the sibling skill to use instead when this one doesn't apply, and end with an explicit `Trigger on: 'phrase one', 'phrase two', ...` clause listing literal phrases a user might type (see `references/checklist.md` §Description). Writing it last, instead of up front, means it describes what the skill actually became rather than what it was guessed to be.
-
-## Step 5: Final validate
 
 Re-run Step 3's command. It must report `VALID (0 error(s), ...)` before the skill is considered done. Zero errors is mandatory; outstanding warnings are a judgment call.
 
@@ -63,7 +60,7 @@ Re-run Step 3's command. It must report `VALID (0 error(s), ...)` before the ski
 
 - **NEVER** write the real `description` before the body is drafted. **WHY:** the two-pass split exists so the description reflects what the skill actually does, not a guess made before any of it was written. **FIX:** leave the `{{FILL` placeholder through Step 3; only do Step 4 after Step 3 passes.
 - **NEVER** skip a repo's own plugin-wide validation (e.g. this plugin's own `npm run validate`) just because `validate_skill.py` passed. **WHY:** `validate_skill.py` checks one skill in isolation; a repo-wide validator may check things this can't see (plugin manifest, cross-skill consistency). **FIX:** run both if the target repo has one.
-- **NEVER** hand-write a SKILL.md skeleton instead of running `scaffold_skill.py`. **WHY:** hand-copying drifts from the placeholder-marker convention `validate_skill.py` depends on to catch unfinished sections. **FIX:** always scaffold first, even for a one-off skill.
+- **NEVER** hand-write a SKILL.md skeleton instead of running `scaffold_skill.py`. **WHY:** hand-copying drifts from the placeholder-marker convention `validate_skill.py` depends on to catch unfinished sections. **FIX:** always scaffold first.
 
 ## Handoff
 
