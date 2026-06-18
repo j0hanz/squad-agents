@@ -15,11 +15,12 @@ agent_dev_json_escape() {
   fi
   # bash-only fallback if jq is unavailable in the consuming repo
   local out="$input"
-  out="${out//\\/\\\\}"
-  out="${out//\"/\\\"}"
-  out="${out//$'\n'/\\n}"
-  out="${out//$'\r'/\\r}"
-  out="${out//$'\t'/\\t}"
+  local bs='\'
+  out="${out//"$bs"/"$bs$bs"}"
+  out="${out//\"/"$bs"\"}"
+  out="${out//$'\n'/"$bs"n}"
+  out="${out//$'\r'/"$bs"r}"
+  out="${out//$'\t'/"$bs"t}"
   printf '%s' "$out"
 }
 
