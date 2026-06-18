@@ -37,6 +37,8 @@ CHECKS:
   4. Error handling: Are all error paths handled, propagated, or explicitly documented as out-of-scope?
   5. File growth: Did any file gain >150 lines?
   6. Interface clarity: Are public APIs clearly named and typed?
+  7. Security: Any injection risk (SQL/command/template), unsanitized input crossing a trust
+     boundary, secrets/credentials committed, or unsafe deserialization introduced by this task?
 
 OUTPUT:
   VERDICT: [QUALITY_PASS | CRITICAL | IMPORTANT | MINOR]
@@ -64,12 +66,12 @@ OUTPUT:
 
 ## Verdict Rules
 
-| Verdict        | Definition                                                                                      | Action                               |
-| :------------- | :---------------------------------------------------------------------------------------------- | :----------------------------------- |
-| `QUALITY_PASS` | No CRITICAL or IMPORTANT issues                                                                 | Advance to next task                 |
-| `CRITICAL`     | Silent failure, broken abstraction, untested error path risking data loss or incorrect behavior | Fix before advancing; re-run Phase 3 |
-| `IMPORTANT`    | Responsibility violation, tight coupling, test gap causing near-term pain                       | Fix before advancing                 |
-| `MINOR`        | Style inconsistency, minor naming issue                                                         | Log; fix later                       |
+| Verdict        | Definition                                                                                                                       | Action                               |
+| :------------- | :------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------- |
+| `QUALITY_PASS` | No CRITICAL or IMPORTANT issues                                                                                                  | Advance to next task                 |
+| `CRITICAL`     | Silent failure, broken abstraction, untested error path risking data loss or incorrect behavior, or any Check 7 security finding | Fix before advancing; re-run Phase 3 |
+| `IMPORTANT`    | Responsibility violation, tight coupling, test gap causing near-term pain                                                        | Fix before advancing                 |
+| `MINOR`        | Style inconsistency, minor naming issue                                                                                          | Log; fix later                       |
 
 ## Dispatcher Rules
 

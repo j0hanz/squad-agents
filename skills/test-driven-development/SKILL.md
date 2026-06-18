@@ -47,9 +47,10 @@ digraph test_driven_development {
   Loop -> Red -> RunRed;
   RunRed -> Green [label="failure confirmed"];
   Green -> RunGreen;
-  RunGreen -> Stuck;
+  RunGreen -> Stuck [label="fail"];
+  RunGreen -> Refactor [label="pass"];
   Stuck -> Diagnose [label="yes"];
-  Stuck -> Refactor [label="no"];
+  Stuck -> Green [label="no, retry"];
   Refactor -> RunRefactor -> CheckDone;
   CheckDone -> Loop [label="no"];
   CheckDone -> Done [label="yes"];
@@ -90,6 +91,17 @@ Propose and confirm the public surface via `AskUserQuestion`:
 **action:** Write minimal stub to allow compilation (e.g., `pass`, `return null`).
 **action:** Run test.
 **gate:** Confirm failure (Assertion Fail). If pass, delete and rewrite.
+
+### N-1 Test (False-Green Elimination)
+
+A test that never fails proves nothing. Before trusting any GREEN result (here or in `verification-before-completion`):
+
+1. **Revert** the implementation change (stash or comment it out) while keeping the test.
+2. **Fail** — run the test, confirm it fails. If it still passes, the test is not exercising the behavior; rewrite it.
+3. **Fix** — restore the implementation.
+4. **Pass** — run the test again, confirm it passes.
+
+Use this whenever a test's failure mode is non-obvious (e.g., async code, mocked boundaries, snapshot tests).
 
 ## Step 3: GREEN (Minimal Implementation)
 

@@ -17,6 +17,9 @@ digraph using_agent_dev_skills {
 
   Start [label="Start: New Task", shape=diamond];
 
+  Gate0 [label="Gate 0: Repo Onboarded?", shape=diamond];
+  Init [label="codebase-init"];
+
   Gate1 [label="Gate 1: Fully Defined?", shape=diamond];
   Brainstorm [label="brainstorming"];
   Planning [label="planning"];
@@ -31,7 +34,17 @@ digraph using_agent_dev_skills {
   Dev [label="multi-agent-development"];
   TDD [label="test-driven-development"];
 
-  Start -> Gate1;
+  Gate4 [label="Gate 4: Quality & Delivery", shape=diamond];
+  Verify [label="verification-before-completion"];
+  RCR [label="request-code-review"];
+  GH [label="github-automation"];
+  Receive [label="receive-code-review"];
+
+  Start -> Gate0;
+  Gate0 -> Init [label="no AGENTS.md"];
+  Gate0 -> Gate1 [label="onboarded"];
+  Init -> Gate1;
+
   Gate1 -> Brainstorm [label="vague/no spec"];
   Gate1 -> Planning [label="idea only"];
   Gate1 -> Gate2 [label="spec+plan exist"];
@@ -44,6 +57,17 @@ digraph using_agent_dev_skills {
   Gate3 -> Dispatch [label="independent"];
   Gate3 -> Dev [label="sequential/complex"];
   Gate3 -> TDD [label="standard/focused"];
+
+  Dispatch -> Gate4;
+  Dev -> Gate4;
+  TDD -> Gate4;
+
+  Gate4 -> Verify -> RCR;
+  RCR -> GH [label="PASS"];
+  RCR -> Receive [label="FAIL"];
+  Receive -> Diagnose [label="blocking issue"];
+  Receive -> Refactor [label="hygiene issue"];
+  Receive -> RCR [label="re-review, capped at 2"];
 }
 ```
 
@@ -63,6 +87,13 @@ Announce the identified route and confirm via `AskUserQuestion`:
 4. **No Skips:** Do NOT skip because a task seems \"simple\" or \"quick\". Every change deserves the appropriate rigor.
 
 ## Diagnostic Decision Tree
+
+### Gate 0: Is the repo onboarded?
+
+- **IF** no `AGENTS.md`/`CLAUDE.md` exists at the repo root:
+  -> **ROUTE TO:** `codebase-init`. Note: this skill has `disable-model-invocation: true` — it must be explicitly invoked by the user, not auto-triggered. Surface it as a recommendation, not an automatic route.
+- **IF** the repo is already onboarded:
+  -> **Proceed to Gate 1.**
 
 ### Gate 1: Is the task fully defined?
 
@@ -95,7 +126,16 @@ Announce the identified route and confirm via `AskUserQuestion`:
 - **IF** writing standard code (single focused feature/fix):
   -> **ROUTE TO:** `test-driven-development` ⚠️
 
-⚠️ **Agentic Skill Warning:** `test-driven-development` and `request-code-review` execute autonomously. Output `This will start an autonomous session (~N calls). Proceed?` and wait for user confirmation.
+⚠️ **Agentic Skill Warning:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` execute autonomously (each dispatches multiple subagent calls). Output `This will start an autonomous session (~N calls). Proceed?` and wait for user confirmation. `multi-agent-development` is the most expensive of these (N tasks × up to 3 subagent phases × up to 2 retries) — never skip its confirmation gate.
+
+### Gate 4: Quality & Delivery
+
+After Gate 3's execution skill completes:
+
+- **ALWAYS** -> **ROUTE TO:** `verification-before-completion` to gather execution evidence.
+- **THEN** -> **ROUTE TO:** `request-code-review` (mandatory for non-trivial changes — it is the only security gate in the multi-agent-development flow).
+  - **IF PASS** -> **ROUTE TO:** `github-automation` to open the PR. Note: `disable-model-invocation: true` — this is a deliberate human-invoked delivery gate, not an automatic hop.
+  - **IF FAIL** -> **ROUTE TO:** `receive-code-review` to process feedback, which may loop back to `diagnose` (blocking issues) or `refactor` (hygiene), then re-review (capped at 2 cycles before escalating to the user).
 
 ## Mandatory Rules (NEVER List)
 
@@ -103,6 +143,8 @@ Announce the identified route and confirm via `AskUserQuestion`:
 - **NEVER** skip `architecting` for `refactor` if changes span 3+ files or cross module boundaries.
 - **NEVER** use `multi-agent-dispatch` if tasks have _any_ shared mutable state or logical dependencies.
 - **NEVER** ignore the `diagnose` step when a bug is encountered during a feature implementation.
+- **NEVER** treat Gate 4 (`request-code-review`) as optional after `multi-agent-development` — its quality gate does not check security; `request-code-review` is the only skill in the ecosystem that does.
+- **NEVER** auto-invoke `codebase-init` or `github-automation` — both have `disable-model-invocation: true` by design. Recommend them; let the user trigger them.
 
 **next skills:**
 
@@ -114,10 +156,10 @@ Announce the identified route and confirm via `AskUserQuestion`:
 
 ## Auxiliary Skills
 
-- **Quality/Validation:** `verification-before-completion`, `request-code-review`, `receive-code-review`.
-- **Delivery:** `github-automation`.
-- **Ecosystem Building:** `skill-builder`.
-- **Documentation:** `codebase-init`.
+- **Quality/Validation:** `verification-before-completion`, `request-code-review`, `receive-code-review` — see Gate 4.
+- **Delivery:** `github-automation` — see Gate 4.
+- **Repo Onboarding:** `codebase-init` — see Gate 0.
+- **Ecosystem Building:** `skill-builder` — top-level entry point for building/improving skills themselves; not part of the product-code workflow, so it has no gate in this tree.
 
 ## Skip Disclaimer
 

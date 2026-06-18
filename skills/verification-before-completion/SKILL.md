@@ -41,7 +41,7 @@ digraph verification_before_completion {
 
 **action:** Verify all items before completion.
 
-- [ ] **Tests:** Targeted tests and regression suite pass.
+- [ ] **Tests:** Targeted tests and regression suite pass. Paste actual runner output (exit code + pass/fail counts) — a claim without pasted output is not evidence.
 - [ ] **Manual:** Documented inputs/outputs if no automation.
 - [ ] **Bug Fix:** Confirm reproduction failure then confirm success.
 - [ ] **Clean:** `grep` sweep for debug logs/tags (`debugger`, `pdb`, `TODO`).
@@ -87,7 +87,7 @@ If no automated pass/fail signal exists, propose a manual test plan via `AskUser
 
 ## 5. Expert Patterns
 
-**action:** Use N-1 test (as defined in `test-driven-development`) to eliminate false greens (Revert → Fail → Fix → Pass).
+**action:** Use the N-1 test (Revert → Fail → Fix → Pass, see [`test-driven-development`](../test-driven-development/SKILL.md#n-1-test-false-green-elimination)) to eliminate false greens.
 **action:** Test `null`, `undefined`, empty collections, and boundary cases to ensure robust coverage.
 
 **next skills:**

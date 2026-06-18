@@ -54,7 +54,7 @@ Extract requirements and confirm the skill draft via `AskUserQuestion`:
 2. **Alternative** — [Alternative approach] + reason.
 3. **Other** — Custom draft.
 
-4. **Audit:** Dispatch `general-purpose` agent to check triggering effectiveness.
+4. **Audit:** Dispatch `general-purpose` agent to check triggering effectiveness, using the [subagent-contract](../multi-agent-dispatch/references/subagent-contract.md) (SCOPE/OBJECTIVE/CONTEXT/CONSTRAINTS/OUTPUT SCHEMA).
    - **Red Flags:** Vague triggers, tool overlap with existing skills, nested loops in instructions, missing I/O contracts.
 
 ## Step 2: Test Definition
@@ -70,9 +70,9 @@ Save cases to `evals/evals.json`.
 ## Step 3: Eval Loop (Iteration N)
 
 1. **Setup:** `python scripts/init_eval.py --skill-name <name> --eval-id <ID>`
-2. **Execute:** Spawn `with_skill` and `baseline` subagents in parallel.
+2. **Execute:** Spawn `with_skill` and `baseline` subagents in parallel, using the [subagent-contract](../multi-agent-dispatch/references/subagent-contract.md) for each prompt. **Max 5 concurrent agents per batch** — if more than 5 eval cases run together, batch the rest sequentially.
 3. **Metrics:** Capture `total_tokens` and `duration_ms` into `timing.json`.
-4. **Grade:** Dispatch agent to score assertions. Save to `grading.json`.
+4. **Grade:** Dispatch agent to score assertions against the OUTPUT SCHEMA's `EVIDENCE` field. Save to `grading.json`.
 5. **Aggregate:** `python -m scripts.aggregate_benchmark <workspace>/iteration-N`
 6. **Viewer:** Launch `generate_review.py`. Provide clickable link.
 

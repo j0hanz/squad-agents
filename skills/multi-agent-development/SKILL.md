@@ -67,6 +67,15 @@ digraph multi_agent_dev {
 - **Dependencies or shared state?** → **Sequential** (This skill).
 - **Independent tasks?** → **Parallel** (`multi-agent-dispatch`).
 
+## Step 0: Confirm
+
+**action: Autonomy Confirmation**
+This skill dispatches multiple subagents per task (implementer + up to 2 reviewers, × up to 2 retries each). Before starting, confirm via `AskUserQuestion`:
+
+1. ✅ **Recommended** — Proceed with multi-agent-development for [N tasks from plan]. This will start an autonomous session (~[N × 3-9] calls). Proceed?
+2. **Alternative** — Run a single task first to validate the approach.
+3. **Other** — Custom response.
+
 ## Partitioning & Scope
 
 **action: Partition Tasks**
@@ -86,8 +95,8 @@ Execute Phases 1 → 2 → 3 in strict order.
 ### Phase 1: Implement
 
 - Dispatch a `general-purpose` subagent with `isolation: \"worktree\"`.
-- **Prompt Contract:** Carry `SCOPE`, `OBJECTIVE`, `CONTEXT`, `CONSTRAINTS`.
-- **Outcome:** `DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT`.
+- **Prompt Contract:** Read [`../multi-agent-dispatch/references/subagent-contract.md`](../multi-agent-dispatch/references/subagent-contract.md) and carry `SCOPE`, `OBJECTIVE`, `CONTEXT`, `CONSTRAINTS`, `OUTPUT SCHEMA`.
+- **Outcome:** `VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]`, `FILES_TOUCHED`, `COMMIT`, `SUMMARY`.
 
 ### Phase 2: Spec Compliance Gate
 
@@ -109,13 +118,14 @@ Execute Phases 1 → 2 → 3 in strict order.
 
 Advance only after Phase 3 passes. After ALL tasks pass:
 
-1. `npm test && npm run validate`
-2. Invoke `verification-before-completion`
+1. Run the project's test and validate commands (read from `AGENTS.md` / package manifest — never assume `npm`).
+2. Invoke `verification-before-completion`.
+3. Invoke `request-code-review`. **MANDATORY, not optional** — Phase 3's quality gate does not check security (see Check 7 in `quality-reviewer-prompt.md`); `request-code-review` Tier 1 is the only security gate in this workflow.
 
 **next skills:**
 
 - `verification-before-completion`: After all tasks in the plan are complete and pass quality gates, to ensure system-wide integrity.
-- `request-code-review`: For non-trivial changes that require an unbiased, fresh-context audit before merging.
+- `request-code-review`: Mandatory fresh-context security and correctness audit before merging — the quality gate in this skill does not cover security.
 
 ## Operational Rules
 

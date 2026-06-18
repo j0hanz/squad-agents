@@ -68,10 +68,7 @@ Analyze the work and confirm the parallel grouping via `AskUserQuestion`:
 2. **Alternative** — [Alternative Grouping] + justification.
 3. **Other** — Custom groups.
 
-4. **SELECT:** Configure `general-purpose` agents with specialized roles in prompt constraints.
-   - **Investigator (Read-only):** Trace root cause, provide fix as code block. No edits.
-   - **Writer (Isolation: worktree):** Implement spec, write tests, report changes.
-   - **Researcher (Read-only):** Explore code/docs, report file paths and usages.
+4. **SELECT:** Configure `general-purpose` agents with specialized roles per the Role Vocabulary in [`references/subagent-contract.md`](references/subagent-contract.md) (Investigator/Writer/Researcher). For read-only roles, explicitly instruct no Write/Edit — and note this is an instruction, not an enforced restriction, unless the harness supports a tool allowlist.
 5. **LAUNCH:**
    - Enumerate each subagent's intended write-paths (from its SCOPE).
    - Diff them against every other subagent's write-paths.
@@ -85,19 +82,7 @@ Analyze the work and confirm the parallel grouping via `AskUserQuestion`:
 
 ## Subagent Prompt Contract (Zero-Shot)
 
-Every prompt MUST contain:
-
-- **SCOPE:** Validated paths (In/Out of bounds).
-- **OBJECTIVE:** One concrete verifiable/falsifiable outcome.
-- **CONTEXT:** Error text, versions, baseline commit — everything to start cold.
-- **CONSTRAINTS:** Tool restrictions and specific "Do Not" rules.
-- **OUTPUT SCHEMA:** Instruct subagents to return data in this format:
-  ```text
-  VERDICT: [SUCCESS | FAILURE | BLOCKED]
-  FILES_TOUCHED: [list of paths]
-  SUMMARY: [concise what was done]
-  EVIDENCE: [test results or grep output]
-  ```
+**MANDATORY**: Read [`references/subagent-contract.md`](references/subagent-contract.md) — the canonical SCOPE/OBJECTIVE/CONTEXT/CONSTRAINTS/OUTPUT SCHEMA contract and role vocabulary used by every dispatching skill in this ecosystem.
 
 ## Integration Rules
 

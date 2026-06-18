@@ -55,7 +55,7 @@ Read `references/phases.md` and propose 3-5 falsifiable hypotheses via `AskUserQ
 3. **Other** — Custom hypothesis.
 
 **format:** "If [X] is the cause, then [Y] will change when I do [Z]."
-**dispatch:** If hypotheses are independent, use `multi-agent-dispatch`.
+**dispatch:** If hypotheses are independent, use `multi-agent-dispatch`. Each hypothesis agent must be a **Writer with `isolation: worktree`** (not the read-only Investigator role) — instrumenting and running an experiment mutates a working copy, so each agent needs its own worktree. Disjoint by construction since each agent tests a different hypothesis.
 
 ## Phase 4: Instrumentation
 

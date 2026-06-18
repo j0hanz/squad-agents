@@ -93,6 +93,7 @@ For any missing core field, confirm via `AskUserQuestion`:
 
 Dispatch `general-purpose` agent to audit quality (vague goals, missing error cases, multi-outcome tasks).
 
+- **MANDATORY**: Read [`../multi-agent-dispatch/references/subagent-contract.md`](../multi-agent-dispatch/references/subagent-contract.md) and use its SCOPE/OBJECTIVE/CONTEXT/CONSTRAINTS/OUTPUT SCHEMA contract for the dispatch prompt.
 - **MANDATORY**: Pass `references/validation.md` and the output of `validate.py` to the Reviewer subagent.
 - Reviewer writes to `plan/NAME.review.md`.
 - **Handoff Blocked** until `ready_for_execution: true` is set in review file.
@@ -101,6 +102,8 @@ Dispatch `general-purpose` agent to audit quality (vague goals, missing error ca
 ## Step 5: Handoff
 
 Pass plan to `test-driven-development`, `multi-agent-development`, or `multi-agent-dispatch` (for independent task clusters).
+
+**If handing off to `multi-agent-development` or `multi-agent-dispatch`:** Both require a `Baseline commit` to give reviewers a precise diff range. Before handoff, ensure the current state is committed and record that commit hash (`git rev-parse HEAD`) in the handoff message — these skills cannot diff against an uncommitted or unknown baseline.
 
 **next skills:**
 
