@@ -49,11 +49,12 @@ json_escape() {
   # json_escape <string> — minimal escaping for embedding inside a JSON
   # string literal we build by hand (no jq dependency on this path).
   local s="$1"
-  s="${s//\\/\\\\}"
-  s="${s//\"/\\\"}"
-  s="${s//$'\n'/\\n}"
-  s="${s//$'\r'/\\r}"
-  s="${s//$'\t'/\\t}"
+  local bs='\'
+  s="${s//"$bs"/"$bs$bs"}"
+  s="${s//\"/"$bs"\"}"
+  s="${s//$'\n'/"$bs"n}"
+  s="${s//$'\r'/"$bs"r}"
+  s="${s//$'\t'/"$bs"t}"
   printf '%s' "$s"
 }
 
