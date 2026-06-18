@@ -69,7 +69,7 @@ Ask exactly 3 `AskUserQuestion` prompts, in this exact order, once per init. For
    - **Alternative** — [Alternative Option].
    - **Other** — Custom answer.
 
-Read `references/hard-rules.md` for the exact option wording and headers each prompt must use.
+Read `references/hard-rules.md` for the exact option wording, headers, and the Recommendation Heuristics each prompt's ✅ Recommended choice must be derived from (don't invent the heuristic ad hoc).
 
 **Cancellation:** If the user cancels or dismisses any of the 3 prompts, halt immediately. Do not proceed to Phase 1 or draft any part of `AGENTS.md`. No partial file should be written.
 

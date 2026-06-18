@@ -95,7 +95,7 @@ Execute Phases 1 → 2 → 3 in strict order.
 ### Phase 1: Implement
 
 - Dispatch a `general-purpose` subagent with `isolation: \"worktree\"`.
-- **Prompt Contract:** Read [`../multi-agent-dispatch/references/subagent-contract.md`](../multi-agent-dispatch/references/subagent-contract.md) and carry `SCOPE`, `OBJECTIVE`, `CONTEXT`, `CONSTRAINTS`, `OUTPUT SCHEMA`.
+- **Prompt Contract:** Read [`../multi-agent-dispatch/references/subagent-contract.md`](../multi-agent-dispatch/references/subagent-contract.md) and carry `SCOPE`, `OBJECTIVE`, `CONTEXT`, `CONSTRAINTS`, `OUTPUT SCHEMA`. (Shared with `multi-agent-dispatch` by reference, not copy — if that skill is ever removed/renamed, update this path too.)
 - **Outcome:** `VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]`, `FILES_TOUCHED`, `COMMIT`, `SUMMARY`.
 
 ### Phase 2: Spec Compliance Gate

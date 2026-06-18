@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "Structured discovery to prevent rework. Use for new features or ambiguous requirements. Trigger on: 'let's build', 'new feature', 'I want to implement', 'add X to', 'ambiguous design', 'unclear terminology', 'requirements discovery', 'brainstorming', 'stakeholder probe', 'glossary definition'."
+description: "Structured discovery to prevent rework. Use for new product features or ambiguous requirements — not for building/improving a Claude Code skill itself (see skill-builder). Trigger on: 'let's build a feature', 'new feature', 'I want to implement', 'add X to', 'ambiguous design', 'unclear terminology', 'requirements discovery', 'brainstorming', 'stakeholder probe', 'glossary definition'."
 ---
 
 # brainstorming

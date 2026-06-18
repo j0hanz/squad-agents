@@ -1,6 +1,6 @@
 ---
 name: using-agent-dev-skills
-description: "Global orchestrator for agent-dev skills. Diagnostic gating to route tasks to optimal skills. Trigger on: 'start task', 'route work', 'using-agent-dev-skills', 'skill selection', 'task diagnostic', 'orchestrate development'."
+description: "Global orchestrator for agent-dev skills. Diagnostic gating to route tasks to optimal skills. Use as the default entry point for any software engineering task in this repo — feature requests, bug investigations, reviews — not just explicit routing requests. Trigger on: 'start task', 'route work', 'using-agent-dev-skills', 'skill selection', 'task diagnostic', 'orchestrate development', and ordinary task requests like 'fix this bug', 'add a feature', 'investigate why X is failing'."
 ---
 
 # using-agent-dev-skills
@@ -143,6 +143,7 @@ After Gate 3's execution skill completes:
 - **NEVER** skip `architecting` for `refactor` if changes span 3+ files or cross module boundaries.
 - **NEVER** use `multi-agent-dispatch` if tasks have _any_ shared mutable state or logical dependencies.
 - **NEVER** ignore the `diagnose` step when a bug is encountered during a feature implementation.
+- **NEVER** let `test-driven-development` retry indefinitely — if it fails to pass after 3 attempts, escalate to `diagnose` (implementation stuck) or `planning` (spec ambiguous). See `references/lifecycle.md` Transition States.
 - **NEVER** treat Gate 4 (`request-code-review`) as optional after `multi-agent-development` — its quality gate does not check security; `request-code-review` is the only skill in the ecosystem that does.
 - **NEVER** auto-invoke `codebase-init` or `github-automation` — both have `disable-model-invocation: true` by design. Recommend them; let the user trigger them.
 

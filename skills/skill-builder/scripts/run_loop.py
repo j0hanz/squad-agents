@@ -233,6 +233,8 @@ def main():
     args = parser.parse_args()
 
     eval_set = load_json(Path(args.eval_set))
+    for item in eval_set:
+        item.setdefault("query", item.get("prompt"))
     live_report_path = Path(args.live_report) if args.live_report else None
     log_dir = Path(args.log_dir) if args.log_dir else None
 

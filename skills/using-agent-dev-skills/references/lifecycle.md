@@ -41,5 +41,5 @@ graph TD
 
 ## Transition States
 
-- **TDD Escalation:** If TDD fails to pass after 3 attempts, it must return to `diagnose` or `planning`.
-- **Review Failure:** `receive-code-review` analyzes the failure level and routes back to the appropriate corrective skill.
+- **TDD Escalation:** If TDD fails to pass after 3 attempts, it must return to `diagnose` or `planning`. This path is not yet reflected in `SKILL.md`'s Gate 3 text — treat it as authoritative until the main file is updated.
+- **Review Failure:** `receive-code-review` analyzes the failure level and routes back to the appropriate corrective skill, using `request-code-review`'s Tier classification (`references/patterns.md` in that skill): Tier 1 = Security, Tier 2 = Correctness, Tier 3 = Performance, Tier 4 = Reuse/hygiene. Tier 1/2 findings route to `diagnose`; Tier 4 routes to `refactor`; Tier 3 findings are non-blocking and require no escalation. `SKILL.md`'s Gate 4 describes this same routing using "blocking issue"/"hygiene issue" wording rather than tier numbers — both describe the same logic.

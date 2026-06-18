@@ -1,7 +1,7 @@
 ---
 name: test-driven-development
-description: "Strict Red-Green-Refactor development. Mandatory failing test before implementation. Trigger on: 'TDD', 'test-first', 'write tests', 'implement feature', 'test-driven-development', 'regression test', 'scenario coverage'."
-user-invocable: true
+description: "Strict Red-Green-Refactor development for new feature work. Mandatory failing test before implementation. Not for writing a regression test for an already-diagnosed bug fix (see diagnose). Trigger on: 'TDD', 'test-first', 'write tests', 'implement feature', 'test-driven-development', 'scenario coverage'."
+disable-model-invocation: false
 ---
 
 # test-driven-development

@@ -6,29 +6,25 @@ Canonical JSON formats for skill-builder.
 
 ## evals.json
 
-`evals/evals.json`. Defines skill test cases.
+`evals/evals.json`. Defines triggering test cases consumed directly by `scripts/run_eval.py` and `scripts/run_loop.py` (`load_json` passes the file's top-level array straight in as `eval_set` — it must be a flat array, not wrapped in an object).
 
 ```json
-{
-  "skill_name": "example-skill",
-  "evals": [
-    {
-      "id": 1,
-      "prompt": "Task",
-      "expected_output": "Success criteria",
-      "files": ["evals/files/sample.pdf"],
-      "expectations": ["Assertion A", "Assertion B"]
-    }
-  ]
-}
+[
+  {
+    "name": "should-trigger-on-make-skill",
+    "prompt": "Make a skill that helps me write database queries",
+    "should_trigger": true,
+    "assertions": ["skill-builder skill is triggered", "Skill interview is conducted"]
+  }
+]
 ```
 
-| Field                  | Notes                     |
-| :--------------------- | :------------------------ |
-| `skill_name`           | Matches skill frontmatter |
-| `evals[].id`           | Unique identifier         |
-| `evals[].prompt`       | Execution task            |
-| `evals[].expectations` | Verifiable statements     |
+- `name` — unique, human-readable case identifier
+- `prompt` — the user message to send for this case
+- `should_trigger` — `true`/`false`, whether the skill is expected to fire
+- `assertions` — verifiable statements checked against the transcript
+
+Include at least one `should_trigger: false` case per skill to catch over-eager triggering.
 
 ---
 

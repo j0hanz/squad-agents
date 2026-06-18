@@ -1,6 +1,6 @@
 ---
 name: architecting
-description: "Expert architecture review and system design. Use when a codebase has structural problems like circular dependencies, God modules, or boundary violations (bleed). Trigger on: 'architecture review', 'restructure this', 'too coupled', 'design this system', 'where should this code live', 'God class', 'circular deps', 'dependency mapping', 'domain boundaries'."
+description: "Expert architecture review and system design for problems spanning multiple files or module boundaries — circular dependencies, God modules, or boundary violations (bleed). Not for single-file cleanup (see refactor). Trigger on: 'architecture review', 'restructure across modules', 'too coupled', 'design this system', 'where should this code live', 'God class', 'circular deps', 'dependency mapping', 'domain boundaries'."
 disable-model-invocation: false
 allowed-tools: Bash(node *), Bash(python *), AskUserQuestion
 ---

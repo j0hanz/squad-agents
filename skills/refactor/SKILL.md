@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: "Improve code structure without changing behavior. Focus on readability and testability. Trigger on: 'clean up', 'refactor', 'simplify code', 'improve structure', 'modernize', 'code smell', 'extract function', 'rename symbol'."
+description: "Improve code structure without changing behavior, scoped to a single file or function. Focus on readability and testability. Not for changes spanning multiple files or module boundaries (see architecting). Trigger on: 'clean up', 'refactor', 'simplify code', 'improve this function's structure', 'modernize', 'code smell', 'extract function', 'rename symbol'."
 disable-model-invocation: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: receive-code-review
-description: "Technical processing of code review feedback. Verification and implementation of reviewer suggestions. Trigger on: 'review feedback', 'reviewer said', 'PR comments', 'fix review comments', 'receive-code-review', 'implement feedback'."
+description: "Technical processing of code review feedback you have already received. Verification and implementation of reviewer suggestions — not for requesting a new review (see request-code-review). Trigger on: 'review feedback', 'reviewer said', 'PR comments', 'fix review comments', 'receive-code-review', 'implement feedback'."
 disable-model-invocation: false
 ---
 

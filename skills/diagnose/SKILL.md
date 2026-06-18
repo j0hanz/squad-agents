@@ -38,7 +38,7 @@ digraph diagnose {
 ## Phase 1: Build Feedback Loop
 
 **action:** Create deterministic < 2s pass/fail signal.
-**action:** Isolate filesystem, pin seeds/time.
+**action:** Isolate filesystem, pin seeds/time. See `references/feedback-loops.md` for setup patterns by system type (CLI tools, API/HTTP services, and others).
 **gate:** If no code execution, request logs/telemetry. Do not proceed without loop.
 
 ## Phase 2: Reproduce

@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: "Build, test, and optimize Agent Skills. Lifecycle management including eval-driven iteration. Trigger on: 'make skill', 'build skill', 'skill not working', 'optimize skill', 'skill-builder', 'run evals', 'benchmark skill'."
+description: "Build, test, and optimize Agent Skills themselves (the .md prompt files under skills/), not product features. Lifecycle management including eval-driven iteration. Trigger on: 'make a skill', 'build a skill', 'skill not working', 'optimize skill', 'skill-builder', 'run evals', 'benchmark skill'."
 disable-model-invocation: false
 ---
 
@@ -88,6 +88,13 @@ Save cases to `evals/evals.json`.
 2. **Generalize:** Bundle repetitive logic into `scripts/`.
 3. **Refine Prompt:** Remove noise; clarify steps.
 4. **Rerun:** Execute next iteration in new directory.
+
+**Automated alternative:** `python scripts/run_loop.py --eval-set evals/evals.json --skill-path <dir> --model <model>` runs Steps 3-4 end-to-end (execute, grade, diagnose, refine, rerun) for up to `--max-iterations`, writing a live HTML report via `--live-report`. Use this instead of the manual loop when iterating unattended; fall back to the manual steps above when you need to inspect a single failure closely.
+
+## Step 5: Package & Validate (Optional)
+
+- `python scripts/quick_validate.py <skill-dir>` — fast structural sanity check before a full eval run.
+- `python scripts/package_skill.py <skill-dir>` — builds the distributable `.skill` file once evals pass.
 
 **next skills:**
 
