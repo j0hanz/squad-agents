@@ -62,23 +62,23 @@ Answer BOTH before spawning:
 ## The Four-Step Loop
 
 **action: Group Tasks**
-Analyze the work and confirm the parallel grouping via `AskUserQuestion`:
+Analyze the work and confirm the parallel grouping via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually:
 
 1. ✅ **Recommended** — [Groups] based on [disjoint files/hypotheses].
-2. **Alternative** — [Alternative Grouping] + justification.
-3. **Other** — Custom groups.
+2. **Alternative** — [Alternative Grouping] + justification for the different split.
 
-4. **SELECT:** Configure `general-purpose` agents with specialized roles per the Role Vocabulary in [`references/subagent-contract.md`](references/subagent-contract.md) (Investigator/Writer/Researcher). For read-only roles, explicitly instruct no Write/Edit — and note this is an instruction, not an enforced restriction, unless the harness supports a tool allowlist.
-5. **LAUNCH:**
+3. **SELECT:** Configure `general-purpose` agents with specialized roles per the Role Vocabulary in [`references/subagent-contract.md`](references/subagent-contract.md) (Investigator/Writer/Researcher). For read-only roles, explicitly instruct no Write/Edit — and note this is an instruction, not an enforced restriction, unless the harness supports a tool allowlist.
+4. **LAUNCH:**
    - Enumerate each subagent's intended write-paths (from its SCOPE).
    - Diff them against every other subagent's write-paths.
    - **Limit:** Max 5 concurrent agents per batch.
    - If disjoint, emit ALL `Agent` calls in **ONE message** for true concurrency.
-6. **INTEGRATE:** Reconcile findings/diffs. Run full project validation.
+5. **INTEGRATE:** Reconcile findings/diffs. Run full project validation.
 
 **next skills:**
 
 - `verification-before-completion`: Once all parallel tasks are integrated, to verify the final combined state against project standards.
+- `diagnose`: If integration reveals a regression or conflict between two agents' changes that needs root-cause analysis rather than a guessed merge.
 
 ## Subagent Prompt Contract (Zero-Shot)
 

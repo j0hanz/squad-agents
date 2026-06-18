@@ -19,6 +19,7 @@ skills/*/eval-workspace/
 .claude/state
 .claude/explorer-breadcrumbs.log
 .continue
+.claude/skill-nudge-state
 
 # IDE
 .vscode/

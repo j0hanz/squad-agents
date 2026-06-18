@@ -70,23 +70,21 @@ digraph multi_agent_dev {
 ## Step 0: Confirm
 
 **action: Autonomy Confirmation**
-This skill dispatches multiple subagents per task (implementer + up to 2 reviewers, × up to 2 retries each). Before starting, confirm via `AskUserQuestion`:
+This skill dispatches multiple subagents per task (implementer + up to 2 reviewers, × up to 2 retries each). Before starting, confirm via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually:
 
-1. ✅ **Recommended** — Proceed with multi-agent-development for [N tasks from plan]. This will start an autonomous session (~[N × 3-9] calls). Proceed?
-2. **Alternative** — Run a single task first to validate the approach.
-3. **Other** — Custom response.
+1. ✅ **Recommended** — Proceed with multi-agent-development for [N tasks from plan]. This will start an autonomous session (~[N × 3-9] calls).
+2. **Alternative** — Run a single task first to validate the approach before committing to all N.
 
 ## Partitioning & Scope
 
 **action: Partition Tasks**
-Analyze the plan and confirm task assignments via `AskUserQuestion`:
+Analyze the plan and confirm task assignments via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually:
 
 1. ✅ **Recommended** — [Task Sequence] based on [file dependencies and disjoint sets].
-2. **Alternative** — [Grouped Tasks] + reasoning.
-3. **Other** — Custom partitioning.
+2. **Alternative** — [Grouped Tasks] + the dependency reasoning that would justify grouping instead.
 
-4. Verify no two tasks touch the same file unless they are strictly ordered.
-5. If overlap is found, you MUST consolidate those tasks or ensure the downstream task receives the upstream task's commits as context.
+3. Verify no two tasks touch the same file unless they are strictly ordered.
+4. If overlap is found, you MUST consolidate those tasks or ensure the downstream task receives the upstream task's commits as context.
 
 ## The Core Loop (Per Task)
 

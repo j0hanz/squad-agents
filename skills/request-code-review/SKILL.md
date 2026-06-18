@@ -48,11 +48,10 @@ digraph request_code_review {
 ## Step 0: Confirm
 
 **action: Review Confirmation**
-Confirm the start of an autonomous review session via `AskUserQuestion`:
+Confirm the start of an autonomous review session via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually:
 
 1. ✅ **Recommended** — Dispatch fresh-context review for [range/summary].
-2. **Alternative** — Inline review (if diff is small/uncommitted).
-3. **Other** — Custom review parameters.
+2. **Alternative** — Inline review instead, if the diff is small or uncommitted and can't be dispatched.
 
 ## Pre-Review Checkpoint
 

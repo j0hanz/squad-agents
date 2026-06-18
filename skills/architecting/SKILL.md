@@ -42,11 +42,10 @@ digraph architecting {
 **trigger:** Architecture review, design request, or structural issues (God modules, circular deps).
 
 **action: Route & Confirm**
-Route and confirm via `AskUserQuestion` (or 3-option markdown block):
+Route and confirm via `AskUserQuestion` (or 2-option markdown block) — the tool supplies a free-text "Other" automatically, so don't add one manually:
 
-1. ✅ **Recommended** — [Concrete Answer] based on [evidence: imports, size, churn].
-2. **Alternative** — [Plausible Option] + condition for use.
-3. **Other** — Custom response.
+1. ✅ **Recommended** — [Mode A or B] based on [evidence: imports, size, churn, "existing code" vs "new module"].
+2. **Alternative** — [The other mode] + condition under which it would actually apply instead.
 
 **routing:**
 | Mode | Focus |

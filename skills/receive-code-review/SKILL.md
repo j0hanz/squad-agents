@@ -61,10 +61,9 @@ digraph receive_code_review {
 **action: Clarify Feedback**
 
 1. Read every item before responding to any of it.
-2. If any item is unclear, confirm via `AskUserQuestion`:
-   - ✅ **Recommended** — [Clarification Proposal] for [unclear items].
-   - **Alternative** — [Alternative Interpretation] + query.
-   - **Other** — Custom clarification.
+2. If any item is unclear, confirm via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually. Batch every unclear item from this review into one call (one question per item, up to 4) rather than one round-trip per item:
+   - ✅ **Recommended** — [Clarification Proposal] for [unclear item], grounded in the codebase usage you'd verify against in step 2.
+   - **Alternative** — [Alternative Interpretation] + the query that would disambiguate it.
 
 3. Do not implement the items you understand while a related item is still ambiguous; partial understanding produces a wrong implementation.
 

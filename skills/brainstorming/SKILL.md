@@ -70,11 +70,12 @@ Before Discovery, check for an in-progress session on this topic.
 ## Phase 1: Discovery
 
 **action: Stakeholder Probe**
-Identify the primary users and confirm via `AskUserQuestion`:
+Identify the primary users and confirm via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually:
 
 1. ✅ **Recommended** — [Audience] based on [feature context].
 2. **Alternative** — [Secondary Audience] + reason for inclusion.
-3. **Other** — Custom stakeholder.
+
+Skip this question entirely if the request already names a single unambiguous audience (e.g. "add an admin-only export button") — confirming the obvious wastes a turn.
 
 4. **Codebase Scan:**
    - Read `references/codebase-scanner-prompt.md` before dispatching.
@@ -93,11 +94,10 @@ Identify the primary users and confirm via `AskUserQuestion`:
 ## Phase 2: Domain Clarity (Term Definition)
 
 **action: Define Term**
-For each ambiguous term, propose a definition via `AskUserQuestion`:
+For each ambiguous term, propose a definition via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually. Batch all ambiguous terms from this request into one `AskUserQuestion` call (one question per term, up to 4) instead of one round-trip per term:
 
 1. ✅ **Recommended** — [Term]: [Definition] based on [codebase usage/patterns].
-2. **Alternative** — [Term]: [Alternative Definition] + context.
-3. **Other** — Custom definition.
+2. **Alternative** — [Term]: [Alternative Definition] found in conflicting code/docs usage, if one exists.
 
 - **Goal:** Resolve conflicts between code, docs, and team language.
 - **Exit:** If Phase 1's scan found an existing `glossary.md` or `CONTEXT.md`, append the term there. If neither exists, create `glossary.md` at the project root — it is the canonical file for term definitions; `CONTEXT.md` is for architectural/contextual notes, not glossaries.

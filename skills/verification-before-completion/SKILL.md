@@ -60,11 +60,10 @@ digraph verification_before_completion {
 ## 3. Manual Verification Template
 
 **action: Gather Evidence**
-If no automated pass/fail signal exists, propose a manual test plan via `AskUserQuestion`:
+If no automated pass/fail signal exists, propose a manual test plan via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually:
 
 1. ✅ **Recommended** — [Test Plan] based on [feature scope and risk].
-2. **Alternative** — [Lighter Test] + justification.
-3. **Other** — Custom verification.
+2. **Alternative** — [Lighter Test] + the justification for why less coverage is acceptable here.
 
 **format:**
 
@@ -93,6 +92,7 @@ If no automated pass/fail signal exists, propose a manual test plan via `AskUser
 **next skills:**
 
 - `request-code-review`: Once all verification items are satisfied and behavior is confirmed clean through execution evidence.
+- `diagnose`: If the checklist or evidence-gathering surfaces a regression, to root-cause it before re-attempting completion.
 
 ## Transition
 

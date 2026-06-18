@@ -48,11 +48,11 @@ digraph diagnose {
 ## Phase 3: Hypothesize & Falsify
 
 **action: Present Hypotheses**
-Read `references/phases.md` and propose 3-5 falsifiable hypotheses via `AskUserQuestion`:
+Read `references/phases.md` and propose 3-5 falsifiable hypotheses via `AskUserQuestion`. Surface the top 3 as real options (the tool caps at 4 and supplies a free-text "Other" automatically — never add one manually); log any remaining hypotheses in the session/diagnosis notes as queued, not dropped:
 
 1. ✅ **Recommended** — [Primary Hypothesis] based on [Recent Changes > Logic > Env].
-2. **Alternative** — [Plausible Option] + condition for testing.
-3. **Other** — Custom hypothesis.
+2. **Alternative** — [Second Hypothesis] + condition for testing.
+3. **Alternative** — [Third Hypothesis] + condition for testing, if a third falsifiable candidate exists.
 
 **format:** "If [X] is the cause, then [Y] will change when I do [Z]."
 **dispatch:** If hypotheses are independent, use `multi-agent-dispatch`. Each hypothesis agent must be a **Writer with `isolation: worktree`** (not the read-only Investigator role) — instrumenting and running an experiment mutates a working copy, so each agent needs its own worktree. Disjoint by construction since each agent tests a different hypothesis.

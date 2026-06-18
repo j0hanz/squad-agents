@@ -51,11 +51,10 @@ Build a mental model before touching code:
 ## Step 2: Pain Point Mapping
 
 **action: Map Pain Points**
-If vague, ask "What is the hardest part of working with this code?" and confirm via `AskUserQuestion`:
+If vague, ask "What is the hardest part of working with this code?" and confirm via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually. Ground options in the pain-point table below rather than generic phrasing — if the code shows symptoms matching 2+ rows, surface those as the real options instead of inventing a placeholder second guess:
 
-1. ✅ **Recommended** — [Diagnosis] based on [symptoms: nesting, duplication, coupling].
-2. **Alternative** — [Alternative Diagnosis] + reason.
-3. **Other** — Custom pain point.
+1. ✅ **Recommended** — [Diagnosis] based on [the table row whose symptom best matches what you observed: nesting, duplication, coupling, naming].
+2. **Alternative** — [a second table row whose symptom is also plausible] + the reason it might be the better fit.
 
 **MANDATORY**: If the pain point is vague or complex, you MUST read `references/smell-catalog.md` to accurately diagnose the issue.
 

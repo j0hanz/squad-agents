@@ -78,13 +78,12 @@ digraph using_agent_dev_skills {
 3. **Invoke Immediately:** Once a route is identified, immediately activate and follow that skill.
 
 **action: Notify Route**
-Announce the identified route and confirm via `AskUserQuestion`:
+Announce the identified route and confirm via `AskUserQuestion` — the tool supplies a free-text "Other" automatically (covers "apply intent manually, no skill"), so don't add a manual option for it:
 
 1. ✅ **Recommended** — Routing to [`<skill-name>`]: [reason] based on [gate evaluation].
-2. **Alternative** — Routing to [Alternative Skill] + justification.
-3. **Other** — Manual intent application.
+2. **Alternative** — Routing to [Alternative Skill] + the gate condition that would make it the better fit instead.
 
-4. **No Skips:** Do NOT skip because a task seems \"simple\" or \"quick\". Every change deserves the appropriate rigor.
+3. **No Skips:** Do NOT skip because a task seems \"simple\" or \"quick\". Every change deserves the appropriate rigor.
 
 ## Diagnostic Decision Tree
 

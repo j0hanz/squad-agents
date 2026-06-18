@@ -62,6 +62,6 @@ Re-run Step 3's command. It must report `VALID (0 error(s), ...)` before the ski
 - **NEVER** skip a repo's own plugin-wide validation (e.g. this plugin's own `npm run validate`) just because `validate_skill.py` passed. **WHY:** `validate_skill.py` checks one skill in isolation; a repo-wide validator may check things this can't see (plugin manifest, cross-skill consistency). **FIX:** run both if the target repo has one.
 - **NEVER** hand-write a SKILL.md skeleton instead of running `scaffold_skill.py`. **WHY:** hand-copying drifts from the placeholder-marker convention `validate_skill.py` depends on to catch unfinished sections. **FIX:** always scaffold first.
 
-## Handoff
+**next skills:**
 
-This skill is typically a leaf step in skill authoring — there's no required next skill. If drafting the body surfaces a structural question (where should shared logic live across two skills, a circular reference between two `references/` files), hand off to `architecting`.
+- `architecting`: If drafting the body surfaces a structural question — where shared logic should live across two skills, or a circular reference between two `references/` files. This skill is otherwise a leaf step in skill authoring; there's no required next skill on the happy path.

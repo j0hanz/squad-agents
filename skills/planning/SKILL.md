@@ -64,11 +64,10 @@ If a **Design Brief** (from `brainstorming`) is present, map fields and skip cor
 - **Brief Chosen Approach** → Goal
 
 **action: Intake Interview**
-For any missing core field, confirm via `AskUserQuestion`:
+For any missing core field, confirm via `AskUserQuestion` — the tool supplies a free-text "Other" automatically, so don't add one manually. Batch all missing fields into one call (one question per field, up to 4) instead of asking serially:
 
 1. ✅ **Recommended** — [Field Value] based on [brief/context].
-2. **Alternative** — [Plausible Option] + context.
-3. **Other** — Custom answer.
+2. **Alternative** — [Plausible Option] + context for when it would apply instead.
 
 **Interview (if needed):** Ask only missing **Goal** (One sentence) and **Interface** (Inputs/Outputs). Mark others as `UNKNOWN: [what and why]`.
 
