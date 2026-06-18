@@ -6,7 +6,7 @@ A Claude Code plugin for authoring and maintaining skills and hooks — structur
 
 ## Overview
 
-Agent Dev Plugin extends Claude Code with 12 skills and 8 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on every session event to keep development disciplined. Multi-step or parallel work is delegated to the built-in `general-purpose` agent — configured per task via the prompt — orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
+Agent Dev Plugin extends Claude Code with 13 skills and 8 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on every session event to keep development disciplined. Multi-step or parallel work is delegated to the built-in `general-purpose` agent — configured per task via the prompt — orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
@@ -20,7 +20,7 @@ Agent Dev Plugin extends Claude Code with 12 skills and 8 lifecycle hooks coveri
 
 | Feature                  | Description                                                                                                                                    |
 | :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| 12 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`                                                                                   |
+| 13 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`                                                                                   |
 | Subagent orchestration   | `multi-agent-dispatch` and `multi-agent-development` drive every `general-purpose` subagent dispatch — no custom agent definitions to maintain |
 | 8 lifecycle hooks        | Fire on session events to enforce workflow discipline automatically                                                                            |
 | Marketplace install      | One-command install from GitHub — no manual clone required                                                                                     |
@@ -71,7 +71,7 @@ claude --plugin-dir ./claude-agent-dev-plugin
 
 ## What's Included
 
-### Skills (12)
+### Skills (13)
 
 Skills are invoked automatically by Claude based on task context, or manually with `/skill-name`.
 
@@ -89,6 +89,7 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `verification-before-completion` | (automatic before task completion)                         | Verify changes work before marking done                        |
 | `using-agent-dev-skills`         | (meta-routing)                                             | Routes to the right skill based on context                     |
 | `codebase-init`                  | "generate AGENTS.md", "init agents.md"                     | Generating/refreshing AGENTS.md and CLAUDE.md files            |
+| `make-a-skill`                   | "make a skill", "build a skill", "scaffold a skill"        | Scaffold and validate new skills/<name>/SKILL.md               |
 
 ### Subagent Dispatch
 
