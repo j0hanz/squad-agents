@@ -133,7 +133,7 @@ for segment in "${segments[@]}"; do
     shortflags="$(collect_short_flags "${words[@]:2}")"
     has_force=false
     { has_char "$shortflags" f || has_long_flag force "${words[@]:2}" || has_long_flag force-with-lease "${words[@]:2}"; } && has_force=true
-    if $has_force && [[ "$trimmed" =~ (^|[[:space:]/:])(main|master)([[:space:]]|$) ]]; then
+    if $has_force && [[ "$trimmed" =~ (^|[[:space:]])([a-zA-Z0-9._-]*/)?:(main|master)([[:space:]]|$) ]] || [[ "$trimmed" =~ (^|[[:space:]])([a-zA-Z0-9._/-]*/)?(main|master)([[:space:]]|$) ]]; then
       deny "force-push targeting main/master ('$trimmed')"
     fi
   fi
