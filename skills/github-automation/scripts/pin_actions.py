@@ -21,6 +21,7 @@ Skips:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import subprocess
@@ -147,14 +148,20 @@ def resolve_via_ls_remote(repo: str, rev: str) -> str | None:
 
 
 def _extract_sha(json_text: str) -> str | None:
-    m = re.search(r'"sha"\s*:\s*"([0-9a-f]{40})"', json_text)
-    return m.group(1) if m else None
+    try:
+        sha = json.loads(json_text).get("sha")
+    except (json.JSONDecodeError, AttributeError):
+        return None
+    return sha if isinstance(sha, str) and SHA_RE.match(sha) else None
 
 
 def _extract_object_sha(json_text: str) -> str | None:
     # `repos/.../git/tags/<sha>` returns {"object": {"sha": "..."}} for annotated tags.
-    m = re.search(r'"object"\s*:\s*\{[^}]*"sha"\s*:\s*"([0-9a-f]{40})"', json_text)
-    return m.group(1) if m else None
+    try:
+        sha = json.loads(json_text).get("object", {}).get("sha")
+    except (json.JSONDecodeError, AttributeError):
+        return None
+    return sha if isinstance(sha, str) and SHA_RE.match(sha) else None
 
 
 def resolve(repo: str, rev: str) -> str | None:

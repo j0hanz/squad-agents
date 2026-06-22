@@ -1,21 +1,20 @@
-import sys
+import argparse
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 
 def main() -> None:
-    if "--name" not in sys.argv:
-        print("Usage: python execute_plan_pipeline.py --name <NAME>")
-        sys.exit(1)
-
-    name = sys.argv[sys.argv.index("--name") + 1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--name", required=True)
+    args = parser.parse_args()
+    name = args.name
 
     scripts_dir = Path(os.path.abspath(__file__)).parent
     plan_dir = Path("plan").resolve()
 
     spec_path = plan_dir / f"{name}.specs.md"
-    plan_dir / f"{name}.plan.md"
 
     # Pre-flight: spec must exist before running any subprocess
     if not spec_path.exists():

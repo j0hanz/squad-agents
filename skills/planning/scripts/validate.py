@@ -95,10 +95,6 @@ class CoverageMatrix(TypedDict):
 # ---------------------------------------------------------------------------
 
 
-def _contains_code(line: str) -> bool:
-    return "`" in line
-
-
 def validate_spec(
     spec_path: Path, level: str = "contract"
 ) -> tuple[list[str], list[str]]:
