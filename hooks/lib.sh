@@ -39,9 +39,21 @@ agent_dev_telemetry_append() {
   lines=$(wc -l <"$log" 2>/dev/null || echo 0)
   lines=${lines//[^0-9]/}
   if [ -n "$lines" ] && [ "$lines" -gt "$AGENT_DEV_TELEMETRY_MAX_LINES" ]; then
-    local tmp
+    local tmp lockdir
     tmp=$(mktemp "$dir/telemetry.log.XXXXXX" 2>/dev/null) || return 0
-    tail -n "$AGENT_DEV_TELEMETRY_MAX_LINES" "$log" >"$tmp" 2>/dev/null && mv "$tmp" "$log" 2>/dev/null || rm -f "$tmp" 2>/dev/null
+    lockdir="$dir/telemetry.log.lock"
+    # Use mkdir for atomic lock (POSIX-safe, no dependencies).
+    # Only one process wins; others skip rotation without blocking (exit 0).
+    if mkdir "$lockdir" 2>/dev/null; then
+      trap "rm -rf \"$lockdir\" \"$tmp\"" RETURN
+      # Serialize rotation: tail the current log content, then atomically rename.
+      # The mv operation is atomic so a concurrent append is never silently dropped.
+      tail -n "$AGENT_DEV_TELEMETRY_MAX_LINES" "$log" >"$tmp" 2>/dev/null && \
+        mv "$tmp" "$log" 2>/dev/null
+    else
+      # Another process holds the lock; skip rotation (no blocking).
+      rm -f "$tmp" 2>/dev/null
+    fi
   fi
   return 0
 }
