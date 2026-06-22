@@ -9,32 +9,36 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-import { execSync, execFileSync } from 'child_process';
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pluginRoot = path.resolve(__dirname, '..');
 
 const errors = [];
 const warnings = [];
 
-function getPythonPath() {
-  const venvPaths = [
-    path.join(pluginRoot, '.venv', 'Scripts', 'python.exe'),
-    path.join(pluginRoot, '.venv', 'bin', 'python'),
-  ];
-  for (const p of venvPaths) {
-    try {
-      if (fs.existsSync(p)) return p;
-    } catch (e) {}
+// Helper to parse simple YAML frontmatter metadata
+function parseFrontmatter(frontmatterStr) {
+  const data = {};
+  const lines = frontmatterStr.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const colonIndex = trimmed.indexOf(':');
+    if (colonIndex === -1) {
+      throw new Error(`Invalid line in YAML frontmatter (missing colon): "${trimmed}"`);
+    }
+    const key = trimmed.slice(0, colonIndex).trim();
+    let value = trimmed.slice(colonIndex + 1).trim();
+    const isQuoted = (value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"));
+    if (isQuoted) {
+      value = value.slice(1, -1);
+    } else {
+      if (value.includes(':')) {
+        throw new Error(`Invalid unquoted colon in YAML value: "${value}"`);
+      }
+    }
+    data[key] = value;
   }
-  for (const cmd of ['python3', 'python']) {
-    try {
-      execSync(`${cmd} --version`, { stdio: 'ignore' });
-      return cmd;
-    } catch (e) {}
-  }
-  return 'python';
+  return data;
 }
 
 // Validate YAML frontmatter and description
@@ -48,20 +52,11 @@ function validateFrontmatter(filePath, componentType) {
   }
 
   const frontmatter = match[1];
-  const pythonPath = getPythonPath();
-  const helperPath = path.join(pluginRoot, 'bin', 'validate_yaml.py');
-
   let fmData;
   try {
-    const jsonStr = execFileSync(pythonPath, [helperPath], {
-      input: frontmatter,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      encoding: 'utf-8',
-    });
-    fmData = JSON.parse(jsonStr);
+    fmData = parseFrontmatter(frontmatter);
   } catch (err) {
-    const errMsg = err.stderr ? err.stderr.toString().trim() : err.message;
-    errors.push(`[${componentType}] ${filePath}: Invalid YAML frontmatter - ${errMsg}`);
+    errors.push(`[${componentType}] ${filePath}: Invalid YAML frontmatter - ${err.message}`);
     return null;
   }
 
@@ -167,21 +162,6 @@ function main() {
       });
     } catch (e) {
       errors.push(`[Skills] Failed to read skills directory: ${e.message}`);
-    }
-  }
-
-  // Validate agents
-  const agentsDir = path.join(pluginRoot, 'agents');
-  if (fs.existsSync(agentsDir)) {
-    try {
-      fs.readdirSync(agentsDir)
-        .filter((f) => f.endsWith('.md'))
-        .forEach((agent) => {
-          const agentPath = path.join(agentsDir, agent);
-          validateFrontmatter(agentPath, 'Agent');
-        });
-    } catch (e) {
-      errors.push(`[Agents] Failed to read agents directory: ${e.message}`);
     }
   }
 

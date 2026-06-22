@@ -9,7 +9,7 @@ The 12 things that go wrong most often, ordered roughly by frequency. Each entry
 **Common causes:**
 
 - **Workflow file is on a branch that isn't the default branch** (for `schedule`, `workflow_dispatch`, and `repository_dispatch` triggers). These triggers only fire from the default branch's copy of the workflow. Fix: merge to default.
-- **YAML invalid.** GitHub silently disables workflows with parse errors. Check the Actions tab → "Disabled" filter, or run the linter (`scripts/lint.sh`).
+- **YAML invalid.** GitHub silently disables workflows with parse errors. Check the Actions tab → "Disabled" filter, or run the linter (`scripts/lint.py`).
 - **Branch filter excludes the branch.** `on.push.branches: [main]` won't fire from `feature/foo`. Either remove the filter or push to `main`.
 - **`paths:` or `paths-ignore:` filter excludes the changed files.** Check what files the push actually changed.
 - **`if:` on the job evaluated false.** Look at the workflow run (it does show up) — the job will be skipped with a yellow icon and you can see why.

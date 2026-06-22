@@ -11,7 +11,7 @@
         "A top-level or job-level `permissions:` block is present and sets contents: read (least privilege)",
         "Triggers include both push (targeting main/master) and pull_request",
         "All third-party action uses: lines are pinned to 40-character commit SHAs (not branch names or version tags alone)",
-        "lint.py (or lint.sh) was executed and reported success",
+        "lint.py was executed and reported success",
         "No ${{ github.event.* }} or ${{ github.head_ref }} expressions appear inside run: blocks"
       ]
     },
