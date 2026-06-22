@@ -104,8 +104,28 @@ has_long_flag() {
 # quotes (e.g. "/" or '~'), with or without a trailing slash on ~ / $HOME.
 ROOT_TARGET_PATTERN='(^|[[:space:]])["'"'"']?(\$HOME/?|~/?|/\*|/)["'"'"']?([[:space:]]|$)'
 
-# Split on ; && || | into segments — best-effort, not a full shell parser.
-IFS=$'\n' read -r -d '' -a segments < <(printf '%s\0' "$command" | tr ';|' '\n' | sed -E 's/&&/\n/g') || true
+# Split on ; && || | & and literal \n into segments — best-effort, not a full shell parser.
+IFS=$'\n' read -r -d '' -a segments < <(printf '%b' "$command" | awk '
+  {
+    str = $0
+    pos = 1
+    len = length(str)
+
+    while (pos <= len) {
+      match_pos = match(substr(str, pos), /\|\||&&|[&|;]/)
+      if (match_pos == 0) {
+        segment = substr(str, pos)
+        if (segment != "") print segment
+        break
+      }
+
+      segment = substr(str, pos, match_pos - 1)
+      if (segment != "") print segment
+
+      pos = pos + match_pos + RLENGTH - 1
+    }
+  }
+') || true
 
 for segment in "${segments[@]}"; do
   # trim leading/trailing whitespace
