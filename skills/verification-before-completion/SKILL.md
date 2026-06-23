@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: "Evidence-based operational correctness verification. Mandatory execution check before task completion. Not for requesting a peer review of code quality or security (see request-code-review). Trigger on: 'ready to merge', 'looks good', 'mark as done', 'verification-before-completion', 'smoke test', 'manual verification'."
+description: "Evidence-based operational correctness verification. Mandatory execution check before task completion. Not for requesting a peer review of code quality or security (see request-code-review). Trigger on: 'ready to merge', 'looks good', 'mark as done', 'all tests pass', 'smoke test', 'manual verification'."
 disable-model-invocation: false
 ---
 
@@ -14,10 +14,7 @@ Guarantee operational correctness through execution evidence. **NEVER** confirm 
 Start: Ready to Complete
   -> 1. Mandatory Checklist (tests, manual, sweep, diff)
   -> 2. Gather Evidence (runner output / exercise log)
-  -> 3. Decision Logic
-       -- regression found -------> diagnose (handoff)
-       -- no test suite / CI-only -> Blocked/Incomplete
-       -- verified clean ---------> request-code-review (handoff)
+  -> 3. Decision Logic (see table below)
 ```
 
 **trigger:** user says "ready", "mark as done", "looks good", or task is complete.
@@ -37,14 +34,14 @@ Start: Ready to Complete
 
 ## 2. Decision Logic
 
+**"Non-trivial" heuristic:** a change is non-trivial unless it is a single-file edit of 20 lines or fewer with no new public surface and no logic branching. This is a bias-toward-caution heuristic, not a precise boundary — when in doubt, treat the change as non-trivial. Self-classifying a change as trivial to skip the review handoff below is itself a verification failure.
+
 | Status             | Action                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **CI-Only**        | Stop. Report: "Blocked by CI. Wait for pipeline."                                                                                                                                                                                                                                                                                                                                                                                          |
 | **No Test Suite**  | **Gate, not a pass:** before marking INCOMPLETE, you MUST write at least one executable smoke/characterization test or manual reproduction script proving the change works (see §3 Manual Verification Template) — a prose rationale alone is not sufficient. Only after that evidence exists may you mark **INCOMPLETE** and document why full coverage wasn't added (e.g. route to `test-driven-development` for proper coverage later). |
 | **Regression**     | Stop. Invoke `diagnose`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| **Verified Clean** | Transition to `request-code-review`.                                                                                                                                                                                                                                                                                                                                                                                                       |
-
-**"Non-trivial" (for the Transition rule below):** any change that is NOT a single-file, ~20-line-or-fewer edit with no new public surface and no logic branching. When in doubt, treat the change as non-trivial — self-classifying a change as trivial to skip `request-code-review` is itself a verification failure.
+| **Verified Clean** | Non-trivial (see heuristic above) → invoke `request-code-review`. Trivial → done.                                                                                                                                                                                                                                                                                                                                                          |
 
 ## 3. Manual Verification Template
 
@@ -71,7 +68,9 @@ If no automated pass/fail signal exists, propose a manual test plan via `AskUser
 
 - **Confidence:** "It should work" is not evidence.
 - **Green-Wash:** Mocks hiding actual logic or missing assertions.
-- **Shadow Regressions:** Distant modules broken by global state changes.
+- **Shadow Regressions:** Distant modules broken by global state changes — grep for shared/global state touched outside the diff's primary module.
+- **Scope Blindness:** Verifying only the changed lines while ignoring callers/consumers of a changed interface — trace call sites before declaring done.
+- **Stale Evidence:** Pasting output from a run predating the latest edit — re-run after every change, not just the first.
 
 ## 5. Expert Patterns
 
@@ -80,9 +79,5 @@ If no automated pass/fail signal exists, propose a manual test plan via `AskUser
 
 **next skills:**
 
-- `request-code-review`: Once all verification items are satisfied and behavior is confirmed clean through execution evidence.
+- `request-code-review`: Once all verification items are satisfied, behavior is confirmed clean through execution evidence, and the change is non-trivial (§2).
 - `diagnose`: If the checklist or evidence-gathering surfaces a regression, to root-cause it before re-attempting completion.
-
-## Transition
-
-**next:** Invoke `request-code-review` for all non-trivial changes.
