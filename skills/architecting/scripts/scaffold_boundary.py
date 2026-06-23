@@ -144,6 +144,17 @@ def to_pascal(s: str) -> str:
 _SAFE_DOMAIN_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 
 
+def _require_within(parent: str, child: str, error_msg: str) -> None:
+    try:
+        within = os.path.commonpath([parent, child]) == parent
+    except ValueError:
+        # e.g. paths on different drives/UNC roots on Windows
+        within = False
+    if not within:
+        print(error_msg, file=sys.stderr)
+        sys.exit(1)
+
+
 def scaffold(domain: str, pattern: str, output_dir: str, force: bool = False) -> None:
     if not _SAFE_DOMAIN_RE.match(domain):
         print(
@@ -162,13 +173,17 @@ def scaffold(domain: str, pattern: str, output_dir: str, force: bool = False) ->
 
     def_pattern = PATTERNS[pattern]
     out_root = os.path.abspath(output_dir)
+    _require_within(
+        os.getcwd(),
+        out_root,
+        f"Refusing to scaffold outside the current directory: {out_root}",
+    )
     base_dir = os.path.abspath(os.path.join(out_root, domain))
-    if os.path.commonpath([out_root, base_dir]) != out_root:
-        print(
-            f"Refusing to scaffold outside output_dir: {base_dir}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    _require_within(
+        out_root,
+        base_dir,
+        f"Refusing to scaffold outside output_dir: {base_dir}",
+    )
     pascal_name = to_pascal(domain)
 
     print(f'\nScaffolding "{pattern}" boundary for domain "{domain}"')

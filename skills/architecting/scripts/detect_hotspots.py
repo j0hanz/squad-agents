@@ -1,10 +1,20 @@
 import os
-import sys
 import subprocess
+import sys
+import traceback
 from typing import List, Optional, Dict, Any
 from check_locality import run_locality_check
 from detect_bleed import run_bleed_detection
 from git_coupling import run_git_coupling
+
+# Hotspot score weights: fan-out and bleeds count more than raw churn/size.
+FAN_OUT_WEIGHT = 2
+BLEED_WEIGHT = 3
+CHURN_SCORE_CAP = 5
+SIZE_LINES_PER_POINT = 100
+SIZE_SCORE_CAP = 5
+HIGH_RISK_THRESHOLD = 15
+MEDIUM_RISK_THRESHOLD = 7
 
 
 def run_hotspot_detection(
@@ -21,6 +31,12 @@ def run_hotspot_detection(
     coupling_results = run_git_coupling(
         abs_dir, since=since, min_count=1, top_n=1000000
     )
+    if "error" in coupling_results:
+        print(
+            f"Warning: git churn data unavailable ({coupling_results['error']}); "
+            "churn score will be 0 for all files.",
+            file=sys.stderr,
+        )
     file_churn = coupling_results["fileChurn"]
 
     # Find repo root to resolve git paths
@@ -32,7 +48,7 @@ def run_hotspot_detection(
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
 
-    def to_abs(git_rel_path):
+    def to_abs(git_rel_path: str) -> str:
         return os.path.abspath(os.path.join(repo_root, git_rel_path))
 
     # Build lookup maps
@@ -45,9 +61,7 @@ def run_hotspot_detection(
     max_churn = max((f["commits"] for f in file_churn), default=1)
 
     # Union of all files
-    all_files = set(
-        list(fan_out_map.keys()) + list(bleed_map.keys()) + list(churn_map.keys())
-    )
+    all_files = fan_out_map.keys() | bleed_map.keys() | churn_map.keys()
 
     results = []
     for file_path in all_files:
@@ -64,11 +78,17 @@ def run_hotspot_detection(
         fo = fan_out_map.get(file_path, 0)
         bl = bleed_map.get(file_path, 0)
         raw_churn = churn_map.get(file_path, 0)
-        churn_score = round((raw_churn / max_churn) * 5)
-        size_score = min(lines // 100, 5)
+        churn_score = round((raw_churn / max_churn) * CHURN_SCORE_CAP)
+        size_score = min(lines // SIZE_LINES_PER_POINT, SIZE_SCORE_CAP)
 
-        score = fo * 2 + bl * 3 + churn_score + size_score
-        risk = "HIGH" if score >= 15 else "MEDIUM" if score >= 7 else "LOW"
+        score = fo * FAN_OUT_WEIGHT + bl * BLEED_WEIGHT + churn_score + size_score
+        risk = (
+            "HIGH"
+            if score >= HIGH_RISK_THRESHOLD
+            else "MEDIUM"
+            if score >= MEDIUM_RISK_THRESHOLD
+            else "LOW"
+        )
 
         results.append(
             {
@@ -131,8 +151,5 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
-        # sys.exit(1) # Don't exit here so we can see traceback if needed
-        import traceback
-
         traceback.print_exc()
         sys.exit(1)

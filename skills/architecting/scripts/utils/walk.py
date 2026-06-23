@@ -1,6 +1,40 @@
 import os
 from typing import List, Set, Optional
 
+DEFAULT_EXCLUDE = [
+    "node_modules",
+    ".test.",
+    ".spec.",
+    ".git",
+    ".svn",
+    ".hg",
+    ".pytest_cache",
+    ".tox",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".env",
+    "dist",
+    "build",
+    "coverage",
+    ".coverage",
+    ".next",
+    ".nuxt",
+    ".cache",
+    ".parcel",
+    ".npm",
+    ".yarn",
+    "target",
+    ".gradle",
+    ".m2",
+    ".pytest",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".vscode",
+    ".idea",
+    ".DS_Store",
+]
+
 
 def walk_dir(
     root_dir: str,
@@ -22,9 +56,6 @@ def walk_dir(
         if real_path in visited:
             return files
         visited.add(real_path)
-
-        if not os.path.exists(root_dir):
-            return files
 
         for entry in os.scandir(root_dir):
             if any(pat in entry.name for pat in exclude):

@@ -2,41 +2,7 @@ import os
 import sys
 from typing import List, Dict, Any
 from utils.extractor import extract_imports_with_positions, detect_lang
-from utils.walk import walk_dir
-
-DEFAULT_EXCLUDE = [
-    "node_modules",
-    ".test.",
-    ".spec.",
-    ".git",
-    ".svn",
-    ".hg",
-    ".pytest_cache",
-    ".tox",
-    "__pycache__",
-    ".venv",
-    "venv",
-    ".env",
-    "dist",
-    "build",
-    "coverage",
-    ".coverage",
-    ".next",
-    ".nuxt",
-    ".cache",
-    ".parcel",
-    ".npm",
-    ".yarn",
-    "target",
-    ".gradle",
-    ".m2",
-    ".pytest",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".vscode",
-    ".idea",
-    ".DS_Store",
-]
+from utils.walk import walk_dir, DEFAULT_EXCLUDE
 
 
 def run_bleed_detection(

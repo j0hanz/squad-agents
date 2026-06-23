@@ -21,7 +21,9 @@ def run_git_coupling(
             "--",
             abs_dir,
         ]
-        output = subprocess.check_output(cmd, cwd=abs_dir, encoding="utf-8")
+        output = subprocess.check_output(
+            cmd, cwd=abs_dir, encoding="utf-8", errors="replace"
+        )
     except (subprocess.CalledProcessError, FileNotFoundError):
         return {
             "pairs": [],
@@ -48,7 +50,7 @@ def run_git_coupling(
     file_counts = Counter()
 
     for files in commits:
-        unique_files = sorted(list(set(files)))
+        unique_files = sorted(set(files))
         file_counts.update(unique_files)
 
         if len(unique_files) < 2:

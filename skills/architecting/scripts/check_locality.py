@@ -3,7 +3,7 @@ import sys
 from typing import List, Optional, Tuple, Dict, Any
 from utils.extractor import extract_imports, detect_lang
 from utils.graph import find_cycles
-from utils.walk import walk_dir
+from utils.walk import walk_dir, DEFAULT_EXCLUDE
 
 
 def import_candidates(from_file: str, imp: str, lang: str) -> List[str]:
@@ -29,6 +29,9 @@ def import_candidates(from_file: str, imp: str, lang: str) -> List[str]:
             base = os.path.dirname(base)
 
         resolved = os.path.join(base, *rest)
+        # ponytail: bare "from . import x" (rest=[]) only resolves via __init__.py;
+        # PEP 420 namespace packages without __init__.py won't match. Fix if that
+        # pattern shows up: capture the imported names and try them as submodules.
         return [f"{resolved}.py", os.path.join(resolved, "__init__.py")]
 
     # js / go
@@ -66,39 +69,7 @@ def run_locality_check(
     target_dir: str, exclude: Optional[List[str]] = None
 ) -> Tuple[List[List[str]], List[Dict[str, Any]]]:
     if exclude is None:
-        exclude = [
-            "node_modules",
-            ".test.",
-            ".spec.",
-            ".git",
-            ".svn",
-            ".hg",
-            ".pytest_cache",
-            ".tox",
-            "__pycache__",
-            ".venv",
-            "venv",
-            ".env",
-            "dist",
-            "build",
-            "coverage",
-            ".coverage",
-            ".next",
-            ".nuxt",
-            ".cache",
-            ".parcel",
-            ".npm",
-            ".yarn",
-            "target",
-            ".gradle",
-            ".m2",
-            ".pytest",
-            ".mypy_cache",
-            ".ruff_cache",
-            ".vscode",
-            ".idea",
-            ".DS_Store",
-        ]
+        exclude = DEFAULT_EXCLUDE
 
     files = walk_dir(target_dir, exclude)
     graph = {}

@@ -1,6 +1,10 @@
 import os
+
+import pytest
 from check_locality import run_locality_check
 from detect_bleed import run_bleed_detection
+from detect_hotspots import run_hotspot_detection
+from scaffold_boundary import scaffold
 
 
 def test_check_locality_cycles(tmp_path):
@@ -42,3 +46,31 @@ def test_check_locality_python(tmp_path):
     cycle_files = [os.path.basename(f) for f in cycles[0]]
     assert "a.py" in cycle_files
     assert "b.py" in cycle_files
+
+
+def test_scaffold_refuses_output_dir_outside_cwd(tmp_path, monkeypatch):
+    project = tmp_path / "project"
+    project.mkdir()
+    outside = tmp_path / "outside"
+    monkeypatch.chdir(project)
+
+    with pytest.raises(SystemExit):
+        scaffold("billing", "hexagonal", str(outside))
+
+    assert not outside.exists()
+
+
+def test_scaffold_writes_within_cwd(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    scaffold("billing", "hexagonal", "src")
+
+    assert (tmp_path / "src" / "billing" / "domain" / "billing.ts").exists()
+
+
+def test_hotspot_detection_warns_when_not_a_git_repo(tmp_path, capsys):
+    (tmp_path / "a.ts").write_text("export const a = 1;")
+
+    run_hotspot_detection(str(tmp_path))
+
+    assert "git churn data unavailable" in capsys.readouterr().err

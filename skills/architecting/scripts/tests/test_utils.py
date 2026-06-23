@@ -75,3 +75,16 @@ def test_no_cycles():
     }
     cycles = find_cycles(graph)
     assert len(cycles) == 0
+
+
+def test_find_cycles_deep_chain_no_recursion_error():
+    # Long linear chain + a cycle at the end; recursive Tarjan would blow
+    # Python's call stack on a graph this deep.
+    n = 5000
+    graph = {f"n{i}.ts": [f"n{i + 1}.ts"] for i in range(n)}
+    graph[f"n{n}.ts"] = ["n0.ts"]
+
+    cycles = find_cycles(graph)
+
+    assert len(cycles) == 1
+    assert len(cycles[0]) == n + 1
