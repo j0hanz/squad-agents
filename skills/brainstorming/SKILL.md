@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "Structured discovery to prevent rework. Use for new product features or ambiguous requirements. Trigger on: 'let's build a feature', 'new feature', 'I want to implement', 'add X to', 'ambiguous design', 'unclear terminology', 'requirements discovery', 'brainstorming', 'stakeholder probe', 'glossary definition'."
+description: "Structured discovery to prevent rework. Designed for new product features or ambiguous requirements. Trigger on: 'let's build a feature', 'new feature', 'I want to implement', 'add X to', 'ambiguous design', 'unclear terminology', 'requirements discovery', 'brainstorming', 'stakeholder probe', 'glossary definition'."
 ---
 
 # brainstorming
@@ -14,11 +14,11 @@ Phase 4 — it still needs Phase 1 Discovery first. Does not apply to bug fixes,
 config changes with no design space.
 </HARD-GATE>
 
-**"This is too simple to need discovery"** is the rationalization that defeats this skill most often:
+**"This is trivial to need discovery"** is the rationalization that defeats this skill most often:
 a request that looks trivial can still hide unstated stakeholders, terminology conflicts, or existing
 analogous code that Phase 1 would have surfaced. If a request truly has zero ambiguity and one obvious
 implementation, say so explicitly and name which step (Stakeholder Probe, Codebase Scan, Understanding
-Statement) you are skipping and why — never skip silently.
+Statement) is skipped and why — never skip silently.
 
 Default subagent type for every dispatch below: `general-purpose`. Type is only called out where it differs.
 
@@ -113,7 +113,7 @@ Select 1-2 techniques (max 4 questions total):
 
 - Is there a zero-code solution (config, existing extension)?
 - Did an analogous feature already solve this?
-- What is the 10x simpler version?
+- What is the 10x less complex version?
 - **Proactive Filter:** A zero-code or analogous solution found here becomes "Approach A" in Phase 4 — present it, do not silently drop it.
 - **Log:** Append the finding (or "none") to the session log.
 
@@ -131,7 +131,7 @@ Runs only if the Phase 5 flag is set (canonical condition: Phase 1's Adaptive Ro
 
 **Parallel Adversarial Loop:** Reviewers run concurrently for objectivity and lower latency.
 
-1. **Dispatch Parallel Stress-Test:** Read `references/structured-review-prompt.md` before dispatching. Spawn the Skeptic, Constraint Guardian, and User Advocate templates from that file as three parallel `Agent()` calls (contract shape: `../multi-agent-development/references/subagent-contract.md`). Each sees only the design and context packet — none sees the others' objections or your internal reasoning.
+1. **Dispatch Parallel Stress-Test:** Read `references/structured-review-prompt.md` before dispatching. Spawn the Skeptic, Constraint Guardian, and User Advocate templates from that file as three parallel `Agent()` calls (contract shape: `../multi-agent-development/references/subagent-contract.md`). Each sees only the design and context packet — none sees the others' objections or the designer's internal reasoning.
    - **Log:** Append each reviewer's objections to the session log as it returns, not batched after all three finish — this is what lets an interrupted dispatch resume without re-running reviewers that already answered.
 2. **Consolidate & Respond:**
    - Log every objection in a **Response Log** (Objection | Source | Severity | Designer Response | Resolution). Apply the Severity Calibration in `references/structured-review-prompt.md` — discard wording/style objections rather than logging them.
