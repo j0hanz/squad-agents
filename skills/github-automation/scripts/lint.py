@@ -40,7 +40,14 @@ def check_file(path: Path) -> list[str]:
     # 2. Expression injection — including multi-line run: block scalars
     # github.event.(pull_request|issue|comment|review|head_commit).(title|body|message)
     # github.head_ref
-    injection_pattern = r"\$\{\{\s*github\.(event\.(pull_request|issue|comment|review|head_commit)\.(title|body|message)|head_ref|event\.head_commit\.message)"
+    injection_pattern = (
+        r"\$\{\{\s*github\.("
+        r"event\.(pull_request|issue|comment|review|head_commit|commits\[\*\]|pages\[\*\]|label|milestone)"
+        r"\.(title|body|message|name|email|page_name)"
+        r"|head_ref"
+        r"|event\.inputs\.[a-zA-Z0-9_-]+"
+        r")"
+    )
     in_run_block = False
     run_block_indent: int | None = None
 
@@ -48,11 +55,11 @@ def check_file(path: Path) -> list[str]:
         stripped = line.lstrip()
         current_indent = len(line) - len(stripped)
 
-        run_match = re.match(r"^(\s*)run:\s*([|>][-+]?\d*)?\s*(#.*)?$", line)
+        run_match = re.match(r"^(\s*(?:-\s+)?)run:\s*([|>][-+]?\d*)?\s*(#.*)?$", line)
         if run_match:
             in_run_block = True
             run_block_indent = len(run_match.group(1)) + 1
-        elif re.match(r"^\s*run:\s+\S", line):
+        elif re.match(r"^\s*(?:-\s+)?run:\s+\S", line):
             # Inline run: value (no block scalar)
             in_run_block = False
             run_block_indent = None
@@ -79,7 +86,7 @@ def check_file(path: Path) -> list[str]:
         if line.lstrip().startswith("#"):
             continue
 
-        if "permissions:" in line:
+        if line.lstrip().startswith("permissions:"):
             has_permissions = True
 
         uses_match = re.search(r"uses:\s+([^@\s]+)@([^\s#]+)", line)
@@ -103,14 +110,14 @@ def check_file(path: Path) -> list[str]:
                         f"L{i + 1}: Third-party action not pinned to SHA: {ref}@{rev}"
                     )
 
-        if (
-            has_pr_target
-            and "ref:" in line
-            and "github.event.pull_request.head" in line
-        ):
-            errors.append(
-                f"L{i + 1}: pull_request_target combined with checkout of PR head SHA — secret-exposing footgun."
-            )
+    if has_pr_target and re.search(
+        r"uses:\s*actions/checkout.*?ref:\s*\$\{\{\s*github\.event\.pull_request\.head",
+        content,
+        re.DOTALL,
+    ):
+        errors.append(
+            "pull_request_target combined with checkout of PR head SHA — secret-exposing footgun."
+        )
 
     if not has_permissions:
         errors.append(

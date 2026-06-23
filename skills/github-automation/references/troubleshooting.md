@@ -154,6 +154,6 @@ When the symptom is "I have no idea what's happening", turn on debug logs:
 
 Step-level debug is the more useful of the two — it shows what `${{ }}` expressions actually resolved to.
 
-## When to escalate to `gh-fix-ci`
+## When to escalate to `diagnose`
 
-This skill is for designing and authoring workflows. If the user has a _specific failing run_ they want triaged from its logs, hand off — `gh-fix-ci` is built for that interaction loop (`gh run view`, log fetching, narrowing to a failing step). This skill's troubleshooting section is for design-time fixes you can spot from the workflow file alone.
+This skill is for designing and authoring workflows. If the user has a _specific failing run_ they want triaged from its logs, hand off to `diagnose` for that interaction loop (`gh run view`, log fetching, narrowing to a failing step). This skill's troubleshooting section is for design-time fixes you can spot from the workflow file alone.

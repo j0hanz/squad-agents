@@ -36,5 +36,53 @@ def test_injection_at_minimum_block_indent():
         path.unlink()
 
 
+def test_pull_request_target_two_line_footgun_caught():
+    """The real-world vulnerable pattern spans two lines: `ref:` is nested under `with:`."""
+    content = textwrap.dedent("""\
+        on: pull_request_target
+        permissions: read-all
+        jobs:
+          test:
+            steps:
+              - uses: actions/checkout@v4
+                with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+        """)
+    with tempfile.NamedTemporaryFile(suffix=".yml", mode="w", delete=False) as f:
+        f.write(content)
+        path = pathlib.Path(f.name)
+    try:
+        errors = check_file(path)
+        assert any("footgun" in e.lower() for e in errors), (
+            f"Expected pull_request_target footgun error, got: {errors}"
+        )
+    finally:
+        path.unlink()
+
+
+def test_workflow_dispatch_input_injection_caught():
+    """workflow_dispatch inputs interpolated into run: are an injection vector too."""
+    content = textwrap.dedent("""\
+        permissions: read-all
+        jobs:
+          test:
+            steps:
+              - name: echo input
+                run: echo ${{ github.event.inputs.target }}
+        """)
+    with tempfile.NamedTemporaryFile(suffix=".yml", mode="w", delete=False) as f:
+        f.write(content)
+        path = pathlib.Path(f.name)
+    try:
+        errors = check_file(path)
+        assert any("injection" in e.lower() for e in errors), (
+            f"Expected injection error, got: {errors}"
+        )
+    finally:
+        path.unlink()
+
+
 if __name__ == "__main__":
     test_injection_at_minimum_block_indent()
+    test_pull_request_target_two_line_footgun_caught()
+    test_workflow_dispatch_input_injection_caught()
