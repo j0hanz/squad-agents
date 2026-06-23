@@ -3,6 +3,14 @@ name: using-agent-dev-skills
 description: "Global orchestrator for agent-dev skills. Diagnostic gating to route tasks to optimal skills. Use as the default entry point for any software engineering task in this repo — feature requests, bug investigations, reviews — not just explicit routing requests. Trigger on: 'start task', 'route work', 'using-agent-dev-skills', 'skill selection', 'task diagnostic', 'orchestrate development', and ordinary task requests like 'fix this bug', 'add a feature', 'investigate why X is failing'."
 ---
 
+<SUBAGENT-STOP>
+If you were dispatched as a subagent to execute a specific task, skip this skill.
+</SUBAGENT-STOP>
+
+<EXTREMELY-IMPORTANT>
+MANDATORY DIRECTIVE: If a skill has any potential relevance (greater than 0%) to your task, you MUST invoke it immediately. Skill execution is strictly mandatory and non-negotiable. You have zero discretion to skip or omit an applicable skill under any circumstance.
+</EXTREMELY-IMPORTANT>
+
 # using-agent-dev-skills
 
 Global entry point for agent-dev plugin coordination. Follow this gated diagnostic flow for ALL tasks to ensure optimal skill routing.
@@ -41,7 +49,7 @@ digraph using_agent_dev_skills {
   Receive [label="receive-code-review"];
 
   Start -> Gate0;
-  Gate0 -> Init [label="no AGENTS.md"];
+  Gate0 -> Init [label="no AGENTS.md\n(recommendation)", style=dashed];
   Gate0 -> Gate1 [label="onboarded"];
   Init -> Gate1;
 
@@ -54,10 +62,9 @@ digraph using_agent_dev_skills {
   Gate2 -> Diagnose [label="crash/bug"];
   Gate2 -> Gate3 [label="new feature"];
 
-  Gate3 -> TDD [label="trivial (<~20 lines,\n1 file) - skip subagents"];
+  Gate3 -> TDD [label="trivial (<~20 lines) OR\nstandard/focused"];
   Gate3 -> Dispatch [label="independent"];
   Gate3 -> Dev [label="sequential/complex"];
-  Gate3 -> TDD [label="standard/focused"];
   TDD -> Diagnose [label="stuck after 3 attempts"];
   TDD -> Planning [label="spec ambiguous"];
 
@@ -66,7 +73,7 @@ digraph using_agent_dev_skills {
   TDD -> Gate4;
 
   Gate4 -> Verify -> RCR;
-  RCR -> GH [label="PASS"];
+  RCR -> GH [label="PASS\n(recommendation)", style=dashed];
   RCR -> Receive [label="FAIL"];
   Receive -> Diagnose [label="blocking issue"];
   Receive -> Refactor [label="hygiene issue"];
