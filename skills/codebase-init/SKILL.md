@@ -3,7 +3,7 @@ name: codebase-init
 description: "Initialize or audit repository instructions. Generates high-signal AGENTS.md wired to CLAUDE.md/GEMINI.md stubs. Not for documenting a specific feature's spec or design (see planning, brainstorming). Trigger on: 'init codebase', 'onboard repo', 'audit AGENTS.md', 'setup agent instructions', 'codebase-init', 'initialize project memory'."
 disable-model-invocation: true
 user-invocable: true
-allowed-tools: Bash(python *) Bash(python3 *) AskUserQuestion
+allowed-tools: Bash(python *) Bash(python3 *) AskUserQuestion Skill
 ---
 
 # codebase-init
@@ -33,7 +33,7 @@ digraph codebase_init {
   Phase0_Mode [label="Phase 0: Mode Selection\n(If AGENTS.md exists)"];
   Phase0_Confirm [label="Phase 0: Overwrite Confirmation"];
   Phase0_Marker [label="Phase 0: Marker Detection"];
-  Phase0_Survey [label="Phase 0: Policy Survey\n(Ask 4 Questions)"];
+  Phase0_Survey [label="Phase 0: Policy Survey\n(Ask 3 Questions)"];
   Phase1 [label="Phase 1: Environment Discovery\n(Analyze Toolchain / Structure)"];
   Phase1_5 [label="Phase 1.5: Architecting Mapping\n(Detect Patterns)"];
   Phase2 [label="Phase 2: Draft\n(Scaffold AGENTS.md)"];
@@ -85,7 +85,7 @@ digraph codebase_init {
 
 **Policy Survey Constraints:**
 
-- **tool-call:** Call `AskUserQuestion` exactly once with all 4 questions (one question object per decision, in order).
+- **tool-call:** Call `AskUserQuestion` exactly once with all 3 questions (one question object per decision, in order).
 - **options:** Never add an "Other" option manually (supplied automatically).
 - **options-count:** Surface exactly 3 options per question.
 - **cancellation:** Halt immediately if any prompt/question is cancelled/dismissed. No partial file must be written.
@@ -100,8 +100,8 @@ digraph codebase_init {
    - _heuristic:_ Match version/tag, `CHANGELOG`, or release workflow signal.
 3. **Testing rigor:** `always` / `touched-files` / `not-enforced`
    - _heuristic:_ Check if CI gates on the test suite.
-4. **CI/CD Automation:** `github-actions` / `gitlab-ci` / `local-only`
-   - _heuristic:_ Check `.github/workflows/` (github-actions), `.gitlab-ci.yml` (gitlab-ci), or fallback (local-only).
+
+**CI/CD Automation is never surveyed** — `scripts/run.py analyze-env` detects it directly from `.github/workflows/` / `.gitlab-ci.yml` (see `references/phase-1.5-architecting.md`), and `scaffold-agents-md` fills the marker's `ci=` value from that detection automatically. Override with `--ci <github-actions|gitlab-ci|local-only>` only if detection is wrong.
 
 _Note:_ Read `references/hard-rules.md` for exact wording and heuristics.
 
@@ -211,7 +211,7 @@ python "$CLAUDE_PLUGIN_ROOT/skills/codebase-init/scripts/run.py" lint-agents-md 
 
 **trigger:** Any step fails.
 **action:** Halt execution immediately.
-**action:** Call `diagnose` with script `stderr` and current `AGENTS.md`.
+**action:** Invoke the `diagnose` skill (via the `Skill` tool) with script `stderr` and current `AGENTS.md`.
 **constraint:** Do not apply manual fixes until `diagnose` confirms the root cause.
 **resume:** After `diagnose` resolves the issue, resume at the failed phase (do not restart from Phase 0).
 

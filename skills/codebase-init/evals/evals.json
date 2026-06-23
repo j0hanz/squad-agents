@@ -4,12 +4,12 @@
     {
       "id": 1,
       "prompt": "Initialize this repo with AGENTS.md",
-      "expected_output": "Skill identifies no AGENTS.md exists. It starts Phase 0 survey (exactly 4 questions in order: commit policy, maturity, testing, ci/cd). Then runs analyze-all, scaffolds with discovered parameters, wires CLAUDE.md/GEMINI.md, and lints.",
+      "expected_output": "Skill identifies no AGENTS.md exists. It starts Phase 0 survey (exactly 3 questions in order: commit policy, maturity, testing). Then runs analyze-all (which also detects CI/CD automatically), scaffolds with discovered parameters, wires CLAUDE.md/GEMINI.md, and lints.",
       "files": [],
       "expectations": [
-        "Skill asks exactly 4 AskUserQuestion prompts in Phase 0 (Commit, Maturity, Testing, CI/CD)",
-        "Skill runs 'analyze-all' script to discover toolchain and structure",
-        "Skill uses 'scaffold-agents-md' with correct marker values from Phase 0",
+        "Skill asks exactly 3 AskUserQuestion prompts in Phase 0 (Commit, Maturity, Testing) — never CI/CD",
+        "Skill runs 'analyze-all' script to discover toolchain, structure, and CI provider",
+        "Skill uses 'scaffold-agents-md' with correct marker values from Phase 0, with ci= sourced from auto-detection",
         "Skill wires CLAUDE.md and GEMINI.md as one-line redirect stubs",
         "Skill runs 'lint-agents-md' and fixes FAIL-level issues"
       ]

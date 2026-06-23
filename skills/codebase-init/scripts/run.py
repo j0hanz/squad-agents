@@ -938,6 +938,13 @@ def _validate_agents_md_structure(
                 message='Missing "Co-Authored-By:" attribution.',
             )
         )
+    elif "<Model Name>" in content:
+        issues.append(
+            ValidationIssue(
+                level=IssueLevel.FAIL,
+                message='Unresolved "<Model Name>" placeholder: substitute the active model name.',
+            )
+        )
 
     if (
         not _FILE_SCOPED_COMMANDS_RE.search(content)

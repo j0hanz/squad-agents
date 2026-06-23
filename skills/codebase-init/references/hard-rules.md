@@ -1,6 +1,8 @@
 # Hard Rule Survey — Option Sets
 
-These are the exact option sets used by the 4 `AskUserQuestion` prompts in Phase 0. Use this wording verbatim or near-verbatim. Each option lists the marker value it maps to (encoded later into the trailing `codebase-init:hard-rules` marker comment) so answers can be mapped unambiguously.
+These are the exact option sets used by the 3 `AskUserQuestion` prompts in Phase 0. Use this wording verbatim or near-verbatim. Each option lists the marker value it maps to (encoded later into the trailing `codebase-init:hard-rules` marker comment) so answers can be mapped unambiguously.
+
+CI/CD Automation is **not** surveyed — it's auto-detected (see SKILL.md Phase 0).
 
 ## 1. Commit & attribution policy
 
@@ -25,14 +27,6 @@ Header: `Testing rigor`
 - Touched-files only: test/typecheck files you changed; don't require full-suite runs → `testing=touched-files`
 - Not enforced: no automatic testing requirement, rely on existing CI → `testing=not-enforced`
 
-## 4. CI/CD Automation
-
-Header: `CI/CD Automation`
-
-- GitHub Actions: automated CI running on GitHub Actions → `ci=github-actions`
-- GitLab CI: automated CI running on GitLab CI → `ci=gitlab-ci`
-- Local-only: no automated CI, local-only test execution and deployment → `ci=local-only`
-
 ## Recommendation Heuristics
 
 Use these signals, in order, to pick the ✅ Recommended option for each prompt — fall back to the first option if no signal is found:
@@ -40,4 +34,5 @@ Use these signals, in order, to pick the ✅ Recommended option for each prompt 
 1. **Commit & attribution policy:** Recommend `commit=strict` if `git log -20 --format=%s` shows >50% of subjects matching `type(scope): subject`; recommend `commit=relaxed` if a `CONTRIBUTING.md`/`.github/` template mentions commit conventions without enforcing a strict format; otherwise recommend `commit=minimal`.
 2. **Project maturity state:** Recommend `maturity=production` if a version file/tag shows `>=1.0.0`, or a `CHANGELOG.md`/release workflow exists; otherwise recommend `maturity=development`.
 3. **Testing rigor:** Recommend `testing=always` if CI config (`.github/workflows/*.yml`) runs the test suite on every PR; recommend `testing=touched-files` if tests exist but CI doesn't gate on them; otherwise recommend `testing=not-enforced`.
-4. **CI/CD Automation:** Recommend `ci=github-actions` if `.github/workflows/` directory contains files; recommend `ci=gitlab-ci` if `.gitlab-ci.yml` file exists; otherwise recommend `ci=local-only`.
+
+`ci=` is filled by `analyze-env`'s file-based detection (`.github/workflows/` → `github-actions`, `.gitlab-ci.yml` → `gitlab-ci`, otherwise `local-only`), never by survey.

@@ -52,6 +52,17 @@ def test_package_override_exempt_from_hard_rules(tmp_path: Path) -> None:
     assert not any("Hard Rules" in str(issue) for issue in result.issues)
 
 
+def test_unresolved_model_name_placeholder_fails(tmp_path: Path) -> None:
+    body = _BASE_BODY.replace(
+        "Co-Authored-By: Claude <noreply@anthropic.com>",
+        "Co-Authored-By: <Model Name>",
+    )
+    path = _write_agents_md(tmp_path, body)
+    result = validate_agents_md_file(path)
+    assert result.success is False
+    assert any("<Model Name>" in str(issue) for issue in result.issues)
+
+
 def test_hard_rules_marker_missing_warns(tmp_path: Path) -> None:
     body = _BASE_BODY.replace(
         "## Commit Attribution",
@@ -161,9 +172,26 @@ def test_scaffold_skeleton_passes_validation(tmp_path: Path) -> None:
         "not-enforced",
         ci="github-actions",
     )
+    # The raw skeleton always leaves "<Model Name>" unresolved (see Phase 2
+    # post-generation actions, which substitute it before declaring done).
+    content = content.replace("<Model Name>", "Claude")
     path = _write_agents_md(tmp_path, content)
     result = validate_agents_md_file(path)
     assert not result.has_errors
+
+
+def test_scaffold_skeleton_unsubstituted_model_name_fails(tmp_path: Path) -> None:
+    content = render_agents_md_skeleton(
+        "python",
+        "test repo",
+        "strict",
+        "production",
+        "not-enforced",
+        ci="github-actions",
+    )
+    path = _write_agents_md(tmp_path, content)
+    result = validate_agents_md_file(path)
+    assert result.has_errors
 
 
 def test_hard_rules_marker_missing_ci_warns(tmp_path: Path) -> None:
