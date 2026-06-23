@@ -37,6 +37,13 @@
 - **Targeted_Logging:** Log strictly at decision boundaries.
 - **Log_Tagging:** MUST use unique prefix (`[DEBUG-XXXX]`). Makes cleanup a simple grep command.
 - **Performance_Bugs:** Do NOT use logs (overhead distorts timing). Use profilers or `performance.now()` diffs.
+  - **Python:** Use `cProfile` to locate slow functions:
+    `python -m cProfile -s tottime script.py`
+    Or use memory-profiler:
+    `mprof run script.py && mprof plot`
+  - **Node.js:** Record CPU profile:
+    `node --cpu-prof script.js`
+    Analyze in Chrome DevTools: Open `chrome://inspect` -> Profiler -> Load the generated `.cpuprofile` file.
 
 ## Phase 5: Fix + Regression Test
 

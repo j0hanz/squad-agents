@@ -29,7 +29,8 @@ Phase 1: Build Feedback Loop (pass/fail signal)
 ## Phase 1: Build Feedback Loop
 
 **action:** Create deterministic < 2s pass/fail signal.
-**action:** Isolate filesystem, pin seeds/time. See `references/feedback-loops.md` for setup patterns by system type (CLI tools, API/HTTP services, and others).
+**action:** Isolate filesystem, pin seeds/time.
+**MANDATORY - READ ENTIRE FILE:** Before setting up a feedback loop, read [feedback-loops.md](references/feedback-loops.md) completely. Do NOT load [phases.md](references/phases.md) during Phase 1.
 **gate:** If no code execution, request logs/telemetry. Do not proceed without loop.
 
 ## Phase 2: Reproduce
@@ -39,8 +40,10 @@ Phase 1: Build Feedback Loop (pass/fail signal)
 
 ## Phase 3: Hypothesize & Falsify
 
+**MANDATORY - READ ENTIRE FILE:** Before proposing or testing hypotheses, read [phases.md](references/phases.md) completely. Do NOT load [feedback-loops.md](references/feedback-loops.md) during Phase 3.
+
 **action: Present Hypotheses**
-Read `references/phases.md` and propose 3-5 falsifiable hypotheses via `AskUserQuestion`. Surface the top 3 as real options (the tool caps at 4 and supplies a free-text "Other" automatically — never add one manually); log any remaining hypotheses in the session/diagnosis notes as queued, not dropped:
+Propose 3-5 falsifiable hypotheses via `AskUserQuestion`. Surface the top 3 as real options (the tool caps at 4 and supplies a free-text "Other" automatically — never add one manually); log any remaining hypotheses in the session/diagnosis notes as queued, not dropped:
 
 1. ✅ **Recommended** — [Primary Hypothesis] based on [Recent Changes > Logic > Env].
 2. **Alternative** — [Second Hypothesis] + condition for testing.
@@ -58,7 +61,7 @@ Read `references/phases.md` and propose 3-5 falsifiable hypotheses via `AskUserQ
 
 ## Phase 5: Red-Green Fix
 
-**action:** Write regression test targeting failing seam **before** fix.
+**action:** Write regression test targeting failing seam **before** fix. If no correct seam exists (e.g. environment-specific dependency), document the limitation in the fix and request telemetry or user verification approval.
 **action:** Confirm RED (test fails).
 **action:** Apply minimal fix on working copy.
 **action:** Confirm GREEN (test passes).
@@ -88,6 +91,20 @@ Read `references/phases.md` and propose 3-5 falsifiable hypotheses via `AskUserQ
 | `receive-code-review`            | Step 4 Implement (continue the severity-ordered fix loop)                |
 | `codebase-init`                  | Failure Recovery step that invoked diagnose (resume Phase 1/2/3)         |
 | `github-automation`              | The script/PR step that failed (resume once root cause is fixed)         |
+
+## Sibling Exclusions
+
+- **Do NOT use** this skill for writing new feature tests (use [`test-driven-development`](../test-driven-development/SKILL.md) instead).
+- **Do NOT use** this skill for refactoring non-bug structural issues (use [`refactor`](../refactor/SKILL.md) instead).
+
+## Additional Resources
+
+### Reference Files
+
+For detailed patterns, procedures, and setup techniques, consult:
+
+- **`references/feedback-loops.md`** - Setup patterns by system type (CLI, API, Node.js, Frontend, etc.)
+- **`references/phases.md`** - Detailed phases, hypothesis prioritization, and profiling guidelines
 
 ## Output Format
 
