@@ -1,14 +1,9 @@
 ---
 name: brainstorming
-description: "MANDATORY before initiating any creative work, including building features, adding functionality, or altering behavior. Use this to evaluate user intent, define requirements, and map out the design prior to implementation."
+description: 'MANDATORY before initiating any creative work, including building features, adding functionality, or altering behavior. This skill should be used when the user asks to "design a feature", "add functionality", "write a design doc", or "brainstorm a new solution".'
 ---
 
 # brainstorming
-
-Help translate ideas into complete designs and specifications through focused dialogue.
-
-Begin by reviewing the project context, then ask clarifying questions one at a time to refine the requirements. Once the scope is clear, present a proposed design and secure user approval.
-
 
 <HARD-GATE>
 Do not propose code, file changes, or a concrete implementation plan for a new feature or ambiguous
@@ -67,7 +62,7 @@ Default subagent type for every dispatch below: `general-purpose`. Type is only 
 ## Phase 1: Discovery
 
 - **Stakeholder Probe:** Identify users. Trigger `AskUserQuestion` (1. Recommended, 2. Alternative). Skip if unambiguous.
-- **Scanner Subagent:** Read `references/codebase-scanner-prompt.md`. Dispatch subagent (`scan_context.py` → `compress_report.py`). Fallback to regex on failure.
+- **Scanner Subagent:** **MANDATORY - READ ENTIRE FILE**: Before dispatching, you MUST read [codebase-scanner-prompt.md](file:///C:/agent-dev/skills/brainstorming/references/codebase-scanner-prompt.md) completely. NEVER set range limits on reading this file. Do NOT load other reference files for this phase. Dispatch subagent (`scan_context.py` → `compress_report.py`). Fallback to regex on failure.
 - **Extraction:** Interface Shapes, Technical Constraints, Analogous Features, Key Unknowns.
 - **Zero-Code Exit:** Offer exit if scan finds existing satisfying feature/config.
 - **Understanding Statement:** Summarize extraction. Require user confirmation.
@@ -107,7 +102,7 @@ Default subagent type for every dispatch below: `general-purpose`. Type is only 
 
 ## Phase 4: Design Proposal
 
-- **Designer Subagent:** Read `references/design-proposer-prompt.md`. Dispatch subagent with compressed scan report + discovery findings.
+- **Designer Subagent:** **MANDATORY - READ ENTIRE FILE**: Before dispatching, you MUST read [design-proposer-prompt.md](file:///C:/agent-dev/skills/brainstorming/references/design-proposer-prompt.md) completely. NEVER set range limits on reading this file. Do NOT load other reference files for this phase. Dispatch subagent with compressed scan report + discovery findings.
 - **Presentation:** 2-3 approaches with grounded tradeoffs.
 - **Approval Gate:** Await explicit user commitment to one approach. Do not guess.
 - **Review Check:** Phase 5 flag set → Phase 5. Not set → Phase 6.
@@ -118,7 +113,7 @@ Default subagent type for every dispatch below: `general-purpose`. Type is only 
 ## Phase 5: Structured Review
 
 - **Trigger:** Phase 5 flag set OR explicit user request to stress test.
-- **Parallel Dispatch:** Read `references/structured-review-prompt.md`. Spawn Skeptic, Constraint Guardian, User Advocate concurrently.
+- **Parallel Dispatch:** **MANDATORY - READ ENTIRE FILE**: Before dispatching reviewers, you MUST read [structured-review-prompt.md](file:///C:/agent-dev/skills/brainstorming/references/structured-review-prompt.md) completely. NEVER set range limits on reading this file. Spawn Skeptic, Constraint Guardian, User Advocate concurrently.
 - **Consolidation:** Create Response Log (Objection | Source | Severity | Designer Response | Resolution). Discard style/wording objections.
 - **Resolution:** Accept & Revise (update design) OR Reject (provide technical rationale). No open rows allowed.
 - **Arbiter Gate:** Dispatch Arbiter with original design, revised design, Response Log. Yields `APPROVED`, `REVISE`, or `REJECT`.
@@ -147,3 +142,15 @@ Default subagent type for every dispatch below: `general-purpose`. Type is only 
 - **Ignore Constraints:** Phase 4 architecture must explicitly cite which Phase 1 constraints it satisfies.
 - **Reviewer Redesign:** Phase 5 reviewers only identify flaws; Phase 4 handles redesign.
 - **Re-dispatch Reviewers:** Never re-run a Phase 5 reviewer if objections are already logged in the session log.
+
+---
+
+## Additional Resources
+
+### Reference Files
+
+Consult these files for subagent prompt templates:
+
+- **[codebase-scanner-prompt.md](file:///C:/agent-dev/skills/brainstorming/references/codebase-scanner-prompt.md)** - Prompts for scanning codebase and extracting domain context.
+- **[design-proposer-prompt.md](file:///C:/agent-dev/skills/brainstorming/references/design-proposer-prompt.md)** - Prompts for creating 2-3 design approaches.
+- **[structured-review-prompt.md](file:///C:/agent-dev/skills/brainstorming/references/structured-review-prompt.md)** - Prompts for Adversarial Review and Arbiter Gate.

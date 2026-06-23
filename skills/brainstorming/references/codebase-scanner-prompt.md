@@ -29,7 +29,7 @@ CONSTRAINTS:
     Use its JSON output to populate the report. Fall back to manual exploration ONLY if the script fails.
   - Manual fallback (Explorer specific):
     1. Search for domain terms using `grep_search`.
-    2. Map the relevant directory structure using `ls -R`.
+    2. Map the relevant directory structure using workspace listing tools (such as list_dir, find_files, or native python scripts).
     3. Identify key interfaces/types using `grep_search` with regex for class/interface definitions.
     4. Check for analogous patterns by searching for synonyms.
 
