@@ -1,6 +1,6 @@
 ---
 name: planning
-description: "Paired specification and implementation planning. Generates durable spec.md and plan.md artifacts. Not for vague/ambiguous requirements that need discovery first (see brainstorming) or for executing an existing plan (see multi-agent-development, test-driven-development). Trigger on: 'write a spec', 'spec and plan this', 'create implementation plan', 'planning', 'blueprint', 'technical specification', 'task decomposition'."
+description: 'This skill should be used when the user asks to "write a spec", "spec and plan this", "create implementation plan", "planning", "blueprint", "technical specification", or "task decomposition". Generates paired specification and implementation planning artifacts. Not for vague/ambiguous requirements that need discovery first (see brainstorming) or for executing an existing plan (see multi-agent-development, test-driven-development).'
 disable-model-invocation: false
 user-invocable: true
 allowed-tools: Bash(python *) Bash(python3 *)
@@ -25,9 +25,9 @@ Step 1: Intake & Mapping (brief/interview) -> Step 2: Artifact Authoring (scaffo
 ## NEVER Do This
 
 - **NEVER** execute unsanitized bash commands with user variables. Wrap in single quotes.
-- **NEVER** hand-type spec IDs or file paths for existing files. **WHY:** Manual entry leads to broken traceability and dead links. **FIX:** Use `scaffold.py` and `discover.py`.
+- **NEVER** hand-type spec IDs or file paths for existing files. **WHY:** Manual entry leads to broken traceability and dead links. **FIX:** Use `skills/planning/scripts/scaffold.py` and `skills/planning/scripts/discover.py`.
 - **NEVER** proceed past validation gates without 100% PASS. **WHY:** Hidden errors in the plan compound during implementation.
-- **NEVER** edit `Satisfies:` manually. **FIX:** Use `sync.py`.
+- **NEVER** edit `Satisfies:` manually. **FIX:** Use `skills/planning/scripts/sync.py`.
 - **NEVER** draft a plan without reading the templates and decomposition guide. **WHY:** Planning requires specific granularity and traceability standards.
 
 ## Depth Dial
@@ -41,6 +41,7 @@ Step 1: Intake & Mapping (brief/interview) -> Step 2: Artifact Authoring (scaffo
 ## Step 1: Intake & Mapping
 
 **MANDATORY**: Read `references/discovery.md` to understand how to resolve existing paths.
+**Do NOT load** `references/validation.md`, `references/traceability.md`, or templates (`references/spec-template.md`, `references/plan-template.md`) at this stage.
 
 If a **Design Brief** (from `brainstorming`) is present, map fields and skip corresponding questions:
 
@@ -65,18 +66,19 @@ For any missing core field, confirm via `AskUserQuestion` — the tool supplies 
 
 **MANDATORY**: Read `references/spec-template.md`, `references/plan-template.md`, `references/decomposition.md`, and `references/traceability.md` before authoring. Refer to `references/output-examples.md` and `references/domain-examples.md` for style and examples.
 
-1. **Scaffold:** `python scripts/scaffold.py \"NAME\" --depth [sketch|contract|blueprint]`
+1. **Scaffold:** `python skills/planning/scripts/scaffold.py <name> --depth [sketch|contract|blueprint]`
 2. **Draft Spec:** Fill requirements and interfaces using `spec-template.md`.
-3. **Draft Plan:** Fill tasks using `plan-template.md`. Use `discover.py` for existing paths; prefix new paths with `[UNVERIFIED]`. Use `decomposition.md` to ensure atomic task granularity.
+3. **Draft Plan:** Fill tasks using `plan-template.md`. Use `skills/planning/scripts/discover.py` for existing paths; prefix new paths with `[UNVERIFIED]`. Use `decomposition.md` to ensure atomic task granularity.
 
 ## Step 3: Validation Pipeline
 
 **MANDATORY**: Read `references/validation.md` for error remediation.
+**Do NOT load** `references/discovery.md` or templates at this stage.
 
-**Gate:** Resolve all ERRORS before proceeding (validation pipeline uses `scripts/spec_parser.py` internally to validate spec/plan structure).
+**Gate:** Resolve all ERRORS before proceeding (validation pipeline uses `skills/planning/scripts/spec_parser.py` internally to validate spec/plan structure).
 
-- **Sketch:** `python scripts/validate.py \"NAME\" --spec`
-- **Contract/Blueprint:** `python scripts/execute_plan_pipeline.py --name \"NAME\"`
+- **Sketch:** `python skills/planning/scripts/validate.py <name> --spec`
+- **Contract/Blueprint:** `python skills/planning/scripts/execute_plan_pipeline.py --name <name>`
 
 ## Step 4: Semantic Review (Contract/Blueprint)
 
@@ -86,7 +88,7 @@ Dispatch `general-purpose` agent to audit quality (vague goals, missing error ca
 - **MANDATORY**: Pass `references/validation.md` and the output of `validate.py` to the Reviewer subagent.
 - Reviewer writes to `plan/NAME.review.md`.
 - **Handoff Blocked** until `ready_for_execution: true` is set in review file.
-- Verify: `python scripts/validate.py \"NAME\" --review`
+- Verify: `python skills/planning/scripts/validate.py <name> --review`
 
 ## Step 5: Handoff
 
