@@ -4,10 +4,10 @@
     {
       "id": 1,
       "prompt": "Initialize this repo with AGENTS.md",
-      "expected_output": "Skill identifies no AGENTS.md exists. It starts Phase 0 survey (exactly 3 questions in order: commit policy, maturity, testing). Then runs analyze-all, scaffolds with discovered parameters, wires CLAUDE.md/GEMINI.md, and lints.",
+      "expected_output": "Skill identifies no AGENTS.md exists. It starts Phase 0 survey (exactly 4 questions in order: commit policy, maturity, testing, ci/cd). Then runs analyze-all, scaffolds with discovered parameters, wires CLAUDE.md/GEMINI.md, and lints.",
       "files": [],
       "expectations": [
-        "Skill asks exactly 3 AskUserQuestion prompts in Phase 0 (Commit, Maturity, Testing)",
+        "Skill asks exactly 4 AskUserQuestion prompts in Phase 0 (Commit, Maturity, Testing, CI/CD)",
         "Skill runs 'analyze-all' script to discover toolchain and structure",
         "Skill uses 'scaffold-agents-md' with correct marker values from Phase 0",
         "Skill wires CLAUDE.md and GEMINI.md as one-line redirect stubs",
@@ -28,12 +28,12 @@
     },
     {
       "id": 3,
-      "prompt": "Refresh our AGENTS.md. It already has a marker: <!-- codebase-init:hard-rules v1 commit=strict maturity=production testing=always -->",
+      "prompt": "Refresh our AGENTS.md. It already has a marker: <!-- codebase-init:hard-rules v1 commit=strict maturity=production testing=always ci=github-actions -->",
       "expected_output": "Skill detects the v1 marker and skips Phase 0 survey. It proceeds directly to Phase 1 discovery, Phase 2 drafting (preserving existing sections), and Phase 3 validation.",
       "files": ["AGENTS.md"],
       "expectations": [
         "Skill detects the v1 marker in AGENTS.md",
-        "Skill skips the 3-question Phase 0 survey",
+        "Skill skips the 4-question Phase 0 survey",
         "Skill runs analyze-all and proceeds with regeneration",
         "Skill preserves existing non-generated sections during regeneration"
       ]
