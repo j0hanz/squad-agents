@@ -32,11 +32,12 @@ class CompressConfig:
     max_analogous: int = 2
 
 
-def _dedupe_stable(items: list[str]) -> list[str]:
+def _dedupe_stable(items: list[Any]) -> list[str]:
     """Deduplicate preserving first-occurrence order."""
     seen: set[str] = set()
     result: list[str] = []
     for item in items:
+        item = item if isinstance(item, str) else str(item)
         key = item.strip().lower()
         if key not in seen:
             seen.add(key)
@@ -49,8 +50,10 @@ def _truncate_git_log(log: str, max_lines: int) -> str:
         return "no history"
     lines = [line for line in log.splitlines() if line.strip()]
     truncated = lines[:max_lines]
-    suffix = f" … +{len(lines) - max_lines} more" if len(lines) > max_lines else ""
-    return "\n".join(truncated) + suffix
+    omitted = len(lines) - len(truncated)
+    suffix = f" … +{omitted} more" if omitted > 0 else ""
+    body = "\n".join(truncated)
+    return body + suffix if body else (suffix.strip() or "no history")
 
 
 def _trim_str(value: str, max_chars: int = 200) -> str:
@@ -73,18 +76,23 @@ def compress(report: dict[str, Any], cfg: CompressConfig) -> dict[str, Any]:
     out["scope_reasoning"] = _trim_str(report.get("scope_reasoning", ""), 150)
 
     # Related files — cap count, truncate git log, preserve test coverage signals
-    raw_files: list[dict[str, Any]] = report.get("related_files", [])
-    out["related_files"] = [
-        {
-            "path": f.get("path", ""),
-            "last_commit": _truncate_git_log(
-                f.get("last_commit", ""), cfg.max_log_lines
-            ),
-            "has_tests": f.get("has_tests", False),
-            "test_file": f.get("test_file", ""),
-        }
-        for f in raw_files[: cfg.max_files]
-    ]
+    raw_files: list[Any] = report.get("related_files", [])
+    out["related_files"] = []
+    for f in raw_files[: cfg.max_files]:
+        if not isinstance(f, dict):
+            raise TypeError(
+                f"expected related_files entries to be objects, got {type(f).__name__}"
+            )
+        out["related_files"].append(
+            {
+                "path": f.get("path", ""),
+                "last_commit": _truncate_git_log(
+                    f.get("last_commit", ""), cfg.max_log_lines
+                ),
+                "has_tests": f.get("has_tests", False),
+                "test_file": f.get("test_file", ""),
+            }
+        )
 
     # Deduplicate and cap list fields
     out["interface_shapes"] = _dedupe_stable(report.get("interface_shapes", []))[
@@ -129,10 +137,13 @@ def _non_negative_int(value: str) -> int:
     try:
         val = int(value)
     except ValueError:
-        raise argparse.ArgumentTypeError(f"invalid int value: {value!r}")
+        raise argparse.ArgumentTypeError(f"invalid int value: {value!r}") from None
     if val < 0:
         raise argparse.ArgumentTypeError(f"value must be >= 0, got {val}")
     return val
+
+
+_DEFAULTS = CompressConfig()
 
 
 def main() -> None:
@@ -142,13 +153,29 @@ def main() -> None:
     parser.add_argument(
         "report", nargs="?", help="Path to report JSON (omit to read from stdin)"
     )
-    parser.add_argument("--max-files", type=_non_negative_int, default=5)
-    parser.add_argument("--max-log-lines", type=_non_negative_int, default=3)
-    parser.add_argument("--max-constraints", type=_non_negative_int, default=5)
-    parser.add_argument("--max-interface-shapes", type=_non_negative_int, default=10)
-    parser.add_argument("--max-unknowns", type=_non_negative_int, default=4)
-    parser.add_argument("--max-design-docs", type=_non_negative_int, default=3)
-    parser.add_argument("--max-analogous", type=_non_negative_int, default=2)
+    parser.add_argument(
+        "--max-files", type=_non_negative_int, default=_DEFAULTS.max_files
+    )
+    parser.add_argument(
+        "--max-log-lines", type=_non_negative_int, default=_DEFAULTS.max_log_lines
+    )
+    parser.add_argument(
+        "--max-constraints", type=_non_negative_int, default=_DEFAULTS.max_constraints
+    )
+    parser.add_argument(
+        "--max-interface-shapes",
+        type=_non_negative_int,
+        default=_DEFAULTS.max_interface_shapes,
+    )
+    parser.add_argument(
+        "--max-unknowns", type=_non_negative_int, default=_DEFAULTS.max_unknowns
+    )
+    parser.add_argument(
+        "--max-design-docs", type=_non_negative_int, default=_DEFAULTS.max_design_docs
+    )
+    parser.add_argument(
+        "--max-analogous", type=_non_negative_int, default=_DEFAULTS.max_analogous
+    )
     args = parser.parse_args()
 
     try:

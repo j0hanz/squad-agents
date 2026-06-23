@@ -19,6 +19,7 @@ import ast
 import json
 import re
 import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -121,6 +122,9 @@ def _expand_synonyms(nouns: list[str]) -> list[str]:
     return expanded
 
 
+_SUBPROCESS_TIMEOUT = 15
+
+
 def _git_log(path: str, cwd: Path) -> str:
     try:
         result = subprocess.run(
@@ -128,26 +132,36 @@ def _git_log(path: str, cwd: Path) -> str:
             capture_output=True,
             text=True,
             cwd=str(cwd),
+            timeout=_SUBPROCESS_TIMEOUT,
         )
-    except FileNotFoundError:
+    except (FileNotFoundError, subprocess.TimeoutExpired):
         return "no history"
     if result.returncode != 0:
         return "no history"
     return result.stdout.strip() or "no history"
 
 
-def _grep_files(pattern: str, cwd: Path) -> list[str]:
-    """Return up to 5 file paths matching pattern (case-insensitive, ignores lock files)."""
+def _grep_files(pattern: str, cwd: Path) -> list[str] | None:
+    """Return up to 5 file paths matching pattern, or None if no grep tool is available."""
+    found_git = True
     try:
         git_result = subprocess.run(
             ["git", "grep", "-ril", "-e", pattern],
             capture_output=True,
             text=True,
             cwd=str(cwd),
+            timeout=_SUBPROCESS_TIMEOUT,
         )
         if git_result.returncode == 0:
             return [p for p in git_result.stdout.splitlines() if p][:5]
+        if git_result.returncode > 1:
+            print(
+                f"warning: git grep failed for {pattern!r}: {git_result.stderr.strip()}",
+                file=sys.stderr,
+            )
     except FileNotFoundError:
+        found_git = False
+    except subprocess.TimeoutExpired:
         pass
 
     # Fallback to rg
@@ -168,8 +182,11 @@ def _grep_files(pattern: str, cwd: Path) -> list[str]:
             capture_output=True,
             text=True,
             cwd=str(cwd),
+            timeout=_SUBPROCESS_TIMEOUT,
         )
     except FileNotFoundError:
+        return None if not found_git else []
+    except subprocess.TimeoutExpired:
         return []
 
     paths = [p for p in rg_result.stdout.splitlines() if p]
@@ -178,21 +195,31 @@ def _grep_files(pattern: str, cwd: Path) -> list[str]:
         p_path = Path(p)
         if p_path.is_absolute():
             try:
-                normalized.append(p_path.relative_to(cwd).as_posix())
+                rel = p_path.relative_to(cwd)
             except ValueError:
-                normalized.append(p_path.as_posix())
+                continue  # outside cwd — not a match we should report
+            normalized.append(rel.as_posix())
         else:
             normalized.append(p_path.as_posix())
     return normalized[:5]
 
 
+_DOC_SUFFIXES = [g.removeprefix("**/") for g in _DOC_GLOBS]
+
+
 def _find_doc_files(cwd: Path) -> list[str]:
+    import os
+
     found: list[str] = []
-    for pattern in _DOC_GLOBS:
-        for p in cwd.glob(pattern):
-            if not _is_skippable(p):
-                found.append(str(p.relative_to(cwd)))
-    return found[:5]
+    for root, dirs, files in os.walk(cwd):
+        dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
+        for name in files:
+            rel = (Path(root) / name).relative_to(cwd)
+            if any(rel.match(suf) for suf in _DOC_SUFFIXES):
+                found.append(str(rel))
+                if len(found) >= 5:
+                    return found
+    return found
 
 
 def _find_test_file(file_path: Path, cwd: Path) -> str:
@@ -225,7 +252,7 @@ def _find_test_file(file_path: Path, cwd: Path) -> str:
 def _scan_constraints(file_path: Path) -> list[str]:
     """Scan a file for constraint signals (TODOs, rate limits, timeouts)."""
     try:
-        text = file_path.read_text(encoding="utf-8", errors="ignore")
+        text = file_path.read_text(encoding="utf-8-sig", errors="replace")
     except OSError:
         return []
     hits: list[str] = []
@@ -260,7 +287,7 @@ def _extract_interface_shapes(file_path: Path, nouns: set[str]) -> list[str]:
     if not pattern:
         return []
     try:
-        text = file_path.read_text(encoding="utf-8", errors="ignore")
+        text = file_path.read_text(encoding="utf-8-sig", errors="replace")
     except OSError:
         return []
     for match in re.finditer(pattern, text):
@@ -271,16 +298,18 @@ def _extract_interface_shapes(file_path: Path, nouns: set[str]) -> list[str]:
 
 
 def _estimate_scope(file_count: int, crosses_boundary: bool) -> tuple[str, str]:
-    if file_count <= 2:
+    if file_count <= 2 and not crosses_boundary:
         return "S", f"{file_count} file(s), isolated change"
-    if file_count <= 5:
+    if file_count <= 2:
+        label = "M"
+    elif file_count <= 5:
         label = "M"
     elif file_count <= 10:
         label = "L"
     else:
         label = "XL"
     if crosses_boundary:
-        label = {"M": "L", "L": "XL"}.get(label, label)
+        label = {"S": "M", "M": "L", "L": "XL"}.get(label, label)
     return label, f"{file_count} file(s) matched; boundary crossing: {crosses_boundary}"
 
 
@@ -290,6 +319,9 @@ def scan(nouns: list[str], cwd: Path) -> ScanResult:
     Returns a ScanResult with related files, terminology, constraints, design
     docs, analogous features, test coverage, scope estimate, and unknowns.
     """
+    if not nouns:
+        raise ValueError("scan() requires at least one domain noun")
+
     noun_set = {n.lower() for n in nouns}
     all_terms = _expand_synonyms(nouns)
     adjacent_nouns = all_terms[len(nouns) :]
@@ -299,28 +331,44 @@ def scan(nouns: list[str], cwd: Path) -> ScanResult:
     # ── Phase 1: parallel grep + doc discovery ──────────────────────────────
     seen_paths: set[str] = set()
     adjacent_paths: set[str] = set()
+    grep_unavailable = False
 
     with ThreadPoolExecutor(max_workers=8) as pool:
-        grep_futures = {pool.submit(_grep_files, noun, cwd): noun for noun in nouns}
-        adjacent_futures = {
-            pool.submit(_grep_files, noun, cwd): noun for noun in adjacent_nouns
-        }
+        # Submit in noun order; iterate results in the same order (not
+        # completion order) so related_files is deterministic across runs.
+        grep_futures = [(noun, pool.submit(_grep_files, noun, cwd)) for noun in nouns]
+        adjacent_futures = [
+            (noun, pool.submit(_grep_files, noun, cwd)) for noun in adjacent_nouns
+        ]
         doc_future = pool.submit(_find_doc_files, cwd)
 
-        for fut in as_completed(grep_futures):
-            for path_str in fut.result():
+        for _noun, fut in grep_futures:
+            paths = fut.result()
+            if paths is None:
+                grep_unavailable = True
+                continue
+            for path_str in paths:
                 if path_str not in seen_paths:
                     seen_paths.add(path_str)
                     result.related_files.append(FileSignal(path=path_str))
 
-        for fut in as_completed(adjacent_futures):
-            for path_str in fut.result():
+        for _noun, fut in adjacent_futures:
+            paths = fut.result()
+            if paths is None:
+                grep_unavailable = True
+                continue
+            for path_str in paths:
                 if path_str not in seen_paths and path_str not in adjacent_paths:
                     adjacent_paths.add(path_str)
 
         result.design_docs = doc_future.result()
         if not result.design_docs:
             result.unknowns.append("No glossary, ADR, or architecture docs found")
+
+    if grep_unavailable:
+        result.unknowns.append(
+            "Neither git nor rg is available — file search was skipped"
+        )
 
     # Cap to 5 most relevant files
     result.related_files = result.related_files[:5]
