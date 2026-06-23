@@ -375,6 +375,64 @@ Expected result:
     )
 
 
+def test_parse_plan_multiline_fields_with_blank_lines(tmp_path: Path) -> None:
+    plan_text = """\
+# test-feature
+
+Spec: [test-feature.specs.md](test-feature.specs.md)
+
+## PHASE-001: Implementation
+
+### TASK-001: Multi-line field with blank lines
+Depends on: none
+Files: [src/auth.ts](src/auth.ts)
+Symbols: none
+Satisfies: REQ-001
+Action:
+  Line 1 of action.
+
+  Line 2 of action after a blank line.
+Validate: `npm test`
+Expected result: Done.
+
+## PHASE-END: Acceptance
+"""
+    p = tmp_path / "test-multiline-blank.plan.md"
+    p.write_text(plan_text, encoding="utf-8")
+    doc = parse_plan(p)
+    assert len(doc.tasks) == 1
+    task = doc.tasks[0]
+    assert (
+        task.fields["Action"]
+        == "Line 1 of action.\n\n  Line 2 of action after a blank line."
+    )
+
+
+def test_validate_plan_bare_path_check(tmp_path: Path) -> None:
+    plan_text = """\
+# test-feature
+
+Spec: [test-feature.specs.md](test-feature.specs.md)
+
+## PHASE-001: Implementation
+
+### TASK-001: Implement something
+Depends on: none
+Files: [src/auth.ts](src/auth.ts), src/other.ts
+Symbols: none
+Satisfies: REQ-001
+Action: Add something.
+Validate: `npm test`
+Expected result: Done.
+
+## PHASE-END: Acceptance
+"""
+    p = tmp_path / "test-bare-path.plan.md"
+    p.write_text(plan_text, encoding="utf-8")
+    errs, _ = validate_plan(p)
+    assert any("bare path" in e and "src/other.ts" in e for e in errs)
+
+
 def test_scaffold_domain_injection_sketch(tmp_path: Path) -> None:
     # Test that domain injection works in sketch depth
     spec_path, plan_path = scaffold(

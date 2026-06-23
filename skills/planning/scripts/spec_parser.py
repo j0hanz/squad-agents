@@ -116,6 +116,11 @@ def parse_spec(path: str | Path) -> SpecDocument:
         if current_section is not None:
             doc.sections[current_section] = "\n".join(section_lines).strip()
 
+    def _add_unclass(sec: str, idx: str) -> None:
+        pair = (sec, idx)
+        if pair not in doc.unclassified:
+            doc.unclassified.append(pair)
+
     for line in lines:
         if m := _HEADING_RE.match(line):
             _flush_section()
@@ -136,21 +141,21 @@ def parse_spec(path: str | Path) -> SpecDocument:
                     ):
                         doc.reqs.add(id_str)
                     else:
-                        doc.unclassified.append((current_section, id_str))
+                        _add_unclass(current_section, id_str)
                 elif "constraints" in sec_lower:
                     if id_str.startswith("CON-"):
                         doc.cons.add(id_str)
                     else:
-                        doc.unclassified.append((current_section, id_str))
+                        _add_unclass(current_section, id_str)
                 elif "acceptance criteria" in sec_lower or "validation" in sec_lower:
                     if id_str.startswith("AC-"):
                         doc.acs.add(id_str)
                     elif id_str.startswith("VAL-"):
                         doc.vals.add(id_str)
                     else:
-                        doc.unclassified.append((current_section, id_str))
+                        _add_unclass(current_section, id_str)
                 else:
-                    doc.unclassified.append((current_section, id_str))
+                    _add_unclass(current_section, id_str)
 
     _flush_section()
     return doc
@@ -227,19 +232,22 @@ def parse_plan(path: str | Path) -> PlanDocument:
                 current_task.fields[field_name] = field_value
         else:
             if current_field is not None:
-                stripped = line.strip()
-                if stripped:
-                    if current_field == "Satisfies":
+                if current_field == "Satisfies":
+                    stripped = line.strip()
+                    if stripped:
                         ids = {m.group(1) for m in _IDS_RE.finditer(stripped)}
                         current_task.satisfies |= ids
                         doc.satisfied_ids |= ids
-                    else:
-                        existing = current_task.fields.get(current_field, "")
-                        current_task.fields[current_field] = (
-                            existing + "\n" + line
-                        ).strip()
+                else:
+                    existing = current_task.fields.get(current_field, "")
+                    current_task.fields[current_field] = existing + "\n" + line
 
     if current_task is not None:
         doc.tasks.append(current_task)
+
+    # Strip whitespace/newlines from all parsed task fields
+    for task in doc.tasks:
+        for k, v in task.fields.items():
+            task.fields[k] = v.strip()
 
     return doc

@@ -211,14 +211,25 @@ def validate_plan(plan_path: Path) -> tuple[list[str], list[str]]:
         files_val = task.fields.get("Files", "")
         syms_val = task.fields.get("Symbols", "")
         for field_name, val in [("Files", files_val), ("Symbols", syms_val)]:
-            if (
-                val
-                and not re.search(r"\bnone\b", val, re.IGNORECASE)
-                and "[" not in val
-            ):
-                errors.append(
-                    f"[PLAN] {task.id} '{field_name}': bare path — use markdown links."
-                )
+            if val and not re.search(r"\bnone\b", val, re.IGNORECASE):
+                # Split by newline first, then by comma to get individual items
+                items: list[str] = []
+                for line_part in val.splitlines():
+                    for item in line_part.split(","):
+                        item_stripped = item.strip()
+                        if item_stripped:
+                            items.append(item_stripped)
+
+                # Check if any item does not contain '['
+                for item in items:
+                    if (
+                        not re.search(r"\bnone\b", item, re.IGNORECASE)
+                        and "[" not in item
+                    ):
+                        errors.append(
+                            f"[PLAN] {task.id} '{field_name}': bare path {item!r} — use markdown links."
+                        )
+                        break
 
         validate_val = task.fields.get("Validate", "")
         if (
@@ -348,6 +359,7 @@ def _print_results(
     warnings: list[str],
     matrix: CoverageMatrix | None = None,
 ) -> None:
+    """Print errors, warnings, and optional coverage matrix stats for a validation step."""
     if warnings:
         print("WARNINGS:")
         for w in warnings:
@@ -394,6 +406,7 @@ def _resolve_paths(name_or_path: str) -> tuple[Path, Path]:
 
 
 def main() -> None:
+    """Parse arguments and perform validation check pipelines on specification and plan files."""
     parser = argparse.ArgumentParser(
         description="Validate planning artifacts (spec, plan, cross-check, or review gate)."
     )

@@ -29,10 +29,12 @@ _PHASE_END_RE = re.compile(r"^## PHASE-END[^\n]*", re.MULTILINE)
 
 
 def _is_impl_id(id_str: str) -> bool:
+    """Check if the given ID requires an implementation task (e.g. REQ-, SEC-, etc.)."""
     return any(id_str.startswith(p) for p in IMPL_PREFIXES)
 
 
 def _task_stub(task_id: str, spec_id: str, depends_on: str) -> str:
+    """Generate a template string for a new implementation task stub."""
     return (
         f"### {task_id}: Implement {spec_id}\n\n"
         f"Depends on: {depends_on}\n"
@@ -46,6 +48,7 @@ def _task_stub(task_id: str, spec_id: str, depends_on: str) -> str:
 
 
 def _acceptance_stub(task_id: str, ac_ids: list[str], depends_on: str) -> str:
+    """Generate a template string for the final acceptance validation task stub."""
     ac_list = ", ".join(sorted(ac_ids)) if ac_ids else "none"
     return (
         f"### {task_id}: Final acceptance verification\n\n"
@@ -60,6 +63,7 @@ def _acceptance_stub(task_id: str, ac_ids: list[str], depends_on: str) -> str:
 
 
 def _next_task_number(existing_tasks: list[PlanTask]) -> int:
+    """Find the next available TASK sequential number based on existing tasks."""
     best = 0
     for t in existing_tasks:
         m = re.match(r"TASK-(\d+)", t.id)
@@ -184,6 +188,7 @@ def sync(spec_path: Path, plan_path: Path) -> int:
 
 
 def main() -> None:
+    """Parse CLI arguments and run specification-to-plan synchronization."""
     parser = argparse.ArgumentParser(
         description="Sync spec requirements into plan task stubs (idempotent)."
     )

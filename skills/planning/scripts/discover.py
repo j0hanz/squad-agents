@@ -90,6 +90,8 @@ DECL_PATTERNS: list[re.Pattern[str]] = [
     ),
 ]
 
+_REGEX_TOKEN_RE = re.compile(r"^/.+/[gimsuy]*$")
+
 HELP = """\
 discover.py — Repository discovery helper for implementation plans.
 
@@ -172,6 +174,7 @@ def compile_name_pattern(token: str) -> re.Pattern[str]:
 
 
 def parse_cli_args(raw: list[str]) -> argparse.Namespace:
+    """Parse raw command line arguments into an argparse.Namespace."""
     parser = argparse.ArgumentParser(prog="discover.py", add_help=False)
     parser.add_argument("--root", default=None)
     parser.add_argument("--files", default=None)
@@ -269,6 +272,7 @@ def walk_glob_files(
 
 
 def find_decl_names_on_line(line: str) -> list[str]:
+    """Find declared symbol names on a single line of source code."""
     names: list[str] = []
     for pattern in DECL_PATTERNS:
         for m in pattern.finditer(line):
@@ -282,6 +286,7 @@ def find_symbols(
     name_patterns: list[re.Pattern[str]],
     file_path: str,
 ) -> list[dict[str, Any]]:
+    """Scan file content line-by-line to collect symbols matching target patterns."""
     hits: list[dict[str, Any]] = []
     for i, line in enumerate(content.splitlines()):
         matching = [p for p in name_patterns if p.search(line)]
@@ -292,11 +297,19 @@ def find_symbols(
             continue
         # Emit at most one hit per (file, line) regardless of how many patterns match
         if any(any(pat.search(n) for n in decl_names) for pat in matching):
-            hits.append({"file": file_path, "line": i + 1, "match": line.strip()[:200]})
+            hits.append(
+                {
+                    "file": file_path,
+                    "line": i + 1,
+                    "name": decl_names[0],
+                    "match": line.strip()[:200],
+                }
+            )
     return hits
 
 
 def extract_name(line: str) -> str | None:
+    """Extract the first symbol declaration name from a line."""
     names = find_decl_names_on_line(line)
     return names[0] if names else None
 
@@ -310,6 +323,7 @@ def collect_matched_files(
     ext_filter: frozenset[str],
     max_results: int,
 ) -> list[str]:
+    """Scan and collect relative paths of files matching file_patterns."""
     if not file_patterns:
         return []
     out: list[str] = []
@@ -327,6 +341,7 @@ def collect_matched_symbols(
     max_results: int,
     literal_tokens: list[str] | None = None,
 ) -> list[dict[str, Any]]:
+    """Scan and collect symbol hits matching name_patterns across all files."""
     if not name_patterns:
         return []
     out: list[dict[str, Any]] = []
@@ -367,13 +382,14 @@ def render_markdown(
     matched_symbols: list[dict[str, Any]],
     with_lines: bool,
 ) -> str:
+    """Render the collected files and symbols into a formatted Markdown list."""
     lines: list[str] = []
     for f in matched_files:
         lines.append(f"- [{f}]({f})")
     if matched_files:
         lines.append("")
     for s in matched_symbols:
-        name = extract_name(s["match"]) or s["match"][:60]
+        name = s.get("name") or extract_name(s["match"]) or s["match"][:60]
         anchor = f"{s['file']}#L{s['line']}" if with_lines else s["file"]
         lines.append(f"- [{name}]({anchor}) — `{s['file']}:{s['line']}`")
     if matched_symbols:
@@ -387,6 +403,7 @@ def render_markdown(
 
 
 def main() -> int:
+    """Parse CLI arguments and run discovery of files and symbols."""
     args = parse_cli_args(sys.argv[1:])
 
     if args.help:
@@ -415,9 +432,8 @@ def main() -> int:
         return 2
 
     name_patterns = [compile_name_pattern(n) for n in names]
-    is_regex_token = re.compile(r"^/.+/[gimsuy]*$")
     literal_tokens = (
-        names if names and all(not is_regex_token.match(n) for n in names) else []
+        names if names and all(not _REGEX_TOKEN_RE.match(n) for n in names) else []
     )
     matched_files = collect_matched_files(root, file_patterns, ext_filter, max_results)
     matched_symbols = collect_matched_symbols(

@@ -235,6 +235,7 @@ Spec: [{name}.specs.md]({name}.specs.md)
 
 
 def _inject_domain(template: str, domain: str) -> str:
+    """Inject domain-specific snippets (api or cli) into the spec template."""
     snippets = _DOMAIN_SNIPPETS.get(domain, {})
     req_snip = snippets.get("requirements", "")
     iface_snip = snippets.get("interfaces", "")
@@ -313,6 +314,7 @@ def scaffold(
 
 
 def main() -> None:
+    """Parse CLI arguments and run the spec/plan scaffolding process."""
     parser = argparse.ArgumentParser(
         description="Scaffold paired <name>.specs.md + <name>.plan.md files."
     )

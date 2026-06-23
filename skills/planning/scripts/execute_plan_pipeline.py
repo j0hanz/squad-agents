@@ -6,6 +6,8 @@ Usage:
     python execute_plan_pipeline.py --name <name> [--dir plan]
 """
 
+from __future__ import annotations
+
 import argparse
 import subprocess
 import sys
@@ -47,10 +49,10 @@ def main() -> None:
             print(f"[!] {path_obj} not found. Run scaffold.py and author it first.")
             sys.exit(1)
 
-    _run_step("Validating Spec", scripts_dir, "validate.py", name, "--spec")
+    _run_step("Validating Spec", scripts_dir, "validate.py", str(spec_path), "--spec")
     _run_step("Syncing", scripts_dir, "sync.py", str(spec_path))
-    _run_step("Validating Plan", scripts_dir, "validate.py", name, "--plan")
-    _run_step("Cross-Validating", scripts_dir, "validate.py", name, "--cross")
+    _run_step("Validating Plan", scripts_dir, "validate.py", str(plan_path), "--plan")
+    _run_step("Cross-Validating", scripts_dir, "validate.py", str(spec_path), "--cross")
 
     print("\n[+] Pipeline completed successfully. All validations passed.")
 
