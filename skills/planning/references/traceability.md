@@ -18,7 +18,7 @@ Validate: `npm test -- auth/jwt.test.ts`
 Expected result: All 6 tests pass, 0 skipped.
 ```
 
-`sync.py` sets `Satisfies:` automatically when generating stubs — you never type it by hand.
+`sync.py` sets `Satisfies:` automatically when generating stubs — never type it by hand.
 
 ## The coverage matrix (`validate.py --cross`)
 
@@ -53,7 +53,7 @@ A requirement is covered if any task in the plan has that ID in its `Satisfies:`
 
 ## When spec changes after sync
 
-If you add or rename requirements after running `sync.py`:
+If requirements are added or renamed after running `sync.py`:
 
 1. Edit the spec.
 2. Re-run `python sync.py <name>.specs.md` — it will add stubs for new IDs only; existing tasks are untouched.

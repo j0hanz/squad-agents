@@ -3,7 +3,7 @@
 pipeline for a scaffolded spec/plan pair.
 
 Usage:
-    python execute_plan_pipeline.py --name <name> [--dir plan]
+    python execute_plan_pipeline.py --name <name> [--dir plan] [--depth contract]
 """
 
 from __future__ import annotations
@@ -33,6 +33,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=True)
     parser.add_argument("--dir", default="plan", metavar="DIR")
+    parser.add_argument(
+        "--depth", choices=["sketch", "contract", "blueprint"], default="contract"
+    )
     args = parser.parse_args()
     name = args.name
     _validate_name(name)
@@ -49,10 +52,26 @@ def main() -> None:
             print(f"[!] {path_obj} not found. Run scaffold.py and author it first.")
             sys.exit(1)
 
-    _run_step("Validating Spec", scripts_dir, "validate.py", str(spec_path), "--spec")
+    _run_step(
+        "Validating Spec",
+        scripts_dir,
+        "validate.py",
+        str(spec_path),
+        "--spec",
+        "--level",
+        args.depth,
+    )
     _run_step("Syncing", scripts_dir, "sync.py", str(spec_path))
     _run_step("Validating Plan", scripts_dir, "validate.py", str(plan_path), "--plan")
-    _run_step("Cross-Validating", scripts_dir, "validate.py", str(spec_path), "--cross")
+    _run_step(
+        "Cross-Validating",
+        scripts_dir,
+        "validate.py",
+        str(spec_path),
+        "--cross",
+        "--level",
+        args.depth,
+    )
 
     print("\n[+] Pipeline completed successfully. All validations passed.")
 

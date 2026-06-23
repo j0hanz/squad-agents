@@ -31,7 +31,7 @@
 | `RISK-NNN` | Risk with mitigation or "accepted"                    | Blueprint |
 | `NOTE-NNN` | Rollout, migration, or rollback note                  | Blueprint |
 
-`scaffold.py` places these IDs for you — never type them by hand.
+`scaffold.py` places these IDs — never type them by hand.
 
 ## Self-check before handoff
 

@@ -1,10 +1,10 @@
 ---
 name: planning
-description: 'This skill should be used when the user asks to "write a spec", "spec and plan this", "create implementation plan", "technical specification", "task decomposition", or "production rollout plan". Generates paired specification and implementation planning artifacts. Not for vague/ambiguous requirements that need discovery first (see brainstorming) or for executing an existing plan (see multi-agent-development, test-driven-development).'
+description: 'This skill should be used when the user asks to "write a spec", "spec and plan this", "create implementation plan", "technical specification", "task decomposition", or "production rollout plan". Generates paired specification and implementation planning artifacts for a known goal. Not for vague/ambiguous requirements that need discovery first (see brainstorming), for restructuring/dependency mapping across existing modules (see architecting), or for executing an existing plan (see multi-agent-development, test-driven-development).'
 disable-model-invocation: false
 user-invocable: true
 allowed-tools: Bash(python *) Bash(python3 *)
-argument-hint: '[--depth sketch|contract|blueprint] [--spec-only] [--from-spec <file>] [--quick] [--domain api|cli] <feature description>'
+argument-hint: '[--depth sketch|contract|blueprint] [--spec-only] [--from-spec <file>] [--domain api|cli] <feature description>'
 ---
 
 # planning
@@ -27,7 +27,7 @@ Step 1: Intake & Mapping (brief/interview) -> Step 2: Artifact Authoring (scaffo
 - **NEVER** execute unsanitized bash commands with user variables. **WHY:** Spec/plan content (names, goals) can contain shell metacharacters that get injected into `Validate:` commands. **FIX:** Wrap in single quotes.
 - **NEVER** hand-type spec IDs or file paths for existing files. **WHY:** Manual entry leads to broken traceability and dead links. **FIX:** Use `skills/planning/scripts/scaffold.py` and `skills/planning/scripts/discover.py`.
 - **NEVER** proceed past validation gates without 100% PASS. **WHY:** Hidden errors in the plan compound during implementation.
-- **NEVER** edit `Satisfies:` manually. **FIX:** Use `skills/planning/scripts/sync.py`.
+- **NEVER** edit `Satisfies:` manually for Contract/Blueprint. **FIX:** Use `skills/planning/scripts/sync.py` (sketch has no sync step — its tasks are hand-authored).
 - **NEVER** draft a plan without reading the templates and decomposition guide. **WHY:** Planning requires specific granularity and traceability standards.
 
 ## Depth Dial
@@ -75,10 +75,10 @@ For any missing core field, confirm via `AskUserQuestion` — the tool supplies 
 **MANDATORY**: Read `references/validation.md` for error remediation.
 **Do NOT load** `references/discovery.md` or templates at this stage.
 
-**Gate:** Resolve all ERRORS before proceeding (validation pipeline uses `skills/planning/scripts/spec_parser.py` internally to validate spec/plan structure).
+**Gate:** Resolve all ERRORS before proceeding (validation uses `skills/planning/scripts/spec_parser.py` internally to validate spec/plan structure). Always pass the depth chosen in Step 2 — each depth has different mandatory sections (see `references/spec-template.md`); omitting it silently falls back to `contract` rigor.
 
-- **Sketch:** `python skills/planning/scripts/validate.py <name> --spec`
-- **Contract/Blueprint:** `python skills/planning/scripts/execute_plan_pipeline.py --name <name>`
+- **Sketch:** `python skills/planning/scripts/validate.py <name> --spec --level sketch`. Sketch has no sync step — its single phase is hand-authored directly from the template.
+- **Contract/Blueprint:** `python skills/planning/scripts/execute_plan_pipeline.py --name <name> --depth [contract|blueprint]`. This runs `validate --spec` → `sync.py` (writes task stubs with `Satisfies:` pre-filled) → `validate --plan` → `validate --cross`, in that order.
 
 ## Step 4: Semantic Review (Contract/Blueprint)
 

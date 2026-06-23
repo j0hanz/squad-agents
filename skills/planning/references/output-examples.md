@@ -107,9 +107,8 @@ graph TD
 ```
 ````
 
-````
-
 **Extra plan sections:**
+
 ```markdown
 ## PHASE-ROLLBACK: Rollback Procedures
 
@@ -122,4 +121,4 @@ Satisfies: NOTE-001
 Action: Execute `psql -f migrations/rollback_002.sql` to drop the events table.
 Validate: `psql -c "\\d events" 2>&1 | grep 'did not exist'`
 Expected result: Command confirms table does not exist.
-````
+```

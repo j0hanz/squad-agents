@@ -35,7 +35,7 @@ Copy the link blocks directly into `Files:` and `Symbols:` fields. Never fabrica
 1. Run discovery before writing task fields — never guess paths
 2. Copy line anchors exactly as reported
 3. For new files (not yet created): mark as `[UNVERIFIED: path/to/new-file.ts](UNVERIFIED)` and note which task creates it
-4. For cross-repo paths: use `--assume-paths` modifier and document assumptions
+4. For cross-repo paths discovery can't reach: mark as `[UNVERIFIED: path/to/file.ts](UNVERIFIED)` and document the assumption inline (which repo, why it's not discoverable here)
 
 ## When discovery returns no matches
 
@@ -44,7 +44,7 @@ Copy the link blocks directly into `Files:` and `Symbols:` fields. Never fabrica
 | Pattern returns 0 results    | Simplify glob; check the directory exists         |
 | Symbol not found             | Try broader pattern; verify the symbol name       |
 | New file created during plan | Mark UNVERIFIED; resolve after creating task runs |
-| Cross-repo path needed       | Document as assumption; use `--assume-paths`      |
+| Cross-repo path needed       | Mark UNVERIFIED; document the assumption inline   |
 
 ## Full options
 
