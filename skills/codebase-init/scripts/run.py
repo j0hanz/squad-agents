@@ -252,6 +252,7 @@ class ProjectEnvironment:
     test_runner: str = "Unknown"
     linter: str = "Unknown"
     is_monorepo: bool = False
+    ci_provider: str = "Unknown"
 
 
 @dataclass
@@ -434,6 +435,19 @@ def analyze_project_env(target_dir: Path) -> ProjectEnvironment:
                 env.linter = "See package.json lint script"
         except (json.JSONDecodeError, OSError):
             pass
+
+    if ".gitlab-ci.yml" in files:
+        env.ci_provider = "gitlab-ci"
+    else:
+        github_workflows = target_dir / ".github" / "workflows"
+        if github_workflows.is_dir():
+            try:
+                has_files = any(entry.is_file() for entry in github_workflows.iterdir())
+            except (PermissionError, OSError):
+                has_files = False
+            env.ci_provider = "github-actions" if has_files else "local-only"
+        else:
+            env.ci_provider = "local-only"
 
     return env
 
@@ -949,7 +963,8 @@ def print_audit_report(root_dir: Path, results: AuditResults) -> int:
     safe_print(f"- **Package Manager:** {results.env.package_manager}")
     safe_print(f"- **Test Runner:** {results.env.test_runner}")
     safe_print(f"- **Linter/Formatter:** {results.env.linter}")
-    safe_print(f"- **Monorepo:** {'Yes' if results.env.is_monorepo else 'No'}\n")
+    safe_print(f"- **Monorepo:** {'Yes' if results.env.is_monorepo else 'No'}")
+    safe_print(f"- **CI/CD Automation:** {results.env.ci_provider}\n")
 
     safe_print("### Installed Dependencies")
     if results.dependencies:
@@ -1184,6 +1199,7 @@ def main() -> int:
             safe_print(f"Test Runner:     {env.test_runner}")
             safe_print(f"Linter:          {env.linter}")
             safe_print(f"Monorepo:        {env.is_monorepo}")
+            safe_print(f"CI/CD Automation: {env.ci_provider}")
             return 0
         case "find-dependencies":
             target = _resolve_target(args.target_dir, root)
@@ -1211,6 +1227,7 @@ def main() -> int:
             safe_print(f"Test Runner:     {env.test_runner}")
             safe_print(f"Linter:          {env.linter}")
             safe_print(f"Monorepo:        {env.is_monorepo}")
+            safe_print(f"CI/CD Automation: {env.ci_provider}")
             safe_print("")
             safe_print("### Dependencies")
             deps = get_dependencies(target)
