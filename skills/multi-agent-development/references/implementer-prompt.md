@@ -33,7 +33,7 @@ CONSTRAINTS:
   - [Add task-specific constraints here]
 
 OUTPUT:
-  STATUS: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]
+  VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]
 
   SUMMARY:
   [2-4 sentences: what was built, which functions/classes added, how tests verify it]
