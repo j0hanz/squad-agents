@@ -1,5 +1,6 @@
 {
   "name": "claude-agent-dev",
+  "description": "Claude Code plugin for multi-agent development",
   "owner": {
     "name": "j0hanz",
     "email": "l.johansson93@outlook.com"
@@ -7,7 +8,13 @@
   "plugins": [
     {
       "name": "claude-agent-dev",
-      "source": "./"
+      "description": "Multi-agent workflows for Claude Code: development, testing, debugging, and review.",
+      "version": "1.1.2",
+      "source": "./",
+      "author": {
+        "name": "j0hanz",
+        "email": "l.johansson93@outlook.com"
+      }
     }
   ]
 }

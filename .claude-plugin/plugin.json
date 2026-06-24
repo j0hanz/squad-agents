@@ -2,15 +2,29 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "claude-agent-dev",
   "version": "1.1.2",
-  "description": "A plugin to help with agent development and testing.",
+  "description": "Multi-agent workflows for Claude Code: development, testing, debugging, and review.",
   "license": "MIT",
   "author": {
     "name": "j0hanz",
     "email": "l.johansson93@outlook.com"
   },
   "repository": "https://github.com/j0hanz/claude-agent-dev-plugin",
-  "homepage": "https://github.com/j0hanz/claude-agent-dev-plugin#readme",
-  "keywords": ["claude-agent-dev", "claude", "plugin", "agent", "development", "testing"],
+  "homepage": "https://github.com/j0hanz/claude-agent-dev-plugin",
+  "keywords": [
+    "agent",
+    "claude",
+    "plugin",
+    "skills",
+    "code-review",
+    "refactor",
+    "architecture",
+    "test-driven-development",
+    "multi-agent",
+    "workflow",
+    "debugging",
+    "testing",
+    "development"
+  ],
   "hooks": "./hooks/hooks.json",
   "monitors": "./monitors/monitors.json"
 }
