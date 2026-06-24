@@ -50,10 +50,17 @@ Next Task?
 
 ## Partitioning & Scope
 
-- **Action**: AskUserQuestion for task order.
-- **Option 1**: Strict order based on files (Recommended).
+Before asking the user, write the same Lane Matrix `multi-agent-dispatch` uses — it's what makes "strict order" a fact instead of a guess:
+
+| Task | Files touched | Depends on | Risk | Verification |
+| :--- | :------------ | :--------- | :--- | :----------- |
+| 1    | [exact paths] | none       | ...  | ...          |
+| 2    | ...           | Task 1     | ...  | ...          |
+
+- **File Rule**: Combine tasks into one if they touch the same files — never run two tasks against overlapping paths even sequentially without merging them first.
+- **Action**: AskUserQuestion for task order, using the matrix as evidence.
+- **Option 1**: Strict order based on the matrix's `Depends on` column (Recommended).
 - **Option 2**: Grouped tasks with reasons (Alternative).
-- **File Rule**: Combine tasks if they touch the same files.
 
 ## Core Loop (Strict Order)
 
@@ -79,6 +86,13 @@ Next Task?
 - **Test**: Run project tests.
 - **Verify**: Run `verification-before-completion`.
 - **Review**: Run `request-code-review` (Mandatory).
+
+## Failure Modes (check before you call it done)
+
+- A task's "Depends on" was assumed instead of verified against the Lane Matrix — order was wrong.
+- An implementer's `DONE` summary was trusted instead of the spec/quality reviewers actually reading the diff.
+- A blocked or skipped task wasn't surfaced to the user — it just silently didn't happen.
+- An old agent was reused across tasks, carrying stale memory into a new task's context.
 
 ## Operational Rules
 

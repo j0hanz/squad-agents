@@ -7,12 +7,12 @@ argument-hint: '[the independent tasks to parallelize]'
 
 # multi-agent-dispatch
 
-Maximize efficiency through parallel execution across isolated problem domains. Independent domains (no shared state) → this skill. Shared mutable state or dependencies → `multi-agent-development` instead; see Dispatch Gate below for the exact test.
+Maximize efficiency through parallel execution across isolated problem domains. Independent domains (no shared state) → this skill. Shared mutable state or dependencies → `multi-agent-development` instead; the Lane Matrix below is the test.
 
 ```
-GROUP -> SELECT -> LAUNCH -> INTEGRATE
-                      ^         |
-                      └─ retry ─┘ (partial failure)
+GROUP -> MATRIX -> SELECT -> LAUNCH -> INTEGRATE
+                                ^         |
+                                └─ retry ─┘ (partial failure)
 ```
 
 ## Strict Rules
@@ -21,43 +21,65 @@ GROUP -> SELECT -> LAUNCH -> INTEGRATE
 - **NO Assumed Context:** Subagents start blank. Put every needed fact directly into the prompt.
 - **MAX 3 Agents:** Launch a maximum of 3 agents per batch. Combine their work before starting more.
 - **NO Blind Trust:** Agents make mistakes. You MUST run the test suite to prove their work is correct.
+- **NO Hidden Skips:** If you skip a check or a lane, say so in the final report. Never bury it in a summary.
 
-## Dispatch Gate
+## Step 1: GROUP
 
-Run parallel agents ONLY if BOTH are true:
+Confirm task groups with the user using `AskUserQuestion`.
 
-1. **Authorized:** The user or the active step explicitly asked for parallel work.
-2. **Independent:** Tasks are 100% separate.
+Heuristic, not a rule: parallel dispatch pays off most once you have 3+ tasks (or failures) in separate files with unrelated causes. Below that, sequential is usually simpler to reason about — don't force parallelism for its own sake.
 
-- No shared files to edit.
-- No task depends on another task finishing first.
-- No shared limits (like databases or API limits).
+## Step 2: MATRIX (write it down — don't reason about independence silently)
 
-_If false or unsure, do not run in parallel. Use sequential `multi-agent-development`._
+Before assigning roles or launching anything, write this table:
 
-## Four-Step Loop
+| Lane | Files touched | Depends on    | Risk         | Verification          |
+| :--- | :------------ | :------------ | :----------- | :-------------------- |
+| 1    | [exact paths] | none / Lane N | low/med/high | tests / grep / manual |
+| 2    | ...           | ...           | ...          | ...                   |
 
-**MANDATORY:** Read `../multi-agent-development/references/subagent-contract.md` before starting.
+This table **is** the dispatch gate:
 
-1. **GROUP:** Confirm the task groups with the user using `AskUserQuestion`.
-2. **SELECT:** Assign roles (Investigator, Writer, Researcher).
+- A lane may run in the current parallel batch only if its "Files touched" set is disjoint from every other lane in that batch AND "Depends on" is empty (or already merged).
+- Any overlap or dependency → that lane moves to a later batch, or to sequential `multi-agent-development`.
+- If you can't fill every cell with a concrete answer (not "probably fine"), you are not ready to parallelize that lane.
+
+## Step 3: SELECT
+
+Assign roles using the Role Vocabulary defined in `../multi-agent-development/references/subagent-contract.md` (Investigator / Writer / Researcher). **MANDATORY:** read that file before dispatching — it defines the prompt contract every dispatch below depends on.
 
 - Writers MUST use `isolation: worktree` to prevent overlapping edits.
 
-3. **LAUNCH:**
+## Step 4: LAUNCH
 
-- Verify no files overlap between agents.
+- Re-check the matrix for the lanes in this batch: zero file overlap, zero unresolved dependencies.
 - Limit to 3 agents per batch.
-- Launch all agents in ONE single message.
+- Launch all agents for a batch in ONE single message.
+- A lane that's long-running or purely exploratory (no one is blocked on it) can run with `run_in_background` instead of holding up the batch — but never leave it unmonitored past this task.
 
-4. **INTEGRATE:** Combine the work and run the tests.
+## Step 5: INTEGRATE
 
-### Partial Failures (During Integration)
+Consolidate each agent's `VERDICT` / `SUMMARY` / `EVIDENCE` (per the contract) into one report, tiered the same way `multi-agent-development`'s quality reviewer is:
 
-- Keep and save the successful, tested work.
-- Re-run only the failed tasks with fresh agents.
-- If a task failed because it secretly needed another task to finish first, stop parallel work. Switch to sequential work.
-- Always report blocked or failed tasks to the user.
+- **CRITICAL** — lane's work is wrong or broken: discard, do not merge, re-dispatch fresh.
+- **IMPORTANT** — works but needs a fix before merge: re-dispatch with the issue verbatim.
+- **MINOR** — cosmetic: merge now, log for later.
+
+Then run the real test suite. A `VERDICT: SUCCESS` report is a claim, not proof — never merge on the report alone.
+
+### Partial Failures
+
+- Keep and save the successful, tested lanes.
+- Re-run only the failed lanes with fresh agents.
+- If a lane failed because it secretly depended on another lane finishing first, stop parallel work for that pair — update the Matrix and switch them to sequential.
+- Always report blocked or failed lanes to the user, tiered as above.
+
+## Failure Modes (check before you call it done)
+
+- Concurrent edits collided because a Matrix "Files touched" cell was guessed instead of verified.
+- A lane self-reported `SUCCESS` and that report was trusted instead of the test suite.
+- A skipped lane or check got mentioned nowhere instead of surfaced as `BLOCKED`/`CRITICAL`.
+- A background agent kept running with nobody checking on it after the batch moved on.
 
 ## Integration Rules
 
@@ -67,7 +89,7 @@ _If false or unsure, do not run in parallel. Use sequential `multi-agent-develop
 
 ## Success Criteria
 
-All results are combined, tests are GREEN, and tasks are passed to `verification-before-completion`.
+All results are combined, tests are GREEN, every skipped/blocked lane is named in the report, and tasks are passed to `verification-before-completion`.
 
 ## Next Skills
 
