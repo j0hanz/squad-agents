@@ -67,6 +67,19 @@ Consolidate each agent's `VERDICT` / `SUMMARY` / `EVIDENCE` (per the contract) i
 
 Then run the real test suite. A `VERDICT: SUCCESS` report is a claim, not proof — never merge on the report alone.
 
+### Report Template
+
+Present the consolidated result to the user in this exact shape:
+
+```
+| Lane | VERDICT | Tier                          | Action                          |
+| :--- | :------ | :----------------------------- | :------------------------------- |
+| 1    | ...     | PASS/CRITICAL/IMPORTANT/MINOR  | merged / re-dispatched / discarded |
+
+Tests: [PASS|FAIL — command run]
+Skipped/blocked lanes: [list, or "none"]
+```
+
 ### Partial Failures
 
 - Keep and save the successful, tested lanes.

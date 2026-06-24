@@ -87,6 +87,19 @@ Before asking the user, write the same Lane Matrix `multi-agent-dispatch` uses �
 - **Verify**: Run `verification-before-completion`.
 - **Review**: Run `request-code-review` (Mandatory).
 
+### Report Template
+
+Present the consolidated result to the user in this exact shape:
+
+```
+| Task | VERDICT        | Spec   | Quality        | Action                        |
+| :--- | :-------------- | :----- | :-------------- | :----------------------------- |
+| 1    | DONE/BLOCKED... | PASS/FAIL | PASS/CRITICAL/IMPORTANT/MINOR | merged / re-dispatched / blocked |
+
+Tests: [PASS|FAIL — command run]
+Blocked/escalated tasks: [list, or "none"]
+```
+
 ## Failure Modes (check before you call it done)
 
 - A task's "Depends on" was assumed instead of verified against the Lane Matrix — order was wrong.
