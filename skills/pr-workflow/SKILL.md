@@ -1,6 +1,6 @@
 ---
 name: pr-workflow
-description: 'Delivers a reviewed code change to GitHub the convenient way: smart change detection, automatic branch naming, atomic commits, push, and a pull request with a generated description — the terminal "ship it" step of the dev lifecycle. Use when the user says "commit this", "open a PR", "ship it", "push my work", "raise a PR", "create a pull request", or "deliver the change". Multi-agent aware: isolates parallel agents in git worktrees and assembles their branches into PRs, conflict-aware. Trigger on: "commit and push", "open/raise/create a PR", "ship this", "deliver this change", "branch and commit", "assemble agent branches", "pr-workflow". Always prefer this over gh-actions for shipping an ordinary diff, and over request-code-review when the change is already reviewed and just needs to land. Not for authoring CI/Actions YAML or gh batch scripts — that is gh-actions.'
+description: 'Delivers a code change to GitHub the convenient way — ideally reviewed, but proceeds unreviewed on explicit confirmation: smart change detection, automatic branch naming, atomic commits, push, and a pull request with a generated description — the terminal "ship it" step of the dev lifecycle. Use when the user says "open a PR", "ship it", "push my work", "raise a PR", "create a pull request", or "deliver the change". Multi-agent aware: isolates parallel agents in git worktrees and assembles their branches into PRs, conflict-aware. Trigger on: "commit and push", "open/raise/create a PR", "ship this", "deliver this change", "branch and commit", "assemble agent branches". Always prefer this over gh-actions for shipping an ordinary diff, and over request-code-review when the change is already reviewed and just needs to land. Not for authoring CI/Actions YAML or gh batch scripts — that is gh-actions.'
 disable-model-invocation: false
 argument-hint: '[what to ship: "current diff", a branch, or "agent branches"]'
 allowed-tools: Bash(git *), Bash(gh *), Read, Edit, AskUserQuestion
@@ -8,13 +8,13 @@ allowed-tools: Bash(git *), Bash(gh *), Read, Edit, AskUserQuestion
 
 # pr-workflow
 
-The convenient terminal step: take work that's done (and ideally reviewed) and land it as a clean PR with the least fuss. Generate the branch name, the commit messages, and the PR body — don't make the human author plumbing. Reserve confirmation for the one moment it matters: **the push**, because that's the first step that leaves the machine and is hard to retract.
+The convenient terminal step: take work that's done (and ideally reviewed) and land it as a single, atomically-committed PR with the least fuss. Generate the branch name, the commit messages, and the PR body — don't make the human author plumbing. Reserve confirmation for the one moment it matters: **the push**, because that's the first step that leaves the machine and is hard to retract.
 
 ## Process Flow
 
 ```
 Start: Deliver Request
-  -> 0. Scope: reviewed? working tree clean? single branch vs many agent branches?
+  -> 0. Scope: reviewed? any uncommitted changes? single branch vs many agent branches?
   -> 1. Detect & Group (git status / diff) -> logical change groups
   -> 2. Branch (auto-name <type>/<desc>, or reuse the current feature branch)
   -> 3. Commit (atomic per group, generated message, secret scan)
@@ -39,20 +39,20 @@ Start: Deliver Request
 
 1. **Format:** `<type>/<short-name>` (max 50 characters).
 2. **Types:** `feature`, `fix`, `refactor`, `docs`, `test`, `chore`.
-3. **Action:** If on `main`, run `git checkout -b <name>`. If already on a correct feature branch, stay there. You must generate the name yourself.
+3. **Action:** If on `main`, run `git checkout -b <name>` with a self-generated name. If already on a correct feature branch, stay there.
 
 ## Step 3: Commit Safely
 
 1. Make one commit for each group of files.
 2. Add specific files: `git add -- path/to/file`. Do NOT use `git add -A`.
-3. **Secret Check:** Run `git diff --staged | grep -iE 'password|secret|api_key|token|BEGIN .*PRIVATE KEY'`. Stop completely and warn the user if this finds anything.
+3. **Secret Check:** Run `git diff --staged | grep -iE 'password|secret|api_key|AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9._-]+|token|BEGIN .*PRIVATE KEY'` and `git diff --staged --name-only | grep -E '\.env($|\.)|\.pem$|\.pfx$|id_rsa$'`. Stop completely and warn the user if either finds anything. Pattern-based, not exhaustive — a bare credential in an unflagged variable name can still slip through; for high-stakes repos pair this with a real scanner (e.g. `gitleaks`).
 4. **Message:** `<type>: <why you did it>` (max 72 characters).
 5. Show the commit to the user and wait for them to say "OK".
 
 ## Step 4: Ask Before Pushing
 
-1. You MUST stop and ask the user for permission.
-2. Run `git push -u origin <branch>` ONLY after they say yes.
+1. **Gate:** Call `AskUserQuestion` (Yes/No, no manual "Other") asking permission to push. This is a separate turn — never call `git push` in the same response as the question.
+2. **Action:** Run `git push -u origin <branch>` only after the answer is yes. Any other answer stops here; do not retry the push without asking again.
 
 ## Step 5: Create Pull Request (PR)
 
@@ -76,13 +76,14 @@ Start: Deliver Request
 1. **Separate Folders:** Give each agent its own folder and branch using `git worktree add ../<repo>-<task> -b <type>/<task>`.
 2. **Keep Commits Separate:** Never squash (squish together) commits from different agents. Keep the exact history.
 3. **Merging:** Open one PR per branch. If merging branches together, fix conflicts one by one. Use `diagnose` if a merge fails.
+4. **Same Gate Applies:** Each agent's push still goes through Step 4 — one confirmation per branch, no exceptions for worktrees.
 
 ## STRICT RULES (NEVER DO THIS)
 
-- **NEVER** push or open a PR without asking the user first.
-- **NEVER** commit passwords, secret keys, or `.env` files.
-- **NEVER** mix different tasks in one commit (like fixing a bug and changing spacing).
-- **NEVER** force-push (`git push -f`) or skip branch rules.
+- **NEVER** push or open a PR without asking the user first (the push is the first step that leaves the machine — see Step 4).
+- **NEVER** commit passwords, secret keys, or `.env` files (see Step 3's secret check).
+- **NEVER** mix different tasks in one commit (like fixing a bug and changing spacing) — it breaks `git bisect` and makes a single-commit revert impossible.
+- **NEVER** force-push (`git push -f`) or skip branch rules — it rewrites history other agents or branches may depend on.
 
 ## Next Steps & Errors
 
