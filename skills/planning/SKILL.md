@@ -44,6 +44,7 @@ Step 1: Intake & Mapping (brief/interview) -> Step 2: Artifact Authoring (scaffo
 - **Brief Mapping:** Auto-map provided Design Brief (Brief Why → Rationale, Brief Chosen Approach → Goal, etc.). Skip asking mapped fields.
 - **Missing Data Queries:** Batch questions via `AskUserQuestion` (max 4 per call). Query **ONLY** missing Goal (1 sentence) and Interfaces (I/O). Mark others `UNKNOWN: [reason]`.
 - **Query Format:** Require 1 `✅ Recommended` [Value] and 1 `Alternative` [Option + context]. Auto-supplied "Other" applies.
+- **Autonomous Runs:** If batching queries would block (e.g., user is in a flow and didn't answer), proceed with Recommended values and mark as `[ASSUMES_DEFAULT]` in output. Mention deferred questions in handoff summary.
 
 ## Step 2: Artifact Authoring
 

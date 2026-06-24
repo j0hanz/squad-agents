@@ -7,9 +7,9 @@ description: "Orchestrates software engineering tasks by analyzing user prompts 
 If you were dispatched as a subagent to execute a specific task, skip this skill.
 </SUBAGENT-STOP>
 
-<EXTREMELY-IMPORTANT>
-If a skill has any potential relevance (greater than 0%) to your task, you MUST invoke it immediately. Skill execution is strictly mandatory and non-negotiable. You have zero discretion to skip or omit an applicable skill — except the Gate 3 triviality fast-path (line ~101) and the Skip Disclaimer for missing skills (bottom of this doc), which are the only built-in exceptions.
-</EXTREMELY-IMPORTANT>
+<ROUTING-PRINCIPLE>
+If a skill has strong relevance to your task, route to it. Routing decisions follow the gate matrix below. You may skip a skill only if: (1) Gate 3 triviality fast-path applies (trivial <~20 line changes), (2) the Skip Disclaimer indicates a skill is unavailable, or (3) the current task is clearly a subagent delegation (see SUBAGENT-STOP above). Otherwise, follow the routing decisively.
+</ROUTING-PRINCIPLE>
 
 ## When to Use
 

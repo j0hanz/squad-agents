@@ -42,4 +42,4 @@ dependencies: Python dev dependencies are declared in `pyproject.toml` — never
 
 ## Commit Attribution
 
-Co-Authored-By: Gemini 3.5 Flash
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
