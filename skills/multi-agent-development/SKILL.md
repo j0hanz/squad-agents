@@ -87,6 +87,7 @@ For a cluster of 2+ tasks with no dependency between them: dispatch one implemen
 
 ## Final Validation
 
+- **Bar**: Every task clears the project-wide [Definition of Done](../verification-before-completion/references/definition-of-done.md) before it counts as done — independently verified, never on the implementer's self-report.
 - **Test**: Run project tests.
 - **Verify**: Run `verification-before-completion`.
 - **Review**: Run `request-code-review` (Mandatory).
@@ -111,6 +112,31 @@ Blocked/escalated tasks: [list, or "none"]
 - A blocked or skipped task wasn't surfaced to the user — it just silently didn't happen.
 - An old agent was reused across tasks, carrying stale memory into a new task's context.
 - Tasks with `Depends on: none` and disjoint files were still run one-at-a-time instead of clustered — wasted wall-clock time with no correctness benefit.
+
+## Worked Example
+
+Plan: add a "saved searches" feature — schema, API, and UI. Partition Matrix:
+
+| Task | Files touched                                           | Depends on | Risk | Verification      |
+| :--- | :------------------------------------------------------ | :--------- | :--- | :---------------- |
+| 1    | `migrations/saved_search.sql`, `models/saved_search.ts` | none       | med  | `npm test models` |
+| 2    | `api/saved-search.ts`                                   | Task 1     | med  | `npm test api`    |
+| 3    | `ui/SavedSearches.tsx`                                  | Task 2     | low  | `npm test ui`     |
+
+Strict chain (2 needs 1's model, 3 needs 2's contract) → no clustering; run in order. Each task: Phase 1 implement (worktree) → Phase 2 spec check → Phase 3 quality check, clearing the [Definition of Done](../verification-before-completion/references/definition-of-done.md) before the next starts.
+
+```
+| Task | VERDICT | Spec | Quality | Action |
+| :--- | :------ | :--- | :------ | :----- |
+| 1    | DONE    | PASS | PASS    | merged |
+| 2    | DONE    | PASS | IMPORTANT → fixed | re-dispatched, then merged |
+| 3    | DONE    | PASS | PASS    | merged |
+
+Tests: PASS — `npm test` (full suite)
+Blocked/escalated tasks: none
+```
+
+Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and launched together; here Task 2 literally cannot start until Task 1's model exists, so the Matrix's `Depends on` column forces order.
 
 ## Operational Rules
 

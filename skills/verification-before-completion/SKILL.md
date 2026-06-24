@@ -23,6 +23,8 @@ Start: Ready to Complete
 
 ## 1. Mandatory Checklist
 
+The standing bar every change clears is [`references/definition-of-done.md`](references/definition-of-done.md) — the project-wide Definition of Done. The items below are that bar applied here; read it first.
+
 **action:** Verify all items before completion.
 
 - [ ] **Tests:** Targeted tests and regression suite pass. Paste actual runner output (exit code + pass/fail counts) — a claim without pasted output is not evidence.

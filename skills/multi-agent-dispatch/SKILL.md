@@ -68,7 +68,7 @@ Consolidate each agent's `VERDICT` / `SUMMARY` / `EVIDENCE` (per the contract) i
 - **IMPORTANT** — works but needs a fix before merge: re-dispatch with the issue verbatim.
 - **MINOR** — cosmetic: merge now, log for later.
 
-Then run the real test suite. A `VERDICT: SUCCESS` report is a claim, not proof — never merge on the report alone.
+Then run the real test suite. A `VERDICT: SUCCESS` report is a claim, not proof — never merge on the report alone. A lane is mergeable only once its work clears the project-wide [Definition of Done](../verification-before-completion/references/definition-of-done.md), independently verified.
 
 ### Report Template
 
@@ -106,6 +106,31 @@ Skipped/blocked lanes: [list, or "none"]
 ## Success Criteria
 
 All results are combined, tests are GREEN, every skipped/blocked lane is named in the report, and tasks are passed to `verification-before-completion`.
+
+## Worked Example
+
+6 test failures across 3 files, unrelated root causes. GROUP → 3 lanes. MATRIX:
+
+| Lane | Files touched            | Depends on | Risk | Verification                |
+| :--- | :----------------------- | :--------- | :--- | :-------------------------- |
+| 1    | `tool-approval.test.ts`  | none       | low  | `vitest run tool-approval`  |
+| 2    | `batch-complete.test.ts` | none       | med  | `vitest run batch-complete` |
+| 3    | `agent-abort.test.ts`    | none       | low  | `vitest run agent-abort`    |
+
+Files disjoint, no dependencies → all three launch in ONE message, each a Writer with `isolation: worktree`, `run_in_background: true`. As each notifies, INTEGRATE it. Then run the full suite (not the per-lane greps the agents reported):
+
+```
+| Lane | VERDICT | Tier | Action |
+| :--- | :------ | :--- | :----- |
+| 1    | SUCCESS | PASS | merged |
+| 2    | SUCCESS | MINOR | merged, logged naming nit |
+| 3    | SUCCESS | PASS | merged |
+
+Tests: PASS — `vitest run` (all 6 green)
+Skipped/blocked lanes: none
+```
+
+Outcome: 6 failures cleared concurrently, zero integration conflicts — because the Matrix proved the file sets were disjoint _before_ launch, not after.
 
 ## Next Skills
 

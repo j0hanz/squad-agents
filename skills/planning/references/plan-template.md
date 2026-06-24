@@ -44,6 +44,12 @@ Validate: `[VAL commands from spec]`
 Expected result: All AC items confirmed observable.
 ```
 
+Per-task `Validate:`/`Expected result:` are task-specific and sit **on top of** the
+project-wide [Definition of Done](../../verification-before-completion/references/definition-of-done.md)
+— the standing bar (tests/build/lint clean, no debug residue) every task clears
+regardless. Do not restate the DoD in each task; assume it as the floor and add
+only what's specific to the task.
+
 ## Canonical task block
 
 Every task must have exactly these fields (in this order):
