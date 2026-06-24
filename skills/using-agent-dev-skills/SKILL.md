@@ -40,7 +40,7 @@ Gate 3: Execution Strategy
   [dispatch | development | TDD] --> Gate 4
 
 Gate 4: Quality & Delivery
-  -> workflow-validator -> verification-before-completion -> request-code-review
+  -> verification-before-completion -> request-code-review
        -- PASS (recommendation) --> github-automation
        -- FAIL ----------------------> receive-code-review
                                           -- blocking issue ------> diagnose
@@ -93,8 +93,6 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **Autonomous by default:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are all worktree-isolated and test-gated before anything merges — so run them directly and announce the route, don't stop and wait for a go-ahead. Ask first only when a step is genuinely irreversible outside the worktree (a destructive command, a push, a migration) or it's the first dispatch of the session and the user hasn't seen the behavior yet.
 
 ### Gate 4: Quality & Delivery
-
-- **Structural & Schema Checks:** Route to `workflow-validator`.
 
 - **Execution Complete:** Route to `verification-before-completion`.
 - **Security & Quality Check:** Route to `request-code-review` (Mandatory).
