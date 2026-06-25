@@ -85,6 +85,148 @@ Some instructions.
   }
 });
 
+test('validate-plugin detects Bash(...) command-scoped tools syntax in agents/*.md', () => {
+  const agentsDir = path.join(projectRoot, 'agents');
+  const agentMdPath = path.join(agentsDir, 'temp-invalid-tools-agent.md');
+  const invalidContent = `---
+name: temp-invalid-tools-agent
+description: Temp fixture for tool entry syntax validation.
+tools: Read, Grep, Bash(git *)
+---
+Some instructions.
+`;
+
+  fs.writeFileSync(agentMdPath, invalidContent, 'utf-8');
+
+  try {
+    let errorOccurred = false;
+    try {
+      execSync(`node bin/validate-plugin.mjs`, { cwd: projectRoot, stdio: 'pipe' });
+    } catch (err) {
+      errorOccurred = true;
+      const output = err.stdout.toString() + err.stderr.toString();
+      assert.ok(
+        output.includes("Invalid 'tools' entry") && output.includes('Bash(git *)'),
+        'Output should flag the Bash(git *) command-scoped tools entry',
+      );
+    }
+    assert.ok(errorOccurred, 'Validator should fail on Bash(git *) in tools:');
+  } finally {
+    if (fs.existsSync(agentMdPath)) {
+      fs.unlinkSync(agentMdPath);
+    }
+  }
+});
+
+test('validate-plugin detects an agent name not matching ^[a-z][a-z0-9-]*$', () => {
+  const agentsDir = path.join(projectRoot, 'agents');
+  const agentMdPath = path.join(agentsDir, 'temp-bad-name-agent.md');
+  const invalidContent = `---
+name: TempBadName_Agent
+description: Temp fixture for name pattern validation.
+tools: Read
+---
+Some instructions.
+`;
+
+  fs.writeFileSync(agentMdPath, invalidContent, 'utf-8');
+
+  try {
+    let errorOccurred = false;
+    try {
+      execSync(`node bin/validate-plugin.mjs`, { cwd: projectRoot, stdio: 'pipe' });
+    } catch (err) {
+      errorOccurred = true;
+      const output = err.stdout.toString() + err.stderr.toString();
+      assert.ok(
+        output.includes('must match ^[a-z][a-z0-9-]*$'),
+        'Output should flag the invalid name pattern',
+      );
+    }
+    assert.ok(errorOccurred, 'Validator should fail on an invalid agent name pattern');
+  } finally {
+    if (fs.existsSync(agentMdPath)) {
+      fs.unlinkSync(agentMdPath);
+    }
+  }
+});
+
+test('validate-plugin detects duplicate agent names across files', () => {
+  const agentsDir = path.join(projectRoot, 'agents');
+  const firstPath = path.join(agentsDir, 'temp-dup-agent-one.md');
+  const secondPath = path.join(agentsDir, 'temp-dup-agent-two.md');
+  const content = (desc) => `---
+name: temp-dup-agent
+description: ${desc}
+tools: Read
+---
+Some instructions.
+`;
+
+  fs.writeFileSync(
+    firstPath,
+    content('First temp fixture for duplicate-name validation.'),
+    'utf-8',
+  );
+  fs.writeFileSync(
+    secondPath,
+    content('Second temp fixture for duplicate-name validation.'),
+    'utf-8',
+  );
+
+  try {
+    let errorOccurred = false;
+    try {
+      execSync(`node bin/validate-plugin.mjs`, { cwd: projectRoot, stdio: 'pipe' });
+    } catch (err) {
+      errorOccurred = true;
+      const output = err.stdout.toString() + err.stderr.toString();
+      assert.ok(
+        output.includes('Duplicate agent') && output.includes('temp-dup-agent'),
+        'Output should flag the duplicate agent name',
+      );
+    }
+    assert.ok(errorOccurred, 'Validator should fail on a duplicate agent name');
+  } finally {
+    if (fs.existsSync(firstPath)) fs.unlinkSync(firstPath);
+    if (fs.existsSync(secondPath)) fs.unlinkSync(secondPath);
+  }
+});
+
+test('validate-plugin detects an invalid model enum value in agents/*.md', () => {
+  const agentsDir = path.join(projectRoot, 'agents');
+  const agentMdPath = path.join(agentsDir, 'temp-invalid-model-agent.md');
+  const invalidContent = `---
+name: temp-invalid-model-agent
+description: Temp fixture for model enum validation.
+tools: Read
+model: gpt-4
+---
+Some instructions.
+`;
+
+  fs.writeFileSync(agentMdPath, invalidContent, 'utf-8');
+
+  try {
+    let errorOccurred = false;
+    try {
+      execSync(`node bin/validate-plugin.mjs`, { cwd: projectRoot, stdio: 'pipe' });
+    } catch (err) {
+      errorOccurred = true;
+      const output = err.stdout.toString() + err.stderr.toString();
+      assert.ok(
+        output.includes("Invalid 'model' value"),
+        'Output should flag the invalid model value',
+      );
+    }
+    assert.ok(errorOccurred, 'Validator should fail on an invalid model enum value');
+  } finally {
+    if (fs.existsSync(agentMdPath)) {
+      fs.unlinkSync(agentMdPath);
+    }
+  }
+});
+
 test('validate-plugin detects a dangling cross-skill routing reference', () => {
   const tempSkillDir = path.join(projectRoot, 'skills', 'temp-routing-skill');
   if (!fs.existsSync(tempSkillDir)) {

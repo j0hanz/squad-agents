@@ -22,6 +22,7 @@ function parseFrontmatter(frontmatterStr) {
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
+    if (line.match(/^[ \t]/)) continue; // skip nested/indented YAML (e.g. an agent hooks: block) — only top-level scalars are validated
     const colonIndex = trimmed.indexOf(':');
     if (colonIndex === -1) {
       throw new Error(`Invalid line in YAML frontmatter (missing colon): "${trimmed}"`);
@@ -98,14 +99,120 @@ function validateSkillStructure(skillDir) {
   }
 }
 
-// Validate agent structure
-function validateAgentStructure(agentMd) {
+// A valid tools/disallowedTools entry is a bare tool name, an MCP reference
+// (mcp__server, mcp__server__tool, mcp__server__*, or the disallowedTools-only
+// mcp__* wildcard), an Agent(...) reference, or the deprecated Task(...) alias
+// that still works per docs. Anything else with parens — e.g. the Bash(git *)
+// command-scoped syntax valid in skill allowed-tools / settings.json
+// permissions but NOT in agent tools: — is invalid here.
+const VALID_TOOL_ENTRY =
+  /^(mcp__\*|mcp__[\w-]+(__([\w-]+|\*))?|Agent\([^)]*\)|Task\([^)]*\)|[A-Za-z][\w-]*)$/;
+const VALID_MODELS = new Set(['sonnet', 'opus', 'haiku', 'fable', 'inherit']);
+const VALID_COLORS = new Set([
+  'red',
+  'blue',
+  'green',
+  'yellow',
+  'purple',
+  'orange',
+  'pink',
+  'cyan',
+]);
+const VALID_PERMISSION_MODES = new Set([
+  'default',
+  'acceptEdits',
+  'auto',
+  'dontAsk',
+  'bypassPermissions',
+  'plan',
+]);
+const VALID_MEMORY = new Set(['user', 'project', 'local']);
+const AGENT_NAME_PATTERN = /^[a-z][a-z0-9-]*$/;
+
+// Validates one tools/disallowedTools comma-joined string (parseFrontmatter's
+// flat-line parser always produces these as a single string, never pre-split).
+function validateToolList(agentMd, fieldName, rawValue) {
+  rawValue
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach((entry) => {
+      if (!VALID_TOOL_ENTRY.test(entry)) {
+        errors.push(
+          `[Agent] ${agentMd}: Invalid '${fieldName}' entry "${entry}" — only bare tool names, mcp__server[__tool|__*], Agent(...), or Task(...) are valid (e.g. "Bash(git *)" is not documented for agent tools:)`,
+        );
+      }
+    });
+}
+
+// Validate agent structure. agentNamesSeen: Map<name, firstFilePath> threaded
+// in from main() so duplicate names across different agents/*.md files can be
+// detected (docs warn duplicates are silently resolved with no runtime error).
+function validateAgentStructure(agentMd, agentNamesSeen) {
   const result = validateFrontmatter(agentMd, 'Agent');
   if (!result) return;
 
   const { fmData } = result;
+
   if (typeof fmData.name !== 'string' || !fmData.name.trim()) {
     errors.push(`[Agent] ${agentMd}: Missing or empty 'name' field in frontmatter`);
+  } else {
+    const name = fmData.name.trim();
+    if (!AGENT_NAME_PATTERN.test(name)) {
+      errors.push(
+        `[Agent] ${agentMd}: 'name' field "${name}" must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, hyphens, starting with a letter)`,
+      );
+    }
+    if (agentNamesSeen.has(name)) {
+      errors.push(
+        `[Agent] ${agentMd}: Duplicate agent 'name' "${name}" — also defined in ${agentNamesSeen.get(name)}. Docs warn duplicates are silently resolved with no runtime error.`,
+      );
+    } else {
+      agentNamesSeen.set(name, agentMd);
+    }
+  }
+
+  if (typeof fmData.tools === 'string' && fmData.tools.trim()) {
+    validateToolList(agentMd, 'tools', fmData.tools);
+  }
+  if (typeof fmData.disallowedTools === 'string' && fmData.disallowedTools.trim()) {
+    validateToolList(agentMd, 'disallowedTools', fmData.disallowedTools);
+  }
+
+  if (typeof fmData.model === 'string' && fmData.model.trim()) {
+    const model = fmData.model.trim();
+    if (!VALID_MODELS.has(model) && !model.startsWith('claude-')) {
+      errors.push(
+        `[Agent] ${agentMd}: Invalid 'model' value "${model}" — expected one of ${[...VALID_MODELS].join('|')}, or a claude-* model id`,
+      );
+    }
+  }
+
+  if (typeof fmData.color === 'string' && fmData.color.trim()) {
+    const color = fmData.color.trim();
+    if (!VALID_COLORS.has(color)) {
+      errors.push(
+        `[Agent] ${agentMd}: Invalid 'color' value "${color}" — expected one of ${[...VALID_COLORS].join('|')}`,
+      );
+    }
+  }
+
+  if (typeof fmData.permissionMode === 'string' && fmData.permissionMode.trim()) {
+    const mode = fmData.permissionMode.trim();
+    if (!VALID_PERMISSION_MODES.has(mode)) {
+      errors.push(
+        `[Agent] ${agentMd}: Invalid 'permissionMode' value "${mode}" — expected one of ${[...VALID_PERMISSION_MODES].join('|')}`,
+      );
+    }
+  }
+
+  if (typeof fmData.memory === 'string' && fmData.memory.trim()) {
+    const mem = fmData.memory.trim();
+    if (!VALID_MEMORY.has(mem)) {
+      errors.push(
+        `[Agent] ${agentMd}: Invalid 'memory' value "${mem}" — expected one of ${[...VALID_MEMORY].join('|')}`,
+      );
+    }
   }
 }
 
@@ -227,13 +334,14 @@ function main() {
   // Validate agents
   const agentsDir = path.join(pluginRoot, 'agents');
   if (fs.existsSync(agentsDir)) {
+    const agentNamesSeen = new Map();
     try {
       fs.readdirSync(agentsDir).forEach((file) => {
         if (!file.endsWith('.md')) return;
         const agentPath = path.join(agentsDir, file);
         try {
           if (fs.statSync(agentPath).isFile()) {
-            validateAgentStructure(agentPath);
+            validateAgentStructure(agentPath, agentNamesSeen);
           }
         } catch (e) {
           errors.push(`[Agents] Failed to stat agent ${file}: ${e.message}`);

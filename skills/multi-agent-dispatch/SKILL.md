@@ -49,9 +49,11 @@ This table **is** the dispatch gate:
 
 ## Step 3: SELECT
 
-Assign roles: **Investigator** (read-only, traces root cause), **Writer** (`isolation: worktree`, implements a spec), **Researcher** (read-only, reports file paths/usages).
+Assign roles: **Investigator** (read-only, traces root cause), **Writer** (dispatches the named `implementer` agent, `isolation: worktree`), **Researcher** (read-only, reports file paths/usages).
 
-Every dispatch prompt MUST contain five fields — subagents start cold with no memory of this conversation:
+Writer lanes dispatch `subagent_type: implementer` (`agents/implementer.md`), not generic `general-purpose` — it already requires `isolation: worktree` and returns its own fixed output schema (see Step 5: INTEGRATE), so skip the generic five-field/VERDICT-SCHEMA setup for Writer lanes specifically. Investigator and Researcher lanes have no matching named agent — dispatch `general-purpose` for those, using the five-field contract below.
+
+Every Investigator/Researcher dispatch prompt MUST contain five fields — subagents start cold with no memory of this conversation:
 
 - **SCOPE:** exact files the agent may touch (and may not).
 - **OBJECTIVE:** one concrete, falsifiable done-condition, not "improve X."
@@ -59,9 +61,11 @@ Every dispatch prompt MUST contain five fields — subagents start cold with no 
 - **CONSTRAINTS:** tool restrictions, explicit "Do Not" rules.
 - **OUTPUT SCHEMA:** require `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` verbatim.
 
+For Writer lanes, structure the dispatch prompt using `implementer`'s own five fields instead (SCOPE/OBJECTIVE/CONTEXT/CONSTRAINTS/OUTPUT, per `agents/implementer.md`) — its OUTPUT is implicit (it always replies with its own fixed schema), so don't also impose the generic VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE schema on top of it.
+
 For the full contract, common mistakes, and specialist-routing table, see `../multi-agent-development/references/subagent-contract.md` — read it before dispatching when available; the five fields above are the fallback if that file is missing.
 
-- Writers MUST use `isolation: worktree` to prevent overlapping edits.
+- Writers MUST use `isolation: worktree` to prevent overlapping edits — state it explicitly in the dispatch call since `isolation` is dispatcher-side guidance, not an enforced agent property.
 
 ## Step 4: LAUNCH
 
@@ -73,22 +77,27 @@ For the full contract, common mistakes, and specialist-routing table, see `../mu
 
 ## Step 5: INTEGRATE
 
-Consolidate each agent's `VERDICT` / `SUMMARY` / `EVIDENCE` (per the contract) into one report, tiered the same way `multi-agent-development`'s quality reviewer is:
+Each lane reports against a different schema depending on its role — interpret accordingly before tiering:
 
-- **CRITICAL** — lane's work is wrong or broken: discard, do not merge, re-dispatch fresh.
+- **Writer lanes (`implementer`):** Returns `VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]` + SUMMARY + FILES_CHANGED + COMMIT + CONCERNS/BLOCKER/QUESTION. Map to a tier: `DONE` → PASS/merged; `DONE_WITH_CONCERNS` → MINOR or IMPORTANT depending on the concern's severity (merge-and-log, or re-dispatch with the concern verbatim); `BLOCKED` → CRITICAL/discarded, re-dispatch fresh only after resolving the blocker; `NEEDS_CONTEXT` → CRITICAL/discarded, re-dispatch with the question answered, not retried verbatim.
+- **Investigator/Researcher lanes (`general-purpose`):** Returns the generic `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` contract — tier its dispatch-specific VERDICT enum the same CRITICAL/IMPORTANT/MINOR way as before.
+
+Tier every lane, regardless of schema, into the same three buckets used here and by `multi-agent-development`'s quality reviewer:
+
+- **CRITICAL** — lane's work is wrong, broken, or blocked: discard, do not merge, re-dispatch fresh.
 - **IMPORTANT** — works but needs a fix before merge: re-dispatch with the issue verbatim.
 - **MINOR** — cosmetic: merge now, log for later.
 
-Then run the real test suite. A `VERDICT: SUCCESS` report is a claim, not proof — never merge on the report alone. A lane is mergeable only once its work clears the project-wide [Definition of Done](../verification-before-completion/references/definition-of-done.md), independently verified.
+Then run the real test suite. Neither implementer's `DONE` nor a generic lane's `VERDICT: SUCCESS` is proof by itself — never merge on either report alone. A lane is mergeable only once its work clears the project-wide [Definition of Done](../verification-before-completion/references/definition-of-done.md), independently verified.
 
 ### Report Template
 
 Present the consolidated result to the user in this exact shape:
 
 ```
-| Lane | VERDICT | Tier                          | Action                          |
-| :--- | :------ | :----------------------------- | :------------------------------- |
-| 1    | ...     | PASS/CRITICAL/IMPORTANT/MINOR  | merged / re-dispatched / discarded |
+| Lane | VERDICT (native schema)                         | Tier                          | Action                          |
+| :--- | :----------------------------------------------- | :----------------------------- | :------------------------------- |
+| 1    | DONE/DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT (Writer) or SUCCESS/FAILURE/BLOCKED (Investigator/Researcher) | PASS/CRITICAL/IMPORTANT/MINOR  | merged / re-dispatched / discarded |
 
 Tests: [PASS|FAIL — command run]
 Skipped/blocked lanes: [list, or "none"]
@@ -128,14 +137,14 @@ All results are combined, tests are GREEN, every skipped/blocked lane is named i
 | 2    | `batch-complete.test.ts` | none       | med  | `vitest run batch-complete` |
 | 3    | `agent-abort.test.ts`    | none       | low  | `vitest run agent-abort`    |
 
-Files disjoint, no dependencies → all three launch in ONE message, each a Writer with `isolation: worktree`, `run_in_background: true`. As each notifies, INTEGRATE it. Then run the full suite (not the per-lane greps the agents reported):
+Files disjoint, no dependencies → all three launch in ONE message, each dispatching `implementer` with `isolation: worktree`, `run_in_background: true`. As each notifies, INTEGRATE it. Then run the full suite (not the per-lane greps the agents reported):
 
 ```
-| Lane | VERDICT | Tier | Action |
-| :--- | :------ | :--- | :----- |
-| 1    | SUCCESS | PASS | merged |
-| 2    | SUCCESS | MINOR | merged, logged naming nit |
-| 3    | SUCCESS | PASS | merged |
+| Lane | VERDICT (implementer) | Tier | Action |
+| :--- | :--------------------- | :--- | :----- |
+| 1    | DONE                    | PASS | merged |
+| 2    | DONE_WITH_CONCERNS      | MINOR | merged, logged naming nit from CONCERNS |
+| 3    | DONE                    | PASS | merged |
 
 Tests: PASS — `vitest run` (all 6 green)
 Skipped/blocked lanes: none

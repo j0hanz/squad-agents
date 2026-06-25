@@ -9,6 +9,18 @@
 # does not trigger a block. Narrow by design: favors under-blocking over
 # over-blocking, since a false-positive block breaks a downstream user's
 # unrelated workflow in a repo this plugin's author doesn't control.
+#
+# A denylisted command can also be hidden inside $(...) / `...` / <(...) /
+# >(...) of an otherwise-harmless outer command (e.g. `echo $(rm -rf ~)`),
+# which the ;/&/|/&&/|| segment splitter alone never looks inside. Unlike
+# git-guard.sh's allowlist (where rejecting any use of substitution outright
+# is an acceptable trade-off for a narrow, read-only-reviewer use case), this
+# guard runs on every Bash call in every session, where $(...) is extremely
+# common for harmless purposes — so
+# instead of rejecting substitution outright, this guard extracts the
+# *contents* of each substitution and scans them with the exact same
+# denylist checks as top-level segments, recursively closing the gap without
+# blocking ordinary `VAR=$(date)`-style usage.
 set -euo pipefail
 
 OVERRIDE_VAR="AGENT_DEV_SKIP_SHELL_SAFETY"
@@ -43,11 +55,31 @@ extract_command() {
   fi
   if [[ "$json" =~ \"command\"[[:space:]]*:[[:space:]]*\"((\\.|[^\"\\])*)\" ]]; then
     local raw="${BASH_REMATCH[1]}"
-    raw="${raw//\\\"/\"}"
-    raw="${raw//\\n/$'\n'}"
-    raw="${raw//\\t/$'\t'}"
-    raw="${raw//\\\\/\\}"
-    printf '%s' "$raw"
+    # Single left-to-right pass so a doubled backslash (JSON \\) is consumed
+    # atomically and can never be misread as the start of a later \n/\t
+    # escape — four independent global substitutions (the previous
+    # approach) could misfire on a raw backslash immediately followed by a
+    # literal 'n' or 't', corrupting Windows-style paths like C:\new\... into
+    # a false-positive deny.
+    local out="" i=0 len=${#raw} c next
+    while ((i < len)); do
+      c="${raw:i:1}"
+      if [[ "$c" == '\' && $((i + 1)) -lt $len ]]; then
+        next="${raw:i+1:1}"
+        case "$next" in
+        '"') out+='"' ;;
+        n) out+=$'\n' ;;
+        t) out+=$'\t' ;;
+        '\') out+='\' ;;
+        *) out+="$c$next" ;;
+        esac
+        ((i += 2))
+      else
+        out+="$c"
+        ((i += 1))
+      fi
+    done
+    printf '%s' "$out"
   fi
 }
 
@@ -57,23 +89,8 @@ if [ -z "$command" ]; then
   exit 0
 fi
 
-json_escape() {
-  # json_escape <string> — minimal escaping for embedding inside a JSON
-  # string literal we build by hand (no jq dependency on this path).
-  local s="$1"
-  local bs='\'
-  s="${s//"$bs"/"$bs$bs"}"
-  s="${s//\"/"$bs"\"}"
-  s="${s//$'\n'/"$bs"n}"
-  s="${s//$'\r'/"$bs"r}"
-  s="${s//$'\t'/"$bs"t}"
-  printf '%s' "$s"
-}
-
 deny() {
-  local reason
-  reason="$(json_escape "$1")"
-  printf '%s\n' "{\"hookSpecificOutput\": {\"permissionDecision\": \"deny\"}, \"systemMessage\": \"[agent-dev:shell-safety] Blocked: ${reason}. Set ${OVERRIDE_VAR}=1 to override.\"}" >&2
+  printf '[agent-dev:shell-safety] Blocked: %s. Set %s=1 to override.\n' "$1" "$OVERRIDE_VAR" >&2
   exit 2
 }
 
@@ -116,8 +133,44 @@ has_long_flag() {
 # quotes (e.g. "/" or '~'), with or without a trailing slash on ~ / $HOME.
 ROOT_TARGET_PATTERN='(^|[[:space:]])["'"'"']?(\$HOME/?|~/?|/\*|/)["'"'"']?([[:space:]]|$)'
 
-# Split on ; && || | & and literal \n into segments — best-effort, not a full shell parser.
-IFS=$'\n' read -r -d '' -a segments < <(printf '%b' "$command" | awk '
+# Best-effort, non-nested extraction of $(...) / `...` / <(...) / >(...)
+# contents from the full command — each becomes its own candidate to scan
+# below, alongside the top-level segments, so a denylisted command hidden
+# inside a substitution of an unrelated outer command is still caught. Not
+# a full shell parser: deliberately simple, leftmost-match extraction: for a
+# nested case like `$(echo $(rm -rf ~))`, the innermost construct is found
+# and stripped first, then the (now unnested) remainder is found on the next
+# iteration — see the loop's removal step.
+extract_substitution_contents() {
+  local rest="$1" out=""
+  local -a patterns=('\$\(([^()]*)\)' '`([^`]*)`' '<\(([^()]*)\)' '>\(([^()]*)\)')
+  local pattern matched=1
+  while [ "$matched" = 1 ]; do
+    matched=0
+    for pattern in "${patterns[@]}"; do
+      if [[ "$rest" =~ $pattern ]]; then
+        out+="${BASH_REMATCH[1]}"$'\n'
+        rest="${rest/"${BASH_REMATCH[0]}"/}"
+        matched=1
+      fi
+    done
+  done
+  printf '%s' "$out"
+}
+
+substitution_contents="$(extract_substitution_contents "$command")"
+scan_target="$command"
+if [ -n "$substitution_contents" ]; then
+  scan_target="$command"$'\n'"$substitution_contents"
+fi
+
+# Split on ; && || | & and literal newlines into segments — best-effort, not
+# a full shell parser. %s, not %b: $command/$scan_target is already plain
+# decoded text by this point (jq, or the fallback above, both produce real
+# newline bytes from a JSON \n), not an escape-sequence string to
+# re-interpret — %b would wrongly eat a literal \n/\t inside e.g. a Windows
+# path (C:\new\file.txt) as if it were an escape sequence, corrupting it.
+IFS=$'\n' read -r -d '' -a segments < <(printf '%s' "$scan_target" | awk '
   {
     str = $0
     pos = 1

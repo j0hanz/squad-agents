@@ -2,7 +2,7 @@
 
 Canonical contract for any skill that dispatches a `general-purpose` subagent — shared by `multi-agent-development` and `multi-agent-dispatch`. Subagents start cold — they have no memory of the parent conversation. Every dispatch prompt MUST contain all five fields below.
 
-`multi-agent-development`'s own three fixed roles now have named agents (`implementer`/`spec-reviewer`/`quality-reviewer` in the project's `agents/` directory) and no longer need the generic fallback below.
+This plugin's `agents/` directory ships four named agents covering fixed roles: `implementer` (Writer — used by both `multi-agent-development`'s Phase 1 and `multi-agent-dispatch`'s Writer lanes), `spec-reviewer` and `quality-reviewer` (`multi-agent-development`'s Phase 2/Phase 3 gates), and `diff-reviewer` (`request-code-review`'s dispatch target). Each has its own fixed output schema described in its own file and no longer needs the generic fallback below. The generic schema remains the fallback for any role without a matching named agent — Investigator/Researcher lanes in `multi-agent-dispatch`, and any specialist category in the "Routing a lane to a specialist" table below.
 
 - **SCOPE:** Validated paths (In/Out of bounds). For writer roles, list the exact files the agent may touch.
 - **OBJECTIVE:** One concrete, verifiable/falsifiable outcome. Not "improve X" — state the exact done-condition.
@@ -33,12 +33,12 @@ A prompt that violates the five-field contract wastes a whole agent run. Most fa
 
 ## Role Vocabulary
 
-Use these role labels when configuring subagents so isolation and tool-restriction decisions are explicit, not implied by prose. For a read-only Investigator/Researcher lane, prefer a more specific `subagent_type` already present in the user's installed agent roster over generic `general-purpose` when one matches the lane's task domain; fall back to `general-purpose` when none matches. Name no specific third-party agent here — this plugin ships no `agents/` directory of its own, so any named example would be environment-specific.
+Use these role labels when configuring subagents so isolation and tool-restriction decisions are explicit, not implied by prose. For a read-only Investigator/Researcher lane, prefer a more specific `subagent_type` already present in the user's installed agent roster over generic `general-purpose` when one matches the lane's task domain; fall back to `general-purpose` when none matches. This plugin's own `agents/` directory covers four fixed roles by name — `implementer` (Writer), `spec-reviewer` and `quality-reviewer` (the two Reviewer gates below), and `diff-reviewer` (used by `request-code-review`) — so those roles are named directly rather than left generic. The categories in the table below (architecture review, language-specific quality, error-handling auditing, root-cause debugging, docs sync) have no matching named agent in this plugin, so for those, fall back to scanning the user's installed roster as described, then `general-purpose` if nothing matches.
 
-- **Investigator (Read-only):** Trace root cause, propose a fix as a code block. No edits.
-- **Writer (Isolation: worktree):** Implement a spec, write tests, report changes. Needs its own worktree if it runs experiments or makes edits that could collide with sibling agents.
-- **Researcher (Read-only):** Explore code/docs, report file paths and usages.
-- **Reviewer (Read-only):** Verify a Writer's diff against a spec or quality bar — never the Writer's own summary. Used for `multi-agent-development`'s Phase 2 (spec) and Phase 3 (quality) gates.
+- **Investigator (Read-only):** Trace root cause, propose a fix as a code block. No edits. No named agent matches this role — dispatch `general-purpose` with the generic VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE schema below.
+- **Writer (Isolation: worktree):** Implement a spec, write tests, report changes. Dispatch the named `implementer` agent (`agents/implementer.md`) for this role — it already requires `isolation: worktree` and returns its own schema (`VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]` + SUMMARY/FILES_CHANGED/COMMIT/CONCERNS/BLOCKER/QUESTION), not the generic schema below. Both `multi-agent-development` (Phase 1) and `multi-agent-dispatch` (Step 3 Writer lanes) dispatch it this way.
+- **Researcher (Read-only):** Explore code/docs, report file paths and usages. No named agent matches this role — dispatch `general-purpose` with the generic schema below.
+- **Reviewer (Read-only):** Verify a Writer's diff against a spec or quality bar — never the Writer's own summary. `multi-agent-development` dispatches the named `spec-reviewer` (Phase 2) and `quality-reviewer` (Phase 3) agents for this role; `request-code-review` dispatches the named `diff-reviewer` agent. Each has its own fixed output schema rather than the generic schema below.
 
 ### Routing a lane to a specialist
 

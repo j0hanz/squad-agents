@@ -51,9 +51,14 @@ test('shell-safety.sh blocks rm -rf / with exit code 2', () => {
   const { exitCode, stderr } = runHandler('shell-safety.sh', {
     tool_input: { command: 'rm -rf /' },
   });
+  // PreToolUse on exit 2 ignores stdout entirely and feeds stderr to Claude
+  // as plain text — there is no documented path where stderr is parsed as
+  // JSON, so the deny message is plain text, not a hookSpecificOutput blob.
   assert.strictEqual(exitCode, 2);
-  const parsed = JSON.parse(stderr);
-  assert.strictEqual(parsed.hookSpecificOutput.permissionDecision, 'deny');
+  assert.ok(
+    stderr.includes('Blocked:') && stderr.includes('root-level path'),
+    'stderr should contain the plain-text deny reason',
+  );
 });
 
 test('shell-safety.sh allows an rm -rf on a subpath', () => {

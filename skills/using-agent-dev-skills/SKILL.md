@@ -90,7 +90,7 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **Mixed DAG tasks:** Route to `multi-agent-development` (batch tasks with gated reviews).
 - **Standard single feature:** Route to `test-driven-development`.
 - **TDD fails 3 times:** Route to `diagnose` (stuck) or `planning` (ambiguous spec).
-- **Autonomous by default:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are all worktree-isolated and test-gated before anything merges — so run them directly and announce the route, don't stop and wait for a go-ahead. Ask first only when a step is genuinely irreversible outside the worktree (a destructive command, a push, a migration) or it's the first dispatch of the session and the user hasn't seen the behavior yet.
+- **Autonomous by default:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are all safe enough to run directly and announce the route without stopping for a go-ahead — but each earns that safety differently: `test-driven-development` edits directly in the main thread and is test-gated (red-green-refactor) rather than isolated; `request-code-review` dispatches a read-only agent (`diff-reviewer`, Write/Edit denied) that never writes, so there's nothing to isolate — its safety is tool-restriction; `multi-agent-development` and `multi-agent-dispatch` dispatch Writer-role agents under `isolation: worktree` and are test-gated before merge. Ask first only when a step is genuinely irreversible outside whatever guard applies (a destructive command, a push, a migration) or it's the first dispatch of the session and the user hasn't seen the behavior yet.
 
 ### Gate 4: Quality & Delivery
 
