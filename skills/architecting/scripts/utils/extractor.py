@@ -81,9 +81,3 @@ def extract_imports_with_positions(
 
 def extract_imports(content: str, lang: Optional[str] = None) -> List[str]:
     return [m["specifier"] for m in extract_imports_with_positions(content, lang)]
-
-
-def top_level_package(imp: str) -> str:
-    if imp.startswith("."):
-        return imp
-    return imp.split(".")[0]
