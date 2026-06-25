@@ -15,9 +15,6 @@ dev = [
 testpaths = [
     "skills",
 ]
-pythonpath = [
-    "skills/architecting/scripts",
-]
 addopts = "-v"
 
 [tool.ruff]

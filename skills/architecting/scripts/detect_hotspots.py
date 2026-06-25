@@ -19,13 +19,15 @@ from detect_bleed import run_bleed_detection
 from git_coupling import run_git_coupling
 
 # Hotspot score weights: fan-out and bleeds count more than raw churn/size.
-FAN_OUT_WEIGHT = 2
-BLEED_WEIGHT = 3
-CHURN_SCORE_CAP = 5
-SIZE_LINES_PER_POINT = 100
-SIZE_SCORE_CAP = 5
-HIGH_RISK_THRESHOLD = 15
-MEDIUM_RISK_THRESHOLD = 7
+WEIGHTS = {
+    "fan_out": 2,
+    "bleed": 3,
+    "churn_score_cap": 5,
+    "size_lines_per_point": 100,
+    "size_score_cap": 5,
+    "high_risk_threshold": 15,
+    "medium_risk_threshold": 7,
+}
 
 # Set up logging to write to sys.stderr dynamically so that testing capture works correctly.
 logger = logging.getLogger(__name__)
@@ -116,16 +118,22 @@ def run_hotspot_detection(
         bl = bleed_map.get(file_path, 0)
         raw_churn = churn_map.get(file_path, 0)
         churn_score = (
-            round((raw_churn / max_churn) * CHURN_SCORE_CAP) if max_churn > 0 else 0
+            round((raw_churn / max_churn) * WEIGHTS["churn_score_cap"])
+            if max_churn > 0
+            else 0
         )
-        size_score = min(lines // SIZE_LINES_PER_POINT, SIZE_SCORE_CAP)
+        size_score = min(
+            lines // WEIGHTS["size_lines_per_point"], WEIGHTS["size_score_cap"]
+        )
 
-        score = fo * FAN_OUT_WEIGHT + bl * BLEED_WEIGHT + churn_score + size_score
+        score = (
+            fo * WEIGHTS["fan_out"] + bl * WEIGHTS["bleed"] + churn_score + size_score
+        )
         risk = (
             "HIGH"
-            if score >= HIGH_RISK_THRESHOLD
+            if score >= WEIGHTS["high_risk_threshold"]
             else "MEDIUM"
-            if score >= MEDIUM_RISK_THRESHOLD
+            if score >= WEIGHTS["medium_risk_threshold"]
             else "LOW"
         )
 

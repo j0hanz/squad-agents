@@ -110,12 +110,9 @@ if __name__ == "__main__":
             for violation in violations:
                 file_path = Path(violation["file"])
                 try:
-                    rel_file = file_path.relative_to(Path.cwd())
+                    rel_file = file_path.relative_to(Path.cwd(), walk_up=True)
                 except ValueError:
-                    try:
-                        rel_file = file_path.relative_to(Path.cwd(), walk_up=True)
-                    except (ValueError, TypeError):
-                        rel_file = file_path
+                    rel_file = file_path
                 print(
                     f"{str(rel_file):<50} {violation['violation']:<20} {violation['line']:<5}"
                 )
