@@ -45,7 +45,7 @@ Select ONE strategy based on diagnostics:
    `python skills/context-optimizer/scripts/prune_context.py --summary --timestamp "$(date -Iseconds)" --current-skill "<skill-name or gate>" --done "completed items" --blocking "blockers" --next-step "next actions" --decisions "key decisions"`
 2. Tell the user: "Clearing history. Please type 'resume'."
 3. Run `/clear`.
-4. Reload `.claude/rolling_summary.md` and resume the `current_skill` recorded there directly — do not re-enter `using-agent-dev-skills` from Gate 0.
+4. Reload `.claude/rolling_summary.md` and resume the `current_skill` recorded there directly — do not re-enter `using-agent-sdlc-skills` from Gate 0.
 
 ## STRICT PROHIBITIONS
 
@@ -57,4 +57,4 @@ Select ONE strategy based on diagnostics:
 
 - `planning`: Trigger if context reveals major specification gaps.
 - Whichever skill was recorded as `current_skill` in the rolling summary: resume it directly.
-- `using-agent-dev-skills`: Only if no `current_skill` was recorded (e.g. optimizing before any route was chosen).
+- `using-agent-sdlc-skills`: Only if no `current_skill` was recorded (e.g. optimizing before any route was chosen).

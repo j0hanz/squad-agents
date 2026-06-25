@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 # Scans plugin structure for convention violations.
-# Usage: agent-dev-validate
+# Usage: agent-sdlc-validate
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 exec python "${PLUGIN_ROOT}/skills/codebase-init/scripts/run.py" scan-structure

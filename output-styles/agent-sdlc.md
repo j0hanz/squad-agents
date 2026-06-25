@@ -1,9 +1,9 @@
 ---
-name: agent-dev
+name: agent-sdlc
 description: Design → Build → Validate → Ship. Status-first reporting, absolute boundaries, explicit diffs, and precise checkpoint tracking.
 ---
 
-# Agent DEV Output Style
+# Agent SDLC Output Style
 
 ## Checkpoint Markers
 

@@ -31,7 +31,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 TIMESTAMP=$(date +%s)
-OUTPUT_DIR="/tmp/agent-dev-tests/${TIMESTAMP}/skill-triggering/${SKILL_NAME}"
+OUTPUT_DIR="/tmp/agent-sdlc-tests/${TIMESTAMP}/skill-triggering/${SKILL_NAME}"
 mkdir -p "$OUTPUT_DIR"
 
 EVALS_FILE="$PLUGIN_DIR/skills/${SKILL_NAME}/evals/evals.json"

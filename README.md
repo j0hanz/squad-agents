@@ -1,12 +1,12 @@
-# Agent Dev Plugin
+# Agent SDLC Plugin
 
-[![License](https://img.shields.io/github/license/j0hanz/claude-agent-dev-plugin?style=for-the-badge)](https://github.com/j0hanz/claude-agent-dev-plugin/blob/master/LICENSE) [![Latest release](https://img.shields.io/github/v/release/j0hanz/claude-agent-dev-plugin?style=for-the-badge&include_prereleases&sort=semver)](https://github.com/j0hanz/claude-agent-dev-plugin/releases) [![Node.js](https://img.shields.io/badge/node-%3E%3D22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org) [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org) [![GitHub stars](https://img.shields.io/github/stars/j0hanz/claude-agent-dev-plugin?style=for-the-badge&logo=github)](https://github.com/j0hanz/claude-agent-dev-plugin/stargazers)
+[![License](https://img.shields.io/github/license/j0hanz/agent-sdlc?style=for-the-badge)](https://github.com/j0hanz/agent-sdlc/blob/master/LICENSE) [![Latest release](https://img.shields.io/github/v/release/j0hanz/agent-sdlc?style=for-the-badge&include_prereleases&sort=semver)](https://github.com/j0hanz/agent-sdlc/releases) [![Node.js](https://img.shields.io/badge/node-%3E%3D22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org) [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org) [![GitHub stars](https://img.shields.io/github/stars/j0hanz/agent-sdlc?style=for-the-badge&logo=github)](https://github.com/j0hanz/agent-sdlc/stargazers)
 
 A Claude Code plugin for authoring and maintaining skills and hooks — structured workflows and lifecycle hooks that guide Claude through the full agent development lifecycle.
 
 ## Overview
 
-Agent Dev Plugin extends Claude Code with 15 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to the built-in `general-purpose` agent — configured per task via the prompt — orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
+Agent SDLC Plugin extends Claude Code with 15 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to the built-in `general-purpose` agent — configured per task via the prompt — orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
@@ -37,10 +37,10 @@ Agent Dev Plugin extends Claude Code with 15 skills and 2 lifecycle hooks coveri
 ```json
 {
   "extraKnownMarketplaces": {
-    "claude-agent-dev": {
+    "claude-agent-sdlc": {
       "source": {
         "source": "github",
-        "repo": "j0hanz/claude-agent-dev-plugin"
+        "repo": "j0hanz/agent-sdlc"
       }
     }
   }
@@ -50,14 +50,14 @@ Agent Dev Plugin extends Claude Code with 15 skills and 2 lifecycle hooks coveri
 1. Install the plugin:
 
 ```bash
-claude plugin install claude-agent-dev@claude-agent-dev
+claude plugin install claude-agent-sdlc@claude-agent-sdlc
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/j0hanz/claude-agent-dev-plugin.git
-claude --plugin-dir ./claude-agent-dev-plugin
+git clone https://github.com/j0hanz/agent-sdlc.git
+claude --plugin-dir ./agent-sdlc
 ```
 
 ## Prerequisites
@@ -88,7 +88,7 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `gh-actions`                     | "GitHub Actions", "gh CLI", "harden a workflow", "OIDC"    | Secure CI/CD authoring and `gh` CLI scripting                  |
 | `context-optimizer`              | "optimize context", "compress context", "reduce tokens"    | Prunes conversation bloat before hitting context limits        |
 | `verification-before-completion` | (automatic before task completion)                         | Verify changes work before marking done                        |
-| `using-agent-dev-skills`         | (meta-routing)                                             | Routes to the right skill based on context                     |
+| `using-agent-sdlc-skills`        | (meta-routing)                                             | Routes to the right skill based on context                     |
 | `codebase-init`                  | "generate AGENTS.md", "init agents.md"                     | Generating/refreshing AGENTS.md and CLAUDE.md files            |
 
 ### Subagent Dispatch
@@ -108,16 +108,16 @@ There are no custom agent definitions in this plugin. Every dispatch uses the bu
 
 Bash-only handlers (`hooks/*.sh`), wired in `hooks/hooks.json`. `shell-safety` is the only blocking hook — everything else is additive (warns or injects context, never blocks).
 
-| Event                 | Handler        | What it does                                                                                                                                                          | Blocking? |
-| :-------------------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- |
-| `PreToolUse` (`Bash`) | `shell-safety` | Rejects a small, explicit denylist of catastrophic commands (`rm -rf /`, force-push to main/master, `git clean -fdx`). Override with `AGENT_DEV_SKIP_SHELL_SAFETY=1`. | Yes       |
-| `SessionStart` (`*`)  | `skill-nudge`  | Points toward this plugin's bundled skills, at most once per 24h. Opt out with `AGENT_DEV_SKILL_NUDGE=0`.                                                             | No        |
+| Event                 | Handler        | What it does                                                                                                                                                           | Blocking? |
+| :-------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- |
+| `PreToolUse` (`Bash`) | `shell-safety` | Rejects a small, explicit denylist of catastrophic commands (`rm -rf /`, force-push to main/master, `git clean -fdx`). Override with `AGENT_SDLC_SKIP_SHELL_SAFETY=1`. | Yes       |
+| `SessionStart` (`*`)  | `skill-nudge`  | Points toward this plugin's bundled skills, at most once per 24h. Opt out with `AGENT_SDLC_SKILL_NUDGE=0`.                                                             | No        |
 
 `shell-safety.sh` is self-contained (no shared-library dependency) so a bug in `hooks/lib.sh` can never silently disable the one blocking guard. The denylist is intentionally narrow and documented as best-effort, not comprehensive protection.
 
 ### Configuration
 
-You can configure project-local behaviors for the `claude-agent-dev` plugin by creating a settings file at `.claude/claude-agent-dev.local.md` in the root of your project:
+You can configure project-local behaviors for the `claude-agent-sdlc` plugin by creating a settings file at `.claude/claude-agent-sdlc.local.md` in the root of your project:
 
 ```markdown
 ---
@@ -128,9 +128,9 @@ skip_shell_safety: false
 skill_nudge: true
 ---
 
-# claude-agent-dev Configuration
+# claude-agent-sdlc Configuration
 
-This file configures local settings for the `claude-agent-dev` plugin.
+This file configures local settings for the `claude-agent-sdlc` plugin.
 ```
 
 > [!IMPORTANT]
@@ -190,4 +190,4 @@ Released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-[Back to top](#agent-dev-plugin)
+[Back to top](#agent-sdlc-plugin)

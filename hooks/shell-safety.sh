@@ -23,15 +23,15 @@
 # blocking ordinary `VAR=$(date)`-style usage.
 set -euo pipefail
 
-OVERRIDE_VAR="AGENT_DEV_SKIP_SHELL_SAFETY"
+OVERRIDE_VAR="AGENT_SDLC_SKIP_SHELL_SAFETY"
 if [ "${!OVERRIDE_VAR:-0}" = "1" ]; then
   exit 0
 fi
 
 # Load local settings override if exists
-AGENT_DEV_SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/claude-agent-dev.local.md"
-if [ -f "$AGENT_DEV_SETTINGS_FILE" ]; then
-  FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$AGENT_DEV_SETTINGS_FILE" 2>/dev/null || true)
+AGENT_SDLC_SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/claude-agent-sdlc.local.md"
+if [ -f "$AGENT_SDLC_SETTINGS_FILE" ]; then
+  FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$AGENT_SDLC_SETTINGS_FILE" 2>/dev/null || true)
   if [ -n "$FRONTMATTER" ]; then
     SKIP_SAFETY=$(echo "$FRONTMATTER" | grep '^skip_shell_safety:' | sed 's/skip_shell_safety: *//' 2>/dev/null || true)
     if [ "$SKIP_SAFETY" = "true" ]; then
@@ -90,7 +90,7 @@ if [ -z "$command" ]; then
 fi
 
 deny() {
-  printf '[agent-dev:shell-safety] Blocked: %s. Set %s=1 to override.\n' "$1" "$OVERRIDE_VAR" >&2
+  printf '[agent-sdlc:shell-safety] Blocked: %s. Set %s=1 to override.\n' "$1" "$OVERRIDE_VAR" >&2
   exit 2
 }
 

@@ -1,5 +1,5 @@
 {
-  "description": "Lifecycle hooks for claude-agent-dev: a shell-safety guard and a skill nudge. Bash-only — see hooks/*.sh.",
+  "description": "Lifecycle hooks for claude-agent-sdlc: a shell-safety guard and a skill nudge. Bash-only — see hooks/*.sh.",
   "hooks": {
     "PreToolUse": [
       {

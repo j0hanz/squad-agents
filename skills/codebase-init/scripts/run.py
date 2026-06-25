@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Consolidated health check script for the agent-dev plugin.
+Consolidated health check script for the agent-sdlc plugin.
 """
 
 from __future__ import annotations

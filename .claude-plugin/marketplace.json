@@ -1,5 +1,5 @@
 {
-  "name": "claude-agent-dev",
+  "name": "claude-agent-sdlc",
   "description": "Claude Code plugin for multi-agent development",
   "owner": {
     "name": "j0hanz",
@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "claude-agent-dev",
+      "name": "claude-agent-sdlc",
       "description": "Multi-agent workflows for Claude Code: development, testing, debugging, and review.",
       "version": "1.2.0",
       "source": "./",

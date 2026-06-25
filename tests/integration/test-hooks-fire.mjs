@@ -75,17 +75,17 @@ test('shell-safety.sh allows the denylist word inside a quoted string', () => {
   assert.strictEqual(exitCode, 0);
 });
 
-test('shell-safety.sh respects the AGENT_DEV_SKIP_SHELL_SAFETY override', () => {
+test('shell-safety.sh respects the AGENT_SDLC_SKIP_SHELL_SAFETY override', () => {
   const { exitCode } = runHandler(
     'shell-safety.sh',
     { tool_input: { command: 'rm -rf /' } },
-    { AGENT_DEV_SKIP_SHELL_SAFETY: '1' },
+    { AGENT_SDLC_SKIP_SHELL_SAFETY: '1' },
   );
   assert.strictEqual(exitCode, 0);
 });
 
 test('skill-nudge.sh emits additionalContext on first fire, then stays quiet (cooldown)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'agent-dev-nudge-'));
+  const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-'));
   try {
     const first = runHandler(
       'skill-nudge.sh',
@@ -108,13 +108,13 @@ test('skill-nudge.sh emits additionalContext on first fire, then stays quiet (co
   }
 });
 
-test('skill-nudge.sh respects AGENT_DEV_SKILL_NUDGE=0', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'agent-dev-nudge-'));
+test('skill-nudge.sh respects AGENT_SDLC_SKILL_NUDGE=0', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-'));
   try {
     const { stdout, exitCode } = runHandler(
       'skill-nudge.sh',
       {},
-      { CLAUDE_PROJECT_DIR: dir, CLAUDE_PLUGIN_ROOT: pluginRoot, AGENT_DEV_SKILL_NUDGE: '0' },
+      { CLAUDE_PROJECT_DIR: dir, CLAUDE_PLUGIN_ROOT: pluginRoot, AGENT_SDLC_SKILL_NUDGE: '0' },
     );
     assert.strictEqual(exitCode, 0);
     assert.strictEqual(stdout.trim(), '');

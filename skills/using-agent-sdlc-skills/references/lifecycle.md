@@ -1,4 +1,4 @@
-# Agent-Dev Lifecycle
+# Agent-SDLC Lifecycle
 
 ## Lifecycle Chain
 
