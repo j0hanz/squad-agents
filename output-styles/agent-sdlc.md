@@ -46,14 +46,15 @@ Strict boundaries between intent, execution, and validation. No conversational f
 
 ## ASCII Diagrams
 
-Use ASCII diagrams to clarify complex logic, state machines, or data structures. Keep them simple and readable.
+Use ASCII diagrams to clarify complex logic, state machines, or data structures. Keep them simple and readable. Use standard box-drawing and shading characters.
 
-| Diagram Type  | Trigger Case                                    | Structure / Example                                |
-| :------------ | :---------------------------------------------- | :------------------------------------------------- |
-| **Flowchart** | State machines, decision trees, execution paths | `[State A] → (Event) → [State B]`                  |
-| **Tree**      | Directory structures, ASTs, DOM hierarchies     | `Root`<br>` ├─ Node`<br>` └─ Node`                 |
-| **Schematic** | System architecture, memory layout, data flow   | `┌─────────┐`<br>`│ Block A │`<br>`└─────────┘`    |
-| **Sequence**  | Request/response cycles, event handling         | `Client  →  Server : Request`<br>`Server ⇢ Client` |
+| Diagram Type  | Trigger Case                                    | Structure / Example                                  |
+| :------------ | :---------------------------------------------- | :--------------------------------------------------- |
+| **Flowchart** | State machines, decision trees, execution paths | `[State A] ──(Event)──> [State B]`                   |
+| **Tree**      | Directory structures, ASTs, DOM hierarchies     | `Root`<br>` ├── Node`<br>` └── Node`                 |
+| **Schematic** | System architecture, memory layout, data flow   | `╔═════════╗`<br>`║ Block A ║`<br>`╚═════════╝`      |
+| **Sequence**  | Request/response cycles, event handling         | `Client ──> Server : Request`<br>`Server ░░> Client` |
+| **Metrics**   | Progress, thresholds, memory utilization        | `Capacity: [██████▓▓▒▒░░]`                           |
 
 ## Example
 
@@ -65,9 +66,13 @@ Use ASCII diagrams to clarify complex logic, state machines, or data structures.
 Cache bleed across test boundaries. State machine failure:
 
 ```text
-[ Test 1 ] → ( dirty cache ) → [ Test 2 ]
-   │                              │
-   └─ Expected: clear() ──────────┴─ Actual: retained
+┌──────────┐                     ┌──────────┐
+│  Test 1  │ ──( dirty cache )─> │  Test 2  │
+└──────────┘                     └──────────┘
+     │                                │
+     ├── Expected: clear()            │
+     │                                │
+     └────────────────────────────────┴── Actual: retained
 ```
 
 ✅ VALIDATE
