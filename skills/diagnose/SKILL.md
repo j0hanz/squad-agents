@@ -1,6 +1,6 @@
 ---
 name: diagnose
-description: "Performs disciplined root-cause analysis for software bugs and crashes using a systematic hypothesis-falsification workflow. Accepts a symptom description or error trace, and produces a structured diagnosis report detailing the symptom, root cause, fix, and reproduction feedback loop. Trigger on: 'debug', 'fix crash', 'why is this failing', 'unexpected output', 'diagnose bug', 'root cause analysis', 'feedback loop', 'instrumentation'. Also triggers when troubleshooting test failures or diagnosing unexpected runtime exceptions. Always prefer this skill over test-driven-development or refactor when diagnosing a bug prior to implementing a fix."
+description: "Performs disciplined root-cause analysis for software bugs and crashes using a systematic hypothesis-falsification workflow. Accepts a symptom description or error trace, and produces a structured diagnosis report detailing the symptom, root cause, fix, and reproduction feedback loop. Trigger on: 'debug', 'fix crash', 'why is this failing', 'unexpected output', 'diagnose bug', 'root cause analysis', 'feedback loop', 'instrumentation'. Also triggers when troubleshooting test failures or diagnosing unexpected runtime exceptions. Always prefer this skill over test-driven-development when diagnosing a bug prior to implementing a fix."
 disable-model-invocation: false
 argument-hint: '[symptom description or error trace]'
 ---
@@ -69,7 +69,6 @@ Phase 1: Build Feedback Loop (pass/fail signal)
 ## Next Skills
 
 **test-driven-development:** implement new logic/tests
-**refactor:** clean up 1 file/function
 **architecting:** clean up multiple files/modules
 **planning:** address major specification gaps
 **context-optimizer:** if context bloats mid-skill (long reads, many tool calls)
@@ -79,7 +78,6 @@ Phase 1: Build Feedback Loop (pass/fail signal)
 **verification-before-completion:** re-verify in same skill
 **test-driven-development:** resume current task/phase
 **multi-agent-development:** resume current task/phase
-**refactor:** resume refactor cycle
 **multi-agent-dispatch:** resume INTEGRATE step
 **receive-code-review:** resume Step 4 Implement
 **codebase-init:** resume Failure Recovery step
@@ -89,7 +87,6 @@ Phase 1: Build Feedback Loop (pass/fail signal)
 ## Exclusions
 
 **test-driven-development:** use for writing new feature tests
-**refactor:** use for non-bug structural issues
 
 ## References
 

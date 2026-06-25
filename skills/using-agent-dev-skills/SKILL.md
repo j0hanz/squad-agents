@@ -1,6 +1,6 @@
 ---
 name: using-agent-dev-skills
-description: "Orchestrates software engineering tasks by analyzing user prompts and routing them to the optimal workflow in the development lifecycle. Accepts any high-level task description, bug report, or feature request as input, and outputs a diagnostic recommendation or transition to the target tool. Trigger on: 'start task', 'route work', 'using-agent-dev-skills', 'skill selection', 'task diagnostic', 'orchestrate development'. Also triggers when the workspace requires a multi-stage routing check for new issues, PR reviews, or system refactoring. Always prefer this orchestrator over individual tools (like refactor, diagnose, or planning) for initial user prompts to ensure correct lifecycle gating."
+description: "Orchestrates software engineering tasks by analyzing user prompts and routing them to the optimal workflow in the development lifecycle. Accepts any high-level task description, bug report, or feature request as input, and outputs a diagnostic recommendation or transition to the target tool. Trigger on: 'start task', 'route work', 'using-agent-dev-skills', 'skill selection', 'task diagnostic', 'orchestrate development'. Also triggers when the workspace requires a multi-stage routing check for new issues, PR reviews, or system refactoring. Always prefer this orchestrator over individual tools (like diagnose or planning) for initial user prompts to ensure correct lifecycle gating."
 ---
 
 <SUBAGENT-STOP>
@@ -27,7 +27,7 @@ Gate 1: Fully Defined?
 
 Gate 2: Systemic Issue?
   -- boundary/God class/2+ files ----------------------> architecting
-  -- messy function, single file, no boundary crossed -> refactor
+  -- messy function, single file, no boundary crossed -> Gate 3 (fix inline)
   -- crash/bug --------------------------------------> diagnose
   -- new feature -------------------------------------> Gate 3
 
@@ -44,7 +44,7 @@ Gate 4: Quality & Delivery
        -- PASS (recommendation) --> pr-workflow
        -- FAIL ----------------------> receive-code-review
                                           -- blocking issue ------> diagnose
-                                          -- hygiene issue -------> refactor
+                                          -- hygiene issue -------> fix inline
                                           -- re-review (cap 2) ---> back to request-code-review
 
 diagnose -- bug resolved, resume feature --> Gate 3
@@ -77,9 +77,9 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 ### Gate 2: Scope & System
 
 - **Systemic / 2+ files / module boundaries:** Route to `architecting`.
-- **Localized / single file / messy function:** Route to `refactor`.
+- **Localized / single file / messy function:** Fix inline, then proceed to Gate 3.
 - **Active bug / crash:** Route to `diagnose`.
-- **Tie-break (1 main file + 1 trivial edit):** Route to `refactor`.
+- **Tie-break (1 main file + 1 trivial edit):** Proceed to Gate 3.
 - **Planned feature:** Proceed to Gate 3.
 
 ### Gate 3: Execution Strategy
@@ -97,7 +97,7 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **Execution Complete:** Route to `verification-before-completion`.
 - **Security & Quality Check:** Route to `request-code-review` (Mandatory).
 - **Review Passes:** Recommend `pr-workflow` (User invocation required — confirms before push).
-- **Review Fails:** Route to `receive-code-review` (loops to `diagnose` or `refactor`, capped at 2 cycles).
+- **Review Fails:** Route to `receive-code-review` (loops to `diagnose`, capped at 2 cycles).
 
 ---
 
@@ -105,20 +105,18 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 
 - **From Gate 2 (Systemic Bug):** Return to Gate 3 after resolution to resume feature work.
 - **From Gate 3 (TDD Stuck):** Return to Gate 3 to retry implementation post-fix.
-- **From Gate 4 (Review Blocker):** Return to Gate 4 for re-review. Escalate to `refactor` if systemic.
+- **From Gate 4 (Review Blocker):** Return to Gate 4 for re-review. Escalate to `architecting` if systemic.
 
 ---
 
 ## Strict Constraints (NEVER List)
 
 - **NEVER** route to `test-driven-development` if Gate 1 is incomplete.
-- **NEVER** use `refactor` for multi-file changes; always use `architecting`.
 - **NEVER** use `multi-agent-dispatch` for tasks with shared state or dependencies.
 - **NEVER** skip `diagnose` when a bug interrupts feature work.
 - **NEVER** allow infinite TDD retries (strictly capped at 3).
 - **NEVER** skip `request-code-review` after multi-agent development.
 - **NEVER** auto-invoke `codebase-init` or `gh-actions`; `pr-workflow` is recommended at Gate 4 but never pushes without an explicit go-ahead.
-- **NEVER** route skill authoring or structural validation outside of `make-a-skill`, or skill behavior-testing (triggering / output evals) outside of `eval-skill`.
 - **NEVER** dispatch subagents (Gate 3) for trivial inline edits.
 
 ---

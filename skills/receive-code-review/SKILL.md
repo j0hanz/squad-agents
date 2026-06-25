@@ -18,7 +18,6 @@ Start: Feedback Received
   -> 4. Respond (verified or pushback)
   -> 5. Implement (severity order)
        -- Tier 1/2 blocking --> diagnose (handoff)
-       -- Tier 4 hygiene -----> refactor (handoff)
   -> 6. Test individual fix
   -> next item --> back to 3. Verify Finding
   -- all items fixed --> verification-before-completion (handoff)
@@ -68,6 +67,6 @@ Start: Feedback Received
 ## Routing & Skills
 
 **Tier 1/2 (Bugs/Security)**: Use `diagnose` to find the real problem.
-**Tier 4 (Cleanup)**: Use `refactor`.
+**Tier 4 (Cleanup)**: Fix directly inline.
 **Done**: Use `verification-before-completion`, then ask for a new review.
 **Failing Twice**: Stop. Mark as **BLOCKED**. Wait for the user to tell you what to do next. Do not keep trying.

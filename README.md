@@ -6,7 +6,7 @@ A Claude Code plugin for authoring and maintaining skills and hooks — structur
 
 ## Overview
 
-Agent Dev Plugin extends Claude Code with 17 skills and 3 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands, surface relevant skills, and keep a local telemetry trail. Multi-step or parallel work is delegated to the built-in `general-purpose` agent — configured per task via the prompt — orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
+Agent Dev Plugin extends Claude Code with 15 skills and 3 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands, surface relevant skills, and keep a local telemetry trail. Multi-step or parallel work is delegated to the built-in `general-purpose` agent — configured per task via the prompt — orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
@@ -20,7 +20,7 @@ Agent Dev Plugin extends Claude Code with 17 skills and 3 lifecycle hooks coveri
 
 | Feature                  | Description                                                                                                                                    |
 | :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| 17 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`                                                                                   |
+| 15 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`                                                                                   |
 | Subagent orchestration   | `multi-agent-dispatch` and `multi-agent-development` drive every `general-purpose` subagent dispatch — no custom agent definitions to maintain |
 | 3 lifecycle hooks        | Bash-only handlers: a shell-safety guard, a skill nudge, and telemetry capture                                                                 |
 | Marketplace install      | One-command install from GitHub — no manual clone required                                                                                     |
@@ -71,9 +71,9 @@ claude --plugin-dir ./claude-agent-dev-plugin
 
 ## What's Included
 
-### Skills (18)
+### Skills (15)
 
-Skills are invoked automatically by Claude based on task context, or manually with `/skill-name`. 16 are listed below; `multi-agent-dispatch` and `multi-agent-development` are detailed in [Subagent Dispatch](#subagent-dispatch).
+Skills are invoked automatically by Claude based on task context, or manually with `/skill-name`. 13 are listed below; `multi-agent-dispatch` and `multi-agent-development` are detailed in [Subagent Dispatch](#subagent-dispatch).
 
 | Skill                            | Trigger                                                    | Purpose                                                        |
 | :------------------------------- | :--------------------------------------------------------- | :------------------------------------------------------------- |
@@ -82,7 +82,6 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `diagnose`                       | "debug", "fix crash", "not working", "why is this failing" | Root-cause debugging before any fix                            |
 | `request-code-review`            | "review", "check this", "is this correct"                  | Dispatches a fresh-context subagent to review the diff         |
 | `receive-code-review`            | "reviewer said", "PR comments"                             | Verify, push back on, and implement review feedback            |
-| `refactor`                       | "clean up", "refactor", "simplify", "messy"                | Structural improvements                                        |
 | `test-driven-development`        | "TDD", "write tests", "implement this"                     | Red-green-refactor workflow                                    |
 | `architecting`                   | "architecture", "structure", "how is this organized"       | Codebase structural analysis                                   |
 | `pr-workflow`                    | "commit this", "open a PR", "ship it", "push my work"      | Branch, commit, push & open a PR — multi-agent aware delivery  |
@@ -91,8 +90,6 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `verification-before-completion` | (automatic before task completion)                         | Verify changes work before marking done                        |
 | `using-agent-dev-skills`         | (meta-routing)                                             | Routes to the right skill based on context                     |
 | `codebase-init`                  | "generate AGENTS.md", "init agents.md"                     | Generating/refreshing AGENTS.md and CLAUDE.md files            |
-| `make-a-skill`                   | "make a skill", "build a skill", "scaffold a skill"        | Scaffold and validate new skills/<name>/SKILL.md               |
-| `eval-skill`                     | "eval this skill", "does my skill fire", "run skill evals" | Runs behavior tests against a local skill's prompts            |
 
 ### Subagent Dispatch
 
@@ -156,7 +153,7 @@ This file configures local settings for the `claude-agent-dev` plugin.
 │   └── hooks.json
 ├── monitors/               # Live development watchers (experimental)
 ├── output-styles/          # Output style definitions
-├── skills/                 # Skill SKILL.md files (18 skills)
+├── skills/                 # Skill SKILL.md files (15 skills)
 └── tests/                  # Integration tests
 ```
 

@@ -16,7 +16,6 @@ Trigger: Workflow/CLI Request
                     -> 2. Author & Harden (SHA-pinning/OIDC)
                     -> 3. Validate & Audit (lint/security review)
                          -- runtime fail ---> diagnose (handoff)
-                         -- hygiene issue --> refactor (handoff)
   -- gh / API --> Path B: CLI
                     -> 1. Mode Selection (inline vs script)
                     -> 2. Headless Standards (auth/paginate)
@@ -73,7 +72,6 @@ Trigger: Workflow/CLI Request
 - **If anything fails:** Read `references/troubleshooting.md`.
 - **Inspecting a failing PR check:** Run `python3 scripts/inspect_pr_checks.py --pr <n>` to fetch failing check logs and a failure snippet before deciding how to fix the workflow.
 - **`diagnose`:** Call this if a script fails while running.
-- **`refactor`:** Call this if the linter or security audit finds bad code.
 - **`verification-before-completion`:** Call this to double-check work before saving.
 - **`pr-workflow`:** Call this to create a branch, commit, and open a PR.
 - **`context-optimizer`:** Call this if the chat memory gets too full.
