@@ -1,6 +1,6 @@
 ---
 name: using-agent-sdlc-skills
-description: "Orchestrates software engineering tasks by analyzing user prompts and routing them to the optimal workflow in the development lifecycle. Accepts any high-level task description, bug report, or feature request as input, and outputs a diagnostic recommendation or transition to the target tool. Trigger on: 'start task', 'route work', 'using-agent-sdlc-skills', 'skill selection', 'task diagnostic', 'orchestrate development'. Also triggers when the workspace requires a multi-stage routing check for new issues, PR reviews, or system refactoring. Always prefer this orchestrator over individual tools (like diagnose or planning) for initial user prompts to ensure correct lifecycle gating."
+description: "Orchestrates software engineering tasks by analyzing user prompts and routing them to the optimal workflow in the development lifecycle. Accepts any high-level task description, bug report, or feature request as input, and outputs a diagnostic recommendation or transition to the target tool. Trigger on: 'start task', 'route work', 'using-agent-sdlc-skills', 'skill selection', 'task diagnostic', 'orchestrate development'. Also triggers when the workspace requires a multi-stage routing check for new issues, PR reviews, or system refactoring. Always prefer this orchestrator over individual tools (like diagnose or request-plan) for initial user prompts to ensure correct lifecycle gating."
 ---
 
 <SUBAGENT-STOP>
@@ -21,9 +21,10 @@ Start: New Task
        -- onboarded ------------------------------------------> Gate 1
 
 Gate 1: Fully Defined?
-  -- vague/no spec ------> parallel-brainstorming
-  -- idea only -----------> planning
-  -- spec+plan exist -----> Gate 2
+  -- vague/no spec ------------------> parallel-brainstorming
+  -- idea only -----------------------> request-plan
+  -- spec+plan exist, unverified -----> receive-plan
+  -- spec+plan exist, verified -------> Gate 2
 
 Gate 2: Systemic Issue?
   -- boundary/God class/2+ files ----------------------> architecting
@@ -37,7 +38,7 @@ Gate 3: Execution Strategy
   -- independent --------------------------------> multi-agent-dispatch
   -- sequential/complex -------------------------> multi-agent-development
   test-driven-development -- stuck after 3 attempts --> diagnose --> back to Gate 3 (retry)
-  test-driven-development -- spec ambiguous ----------> planning --> back to Gate 3
+  test-driven-development -- spec ambiguous ----------> request-plan --> back to Gate 3
   [dispatch | development | TDD] --> Gate 4
 
 Gate 4: Quality & Delivery
@@ -72,8 +73,9 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 ### Gate 1: Task Definition
 
 - **Vague concept:** Route to `parallel-brainstorming`.
-- **Needs concrete plan:** Route to `planning`.
-- **Spec and plan exist:** Proceed to Gate 2.
+- **Needs concrete plan:** Route to `request-plan`.
+- **Spec and plan exist, unverified:** Route to `receive-plan` directly (skip drafting).
+- **Spec and plan exist, verified:** Proceed to Gate 2.
 
 ### Gate 2: Scope & System
 
@@ -91,7 +93,7 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **Sequential tasks (context constrained):** Route to `multi-agent-development`.
 - **Mixed DAG tasks:** Route to `multi-agent-development` (batch tasks with gated reviews).
 - **Standard single feature:** Route to `test-driven-development`.
-- **TDD fails 3 times:** Route to `diagnose` (stuck) or `planning` (ambiguous spec).
+- **TDD fails 3 times:** Route to `diagnose` (stuck) or `request-plan` (ambiguous spec).
 - **Autonomous by default:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are all safe enough to run directly and announce the route without stopping for a go-ahead — but each earns that safety differently: `test-driven-development` edits directly in the main thread and is test-gated (red-green-refactor) rather than isolated; `request-code-review` dispatches a read-only agent (`diff-reviewer`, Write/Edit denied) that never writes, so there's nothing to isolate — its safety is tool-restriction; `multi-agent-development` and `multi-agent-dispatch` dispatch Writer-role agents under `isolation: worktree` and are test-gated before merge. Ask first only when a step is genuinely irreversible outside whatever guard applies (a destructive command, a push, a migration) or it's the first dispatch of the session and the user hasn't seen the behavior yet.
 
 ### Gate 4: Quality & Delivery

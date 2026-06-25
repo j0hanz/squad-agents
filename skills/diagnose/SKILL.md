@@ -70,7 +70,7 @@ Phase 1: Build Feedback Loop (pass/fail signal)
 
 **test-driven-development:** implement new logic/tests
 **architecting:** clean up multiple files/modules
-**planning:** address major specification gaps
+**request-plan:** address major specification gaps
 **context-optimizer:** if context bloats mid-skill (long reads, many tool calls)
 
 ## Transitions

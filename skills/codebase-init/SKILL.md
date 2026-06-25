@@ -1,6 +1,6 @@
 ---
 name: codebase-init
-description: "Initialize or audit repository instructions. Generates high-signal AGENTS.md wired to CLAUDE.md/GEMINI.md stubs. Not for documenting a specific feature's spec or design (see planning, parallel-brainstorming). Trigger on: 'init codebase', 'onboard repo', 'audit AGENTS.md', 'setup agent instructions', 'codebase-init', 'initialize project memory'."
+description: "Initialize or audit repository instructions. Generates high-signal AGENTS.md wired to CLAUDE.md/GEMINI.md stubs. Not for documenting a specific feature's spec or design (see request-plan, parallel-brainstorming). Trigger on: 'init codebase', 'onboard repo', 'audit AGENTS.md', 'setup agent instructions', 'codebase-init', 'initialize project memory'."
 disable-model-invocation: true
 user-invocable: true
 allowed-tools: Bash(python *) Bash(python3 *) AskUserQuestion Skill
@@ -151,7 +151,7 @@ Phase 1: Environment Discovery (analyze toolchain/structure)
 
 - architecting: Map patterns, "God" modules, circular dependencies.
 - parallel-brainstorming: Explore features.
-- planning: Create implementation plans.
+- request-plan: Create implementation plans.
 - context-optimizer: If context bloats mid-skill (long reads, many tool calls).
 
 ---

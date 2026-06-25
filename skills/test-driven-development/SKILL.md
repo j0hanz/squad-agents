@@ -28,7 +28,7 @@ Start: TDD Request -> Carve-out applies (spike/trivial/CSS)? -- yes --> AskUserQ
   1. RED (write failing test + minimal stub) -> run test, confirm failure
        -- failure confirmed --> 2. GREEN (write minimal implementation) -> run test
                                    -- fail --> Stuck? (3+ attempts)
-                                                  -- yes --> diagnose/planning (handoff)
+                                                  -- yes --> diagnose/request-plan (handoff)
                                                   -- no  --> retry GREEN
                                    -- pass --> 3. REFACTOR (surgical cleanup) -> run test, stay passing
                                                   -> All scenarios covered?
@@ -89,7 +89,7 @@ _If stuck on how simple to be, read `references/minimal-impl-examples.md` fully.
 2. Write the **smallest amount of code possible** to make the test pass.
 3. Do not add extra code "just in case."
 4. If you fail 3 times, start over with a smaller test.
-5. If still stuck, use `diagnose` or `planning` tools.
+5. If still stuck, use `diagnose` or `request-plan` tools.
 
 ## Step 4: REFACTOR (Clean Up)
 

@@ -1,8 +1,0 @@
-[
-  {
-    "name": "python-test-watcher",
-    "command": "python -m pytest \"${CLAUDE_PLUGIN_ROOT}/skills/planning/tests/\" -v --tb=short -f",
-    "description": "Skill script tests — live feedback during skill development",
-    "when": "on-skill-invoke:planning"
-  }
-]

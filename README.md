@@ -71,14 +71,15 @@ claude --plugin-dir ./agent-sdlc
 
 ## What's Included
 
-### Skills (15)
+### Skills (16)
 
-Skills are invoked automatically by Claude based on task context, or manually with `/skill-name`. 13 are listed below; `multi-agent-dispatch` and `multi-agent-development` are detailed in [Subagent Dispatch](#subagent-dispatch).
+Skills are invoked automatically by Claude based on task context, or manually with `/skill-name`. 14 are listed below; `multi-agent-dispatch` and `multi-agent-development` are detailed in [Subagent Dispatch](#subagent-dispatch).
 
 | Skill                            | Trigger                                                    | Purpose                                                        |
 | :------------------------------- | :--------------------------------------------------------- | :------------------------------------------------------------- |
 | `parallel-brainstorming`         | "brainstorm", "add a feature", "explore approaches"        | Parallel multi-agent ideation + critique before implementation |
-| `planning`                       | "plan", "design", "how should we approach"                 | Implementation planning and design decisions                   |
+| `request-plan`                   | "plan", "design", "draft a plan", "write a spec"           | Multi-agent ideate-and-synthesize: drafts plan/specs.md        |
+| `receive-plan`                   | "check my plan", "is this plan ready", "verify this spec"  | Multi-agent critique panel + Traceability Auditor gate         |
 | `diagnose`                       | "debug", "fix crash", "not working", "why is this failing" | Root-cause debugging before any fix                            |
 | `request-code-review`            | "review", "check this", "is this correct"                  | Dispatches a fresh-context subagent to review the diff         |
 | `receive-code-review`            | "reviewer said", "PR comments"                             | Verify, push back on, and implement review feedback            |
@@ -146,7 +147,6 @@ This file configures local settings for the `claude-agent-sdlc` plugin.
 │   ├── shell-safety.sh
 │   ├── skill-nudge.sh
 │   └── hooks.json
-├── monitors/               # Live development watchers (experimental)
 ├── output-styles/          # Output style definitions
 ├── skills/                 # Skill SKILL.md files (15 skills)
 └── tests/                  # Integration tests
@@ -156,7 +156,6 @@ This file configures local settings for the `claude-agent-sdlc` plugin.
 | :--------------- | :--------------------------------------------------------------- |
 | `hooks/`         | Bash hook handlers and the hooks manifest                        |
 | `skills/`        | One directory per skill, each containing a `SKILL.md` definition |
-| `monitors/`      | Experimental live watchers for tests                             |
 | `output-styles/` | Output style definitions                                         |
 | `bin/`           | Plugin manifest validator and YAML schema checker                |
 | `tests/`         | Integration tests verifying hooks fire and skills load correctly |

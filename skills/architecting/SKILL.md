@@ -1,6 +1,6 @@
 ---
 name: architecting
-description: "Performs architecture review and system design for problems spanning multiple files or crossing module boundaries in the target repo's own code. Analyzes existing directories, dependencies, and imports to generate an Architecture Decision Record (ADR) in docs/adr/ and an architecture-brief.json schema. Trigger on: 'architecture review', 'restructure across modules', 'too coupled', 'design this system', 'where should this code live', 'God class', 'circular deps', 'dependency mapping', 'domain boundaries'. Also triggers when addressing boundary violations, structural bleed, or resolving high git coupling between files. Always prefer this skill over planning when designing multi-module interfaces or correcting structural coupling before writing detailed implementation steps."
+description: "Performs architecture review and system design for problems spanning multiple files or crossing module boundaries in the target repo's own code. Analyzes existing directories, dependencies, and imports to generate an Architecture Decision Record (ADR) in docs/adr/ and an architecture-brief.json schema. Trigger on: 'architecture review', 'restructure across modules', 'too coupled', 'design this system', 'where should this code live', 'God class', 'circular deps', 'dependency mapping', 'domain boundaries'. Also triggers when addressing boundary violations, structural bleed, or resolving high git coupling between files. Always prefer this skill over request-plan when designing multi-module interfaces or correcting structural coupling before writing detailed implementation steps."
 disable-model-invocation: false
 allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion
 ---
@@ -14,7 +14,7 @@ Trigger: Review/Design Request
                           -> 2. Present opportunities
                           -> 3. Align (interview/seam)
                           -> 4. Record ADR
-                          -> Handoff: planning
+                          -> Handoff: request-plan
   -- new module ----> Mode B: DESIGN
                           -> 1. Identify domain vs mechanism
                           -> 2. Select pattern
@@ -47,7 +47,7 @@ Trigger: Review/Design Request
 - Load `references/INTERFACE_SHAPES.md` & `references/SEAMS_BY_EXAMPLE.md` before proposing seams.
 
 - **Phase_4_ADR:** Generate ADR in `docs/adr/` using `references/ADR_TEMPLATE.md`.
-- **Phase_5_Handoff:** Generate `architecture-brief.json` (`references/brief-schema.json`). Read `references/MIGRATION_STRATEGIES.md` for gradual cutover. Handoff to `planning`.
+- **Phase_5_Handoff:** Generate `architecture-brief.json` (`references/brief-schema.json`). Read `references/MIGRATION_STRATEGIES.md` for gradual cutover. Handoff to `request-plan`.
 
 - **Mode_B_Design:**
 - **Constraint_Context:** NEVER load diagnostic templates (`references/DOMAIN_INTERVIEW.md`, `references/SEAMS_BY_EXAMPLE.md`).
@@ -67,7 +67,7 @@ Trigger: Review/Design Request
 - **Scale (YAGNI):** Skip formal patterns for <1,000 lines, throwaways, or single-dev setups.
 
 - **Next_Skills:**
-- **planning:** Formalize specs for new designs or major seam extractions.
+- **request-plan:** Formalize specs for new designs or major seam extractions.
 - **multi-agent-development:** Execute complex architectural changes.
 - **diagnose:** Isolate live bugs surfaced during Mode A exploration.
 

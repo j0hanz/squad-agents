@@ -55,6 +55,6 @@ Select ONE strategy based on diagnostics:
 
 **Next Skills:**
 
-- `planning`: Trigger if context reveals major specification gaps.
+- `request-plan`: Trigger if context reveals major specification gaps.
 - Whichever skill was recorded as `current_skill` in the rolling summary: resume it directly.
 - `using-agent-sdlc-skills`: Only if no `current_skill` was recorded (e.g. optimizing before any route was chosen).
