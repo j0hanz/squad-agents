@@ -75,6 +75,49 @@ test('shell-safety.sh allows the denylist word inside a quoted string', () => {
   assert.strictEqual(exitCode, 0);
 });
 
+test('shell-safety.sh blocks rm -r (no -f) on a root-level path', () => {
+  const { exitCode, stderr } = runHandler('shell-safety.sh', {
+    tool_input: { command: 'rm -r /' },
+  });
+  assert.strictEqual(exitCode, 2);
+  assert.ok(stderr.includes('non-forced'), 'stderr should explain the non-forced variant');
+});
+
+test('shell-safety.sh allows rm -r (no -f) on a subpath', () => {
+  const { exitCode } = runHandler('shell-safety.sh', {
+    tool_input: { command: 'rm -r ./build' },
+  });
+  assert.strictEqual(exitCode, 0);
+});
+
+test('shell-safety.sh allows a bare git push --force (no branchspec) — deliberate, not an oversight', () => {
+  const { exitCode } = runHandler('shell-safety.sh', {
+    tool_input: { command: 'git push --force' },
+  });
+  assert.strictEqual(exitCode, 0);
+});
+
+test('shell-safety.sh blocks git push --force regardless of flag/branch token order', () => {
+  const { exitCode } = runHandler('shell-safety.sh', {
+    tool_input: { command: 'git push origin --force master' },
+  });
+  assert.strictEqual(exitCode, 2);
+});
+
+test('shell-safety.sh blocks --force-with-lease=main:<sha> refspec form', () => {
+  const { exitCode } = runHandler('shell-safety.sh', {
+    tool_input: { command: 'git push --force-with-lease=main:abc123' },
+  });
+  assert.strictEqual(exitCode, 2);
+});
+
+test('shell-safety.sh allows force-push to a named non-default branch — documented accepted gap', () => {
+  const { exitCode } = runHandler('shell-safety.sh', {
+    tool_input: { command: 'git push --force origin my-wip-branch' },
+  });
+  assert.strictEqual(exitCode, 0);
+});
+
 test('shell-safety.sh respects the AGENT_SDLC_SKIP_SHELL_SAFETY override', () => {
   const { exitCode } = runHandler(
     'shell-safety.sh',

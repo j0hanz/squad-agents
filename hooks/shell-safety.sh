@@ -131,7 +131,13 @@ has_long_flag() {
 
 # Matches a root-level deletion target, optionally wrapped in matching
 # quotes (e.g. "/" or '~'), with or without a trailing slash on ~ / $HOME.
-ROOT_TARGET_PATTERN='(^|[[:space:]])["'"'"']?(\$HOME/?|~/?|/\*|/)["'"'"']?([[:space:]]|$)'
+# ~user (tilde-username form, another user's home dir) is included; bare ~
+# still matches since the username class allows zero characters.
+# Known accepted gaps (inherited, not new): doesn't resolve a prior `cd /`
+# making a relative target root-equivalent, doesn't follow symlinks, and
+# doesn't catch variable indirection (`T=/; rm -rf "$T"`) — closing those
+# would require shelling out for path resolution, which this guard avoids.
+ROOT_TARGET_PATTERN='(^|[[:space:]])["'"'"']?(\$HOME/?|~[A-Za-z0-9_-]*/?|/\*|/)["'"'"']?([[:space:]]|$)'
 
 # Best-effort, non-nested extraction of $(...) / `...` / <(...) / >(...)
 # contents from the full command — each becomes its own candidate to scan
@@ -208,17 +214,40 @@ for segment in "${segments[@]}"; do
     { has_char "$shortflags" f || has_long_flag force "${words[@]:1}"; } && has_force=true
     if $has_recursive && $has_force && [[ "$trimmed" =~ $ROOT_TARGET_PATTERN ]]; then
       deny "recursive force-delete of a root-level path ('$trimmed')"
+    elif $has_recursive && [[ "$trimmed" =~ $ROOT_TARGET_PATTERN ]]; then
+      # Not gated on $has_force: an unforced `rm -r` against a root-like
+      # target is just as destructive on any file that's already
+      # deletable; the interactive per-file prompt isn't a real safety net
+      # in a non-interactive hook context.
+      deny "recursive delete (non-forced) of a root-level path ('$trimmed')"
     fi
   fi
 
   # git push --force / -f / --force-with-lease (combined, separated, or
-  # long-form) explicitly targeting main or master.
+  # long-form) explicitly targeting main or master. Word-order independent:
+  # flags are scanned across all words and the branch patterns search the
+  # whole segment, not a fixed position relative to --force.
+  #
+  # Force-pushing to a named branch OTHER than main/master (e.g. a shared
+  # release branch) is a deliberate, accepted gap, not an oversight: an
+  # earlier design considered denying any force-push with no explicit
+  # branchspec (treating "implicit current branch" as inherently risky),
+  # but that inverts the risk profile — it blocks the common, safe, everyday
+  # workflow (bare `git push --force` to your own tracked feature branch)
+  # while still exempting the actually-risky case of naming another shared
+  # branch. Closing this gap for real requires asking git which branch is
+  # checked out / tracked, which this hook deliberately avoids (see file
+  # header: no subprocess dependency).
   if [[ "$trimmed" =~ ^git[[:space:]]+push([[:space:]]|$) ]]; then
     read -ra words <<<"$trimmed"
     shortflags="$(collect_short_flags "${words[@]:2}")"
     has_force=false
     { has_char "$shortflags" f || has_long_flag force "${words[@]:2}" || has_long_flag force-with-lease "${words[@]:2}"; } && has_force=true
-    if $has_force && { [[ "$trimmed" =~ (^|[[:space:]])([a-zA-Z0-9._-]*/)?:(main|master)([[:space:]]|$) ]] || [[ "$trimmed" =~ (^|[[:space:]])([a-zA-Z0-9._/-]*/)?(main|master)([[:space:]]|$) ]]; }; then
+    if $has_force && {
+      [[ "$trimmed" =~ (^|[[:space:]])([a-zA-Z0-9._-]*/)?:(main|master)([[:space:]]|$) ]] ||
+        [[ "$trimmed" =~ (^|[[:space:]])([a-zA-Z0-9._/-]*/)?(main|master)([[:space:]]|$) ]] ||
+        [[ "$trimmed" =~ (^|[[:space:]]|=)(main|master):[A-Za-z0-9]*([[:space:]]|$) ]]
+    }; then
       deny "force-push targeting main/master ('$trimmed')"
     fi
   fi

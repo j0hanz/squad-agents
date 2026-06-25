@@ -32,6 +32,7 @@ Gate 2: Systemic Issue?
   -- new feature -------------------------------------> Gate 3
 
 Gate 3: Execution Strategy
+  -- CI/CD workflow (GitHub Actions, gh CLI scripting) --> gh-actions (User invocation required)
   -- trivial (<~20 lines) OR standard/focused --> test-driven-development
   -- independent --------------------------------> multi-agent-dispatch
   -- sequential/complex -------------------------> multi-agent-development
@@ -84,6 +85,7 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 
 ### Gate 3: Execution Strategy
 
+- **CI/CD workflow (GitHub Actions YAML, gh CLI batch/API scripting):** Recommend `gh-actions` (User invocation required — never auto-invoked).
 - **Trivial change (<20 lines, 1 file):** Route to `test-driven-development` (skip dispatch question).
 - **Independent tasks (time constrained):** Route to `multi-agent-dispatch`.
 - **Sequential tasks (context constrained):** Route to `multi-agent-development`.
