@@ -2,6 +2,8 @@
 
 Fill every `{{placeholder}}` before sending: `{{base_commit}}`, `{{head_commit}}`, `{{repo_path}}`, `{{plan_or_requirements_summary}}`, `{{patterns_reference_path}}`. Never dispatch with a placeholder still in the text — if a value is unknown, ask the user rather than guessing.
 
+This template is dispatched to the `diff-reviewer` subagent type.
+
 ```markdown
 Review the changes between {{base_commit}} and {{head_commit}} in {{repo_path}}.
 

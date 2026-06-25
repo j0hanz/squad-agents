@@ -15,7 +15,7 @@ Get an unbiased review by dispatching a fresh-context subagent. Never review you
 
 ```
 Start: Review Request -> 0. Confirm with user -> Pre-Review Checkpoint (tests, context, diffable)
-  -> 1. Stat Check (git diff --stat) -> 2. Dispatch Agent (general-purpose) -> 3. Check Result Shape
+  -> 1. Stat Check (git diff --stat) -> 2. Dispatch Agent (diff-reviewer) -> 3. Check Result Shape
        -- malformed -------> Retry Dispatch (once) -> back to 3. Check Result Shape
        -- failed twice ----> Escalate to user
        -- well-formed -----> 4. Hand Off Result
@@ -39,7 +39,7 @@ Diff Check: If no commits, skip dispatch and request Before/After blocks for inl
 
 Stat Check: Run `git diff --stat {{base}}..{{head}}`
 Prompt: Fill `references/reviewer-dispatch-prompt.md`
-Dispatch: Run read-only `Agent` (strictly exclude Write/Edit tools)
+Dispatch: Run `diff-reviewer` (Write/Edit denied by its tools frontmatter)
 Safety Check: Run `git status --porcelain` (if modified: discard, restore, re-dispatch)
 Output Validation: Require `## Code Review Result` block (retry once if missing, then fail)
 
