@@ -10,7 +10,7 @@ Agent SDLC Plugin extends Claude Code with 15 skills and 2 lifecycle hooks cover
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
-| **Status**          | Stable — v1.2.0              |
+| **Status**          | Stable — v1.0.0              |
 | **Language**        | JavaScript (ESM) · Python    |
 | **Runtime**         | Node.js ≥ 22 · Python ≥ 3.10 |
 | **Package manager** | npm                          |

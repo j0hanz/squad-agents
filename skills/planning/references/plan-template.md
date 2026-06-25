@@ -153,8 +153,6 @@ This Setup → Core → Integration sequence is intra-slice sequencing for one f
 | Test file (unit)          | Per 10 cases          | 20–30 min |
 | Test file (integration)   | Per 5 cases           | 30–45 min |
 
-**Multipliers:** unfamiliar framework ×1.3; complex architecture change ×1.5; first time in codebase ×1.2.
-
 ## Depth profiles
 
 For depth definitions (task counts, effort, format), see **Depth Profiles** in `SKILL.md`.
