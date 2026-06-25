@@ -52,6 +52,39 @@ Some instructions.
   }
 });
 
+test('validate-plugin detects missing description in agents/*.md', () => {
+  const agentsDir = path.join(projectRoot, 'agents');
+  const agentMdPath = path.join(agentsDir, 'temp-invalid-agent.md');
+  const invalidContent = `---
+name: temp-invalid-agent
+tools: Read
+---
+Some instructions.
+`;
+
+  fs.writeFileSync(agentMdPath, invalidContent, 'utf-8');
+
+  try {
+    let errorOccurred = false;
+    try {
+      execSync(`node bin/validate-plugin.mjs`, { cwd: projectRoot, stdio: 'pipe' });
+    } catch (err) {
+      errorOccurred = true;
+      const output = err.stdout.toString() + err.stderr.toString();
+      assert.ok(
+        output.includes("Missing or empty 'description'"),
+        "Output should contain Missing or empty 'description' error",
+      );
+    }
+
+    assert.ok(errorOccurred, 'Validator should have failed with exit code 1');
+  } finally {
+    if (fs.existsSync(agentMdPath)) {
+      fs.unlinkSync(agentMdPath);
+    }
+  }
+});
+
 test('validate-plugin detects a dangling cross-skill routing reference', () => {
   const tempSkillDir = path.join(projectRoot, 'skills', 'temp-routing-skill');
   if (!fs.existsSync(tempSkillDir)) {

@@ -98,6 +98,17 @@ function validateSkillStructure(skillDir) {
   }
 }
 
+// Validate agent structure
+function validateAgentStructure(agentMd) {
+  const result = validateFrontmatter(agentMd, 'Agent');
+  if (!result) return;
+
+  const { fmData } = result;
+  if (typeof fmData.name !== 'string' || !fmData.name.trim()) {
+    errors.push(`[Agent] ${agentMd}: Missing or empty 'name' field in frontmatter`);
+  }
+}
+
 // Validate hook configuration
 function validateHooks() {
   const hooksJson = path.join(pluginRoot, 'hooks', 'hooks.json');
@@ -211,6 +222,26 @@ function main() {
       errors.push(`[Skills] Failed to read skills directory: ${e.message}`);
     }
     validateRouting(skillsDir);
+  }
+
+  // Validate agents
+  const agentsDir = path.join(pluginRoot, 'agents');
+  if (fs.existsSync(agentsDir)) {
+    try {
+      fs.readdirSync(agentsDir).forEach((file) => {
+        if (!file.endsWith('.md')) return;
+        const agentPath = path.join(agentsDir, file);
+        try {
+          if (fs.statSync(agentPath).isFile()) {
+            validateAgentStructure(agentPath);
+          }
+        } catch (e) {
+          errors.push(`[Agents] Failed to stat agent ${file}: ${e.message}`);
+        }
+      });
+    } catch (e) {
+      errors.push(`[Agents] Failed to read agents directory: ${e.message}`);
+    }
   }
 
   // Validate hooks
