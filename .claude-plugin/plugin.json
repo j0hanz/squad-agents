@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "claude-agent-sdlc",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Multi-agent workflows for Claude Code: development, testing, debugging, and review.",
   "license": "MIT",
   "author": {
