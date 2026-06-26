@@ -33,66 +33,67 @@ Phase 3  CONSENT + WRITE
 
 ---
 
-## Phase 0: Prescan & Survey
+## Phase 0: Check and Ask
 
-- **Prescan:** `python "$CLAUDE_PLUGIN_ROOT/skills/project-init/scripts/init.py" prescan .` → JSON `{packages, package_count, file_count, is_monorepo, has_manifest}`. This drives routing; it is cheap (bounded depth-2 walk, skips vendor/`node_modules`).
-- **Marker check:** If an `AGENTS.md` exists, scan for `<!-- project-init:hard-rules v1 commit=… maturity=… testing=… ci=… -->`. If present and valid, **reuse those answers** — do not re-survey. Tell the user it was found and offer to re-survey (treat any "reconfigure / my conventions changed" as the `--force` path).
-- **Survey (only when no valid marker):** Call `AskUserQuestion` **once** with the 3 questions in `references/hard-rules.md` — commit policy, project maturity, testing rigor. Use the option wording verbatim (each option states its effect in plain language). Never add an "Other" option. Halt with no files written if dismissed.
-- **CI is never surveyed** — detect it: `.github/workflows/` → `github-actions`, `.gitlab-ci.yml` → `gitlab-ci`, else `local-only`.
-- **Routing:** `has_manifest == false` → trivial repo: do ONE serial discovery pass yourself (Read the few files), skip the fan-out, go to Phase 2. Otherwise → Phase 1.
-
----
-
-## Phase 1: Discovery Fan-Out
-
-Dispatch blind, **read-only** Researcher agents via `multi-agent-dispatch` (write the MATRIX first). Each starts cold — put every fact in the prompt. Exactly 3 facet lanes (= foreground cap):
-
-| Lane | Facet                   | Scope                                                                                             |
-| :--- | :---------------------- | :------------------------------------------------------------------------------------------------ |
-| L1   | build + PM              | package manager, install/build/dev/test/lint/typecheck commands, lockfiles, entrypoints           |
-| L2   | stack + layout          | languages, frameworks, directory topology, module boundaries (may invoke `architecting`)          |
-| L3   | conventions + CI + docs | lint/format config, CI workflows, commit/branch norms, existing AGENTS/CLAUDE/GEMINI/.cursorrules |
-
-**Monorepo** (`is_monorepo`): add one lane per package dir, run in background batches of ≤3; per-package detail becomes a **package-level `AGENTS.md`** (root stays a summary). Confirm with the user before fanning out above ~6 packages.
-
-Every lane's dispatch prompt carries the five fields (SCOPE / OBJECTIVE / CONTEXT / CONSTRAINTS / OUTPUT-SCHEMA) and:
-
-- **CONSTRAINTS:** read-only (Read/Grep/Glob, **no Bash, never run a command**); cite evidence for every claim; a command/version claim MUST quote a literal `match` string from the cited file.
-- **CONTEXT:** the survey answers + the prescan file manifest. Instruct targeted reads of named files, not full-tree dumps.
-- **OUTPUT-SCHEMA:** a JSON array of claims per `references/canonical-keys.md` — `{key, value, evidence:{path, match}, confidence}`. No prose.
-
-Collect each lane's JSON. **Never trust a self-reported verdict** — the deterministic merge is the gate.
+1. **Scan:** Run `python "$CLAUDE_PLUGIN_ROOT/skills/project-init/scripts/init.py" prescan .` to get project details.
+2. **Check for Old Rules:** Look for `AGENTS.md`. If it has the `<!-- project-init:hard-rules... -->` tag, use those answers. Do not ask the user again unless they force it.
+3. **Ask the User (if no old rules):** Run `AskUserQuestion` exactly once. Ask the 3 questions from `references/hard-rules.md` (commit policy, project maturity, testing rigor). Use the exact words provided. Do not add an "Other" choice. Stop if the user cancels.
+4. **Find CI Automatically:** Do not ask the user about CI. Look for folders: `.github/workflows/` means `github-actions`, `.gitlab-ci.yml` means `gitlab-ci`. Otherwise, use `local-only`.
+5. **Choose Path:** If the scan says `has_manifest == false`, read the project files yourself, skip Phase 1, and go straight to Phase 2. Otherwise, go to Phase 1.
 
 ---
 
-## Phase 2: Merge (preview)
+## Phase 1: Search (Read-Only)
 
-- Concatenate all lanes' claim arrays into one `claims.json` (scratchpad).
-- `python … init.py generate --claims claims.json --commit <c> --maturity <m> --testing <t> --ci <ci> [--purpose "<one sentence>"]` (no `--out` → preview to stdout; the attribution placeholder is expected here).
-- The engine verifies each claim (path resolves inside repo + required `match` present + canonical key), keeps one winner per key by evidence tier then confidence, sanitizes values, and trims to the `<100`-line budget. Dropped/unverified claims print to stderr.
-- **Show the user** the previewed `AGENTS.md` AND the dropped-claims report. If `generate` exits non-zero (lint FAIL — e.g. required keys overflow the budget), fix the inputs or re-dispatch the offending lane; do not write.
+1. **Send Searchers:** Use `multi-agent-dispatch` to send 3 read-only agents at the same time. Give them all facts found in Phase 0.
+2. **Assign Lanes:**
+
+- **Lane 1 (Build):** Find package managers, build steps, and run commands.
+- **Lane 2 (Structure):** Find coding languages, frameworks, and folder setup.
+- **Lane 3 (Rules):** Find format rules, CI steps, and old rule files.
+
+3. **Big Projects (Monorepo):** Add one agent per package folder (run 3 at a time). If there are more than 6 packages, ask the user for permission first.
+4. **Strict Rules for Searchers:**
+
+- They can ONLY read files.
+- **NO Bash. NO running commands.**
+- They must prove every fact by quoting the exact text and naming the file.
+
+5. **Output:** The agents must only output a JSON list of facts matching `references/canonical-keys.md`. No extra text.
 
 ---
 
-## Phase 3: Consent & Write
+## Phase 2: Check and Preview
 
-- **Overwrite guard:** For any of `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` that already exists and is NOT already a one-line stub, show its content, back it up (`*.bak`), and get **explicit consent** before replacing. A real hand-written `CLAUDE.md` must never be silently reduced to a stub.
-- **Write:** `init.py generate --claims claims.json … --model "<active model name>" --out AGENTS.md` (atomic temp+rename, UTF-8 no BOM, `\n`).
-- **Wire stubs:** `init.py wire AGENTS.md CLAUDE.md GEMINI.md`.
-- **Lint:** `init.py lint AGENTS.md` — must PASS.
-- **Receipt:** report files written + line count, and restate the dropped-claims summary so the user knows what was discovered-but-omitted.
+1. **Combine:** Put all facts from Phase 1 into one file called `claims.json`.
+2. **Test:** Run `init.py generate --claims claims.json --commit <c> --maturity <m> --testing <t> --ci <ci>` (Do not use `--out`. Just print it to the screen).
+3. **Filter:** The script will keep only proven facts and drop bad ones.
+4. **Show the User:** Show the user the draft of `AGENTS.md` and the list of dropped facts. If there is an error, fix the inputs or rerun the bad agent. Do not save yet.
 
 ---
 
-## Failure Recovery
+## Phase 3: Ask and Save
 
-- Any script non-zero exit → invoke `diagnose` via `Skill` with the stderr; fix the root cause, resume the failed phase (never restart Phase 0).
-- Finish by handing to `verification-before-completion`.
+1. **Protect Old Files:** If `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` already exist, show them to the user, make a backup (`.bak`), and **ask for explicit permission** before replacing them.
+2. **Save:** Run `init.py generate --claims claims.json ... --model "<active model name>" --out AGENTS.md`.
+3. **Link Files:** Run `init.py wire AGENTS.md CLAUDE.md GEMINI.md`.
+4. **Test the File:** Run `init.py lint AGENTS.md`. It must pass.
+5. **Report to User:** Tell the user what files were saved, how many lines they have, and remind them of the facts that were dropped.
 
-## Prohibitions
+---
 
-- **never** execute a discovered command, or give a discovery lane Bash.
-- **never** hand-write or concatenate `AGENTS.md` — `init.py` is the only writer.
-- **never** copy file content into a stub (one-line redirect only).
-- **never** overwrite an authored `AGENTS.md`/`CLAUDE.md`/`GEMINI.md` without backup + consent.
-- **never** keep a claim whose evidence path is unresolved, outside the repo, or missing a required `match`.
+## Fixing Errors
+
+- If any script fails, use the `diagnose` skill on the error message. Fix the problem and restart the current phase. Never restart Phase 0.
+- When done, run `verification-before-completion`.
+
+---
+
+## STRICT PROHIBITIONS (NEVER DO THESE)
+
+- **NEVER** run any command found in the project.
+- **NEVER** give search agents access to Bash.
+- **NEVER** write or edit `AGENTS.md` by hand. Only the `init.py` script is allowed to write it.
+- **NEVER** copy text into a stub file.
+- **NEVER** replace existing rule files without backing them up and asking the user.
+- **NEVER** keep a fact if you cannot prove it with a real file path and an exact quote.
