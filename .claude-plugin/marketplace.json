@@ -9,7 +9,7 @@
     {
       "name": "claude-agent-sdlc",
       "description": "Multi-agent workflows for Claude Code: development, testing, debugging, and review.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "source": "./",
       "author": {
         "name": "j0hanz",
