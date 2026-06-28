@@ -60,6 +60,7 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **Notification:** Announce the route as plain text: `✅ Routing to [<skill-name>]: [reason]`. This is an FYI, not a decision — don't spend a blocking `AskUserQuestion` just to acknowledge a routing choice the matrix/gates already determined.
 - **No Skips:** Never bypass process gates for "simple" or "quick" tasks.
 - **Context Constraints:** Route to `context-optimizer` at any gate if the active context is bloated or token limits are approached, pruning memory before continuing the task (see the `[Any Gate]` branch in the diagram above — it preempts whichever gate is active).
+- **Gate Matrix Scope:** The Gate 0–4 matrix governs entry-routing only (Gate 0 onboarding through first dispatch at Gate 3) and does not re-describe a skill's own exit transitions once that skill is active. Each skill's own `## Next Skills` section remains canonical for that skill's outbound routing.
 
 ---
 
