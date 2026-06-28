@@ -111,6 +111,12 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **From Gate 3 (TDD Stuck):** Return to Gate 3 to retry implementation post-fix.
 - **From Gate 4 (Review Blocker):** Return to Gate 4 for re-review. Escalate to `architecting` if systemic.
 
+### Transition States
+
+- **TDD Escalation:** If TDD fails to pass after 3 attempts, it must return to `diagnose` or `request-plan`.
+- **Review Failure:** `receive-code-review` analyzes the failure level and routes back to the appropriate corrective skill, using `request-code-review`'s Tier classification (`references/patterns.md` in that skill): Tier 1 = Security, Tier 2 = Correctness, Tier 3 = Performance, Tier 4 = Reuse/hygiene. Tier 1/2 findings route to `diagnose`; Tier 4 findings are fixed inline by `receive-code-review` itself; Tier 3 findings are non-blocking and require no escalation. Gate 4 describes this routing using "blocking issue"/"hygiene issue" wording — both describe the same classification system.
+- **Re-review Cap:** Once `diagnose` verifies its fix (or `receive-code-review` fixes a Tier 4 item inline), control returns to `receive-code-review`, which re-invokes `request-code-review` for a fresh-context re-review of the same range. This cycle is capped at 2 re-reviews before escalating to the user.
+
 ---
 
 ## Strict Constraints (NEVER List)
