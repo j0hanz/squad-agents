@@ -44,3 +44,19 @@ agent_sdlc_skill_exists() {
   local dir="${CLAUDE_PLUGIN_ROOT:-.}/skills/$name"
   [ -f "$dir/SKILL.md" ]
 }
+
+agent_sdlc_enum_skills() {
+  # agent_sdlc_enum_skills — lists all skill directory names by globbing
+  # $CLAUDE_PLUGIN_ROOT/skills/*/SKILL.md, sorted, one per line.
+  # Returns empty if no skills found or glob fails.
+  local root="${CLAUDE_PLUGIN_ROOT:-.}"
+  local skill_files
+  # ponytail: glob may produce zero matches or no skills/ dir at all
+  skill_files=$(find "$root/skills" -maxdepth 2 -name "SKILL.md" 2>/dev/null | sort || true)
+  if [ -z "$skill_files" ]; then
+    return 0
+  fi
+  while IFS= read -r file; do
+    dirname "$file" | xargs basename
+  done <<< "$skill_files"
+}
