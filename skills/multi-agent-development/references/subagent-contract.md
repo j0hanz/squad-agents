@@ -6,7 +6,7 @@ This plugin's `agents/` directory ships six named agents covering fixed roles: `
 
 - **SCOPE:** Validated paths (In/Out of bounds). For writer roles, list the exact files the agent may touch.
 - **OBJECTIVE:** One concrete, verifiable/falsifiable outcome. Not "improve X" — state the exact done-condition.
-- **CONTEXT:** Error text, versions, baseline commit, conventions — everything needed to start cold. Never assume the agent can infer project context.
+- **CONTEXT:** Error text, versions, baseline commit, conventions — everything needed to start cold. Never assume the agent can infer project context. **Large artifacts rule:** artifacts over ~150 lines must be written to a file under `.claude/dispatch/` first, with only the file path cited in CONTEXT — never inline them.
 - **CONSTRAINTS:** Tool restrictions and specific "Do Not" rules. State explicitly if the agent must be read-only (no Write/Edit) — and note that this is an instruction, not an enforced restriction, unless the harness supports passing a tool allowlist.
 - **OUTPUT SCHEMA:** Instruct the subagent to return data in this format:
 
@@ -30,6 +30,7 @@ A prompt that violates the five-field contract wastes a whole agent run. Most fa
 | No CONSTRAINTS — agent edits files a sibling lane owns | "Read-only. Touch nothing under `src/api/`."                                                  |
 | No OUTPUT SCHEMA — reply is freeform prose             | Require `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` verbatim                                     |
 | "Improve the code" (unfalsifiable objective)           | "All 6 tests in the file pass, 0 skipped" (a checkable done-condition)                        |
+| 200-line config file inlined in CONTEXT               | Write to `.claude/dispatch/config.json` first, cite only the path in CONTEXT (large artifacts) |
 
 ## Role Vocabulary
 

@@ -70,7 +70,7 @@ For a cluster of 2+ tasks with no dependency between them: dispatch one implemen
 
 - **Phase 1**: Implement.
 - **Agent**: `implementer` (isolated worktree).
-- **Input**: Read `references/implementer-prompt.md` and `references/subagent-contract.md`.
+- **Input**: Read `references/implementer-prompt.md` and `references/subagent-contract.md` (including the large-artifact rule for `.claude/dispatch/` handoff).
 - **Output**: Verdict, files touched, commit, summary.
 - **Before advancing:** implementer must return `DONE` or `DONE_WITH_CONCERNS`. If `BLOCKED` or `NEEDS_CONTEXT`, stop and surface to the user — do not dispatch Phase 2.
 
