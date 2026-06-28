@@ -289,9 +289,7 @@ def verify_claim(raw: dict[str, Any], root: Path) -> tuple[Claim | None, str]:
     is_abs = os.path.isabs(ev_path)
     norm_ev_path = ev_path.replace("\\", "/")
     resolved = (
-        Path(norm_ev_path).resolve()
-        if is_abs
-        else (root / norm_ev_path).resolve()
+        Path(norm_ev_path).resolve() if is_abs else (root / norm_ev_path).resolve()
     )
     if not resolved.is_relative_to(root):
         return None, f"{key}: evidence path escapes repo root: {ev_path}"

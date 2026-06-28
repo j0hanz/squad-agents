@@ -22,6 +22,7 @@ set -euo pipefail
 
 OVERRIDE_VAR="AGENT_SDLC_SKIP_SHELL_SAFETY"
 if [ "${!OVERRIDE_VAR:-0}" = "1" ]; then
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"[agent-sdlc:shell-safety] WARNING: shell guard bypassed via AGENT_SDLC_SKIP_SHELL_SAFETY env var"}}'
   exit 0
 fi
 
@@ -32,6 +33,7 @@ if [ -f "$AGENT_SDLC_SETTINGS_FILE" ]; then
   if [ -n "$FRONTMATTER" ]; then
     SKIP_SAFETY=$(echo "$FRONTMATTER" | grep '^skip_shell_safety:' | sed 's/skip_shell_safety: *//' 2>/dev/null || true)
     if [ "$SKIP_SAFETY" = "true" ]; then
+      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"[agent-sdlc:shell-safety] WARNING: shell guard bypassed via skip_shell_safety in local config"}}'
       exit 0
     fi
   fi

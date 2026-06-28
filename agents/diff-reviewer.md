@@ -1,6 +1,6 @@
 ---
 name: diff-reviewer
-description: Read-only — unbiased fresh-context code review of a diff/commit-range, scanning Security/Correctness (blocking) then Performance/Reuse-Hygiene (advisory) tiers. Dispatch after an implementer returns DONE or DONE_WITH_CONCERNS, before merging or advancing the change.
+description: Read-only — unbiased fresh-context code review of a diff/commit-range, scanning Security/Correctness (blocking) then Performance/Reuse-Hygiene (advisory) tiers. Dispatch after an implementer returns DONE or DONE_WITH_CONCERNS, before merging or advancing the change. Used by request-code-review for ad-hoc reviews only — do not substitute for spec-reviewer (Phase 2) or quality-reviewer (Phase 3) in multi-agent-development; those run with full task-spec context that diff-reviewer does not have.
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit
 model: inherit

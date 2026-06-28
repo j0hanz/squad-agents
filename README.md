@@ -141,7 +141,7 @@ This file configures local settings for the `claude-agent-sdlc` plugin.
 
 ```text
 .
-├── bin/                    # Validation scripts
+├── bin/                    # Validation and release scripts
 ├── hooks/                  # Hook manifest and bash handlers
 │   ├── lib.sh
 │   ├── shell-safety.sh
@@ -157,7 +157,7 @@ This file configures local settings for the `claude-agent-sdlc` plugin.
 | `hooks/`         | Bash hook handlers and the hooks manifest                        |
 | `skills/`        | One directory per skill, each containing a `SKILL.md` definition |
 | `output-styles/` | Output style definitions                                         |
-| `bin/`           | Plugin manifest validator and YAML schema checker                |
+| `bin/`           | Manifest validator and release scripts                           |
 | `tests/`         | Integration tests verifying hooks fire and skills load correctly |
 
 ## Scripts

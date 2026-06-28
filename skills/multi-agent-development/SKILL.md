@@ -72,18 +72,21 @@ For a cluster of 2+ tasks with no dependency between them: dispatch one implemen
 - **Agent**: `implementer` (isolated worktree).
 - **Input**: Read `references/implementer-prompt.md` and `references/subagent-contract.md`.
 - **Output**: Verdict, files touched, commit, summary.
+- **Before advancing:** implementer must return `DONE` or `DONE_WITH_CONCERNS`. If `BLOCKED` or `NEEDS_CONTEXT`, stop and surface to the user — do not dispatch Phase 2.
 
 - **Phase 2**: Spec Check.
-- **Agent**: Read-only `spec-reviewer`.
+- **Agent**: Read-only `spec-reviewer`. Do not substitute `diff-reviewer` here — spec-reviewer receives the full task spec context that diff-reviewer does not have.
 - **Input**: Read `references/spec-reviewer-prompt.md`.
 - **Goal**: Check if they built exactly what was asked.
 - **Rules**: Max 2 tries. If blocked, pause all tasks and ask the user.
+- **Before advancing:** spec-reviewer must return `SPEC_PASS`. If `SPEC_FAIL` twice, escalate to user.
 
 - **Phase 3**: Quality Check.
-- **Agent**: Read-only `quality-reviewer`.
+- **Agent**: Read-only `quality-reviewer`. Do not substitute `diff-reviewer` here.
 - **Input**: Read `references/quality-reviewer-prompt.md`.
 - **Goal**: Check code quality and tests.
 - **Rules**: Max 2 tries (this does not count against Phase 2).
+- **Before advancing:** quality-reviewer must return `QUALITY_PASS` or `MINOR`. If `CRITICAL` or `IMPORTANT` twice, escalate to user.
 
 ## Final Validation
 
@@ -109,7 +112,7 @@ Blocked/escalated tasks: [list, or "none"]
 
 - A task's "Depends on" was assumed instead of verified against the Lane Matrix — order was wrong.
 - An implementer's `DONE` summary was trusted instead of the spec/quality reviewers actually reading the diff.
-- A blocked or skipped task wasn't surfaced to the user — it just silently didn't happen.
+- A blocked or skipped task wasn't surfaced to the user — it just silently didn't happen. **If any lane reaches `BLOCKED` or `NEEDS_CONTEXT`, surface it to the user before continuing. Never advance the next cluster while a blocked lane is unresolved.**
 - An old agent was reused across tasks, carrying stale memory into a new task's context.
 - Tasks with `Depends on: none` and disjoint files were still run one-at-a-time instead of clustered — wasted wall-clock time with no correctness benefit.
 

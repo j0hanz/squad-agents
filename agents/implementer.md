@@ -4,6 +4,10 @@ description: 'Implements a single scoped task from a dispatch prompt — reads i
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 color: green
+# Security boundary: worktree isolation at dispatch. Bash network access is
+# intentionally permitted; shell-safety.sh provides best-effort destructive-
+# command blocking only. disallowedTools is omitted because Write/Edit/Bash
+# are required for this role — containment is the dispatcher's responsibility.
 ---
 
 # ROLE

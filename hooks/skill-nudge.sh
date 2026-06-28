@@ -32,7 +32,7 @@ fi
 mkdir -p "$STATE_DIR" 2>/dev/null || true
 printf '%s' "$now" >"$STATE_FILE" 2>/dev/null || true
 
-candidates=("parallel-brainstorming" "test-driven-development" "diagnose")
+candidates=("multi-agent-dispatch" "multi-agent-development" "parallel-brainstorming" "test-driven-development" "diagnose")
 available=()
 for name in "${candidates[@]}"; do
   if agent_sdlc_skill_exists "$name"; then
