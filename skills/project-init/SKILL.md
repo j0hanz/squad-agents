@@ -28,7 +28,7 @@ Phase 2  MERGE (preview)   init.py generate --claims claims.json (no --out)
 
 Phase 3  CONSENT + WRITE
   -- existing authored file --> back up + explicit overwrite consent
-  -- approved ---------------> generate --out --model | wire stubs | lint | receipt --> DONE
+  -- approved ---------------> generate --out | wire stubs | lint | receipt --> DONE
 ```
 
 ---
@@ -77,9 +77,9 @@ Phase 3  CONSENT + WRITE
 ## Phase 3: Ask and Save
 
 1. **Protect Old Files:** If root `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` already exist, or if any package-level `<pkg>/AGENTS.md` exists, show them to the user, make a backup (`.bak`), and **ask for explicit permission** before replacing them.
-2. **Save Root:** Run `init.py generate --claims claims.json ... --model "<active model name>" --out AGENTS.md`.
+2. **Save Root:** Run `init.py generate --claims claims.json ... --out AGENTS.md`.
 3. **Save Packages (Monorepos):** For each package folder `<pkg>`, run:
-   `init.py generate --claims claims.json --package <pkg> --model "<active model name>" --out <pkg>/AGENTS.md`.
+   `init.py generate --claims claims.json --package <pkg> --out <pkg>/AGENTS.md`.
 4. **Link Files:** Run `init.py wire AGENTS.md CLAUDE.md GEMINI.md` (root level redirect stubs only).
 5. **Test Root File:** Run `init.py lint AGENTS.md`. It must pass.
 6. **Test Package Files (Monorepos):** For each package folder `<pkg>`, run `init.py lint <pkg>/AGENTS.md`. They must pass.

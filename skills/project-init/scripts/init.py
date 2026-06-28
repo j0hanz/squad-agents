@@ -60,9 +60,9 @@ MANIFEST_FILES = {
 # ── Hard Rules text (carried verbatim from the old codebase-init engine) ──────
 HARD_RULES_TEXT: dict[str, dict[str, str]] = {
     "commit": {
-        "strict": "Conventional Commits format (`type(scope): subject`) required; every AI commit MUST include a `Co-Authored-By:` trailer",
-        "relaxed": "free-form commit messages allowed; every AI commit MUST include a `Co-Authored-By:` trailer",
-        "minimal": "no enforced message format, no required attribution trailer",
+        "strict": "Conventional Commits format (`type(scope): subject`) required — see the `pr-workflow` skill",
+        "relaxed": "free-form commit messages allowed — see the `pr-workflow` skill",
+        "minimal": "no enforced message format",
     },
     "maturity": {
         "production": "stability first — avoid breaking changes, prefer additive changes, flag breaking changes explicitly before making them",
@@ -356,7 +356,6 @@ def render_agents_md(
     maturity: str,
     testing: str,
     ci: str,
-    model: str = "<Model Name>",
     package: str | None = None,
 ) -> str:
     """Assemble the markdown-kv AGENTS.md from verified winners + survey answers."""
@@ -416,8 +415,6 @@ def render_agents_md(
         for k in file_keys:
             lines.append(f"| {k.split('.', 1)[1]} | `{winners[k].value}` |")
 
-    if not package:
-        lines.extend(["", "## Commit Attribution", "", f"Co-Authored-By: {model}", ""])
     return "\n".join(lines)
 
 
@@ -482,13 +479,6 @@ def lint_agents_md(content: str) -> list[str]:
             fails.append('missing "## Hard Rules" section')
         if not _MARKER_RE.search(content):
             fails.append("missing/malformed project-init:hard-rules v1 marker")
-        if "Co-Authored-By:" not in content:
-            fails.append('missing "Co-Authored-By:" attribution')
-        if "## Commit Attribution" not in content:
-            fails.append('missing "## Commit Attribution" section')
-
-    if "<Model Name>" in content:
-        fails.append('unresolved "<Model Name>" placeholder')
 
     in_code = False
     for i, line in enumerate(lines, 1):
@@ -633,14 +623,9 @@ def _cmd_generate(args: argparse.Namespace) -> int:
         args.maturity,
         args.testing,
         args.ci,
-        model=args.model or "<Model Name>",
         package=args.package,
     )
     fails = lint_agents_md(content)
-    # Preview (no --out, no --model): the unresolved attribution placeholder is
-    # expected — the skill substitutes it on the approved final write.
-    if args.model is None and args.out is None:
-        fails = [f for f in fails if "<Model Name>" not in f]
 
     # Side report (stderr) — what was discarded and why; the user is never blind.
     if dropped:
@@ -705,9 +690,6 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     gen.add_argument("--ci", required=True, choices=sorted(HARD_RULES_TEXT["ci"]))
     gen.add_argument("--purpose", default=None)
-    gen.add_argument(
-        "--model", default=None, help="Active model name for the attribution trailer."
-    )
     gen.add_argument(
         "--package",
         default=None,

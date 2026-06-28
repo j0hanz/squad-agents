@@ -29,7 +29,7 @@ CONSTRAINTS:
   - Write tests before or alongside implementation (red → green).
   - Do NOT restructure code outside this task's file scope.
   - Do NOT add features not in the spec.
-  - Commit when complete: git commit -m "Task [N]: [task title]"
+  - Commit when complete, one commit for this task. Subject follows the `pr-workflow` skill's convention: `<type>: [task title]` (or `<type>(<scope>): [task title]` under a strict repo commit policy), imperative, max 72 chars.
   - [Add task-specific constraints here]
 
 OUTPUT:

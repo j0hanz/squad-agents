@@ -8,9 +8,11 @@ CI/CD Automation is **not** surveyed — it is file-detected (see below).
 
 Header: `Commit policy`
 
-- Strict: Conventional Commits format (`type(scope): subject`) required, AND a mandatory `Co-Authored-By:` trailer on AI commits → `commit=strict`
-- Relaxed: free-form commit messages allowed, but a mandatory `Co-Authored-By:` trailer on AI commits → `commit=relaxed`
-- Minimal: no enforced message format, no required attribution trailer → `commit=minimal`
+- Strict: Conventional Commits format (`type(scope): subject`) required → `commit=strict`
+- Relaxed: free-form commit messages allowed → `commit=relaxed`
+- Minimal: no enforced message format → `commit=minimal`
+
+Message construction, atomicity, and issue refs are owned by the `pr-workflow` skill, which reads this `commit=` marker — not duplicated here.
 
 ## 2. Project maturity state
 

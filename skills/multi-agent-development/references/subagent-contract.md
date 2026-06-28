@@ -23,14 +23,14 @@ This plugin's `agents/` directory ships six named agents covering fixed roles: `
 
 A prompt that violates the five-field contract wastes a whole agent run. Most failures are one of these:
 
-| Mistake                                                | Better                                                                                        |
-| :----------------------------------------------------- | :-------------------------------------------------------------------------------------------- |
-| "Fix all the failing tests" (unbounded scope)          | "Fix `src/auth/jwt.test.ts` only; do not edit other files" (one file, explicit out-of-bounds) |
-| "Fix the race condition" (no context)                  | Paste the error text + failing test name + baseline commit                                    |
-| No CONSTRAINTS — agent edits files a sibling lane owns | "Read-only. Touch nothing under `src/api/`."                                                  |
-| No OUTPUT SCHEMA — reply is freeform prose             | Require `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` verbatim                                     |
-| "Improve the code" (unfalsifiable objective)           | "All 6 tests in the file pass, 0 skipped" (a checkable done-condition)                        |
-| 200-line config file inlined in CONTEXT               | Write to `.claude/dispatch/config.json` first, cite only the path in CONTEXT (large artifacts) |
+| Mistake                                                | Better                                                                                         |
+| :----------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| "Fix all the failing tests" (unbounded scope)          | "Fix `src/auth/jwt.test.ts` only; do not edit other files" (one file, explicit out-of-bounds)  |
+| "Fix the race condition" (no context)                  | Paste the error text + failing test name + baseline commit                                     |
+| No CONSTRAINTS — agent edits files a sibling lane owns | "Read-only. Touch nothing under `src/api/`."                                                   |
+| No OUTPUT SCHEMA — reply is freeform prose             | Require `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` verbatim                                      |
+| "Improve the code" (unfalsifiable objective)           | "All 6 tests in the file pass, 0 skipped" (a checkable done-condition)                         |
+| 200-line config file inlined in CONTEXT                | Write to `.claude/dispatch/config.json` first, cite only the path in CONTEXT (large artifacts) |
 
 ## Role Vocabulary
 
@@ -40,11 +40,11 @@ Use these role labels when configuring subagents so isolation and tool-restricti
 
 Choose a model tier based on scope complexity and file count:
 
-| Scope | Files & Signals | Model |
-| :--- | :--- | :--- |
-| Single domain, fully concrete spec | 1–2 files, clear boundaries | **Fast/cheap tier** (e.g., Claude 3 Haiku) |
-| Multi-file or cross-module work, standard clarity | 3+ files OR ambiguous scope | **Standard tier** (`model: inherit`) |
-| Architecture-defining or final-review gate | Critical decision or N-lane review | **Most-capable tier** (e.g., Claude 3 Opus) |
+| Scope                                             | Files & Signals                    | Model                                       |
+| :------------------------------------------------ | :--------------------------------- | :------------------------------------------ |
+| Single domain, fully concrete spec                | 1–2 files, clear boundaries        | **Fast/cheap tier** (e.g., Claude 3 Haiku)  |
+| Multi-file or cross-module work, standard clarity | 3+ files OR ambiguous scope        | **Standard tier** (`model: inherit`)        |
+| Architecture-defining or final-review gate        | Critical decision or N-lane review | **Most-capable tier** (e.g., Claude 3 Opus) |
 
 **Rationale:** Turn count beats token price — a cheap model retried 3× on ambiguous work costs more than one standard-model pass that gets it right.
 

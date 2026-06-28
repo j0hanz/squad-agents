@@ -98,8 +98,6 @@ def test_generated_file_uses_lf_newlines(tmp_path: Path, monkeypatch):
             "local-only",
             "--purpose",
             "test repo",
-            "--model",
-            "Claude",
             "--out",
             "AGENTS.md",
         ]
@@ -302,8 +300,6 @@ def test_cli_package_filtering(tmp_path: Path, monkeypatch):
             "local-only",
             "--purpose",
             "test repo",
-            "--model",
-            "Claude",
             "--package",
             "packages/api",
             "--out",
@@ -318,7 +314,7 @@ def test_cli_package_filtering(tmp_path: Path, monkeypatch):
 
 
 def test_render_package_scoped_agents_md(tmp_path: Path):
-    """Rendering with package parameter excludes hard rules/attribution and adds package-scoped header."""
+    """Rendering with package parameter excludes hard rules and adds package-scoped header."""
     winners = {
         "purpose": init.Claim("purpose", "test pkg purpose", 4, 1.0),
         "stack": init.Claim("stack", "Go 1.22", 4, 1.0),
@@ -336,7 +332,6 @@ def test_render_package_scoped_agents_md(tmp_path: Path):
     assert "purpose: test pkg purpose" in out
     assert "stack: Go 1.22" in out
     assert "## Hard Rules" not in out
-    assert "## Commit Attribution" not in out
     assert "project-init:hard-rules" not in out
     assert "project-init:package-scoped packages/api" in out
 
