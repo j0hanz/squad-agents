@@ -99,10 +99,6 @@ export function saveState(state) {
 export function evaluateStep(state) {
   const actions = [];
   const runningLanes = state.lanes.filter(l => ['RUNNING', 'SPEC_REVIEW', 'QUALITY_REVIEW', 'MERGE_WAIT'].includes(l.status));
-  
-  if (runningLanes.length >= 3) {
-    return actions; // at concurrency limit
-  }
 
   for (const lane of state.lanes) {
     if (lane.status === 'PENDING') {
@@ -116,7 +112,8 @@ export function evaluateStep(state) {
         rl.filesTouched.some(f => lane.filesTouched.includes(f))
       );
 
-      if (depsCompleted && !hasConflict && (runningLanes.length + actions.length < 3)) {
+      const dispatchedNewLanes = actions.filter(a => a.action === 'DISPATCH_IMPLEMENTER').length;
+      if (depsCompleted && !hasConflict && (runningLanes.length + dispatchedNewLanes < 3)) {
         actions.push({
           laneId: lane.id,
           action: 'DISPATCH_IMPLEMENTER',
@@ -163,7 +160,8 @@ export function updateState(state, update) {
       lane.status = 'QUALITY_REVIEW';
     } else {
       if (lane.reviews.spec.runs < 2) {
-        lane.status = 'RUNNING';
+        lane.status = 'PENDING';
+        lane.verdict = null;
         lane.reviews.spec.verdict = null; // reset for next run
       } else {
         lane.status = 'BLOCKED';
@@ -177,8 +175,10 @@ export function updateState(state, update) {
       lane.status = 'COMPLETED'; // Assume merge succeeds; conflicts handled in Task 3
     } else {
       if (lane.reviews.quality.runs < 2) {
-        lane.status = 'RUNNING';
+        lane.status = 'PENDING';
+        lane.verdict = null;
         lane.reviews.quality.verdict = null; // reset for next run
+        lane.reviews.spec.verdict = null; // reset spec review so it doesn't get stuck in SPEC_REVIEW
       } else {
         lane.status = 'BLOCKED';
       }
