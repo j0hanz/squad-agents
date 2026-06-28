@@ -285,10 +285,13 @@ def verify_claim(raw: dict[str, Any], root: Path) -> tuple[Claim | None, str]:
         return None, f"{key}: no evidence path"
 
     # Containment: resolve symlinks/.. then require inside repo root (read guard).
+    # Normalize backslashes to forward slashes for cross-platform resolution
+    is_abs = os.path.isabs(ev_path)
+    norm_ev_path = ev_path.replace("\\", "/")
     resolved = (
-        (root / ev_path).resolve()
-        if not os.path.isabs(ev_path)
-        else Path(ev_path).resolve()
+        Path(norm_ev_path).resolve()
+        if is_abs
+        else (root / norm_ev_path).resolve()
     )
     if not resolved.is_relative_to(root):
         return None, f"{key}: evidence path escapes repo root: {ev_path}"
