@@ -16,7 +16,7 @@ export function initPlan(filePath) {
     if (line.trim().startsWith('- [ ]')) {
       // 1. Strip the markdown list/checkbox prefix
       let titleText = line.trim().replace(/^-\s*\[\s*[xX ]\s*\]\s*/, '');
-      
+
       // 2. Ignore/remove the "(depends on: ...)" suffix
       titleText = titleText.replace(/\(depends on:[^)]*\)/i, '').trim();
 
@@ -29,7 +29,7 @@ export function initPlan(filePath) {
         titleText = titleText.substring(0, firstBacktick);
       }
       const title = titleText.trim() || `Task ${idCounter}`;
-      
+
       // Extract code blocks / files
       const filesTouched = [];
       const codeMatches = line.matchAll(/`([^`]+)`/g);
@@ -41,7 +41,10 @@ export function initPlan(filePath) {
       const dependsOn = [];
       const depMatch = line.match(/\(depends on:\s*([^)]+)\)/i);
       if (depMatch) {
-        const deps = depMatch[1].split(',').map(d => d.trim()).filter(Boolean);
+        const deps = depMatch[1]
+          .split(',')
+          .map((d) => d.trim())
+          .filter(Boolean);
         for (const dep of deps) {
           if (dep.toLowerCase() !== 'none') {
             const laneMatch = dep.match(/lane[- ]?(\d+)/i);
@@ -66,16 +69,16 @@ export function initPlan(filePath) {
         commit: null,
         reviews: {
           spec: { verdict: null, runs: 0 },
-          quality: { verdict: null, runs: 0 }
-        }
+          quality: { verdict: null, runs: 0 },
+        },
       });
     }
   }
 
   // Verify that the target lane exists in the parsed lanes list
   for (const lane of lanes) {
-    lane.dependsOn = lane.dependsOn.filter(depId => {
-      return lanes.some(l => l.id === depId);
+    lane.dependsOn = lane.dependsOn.filter((depId) => {
+      return lanes.some((l) => l.id === depId);
     });
   }
 
@@ -83,7 +86,13 @@ export function initPlan(filePath) {
     planPath: filePath,
     status: 'IN_PROGRESS',
     lanes,
-    history: [{ timestamp: new Date().toISOString(), event: 'INIT', message: `Initialized with ${lanes.length} lanes` }]
+    history: [
+      {
+        timestamp: new Date().toISOString(),
+        event: 'INIT',
+        message: `Initialized with ${lanes.length} lanes`,
+      },
+    ],
   };
 }
 
@@ -98,39 +107,45 @@ export function saveState(state) {
 
 export function evaluateStep(state) {
   const actions = [];
-  const runningLanes = state.lanes.filter(l => ['RUNNING', 'SPEC_REVIEW', 'QUALITY_REVIEW', 'MERGE_WAIT'].includes(l.status));
+  const runningLanes = state.lanes.filter((l) =>
+    ['RUNNING', 'SPEC_REVIEW', 'QUALITY_REVIEW', 'MERGE_WAIT'].includes(l.status),
+  );
 
   for (const lane of state.lanes) {
     if (lane.status === 'PENDING') {
-      const depsCompleted = lane.dependsOn.every(depId => {
-        const depLane = state.lanes.find(l => l.id === depId);
+      const depsCompleted = lane.dependsOn.every((depId) => {
+        const depLane = state.lanes.find((l) => l.id === depId);
         return depLane && depLane.status === 'COMPLETED';
       });
 
-      // Check for file touch conflicts with currently running lanes
-      const hasConflict = runningLanes.some(rl => 
-        rl.filesTouched.some(f => lane.filesTouched.includes(f))
-      );
+      // Check for file touch conflicts with currently running lanes and other pending lanes dispatched in this step
+      const hasConflict =
+        runningLanes.some((rl) => rl.filesTouched.some((f) => lane.filesTouched.includes(f))) ||
+        actions.some((a) => {
+          if (a.action !== 'DISPATCH_IMPLEMENTER') return false;
+          const otherLane = state.lanes.find((l) => l.id === a.laneId);
+          return otherLane && otherLane.filesTouched.some((f) => lane.filesTouched.includes(f));
+        });
 
-      const dispatchedNewLanes = actions.filter(a => a.action === 'DISPATCH_IMPLEMENTER').length;
-      if (depsCompleted && !hasConflict && (runningLanes.length + dispatchedNewLanes < 3)) {
+      const dispatchedNewLanes = actions.filter((a) => a.action === 'DISPATCH_IMPLEMENTER').length;
+      if (depsCompleted && !hasConflict && runningLanes.length + dispatchedNewLanes < 3) {
         actions.push({
           laneId: lane.id,
           action: 'DISPATCH_IMPLEMENTER',
-          prompt: `SCOPE:\n  Files IN scope: ${lane.filesTouched.join(', ')}\nOBJECTIVE:\n  ${lane.title}\nCONTEXT:\n  Last commit: HEAD\nOUTPUT:\n  VERDICT: DONE | BLOCKED | NEEDS_CONTEXT`
+          prompt: `SCOPE:\n  Files IN scope: ${lane.filesTouched.join(', ')}\nOBJECTIVE:\n  ${lane.title}\nCONTEXT:\n  Last commit: HEAD\nOUTPUT:\n  VERDICT: DONE | BLOCKED | NEEDS_CONTEXT`,
         });
       }
     } else if (lane.status === 'SPEC_REVIEW' && lane.reviews.spec.verdict === null) {
       actions.push({
         laneId: lane.id,
         action: 'DISPATCH_SPEC_REVIEWER',
-        prompt: `SCOPE:\n  Files changed: ${lane.filesTouched.join(', ')}\nOBJECTIVE:\n  Verify ${lane.title} matches spec.`
+        prompt: `SCOPE:\n  Files changed: ${lane.filesTouched.join(', ')}\nOBJECTIVE:\n  Verify ${lane.title} matches spec.`,
       });
     } else if (lane.status === 'QUALITY_REVIEW' && lane.reviews.quality.verdict === null) {
       actions.push({
         laneId: lane.id,
         action: 'DISPATCH_QUALITY_REVIEWER',
-        prompt: `SCOPE:\n  Files changed: ${lane.filesTouched.join(', ')}\nOBJECTIVE:\n  Review code quality.`
+        prompt: `SCOPE:\n  Files changed: ${lane.filesTouched.join(', ')}\nOBJECTIVE:\n  Review code quality.`,
       });
     }
   }
@@ -139,14 +154,14 @@ export function evaluateStep(state) {
 }
 
 export function updateState(state, update) {
-  const lane = state.lanes.find(l => l.id === update.laneId);
+  const lane = state.lanes.find((l) => l.id === update.laneId);
   if (!lane) return state;
 
   if (update.phase === 'implementation') {
     lane.verdict = update.verdict;
     lane.commit = update.commit;
     if (update.files) lane.filesTouched = update.files;
-    
+
     if (update.verdict === 'DONE' || update.verdict === 'DONE_WITH_CONCERNS') {
       lane.status = 'SPEC_REVIEW';
     } else {
@@ -155,7 +170,7 @@ export function updateState(state, update) {
   } else if (update.phase === 'spec-review') {
     lane.reviews.spec.verdict = update.verdict;
     lane.reviews.spec.runs++;
-    
+
     if (update.verdict === 'SPEC_PASS') {
       lane.status = 'QUALITY_REVIEW';
     } else {
@@ -191,7 +206,7 @@ export function updateState(state, update) {
   state.history.push({
     timestamp: new Date().toISOString(),
     event: 'UPDATE',
-    message: `Updated lane ${update.laneId} in phase ${update.phase} with verdict ${update.verdict}`
+    message: `Updated lane ${update.laneId} in phase ${update.phase} with verdict ${update.verdict}`,
   });
 
   return state;
@@ -199,7 +214,7 @@ export function updateState(state, update) {
 
 // CLI entrypoint handling
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const [,, command, arg] = process.argv;
+  const [, , command, arg] = process.argv;
   if (command === 'init' && arg) {
     const state = initPlan(arg);
     saveState(state);
@@ -211,7 +226,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       process.exit(1);
     }
     let state = JSON.parse(fs.readFileSync(statePath, 'utf-8'));
-    
+
     if (process.argv.includes('--update')) {
       const payloadIndex = process.argv.indexOf('--update') + 1;
       const payload = JSON.parse(process.argv[payloadIndex]);
