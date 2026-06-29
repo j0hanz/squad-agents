@@ -1,6 +1,6 @@
 ---
 name: parallel-brainstorming
-description: "Multi-agent parallel brainstorming for discovery and solution design. Fans out independent ideator agents that generate candidate approaches simultaneously — not sequentially — to maximize diversity and defeat anchoring, groupthink, and dominant-voice bias, then converges them into 2-3 grounded approaches, runs parallel critique lanes (Skeptic, Constraint Guardian, User Advocate) plus an Arbiter, and writes a markdown-kv Design Brief in docs/design/. Trigger on: 'parallel brainstorming', 'brainstorm a solution', 'design a feature', 'add a feature', 'explore approaches', 'generate options', 'multi-agent design', 'write a design doc', 'requirements discovery', 'build a new feature'. Also triggers when requirements are vague, when you want many distinct options instead of one, or when a request hides unstated stakeholders or terminology. Prefer over request-plan or architecting when the solution space is still open and unproven. Not for bug fixes, typos, or one-line config changes with no design space."
+description: 'Use when requirements are vague or the solution space is open — before a plan exists and before touching code. Prefer over request-plan or architecting when the problem is unproven and multiple distinct approaches need to be explored. Not for bug fixes or one-line changes with no design space.'
 disable-model-invocation: false
 ---
 

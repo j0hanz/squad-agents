@@ -1,6 +1,6 @@
 ---
 name: pr-workflow
-description: 'Delivers a code change to GitHub the convenient way — ideally reviewed, but proceeds unreviewed on explicit confirmation: smart change detection, automatic branch naming, atomic commits, push, and a pull request with a generated description — the terminal "ship it" step of the dev lifecycle. Use when the user says "open a PR", "ship it", "push my work", "raise a PR", "create a pull request", or "deliver the change". Multi-agent aware: isolates parallel agents in git worktrees and assembles their branches into PRs, conflict-aware. Trigger on: "commit and push", "open/raise/create a PR", "ship this", "deliver this change", "branch and commit", "assemble agent branches". Always prefer this over gh-actions for shipping an ordinary diff, and over request-code-review when the change is already reviewed and just needs to land. Not for authoring CI/Actions YAML or gh batch scripts — that is gh-actions.'
+description: 'Use when ready to ship a change — commit, push, and open a PR. Prefer over gh-actions for ordinary code changes, and over request-code-review when the work is already reviewed and just needs to land. Not for authoring CI/Actions YAML or gh batch scripts — that is gh-actions.'
 disable-model-invocation: false
 argument-hint: '[what to ship: "current diff", a branch, or "agent branches"]'
 allowed-tools: Bash(git *), Bash(gh *), Read, Edit, AskUserQuestion

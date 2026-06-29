@@ -1,6 +1,6 @@
 ---
 name: request-code-review
-description: "Requests, coordinates, and executes an unbiased code review by dispatching a read-only subagent to analyze file diffs, git branches, or specific commit ranges. Accepts repository diffs, commit histories, or code blocks as input, and outputs a structured '## Code Review Result' markdown block evaluating security, correctness, and architecture. Also triggers when performing pre-commit security audits, checking a branch for bugs, or validating pull request changes. Always prefer this skill over receive-code-review when seeking a fresh-eye review of code before feedback has been received. Trigger on: 'code review', 'review this diff', 'check for bugs', 'quality review', 'request-code-review', 'security audit', 'review changes', 'audit this code'."
+description: 'Use when implementation is complete and the diff needs a fresh-eye review before merging — security audit, correctness check, or pre-PR validation. Prefer over receive-code-review when requesting a new review rather than acting on existing feedback.'
 disable-model-invocation: false
 argument-hint: '[target: branch, commit, file, or "current diff"]'
 allowed-tools: Bash(git *), Agent

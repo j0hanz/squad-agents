@@ -1,6 +1,6 @@
 ---
 name: receive-code-review
-description: "Processes, verifies, and implements code review feedback received from human reviewers, pull request bots, or subagents. Accepts markdown or text review comments as input, checks them against the codebase to prevent regression or conflict, and outputs verified, atomic file edits. Also triggers when addressing automated git comments, fixing lints, or updating changes from a previous review. Always prefer this skill over request-code-review when modifying code based on existing feedback rather than requesting a new review. Trigger on: 'review feedback', 'reviewer said', 'PR comments', 'fix review comments', 'receive-code-review', 'implement feedback', 'address feedback', 'PR feedback', 'address review comments'."
+description: 'Use when code review feedback has been received — from a human reviewer, PR bot, or subagent — and needs to be verified and implemented. Prefer over request-code-review when acting on existing feedback rather than requesting a new review.'
 disable-model-invocation: false
 ---
 

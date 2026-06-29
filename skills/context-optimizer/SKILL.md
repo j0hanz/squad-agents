@@ -1,6 +1,6 @@
 ---
 name: context-optimizer
-description: "Diagnoses conversation bloat and prunes active context using token diagnostics, rolling summaries, and script-based compaction. Generates a flat key-value state summary file before executing the `/clear` command to reduce active token usage. Trigger on: 'optimize context', 'compress context', 'prune memory', 'reduce tokens', 'context size too large', 'out of tokens', 'compact context', 'clear history', 'cleanup context'. Also triggers when managing long development sessions, handling large file modifications, or resolving memory drift in nested subagent workflows. Always prefer this optimizer over running `/clear` directly when critical task progress and decisions need to be preserved."
+description: 'Use when context is bloated, token limits are near, or the session has grown slow — before running /clear directly when task progress must be preserved.'
 disable-model-invocation: false
 ---
 

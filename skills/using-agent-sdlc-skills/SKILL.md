@@ -1,6 +1,6 @@
 ---
 name: using-agent-sdlc-skills
-description: "Orchestrates software engineering tasks by analyzing user prompts and routing them to the optimal workflow in the development lifecycle. Accepts any high-level task description, bug report, or feature request as input, and outputs a diagnostic recommendation or transition to the target tool. Trigger on: 'start task', 'route work', 'using-agent-sdlc-skills', 'skill selection', 'task diagnostic', 'orchestrate development'. Also triggers when the workspace requires a multi-stage routing check for new issues, PR reviews, or system refactoring. Always prefer this orchestrator over individual tools (like diagnose or request-plan) for initial user prompts to ensure correct lifecycle gating."
+description: 'Use at the start of any new task to route it through the correct lifecycle gate — onboarding, planning, scoping, execution, or delivery. Prefer over jumping directly to an individual skill when the right starting point is unclear.'
 disable-model-invocation: false
 ---
 

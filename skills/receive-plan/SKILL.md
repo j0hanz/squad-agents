@@ -1,6 +1,6 @@
 ---
 name: receive-plan
-description: "Verifies any plan/specs pair — drafted by request-plan or hand-written — using inline traceability checking (main thread grep/file-read) plus one critic agent, then a main-thread verdict. No Arbiter agent. Maximum 1 REVISE round-trip before escalating to the user. Not invoked for sketch-depth plans. Trigger on: 'receive-plan', 'check my plan', 'is this plan ready', 'verify this spec', 'review this plan'. Also triggers when a plan/spec pair already exists and needs validation before execution. Prefer request-plan when no plan exists yet."
+description: 'Use when a plan and spec pair already exists and needs validation before execution. Prefer request-plan when no plan exists yet. Not for sketch-depth plans.'
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[path to plan.md / specs.md, or "the plan I just wrote"]'

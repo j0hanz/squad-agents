@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: 'Implements features using test-driven development (TDD). Use when the user requests "implement feature using TDD", "write unit tests", "red-green-refactor", or "test-first development". Action: writes test files first, verifies failure, then writes minimal implementation.'
+description: 'Use when implementing a feature or fixing a bug. The default implementation path — writes a failing test first, then the minimal code to pass it.'
 disable-model-invocation: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: 'Use when initializing, bootstrapping, generating, or auditing agent instructions (AGENTS.md, CLAUDE.md, GEMINI.md) in a new or existing repository. Scans build managers, stack layouts, and conventions using safe, read-only discovery agents to generate a verified instructions file.'
+description: 'Use when a repository needs AGENTS.md, CLAUDE.md, or GEMINI.md — initializing a new repo, bootstrapping agent instructions, or auditing an existing instructions file.'
 disable-model-invocation: false
 user-invocable: true
 allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill, Read, Grep, Glob, Agent

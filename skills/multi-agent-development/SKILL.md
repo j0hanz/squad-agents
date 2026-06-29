@@ -1,6 +1,6 @@
 ---
 name: multi-agent-development
-description: "Executes a multi-task implementation plan sequentially using isolated, single-purpose subagents with gated quality checks. Accepts a file path to a markdown plan or specification file as input, and writes code changes across multiple files, completing with a comprehensive validation report, test results, and automated git commits. Trigger on: 'implement the plan', 'execute spec', 'agentic development', 'multi-agent-development', 'sequential tasks', 'gated implementation'. Also triggers when the user wants to run a series of dependent coding tasks with rigorous code reviews and test runs at each step. Always prefer over multi-agent-dispatch when tasks share mutable state, have file dependencies, or require ordered execution."
+description: 'Use when implementing a multi-task plan where tasks depend on each other, share files, or must run in order. Prefer over multi-agent-dispatch when tasks have shared state or file dependencies that prevent parallel execution.'
 disable-model-invocation: false
 argument-hint: '[path to plan file]'
 ---

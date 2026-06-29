@@ -1,6 +1,6 @@
 ---
 name: architecting
-description: "Performs architecture review and system design for problems spanning multiple files or crossing module boundaries in the target repo's own code. Analyzes existing directories, dependencies, and imports to generate an Architecture Decision Record (ADR) in docs/adr/ and an architecture-brief.json schema. Trigger on: 'architecture review', 'restructure across modules', 'too coupled', 'design this system', 'where should this code live', 'God class', 'circular deps', 'dependency mapping', 'domain boundaries'. Also triggers when addressing boundary violations, structural bleed, or resolving high git coupling between files. Always prefer this skill over request-plan when designing multi-module interfaces or correcting structural coupling before writing detailed implementation steps."
+description: 'Use when the codebase has structural problems crossing module boundaries — God classes, circular dependencies, boundary violations, or high git coupling — or when designing a new module and deciding where code lives. Prefer over request-plan when the problem is structural rather than a missing feature.'
 disable-model-invocation: false
 allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion
 ---

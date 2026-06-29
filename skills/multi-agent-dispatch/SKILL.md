@@ -1,6 +1,6 @@
 ---
 name: multi-agent-dispatch
-description: "Executes multiple independent task descriptions in parallel by fanning out to isolated, single-purpose subagents, producing integrated file edits, test results, and a consolidated execution report. Trigger on: 'in parallel', 'dispatch agents', 'fan out', 'multi-agent-dispatch', 'independent tasks', 'concurrent execution'. Also triggers when the user requests simultaneous task runs, concurrent agent dispatch, or parallel operations on separate codebase areas. Always prefer this skill over multi-agent-development when tasks have no shared file changes, no database or file dependencies, and do not require ordered execution, and over request-plan when the goal is task implementation rather than layout and analysis."
+description: 'Use when executing multiple tasks that are fully independent — no shared files, no dependencies between them, no required ordering. Prefer over multi-agent-development when tasks are file-disjoint and can safely run concurrently.'
 disable-model-invocation: false
 argument-hint: '[the independent tasks to parallelize]'
 ---
