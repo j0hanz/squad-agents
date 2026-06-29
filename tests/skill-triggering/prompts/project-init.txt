@@ -1,0 +1,1 @@
+This repo doesn't have a CLAUDE.md yet. Can you set one up so future agent sessions know how the codebase is organized?

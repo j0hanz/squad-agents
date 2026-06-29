@@ -3,31 +3,6 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 /**
- * Assert that `text` contains `pattern` (string or RegExp).
- * Throws with a clear message if it doesn't.
- */
-export function assertContains(text, pattern, label = '') {
-  const ok = pattern instanceof RegExp ? pattern.test(text) : text.includes(pattern);
-  if (!ok) {
-    throw new Error(
-      `assertContains failed${label ? ` [${label}]` : ''}:\n  pattern: ${pattern}\n  text (first 500): ${text.slice(0, 500)}`,
-    );
-  }
-}
-
-/**
- * Assert that `text` does NOT contain `pattern`.
- */
-export function assertNotContains(text, pattern, label = '') {
-  const found = pattern instanceof RegExp ? pattern.test(text) : text.includes(pattern);
-  if (found) {
-    throw new Error(
-      `assertNotContains failed${label ? ` [${label}]` : ''}:\n  pattern: ${pattern}\n  text (first 500): ${text.slice(0, 500)}`,
-    );
-  }
-}
-
-/**
  * Create a minimal project directory and return its path.
  * Caller is responsible for cleanup via cleanupProject().
  */

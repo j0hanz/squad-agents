@@ -1,1 +1,0 @@
-This handler function has grown to 200 lines and is getting really hard to follow. Can you clean it up without changing what it does?

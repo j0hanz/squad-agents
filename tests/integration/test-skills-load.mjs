@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { assertContains, assertNotContains, createTmpProject, cleanupProject } from './helpers.mjs';
+import { createTmpProject, cleanupProject } from './helpers.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(__dirname, '../..');
@@ -37,9 +37,8 @@ slowTest(
       );
       // parallel-brainstorming skill instructs Claude to ask clarifying questions or explore options
       // before jumping to implementation. It should NOT just produce code immediately.
-      assertNotContains(
-        stdout,
-        '```',
+      assert.ok(
+        !stdout.includes('```'),
         'parallel-brainstorming skill: should not produce code immediately without design discussion',
       );
     } finally {
@@ -85,7 +84,7 @@ slowTest('check command runs plugin health check', { timeout: 90_000 }, async ()
       },
     );
     // /check structure should output some kind of structure report
-    assertContains(stdout, /structure|skill|plugin|check/i, '/check structure output');
+    assert.match(stdout, /structure|skill|plugin|check/i, '/check structure output');
   } finally {
     cleanupProject(dir);
   }

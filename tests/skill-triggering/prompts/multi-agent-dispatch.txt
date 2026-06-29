@@ -1,1 +1,1 @@
-I have several independent bug reports in the hooks directory. Can you dispatch agents in parallel to investigate hooks/handlers/shell-safety.sh and hooks/handlers/debug.sh at the same time?
+I have several independent bug reports in the hooks directory. Can you dispatch agents in parallel to investigate hooks/shell-safety.sh and hooks/skill-nudge.sh at the same time?

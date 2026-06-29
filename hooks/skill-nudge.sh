@@ -1,15 +1,49 @@
 #!/usr/bin/env bash
 # SessionStart hook — additive only. Points toward this plugin's bundled
 # skills, but only on a cooldown (not every single session) and only toward
-# skills actually present, never hardcoded blind. lib.sh sourcing failure
-# degrades to a silent no-op, never an error.
+# skills actually present, never hardcoded blind.
 set -euo pipefail
 
 cat >/dev/null 2>&1 || true # drain stdin; SessionStart payload unused
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck disable=SC1091
-source "$SCRIPT_DIR/lib.sh" 2>/dev/null || exit 0
+# Load project-local settings (frontmatter only if env var not already set)
+AGENT_SDLC_SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/claude-agent-sdlc.local.md"
+if [[ -z "${AGENT_SDLC_SKILL_NUDGE:-}" ]]; then
+  if [[ -f "$AGENT_SDLC_SETTINGS_FILE" ]]; then
+    FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$AGENT_SDLC_SETTINGS_FILE" 2>/dev/null || true)
+    if [[ -n "$FRONTMATTER" ]]; then
+      NUDGE_VAL=$(echo "$FRONTMATTER" | grep '^skill_nudge:' | sed 's/skill_nudge: *//' 2>/dev/null || true)
+      if [[ "$NUDGE_VAL" == "false" ]]; then
+        export AGENT_SDLC_SKILL_NUDGE=0
+      elif [[ "$NUDGE_VAL" == "true" ]]; then
+        export AGENT_SDLC_SKILL_NUDGE=1
+      fi
+    fi
+  fi
+fi
+
+agent_sdlc_json_escape() {
+  # Escapes $1 for embedding as a JSON string value (no surrounding quotes).
+  # Node is a guaranteed prerequisite for this plugin environment.
+  node -e 'process.stdout.write(JSON.stringify(process.argv[1]).slice(1, -1))' "$1" 2>/dev/null
+}
+
+agent_sdlc_enum_skills() {
+  # agent_sdlc_enum_skills — lists all skill directory names by globbing
+  # $CLAUDE_PLUGIN_ROOT/skills/*/SKILL.md, sorted, one per line.
+  # Returns empty if no skills found or glob fails.
+  local root="${CLAUDE_PLUGIN_ROOT:-.}"
+  local skill_files
+  # ponytail: glob may produce zero matches or no skills/ dir at all
+  skill_files=$(find "$root/skills" -maxdepth 2 -name "SKILL.md" 2>/dev/null | sort || true)
+  if [ -z "$skill_files" ]; then
+    return 0
+  fi
+  while IFS= read -r file; do
+    local d="${file%/SKILL.md}"
+    printf '%s\n' "${d##*/}"
+  done <<< "$skill_files"
+}
 
 # Legacy env var and frontmatter flag force mode to 'off'
 if [ "${AGENT_SDLC_SKILL_NUDGE:-1}" = "0" ]; then

@@ -17,7 +17,7 @@
     "test:node": "node --test tests/validate-plugin.test.mjs",
     "test:python": "python -m pytest -q",
     "test": "npm run validate && npm run test:node && npm run test:python",
-    "test:integration": "node tests/integration/test-hooks-fire.mjs && node tests/integration/test-skills-load.mjs",
+    "test:integration": "node --test tests/integration/",
     "test:eval": "bash tests/skill-triggering/run-all.sh"
   },
   "devDependencies": {
