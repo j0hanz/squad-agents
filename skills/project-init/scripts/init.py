@@ -16,9 +16,11 @@ Subcommands:
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import re
+import stat
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -246,11 +248,14 @@ def evidence_tier(path: str) -> int:
     return 2
 
 
+_CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
 def _sanitize_value(value: str) -> str:
     """Collapse to one line; strip control chars. Prevents forged kv via newline
     or `key:` injection from untrusted repo content."""
     value = str(value).replace("\r", " ").replace("\n", " ")
-    value = "".join(ch for ch in value if ch >= " " or ch == "\t")
+    value = _CONTROL_CHARS_RE.sub("", value)
     return value.strip()[:200]
 
 
@@ -272,7 +277,8 @@ class Claim:
 def _read_text_safe(p: Path) -> str | None:
     """Read a small text file; None if missing, too big, or binary."""
     try:
-        if not p.is_file() or p.stat().st_size > MATCH_FILE_SIZE_CAP:
+        st = p.stat()
+        if not stat.S_ISREG(st.st_mode) or st.st_size > MATCH_FILE_SIZE_CAP:
             return None
         return p.read_text(encoding="utf-8-sig", errors="strict")
     except (OSError, UnicodeDecodeError):
@@ -298,11 +304,11 @@ def verify_claim(raw: dict[str, Any], root: Path) -> tuple[Claim | None, str]:
 
     # Containment: resolve symlinks/.. then require inside repo root (read guard).
     # Normalize backslashes to forward slashes for cross-platform resolution
-    is_abs = os.path.isabs(ev_path)
     norm_ev_path = ev_path.replace("\\", "/")
-    resolved = (
-        Path(norm_ev_path).resolve() if is_abs else (root / norm_ev_path).resolve()
-    )
+    resolved = Path(norm_ev_path)
+    if not resolved.is_absolute():
+        resolved = root / resolved
+    resolved = resolved.resolve()
     if not resolved.is_relative_to(root):
         return None, f"{key}: evidence path escapes repo root: {ev_path}"
 
@@ -344,7 +350,8 @@ def merge_claims(
         if cur is None or (claim.tier, claim.confidence) > (cur.tier, cur.confidence):
             if cur is not None:
                 dropped.append(
-                    f"{claim.key}: superseded (tier {cur.tier} -> {claim.tier})"
+                    f"{claim.key}: superseded (tier {cur.tier}, conf {cur.confidence} -> "
+                    f"tier {claim.tier}, conf {claim.confidence})"
                 )
             winners[claim.key] = claim
 
@@ -453,8 +460,10 @@ def _trim_to_budget(
     """
     dropped: list[str] = []
     kept = dict(winners)
-    # Render with placeholder survey values just to count lines.
-    while True:
+
+    candidates = sorted([k for k in kept if k not in REQUIRED_KEYS], key=_priority)
+
+    for victim in candidates:
         body = render_agents_md(
             kept,
             "minimal",
@@ -466,12 +475,11 @@ def _trim_to_budget(
         )
         if len(body.splitlines()) <= MAX_LINES - 1:
             return kept, dropped
-        candidates = [k for k in kept if k not in REQUIRED_KEYS]
-        if not candidates:
-            return kept, dropped  # only required keys left — let lint surface FAIL
-        victim = min(candidates, key=_priority)
+
         del kept[victim]
         dropped.append(f"{victim}: trimmed to fit <{MAX_LINES}-line budget")
+
+    return kept, dropped
 
 
 # ── Linter ───────────────────────────────────────────────────────────────────
@@ -570,23 +578,21 @@ def prescan(root: Path) -> dict[str, Any]:
 
     def walk(d: Path, depth: int) -> None:
         try:
-            entries = list(d.iterdir())
+            with os.scandir(d) as it:
+                entries = list(it)
         except OSError:
             return
         names = {e.name for e in entries if e.is_file()}
         has_manifest = bool(names & manifest_exact) or any(
-            any(Path(n).match(g) for g in manifest_globs) for n in names
+            any(fnmatch.fnmatchcase(n, g) for g in manifest_globs) for n in names
         )
         if has_manifest:
             rel = str(d.relative_to(root)).replace(os.sep, "/")
             packages.append(rel if rel != "." else ".")
-        for e in entries:
-            if (
-                e.is_dir()
-                and e.name not in PRESCAN_SKIP_DIRS
-                and depth < PRESCAN_MAX_DEPTH
-            ):
-                walk(e, depth + 1)
+        if depth < PRESCAN_MAX_DEPTH:
+            for e in entries:
+                if e.is_dir(follow_symlinks=False) and e.name not in PRESCAN_SKIP_DIRS:
+                    walk(Path(e.path), depth + 1)
 
     walk(root, 0)
     return {
@@ -649,8 +655,7 @@ def _cmd_generate(args: argparse.Namespace) -> int:
         winners = {
             k: v
             for k, v in winners.items()
-            if not v.evidence
-            or v.evidence.path.replace("\\", "/").startswith(pkg_prefix)
+            if not v.evidence or v.evidence.path.startswith(pkg_prefix)
         }
 
     winners, trimmed = _trim_to_budget(
