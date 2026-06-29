@@ -6,11 +6,11 @@ A Claude Code plugin for authoring and maintaining skills and hooks — structur
 
 ## Overview
 
-Agent SDLC Plugin extends Claude Code with 15 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to specialized, safe-by-default subagents (`implementer`, `researcher`, `conflict-resolver`, etc.) orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
+Agent SDLC Plugin extends Claude Code with 16 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to specialized, safe-by-default subagents (`implementer`, `researcher`, `conflict-resolver`, etc.) orchestrated by the `multi-agent-dispatch` (parallel fan-out) and `multi-agent-development` (sequential, gate-checked) skills.
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
-| **Status**          | Stable — v1.0.0              |
+| **Status**          | Stable                       |
 | **Language**        | JavaScript (ESM) · Python    |
 | **Runtime**         | Node.js ≥ 22 · Python ≥ 3.10 |
 | **Package manager** | npm                          |
@@ -20,7 +20,7 @@ Agent SDLC Plugin extends Claude Code with 15 skills and 2 lifecycle hooks cover
 
 | Feature                  | Description                                                                                                                                                  |
 | :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 15 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`                                                                                                 |
+| 16 auto-triggered skills | Activate on task context; invoke manually with `/skill-name`                                                                                                 |
 | Subagent orchestration   | `multi-agent-dispatch` and `multi-agent-development` drive subagent dispatches using specialized, safe-by-default agents (`implementer`, `researcher`, etc.) |
 | 2 lifecycle hooks        | Bash-only handlers: a shell-safety guard and a skill nudge                                                                                                   |
 | Marketplace install      | One-command install from GitHub — no manual clone required                                                                                                   |
@@ -148,7 +148,7 @@ This file configures local settings for the `claude-agent-sdlc` plugin.
 │   ├── skill-nudge.sh
 │   └── hooks.json
 ├── output-styles/          # Output style definitions
-├── skills/                 # Skill SKILL.md files (15 skills)
+├── skills/                 # Skill SKILL.md files (16 skills)
 └── tests/                  # Integration tests
 ```
 
