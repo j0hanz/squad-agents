@@ -79,4 +79,3 @@ If no automated pass/fail signal exists, propose a manual test plan via `AskUser
 
 - `request-code-review`: Once all verification items are satisfied, behavior is confirmed clean through execution evidence, and the change is non-trivial (§2).
 - `diagnose`: If the checklist or evidence-gathering surfaces a regression, to root-cause it before re-attempting completion.
-- `context-optimizer`: If context bloats mid-skill (long reads, many tool calls).

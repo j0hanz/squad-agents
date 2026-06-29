@@ -17,7 +17,6 @@ If a skill has strong relevance to your task, route to it. Routing decisions fol
 
 ```
 Start: New Task
-  -> [Any Gate] Context Bloated / Token Limit Near? --> context-optimizer --> resume same gate
   -> Gate 0: Repo Onboarded?
        -- no AGENTS.md (recommendation) --> project-init --> Gate 1
        -- onboarded ------------------------------------------> Gate 1
@@ -35,7 +34,6 @@ Gate 2: Systemic Issue?
   -- new feature -------------------------------------> Gate 3
 
 Gate 3: Execution Strategy
-  -- CI/CD workflow (GitHub Actions, gh CLI scripting) --> gh-actions (User invocation required)
   -- trivial (<~20 lines) OR standard/focused --> test-driven-development
   -- independent --------------------------------> multi-agent-dispatch
   -- sequential/complex -------------------------> multi-agent-development
@@ -61,7 +59,6 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **Immediate Invocation:** Activate and follow a skill immediately once a route is identified.
 - **Notification:** Announce the route as plain text: `✅ Routing to [<skill-name>]: [reason]`. This is an FYI, not a decision — don't spend a blocking `AskUserQuestion` just to acknowledge a routing choice the matrix/gates already determined.
 - **No Skips:** Never bypass process gates for "simple" or "quick" tasks.
-- **Context Constraints:** Route to `context-optimizer` at any gate if the active context is bloated or token limits are approached, pruning memory before continuing the task (see the `[Any Gate]` branch in the diagram above — it preempts whichever gate is active).
 - **Gate Matrix Scope:** The Gate 0–4 matrix governs entry-routing only (Gate 0 onboarding through first dispatch at Gate 3) and does not re-describe a skill's own exit transitions once that skill is active. Each skill's own `## Next Skills` section remains canonical for that skill's outbound routing.
 - **Auto-invoke:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are safe to invoke without asking first — each is safety-gated (test-gated, read-only agent, or worktree-isolated). Ask first only for irreversible steps (push, migration, destructive command) or the first dispatch of the session.
 
@@ -72,7 +69,7 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **NEVER** skip `diagnose` when a bug interrupts feature work.
 - **NEVER** allow infinite TDD retries (strictly capped at 3).
 - **NEVER** skip `request-code-review` after multi-agent development.
-- **NEVER** auto-invoke `project-init` or `gh-actions`; `pr-workflow` is recommended at Gate 4 but never pushes without an explicit go-ahead.
+- **NEVER** auto-invoke `project-init`; `pr-workflow` is recommended at Gate 4 but never pushes without an explicit go-ahead.
 - **NEVER** dispatch subagents (Gate 3) for trivial inline edits.
 
 ## Auxiliary Information

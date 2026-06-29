@@ -110,4 +110,3 @@ Expected result: Observable success signal.
 ## Next Skills
 
 - `receive-plan` (contract/blueprint only)
-- `context-optimizer` (if context bloats during blueprint synthesis)

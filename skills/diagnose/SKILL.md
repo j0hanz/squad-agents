@@ -116,9 +116,8 @@ Symptom: `POST /orders` 500s intermittently in staging, never locally.
 **test-driven-development:** new logic/tests (not for writing new feature tests — use it directly)
 **project-audit:** clean up multiple files/modules
 **request-plan:** major specification gaps
-**context-optimizer:** mid-skill context bloat
 
-**Resume after fix:** `verification-before-completion` | `test-driven-development` | `multi-agent-development` | `multi-agent-dispatch` (INTEGRATE) | `receive-code-review` (Step 4) | `project-init` (Failure Recovery) | `pr-workflow` (commit/push step) | `gh-actions` (CI step)
+**Resume after fix:** `verification-before-completion` | `test-driven-development` | `multi-agent-development` | `multi-agent-dispatch` (INTEGRATE) | `receive-code-review` (Step 4) | `project-init` (Failure Recovery) | `pr-workflow` (commit/push step)
 
 ## References
 

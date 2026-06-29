@@ -86,8 +86,6 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `test-driven-development`        | "TDD", "write tests", "implement this"                                   | Red-green-refactor workflow                                    |
 | `project-audit`                  | "audit the codebase", "structure", "circular dependency", "coupling"     | Parallel per-directory structural audit                        |
 | `pr-workflow`                    | "commit this", "open a PR", "ship it", "push my work"                    | Branch, commit, push & open a PR — multi-agent aware delivery  |
-| `gh-actions`                     | "GitHub Actions", "gh CLI", "harden a workflow", "OIDC"                  | Secure CI/CD authoring and `gh` CLI scripting                  |
-| `context-optimizer`              | "optimize context", "compress context", "reduce tokens"                  | Prunes conversation bloat before hitting context limits        |
 | `verification-before-completion` | (automatic before task completion)                                       | Verify changes work before marking done                        |
 | `using-agent-sdlc-skills`        | (meta-routing)                                                           | Routes to the right skill based on context                     |
 | `project-init`                   | "init project", "generate AGENTS.md/CLAUDE.md/GEMINI.md", "onboard repo" | Parallel discovery fan-out → lean AGENTS.md + stubs            |

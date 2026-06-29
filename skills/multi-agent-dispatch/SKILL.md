@@ -103,7 +103,6 @@ To prevent orchestrator context bloat during multi-lane integration:
 
 1. Once a lane's work is integrated (merged and tests pass), prune intermediate agent logs, thinking steps, and full file diffs from the active conversation context.
 2. Retain only a high-level summary and the merge commit hash in the main thread.
-3. If token footprint is high or 3+ lanes have been merged, execute the `context-optimizer` skill to generate a rolling summary and reset/compact active context.
 
 Then run the real test suite. Neither implementer's `DONE` nor a researcher's `VERDICT: SUCCESS` is proof by itself — never merge on either report alone. A lane is mergeable only once its work clears the project-wide [Definition of Done](../verification-before-completion/references/definition-of-done.md), independently verified.
 
@@ -168,4 +167,3 @@ Outcome: 6 failures cleared concurrently, zero integration conflicts — because
 - `verification-before-completion`: Run this to check final work.
 - `multi-agent-development`: Run this if tasks depend on each other (sequential).
 - `diagnose`: Run this if combining the code causes errors.
-- `context-optimizer`: Run this if context bloats while collecting parallel results.

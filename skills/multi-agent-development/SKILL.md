@@ -31,8 +31,7 @@ Start Cluster (1+ tasks, Depends-on satisfied) -> Phase 1: Implement EACH task i
        -- CRITICAL / IMPORTANT (retry) -> back to Phase 1 for that task only
 
 Cluster done when every task in it is done/blocked -> Next Cluster?
-  -- yes --> Orchestrator Context Bloated? -- yes --> context-optimizer --> resume loop
-                                            -- no  --> loop to Start Cluster
+  -- yes --> loop to Start Cluster
   -- no  --> Final Validation (test & verify)
 ```
 
@@ -78,7 +77,7 @@ For a cluster of 2+ tasks with no dependency between them: dispatch one implemen
 - **Goal**: Check code quality and tests.
 - **Rules**: Max 2 tries (this does not count against Phase 2).
 - **Before advancing:** quality-reviewer must return `QUALITY_PASS` or `MINOR`. If `CRITICAL` or `IMPORTANT` twice, escalate to user.
-- **After QUALITY_PASS or MINOR:** Run `python ${CLAUDE_SKILL_DIR}/../context-optimizer/scripts/prune_context.py --task-complete "Task N: complete (commits <base7>..<head7>, review clean)"` to record the task completion in `.claude/rolling_summary.md`'s `## Task Ledger` section before advancing to the next task or cluster. This enables the Resuming step to verify that work won't be duplicated on recovery.
+- **After QUALITY_PASS or MINOR:** Document the task completion in `.claude/rolling_summary.md`'s `## Task Ledger` section (e.g., "Task N: complete (commits <base7>..<head7>, review clean)") before advancing to the next task or cluster. This enables the Resuming step to verify that work won't be duplicated on recovery.
 
 ## Final Validation
 
@@ -143,11 +142,10 @@ Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and lau
 - **Commits**: Give reviewers the exact old commit and new commit.
 - **Rejects**: Throw away bad work. Start over from a clean base.
 - **Conflicts**: If a Git merge fails, do NOT immediately abort or escalate. Dispatch the specialized `conflict-resolver` agent (`agents/conflict-resolver.md`) to read conflict markers, resolve them, test, and commit the resolution. Only pause and ask the user if the conflict resolver returns `VERDICT: BLOCKED`.
-- **Resuming**: Before restarting, check `.claude/rolling_summary.md`'s `## Task Ledger` section first to see which tasks have already completed — trust the ledger over self-recollection. Fall back to `git log` only if the ledger section is absent or unreadable (e.g., first task of a fresh plan). The ledger is append-only and read by `prune_context.py --task-complete`, so it is the primary source of truth for task recovery.
-- **Context**: The orchestrator thread accumulates summaries across every task loop even though subagents are isolated. Run `context-optimizer` after every cluster boundary (never mid-task) once 3+ tasks have reported back since the last optimization pass, or sooner if responses noticeably slow down. Prune intermediate subagent logs, thinking steps, and full file diffs from the main conversation context once integrated, keeping only a high-level summary and the merge commit hash.
+- **Resuming**: Before restarting, check `.claude/rolling_summary.md`'s `## Task Ledger` section first to see which tasks have already completed — trust the ledger over self-recollection. Fall back to `git log` only if the ledger section is absent or unreadable (e.g., first task of a fresh plan). The ledger is append-only, making it the primary source of truth for task recovery.
+- **Context**: The orchestrator thread accumulates summaries across every task loop even though subagents are isolated. Prune intermediate subagent logs, thinking steps, and full file diffs from the main conversation context once integrated, keeping only a high-level summary and the merge commit hash.
 
 ## Next Skills
 
 - `verification-before-completion`: Run this for Final Validation handoff.
-- `context-optimizer`: Run this if mid-loop bloat occurs.
 - `diagnose`: Run this for merge/test failure investigation.
