@@ -27,7 +27,7 @@ Spec-compliance is already verified. Do NOT re-check it.
 4. **Errors:** Are all errors handled, passed on, or clearly documented?
 5. **Growth:** Did any file grow by more than 150 lines? (Log as MINOR unless it breaks rule 1. Generated files are ignored).
 6. **Clarity:** Are names and types clear and easy to understand?
-7. **Security:** Are there ANY injection risks, bad inputs, leaked secrets, or unsafe data?
+7. **Security:** Any injection risk (SQL/command/path), hardcoded secrets, or unvalidated external input?
 
 ## VERDICTS
 
@@ -40,7 +40,7 @@ Spec-compliance is already verified. Do NOT re-check it.
 
 You MUST use this exact format. No extra text.
 
-VERDICT: [QUALITY_PASS | CRITICAL | IMPORTANT | MINOR]
+VERDICT: [Choose ONE: QUALITY_PASS | CRITICAL | IMPORTANT | MINOR]
 
 STRENGTHS:
 [file:line - what is good. Max 2 entries]

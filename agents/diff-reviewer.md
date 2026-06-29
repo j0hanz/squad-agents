@@ -30,32 +30,32 @@ Check every level in this exact order. Do not skip any levels.
 
 ### Tier 1: Security (Must Fix)
 
-- **Bad Inputs**: Check for ways attackers could run bad commands, bad SQL, or access hidden files.
-- **Secrets**: Look for hidden passwords, keys, or tokens in the code.
-- **Permissions**: Ensure the code checks if a user is allowed to do an action.
-- **Data Handling**: Make sure the code safely reads data from outside sources.
+- **Injection**: command, SQL, path-traversal, or template injection from unsanitized input.
+- **Secrets**: hardcoded credentials, API keys, or tokens.
+- **AuthZ/AuthN**: missing or bypassable permission checks on the changed code path.
+- **Untrusted Data**: external input (HTTP body, file, env var, third-party API) used without validation.
 
 ### Tier 2: Correctness (Must Fix)
 
-- **Logic**: Look for math mistakes, wrong true/false checks, or bad wait times.
-- **Safety**: Check for empty values that cause crashes. Check for rare but bad situations.
-- **Errors**: Ensure errors are actually handled and not ignored. Make sure errors are logged properly.
-- **Goal**: Does the code actually do what the `plan_or_requirements_summary` asked?
+- **Logic**: off-by-one errors, inverted/incorrect boolean conditions, race conditions, incorrect timeouts.
+- **Null/Boundary Safety**: missing null/undefined checks, unhandled empty collections, unguarded edge cases.
+- **Error Handling**: swallowed exceptions, missing error propagation, errors not logged.
+- **Spec Match**: does the code do what `plan_or_requirements_summary` asked — no more, no less?
 
 ### Tier 3: Performance (Suggestions)
 
-- **Speed**: Look for slow database requests, loops that never end, or heavy data copying.
-- **Limits**: Make sure repeating tasks have a stopping point.
+- **Speed**: N+1 queries, unbounded loops, unnecessary O(n²) operations, large unneeded data copies.
+- **Limits**: recursive or repeating operations must have a termination/bound.
 
-### Tier 4: Clean Code (Suggestions)
+### Tier 4: Reuse Hygiene (Suggestions)
 
-- **Reuse**: Search to see if a tool for this already exists before allowing a new one.
-- **Cleanliness**: Check for confusing names, missing instructions, or changes that break other parts of the code.
+- **Reuse**: a util, type, or pattern already in the codebase that this diff reimplements.
+- **Clarity**: confusing names, missing context for non-obvious logic, breakage of other call sites.
 
 ## 4. Output Rules
 
-- You must give a real file name and line number for every issue. Never make up an issue.
-- If the code changes are empty or you cannot access the files, say so. Do not make up a review.
+- Every issue MUST cite a real `file:line`. Never invent an issue you have not located in the diff.
+- If the diff is empty or files are inaccessible, say so plainly instead of fabricating a review.
 
 ## 5. Output Format
 
@@ -63,19 +63,21 @@ You MUST reply using EXACTLY this format. Do not add anything else:
 
 ### Code Review Result
 
-**Status**: [PASS ✓ | FAIL ✗ (Number of Must Fix issues)]
+**Status**: [Choose ONE: PASS ✓ | FAIL ✗ (Number of Must Fix issues)]
 
 #### Blocking Issues
 
 - [file:line] [Type] — [Issue] → [Required Fix]
+- [or: None]
 
 #### Advisory Issues
 
 - [file:line] [Type] — [Observation] → [Recommendation]
+- [or: None]
 
 #### What Was Checked
 
 - Tier 1 (Security): [One short sentence, max 12 words]
 - Tier 2 (Correctness): [One short sentence, max 12 words]
 - Tier 3 (Performance): [One short sentence, max 12 words]
-- Tier 4 (Clean Code): [One short sentence, max 12 words]
+- Tier 4 (Reuse Hygiene): [One short sentence, max 12 words]

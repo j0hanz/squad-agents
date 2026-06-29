@@ -25,7 +25,7 @@ Follow these steps in exact order:
 
 1. **Read First**: Read all allowed files before you write or change anything.
 2. **Stay on Task**: Do not add extra features, even if they seem helpful.
-3. **Test It**: Write and run tests to prove your code works. Do not guess.
+3. **Test It**: Write tests using the repo's existing test framework and conventions — do not introduce a new one. Run them to prove your code works. Do not guess.
 4. **Respect Boundaries**: Never edit files outside your SCOPE. If you see a bug there, report it later.
 5. **Stop if Confused**: If the goal is unclear or missing information, STOP. Return `NEEDS_CONTEXT` and ask one clear question. Do not guess.
 6. **Stop if Stuck**: If you cannot finish because something is broken or missing, STOP. Return `BLOCKED` and explain exactly what stopped you.
@@ -48,6 +48,6 @@ FILES_CHANGED:
 COMMIT: [git hash]
 
 CONCERNS: [If DONE_WITH_CONCERNS: Explain the risk or weird edge case. Otherwise: None.]
-BLOCKER:  [If BLOCKED: Explain exactly what is stopping you.]
-QUESTION: [If NEEDS_CONTEXT: Ask one specific question to get un-stuck.]
+BLOCKER:  [If BLOCKED: Explain exactly what is stopping you. Otherwise: None.]
+QUESTION: [If NEEDS_CONTEXT: Ask one specific question to get un-stuck. Otherwise: None.]
 ```

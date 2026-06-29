@@ -43,7 +43,7 @@ CONTEXT:
 You must answer in exactly this format:
 
 ```text
-VERDICT: [SPEC_PASS | SPEC_FAIL]
+VERDICT: [Choose ONE: SPEC_PASS | SPEC_FAIL]
 
 MISSING_REQUIREMENTS:
 [Missing rule] - [file:line]
