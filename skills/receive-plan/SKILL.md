@@ -4,7 +4,7 @@ description: 'Use when a plan and spec pair already exists and needs validation 
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[path to plan.md / specs.md, or "the plan I just wrote"]'
-allowed-tools: Agent(researcher)
+allowed-tools: Agent(researcher), Skill(interview)
 ---
 
 # receive-plan
@@ -64,7 +64,7 @@ Read the critic's findings directly — no separate Arbiter agent:
 - **≥2 Med** findings → REVISE.
 - **Low** only, or nothing → APPROVED (note Low findings as a comment in the plan header).
 
-Cap: **1 REVISE round-trip**. On the 2nd unresolved submission, escalate to the user with the unresolved-findings list and stop.
+Cap: **1 REVISE round-trip**. On the 2nd unresolved submission, hand off to `interview` with the unresolved-findings list — the user is choosing between accepting known risk, a full re-draft, or abandoning the plan, a hard-to-reverse call that deserves a structured decision, not a bare escalation message.
 
 ## Step 5: Finalize
 

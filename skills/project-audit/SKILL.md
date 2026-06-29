@@ -2,7 +2,7 @@
 name: project-audit
 description: 'Use when the codebase has structural problems — circular dependencies, infra code bleeding into domain logic, hidden coupling, God files, unclear module responsibilities, or modules whose stated purpose contradicts how other modules actually use them. Parallel per-directory agent judgment, not static-analysis scripts.'
 disable-model-invocation: false
-allowed-tools: Bash(python *), Bash(python3 *), Agent(researcher)
+allowed-tools: Bash(python *), Bash(python3 *), Agent(researcher), Skill(interview)
 ---
 
 # project-audit
@@ -50,6 +50,8 @@ If a lane has nothing to report across all five questions, its entry in the fina
 ## Step 4: OUTPUT
 
 One flat report. Each finding: `{finding, kind (cycle / bleed / cohesion / coupling / intent-mismatch / overlap), corroboration (N lanes, or "single-lane"), evidence}`. Corroborated findings first. **No numeric score, no HIGH/MEDIUM/LOW tier, no borrowed severity vocabulary** — corroboration count is the only ranking signal, and it means something different (independent agreement, not absolute severity). No ADR, no scaffold, no handoff artifact file. Close with: "Start with corroborated findings above; `request-plan` can formalize any single-lane finding you want to act on."
+
+If 2+ corroborated findings are comparably actionable, that's a hard-to-reverse scoping call (it commits which refactor the team pursues first) — hand it to `interview` rather than letting report order pick silently. Skip this when there's only one corroborated finding or the ranking is already a clear lead.
 
 ## Heuristics
 

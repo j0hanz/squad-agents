@@ -60,6 +60,7 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **Notification:** Announce the route as plain text: `✅ Routing to [<skill-name>]: [reason]`. This is an FYI, not a decision — don't spend a blocking `AskUserQuestion` just to acknowledge a routing choice the matrix/gates already determined.
 - **No Skips:** Never bypass process gates for "simple" or "quick" tasks.
 - **Gate Matrix Scope:** The Gate 0–4 matrix governs entry-routing only (Gate 0 onboarding through first dispatch at Gate 3) and does not re-describe a skill's own exit transitions once that skill is active. Each skill's own `## Next Skills` section remains canonical for that skill's outbound routing.
+- **Hard-to-reverse decisions, mid-skill:** any skill that hits a hard-to-reverse branch point with the user (locking a design, picking which finding to act on, accepting risk vs. re-drafting) calls `interview` rather than hand-rolling its own question loop. Doesn't apply to a single isolated yes/no gate inside a tight loop — that's a confirmation, not a session.
 - **Auto-invoke:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are safe to invoke without asking first — each is safety-gated (test-gated, read-only agent, or worktree-isolated). Ask first only for irreversible steps (push, migration, destructive command) or the first dispatch of the session.
 
 ## Strict Constraints (NEVER List)

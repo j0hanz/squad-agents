@@ -2,7 +2,7 @@
 name: parallel-brainstorming
 description: 'Use when requirements are vague or the solution space is open — before a plan exists and before touching code. Prefer over request-plan or project-audit when the problem is unproven and multiple distinct approaches need to be explored. Not for bug fixes or one-line changes with no design space.'
 disable-model-invocation: false
-allowed-tools: Agent(researcher), AskUserQuestion, Write, Bash(python *)
+allowed-tools: Agent(researcher), Skill(interview), Write, Bash(python *)
 ---
 
 # parallel-brainstorming
@@ -68,7 +68,7 @@ Creative Checkpoint
 - **Scan:** Run `python C:/agent-dev/skills/parallel-brainstorming/scripts/scan_context.py -- '<nouns>' --cwd '<root>' | python C:/agent-dev/skills/parallel-brainstorming/scripts/compress_report.py` (fallback to `grep_search` if it fails).
 - **Report:** Extract Related Files, Recent Changes, Terms, Interfaces, Constraints, Scope (S/M/L/XL), and Unknowns.
 - **Zero-Code Check:** Stop and offer exit if existing code/config already solves this.
-- **Understanding Lock:** Summarize the problem and your understanding. Only use `AskUserQuestion` if you have genuine doubts. Otherwise, proceed directly to Phase 3.
+- **Understanding Lock:** Summarize the problem and your understanding. Only invoke `interview` if you have genuine doubts. Otherwise, proceed directly to Phase 3.
 - **Routing:**
 - Scope XL → Offer to break it down.
 - Ambiguous → Go to Phase 2.
@@ -76,8 +76,8 @@ Creative Checkpoint
 
 ## Phase 2: Clarification
 
-- **Sequential Questions:** Ask one question at a time. Use multiple-choice instead of open-ended when possible.
-- **Glossary:** Batch max 4 ambiguous terms. Save definitions to `glossary.md` (never `CONTEXT.md`).
+- **Resolve via `interview`:** hand the ambiguous terms to `interview` (max 4 per batch) rather than hand-rolling a question loop — it already enforces one-at-a-time, two-option questioning.
+- **Glossary:** Save the resolved definitions to `glossary.md` (never `CONTEXT.md`).
 - **Visuals:** Offer a diagram _only_ if layout or data flow requires it. Wait for a reply.
 
 ## Creative Checkpoint (Pre-Ideation)
@@ -103,7 +103,7 @@ Creative Checkpoint
 
 - **Synthesize:** Group similar ideas. Combine strong mechanisms with risk-mitigations from other lanes.
 - **Distill:** Present 2-3 distinct approaches. Approach A must be Minimalist. For each, include: What, Gains, Costs, Fit, First Step.
-- **Approval Lock:** Ask the user via `AskUserQuestion` to choose one approach. **Await explicit user choice. Do not guess.**
+- **Approval Lock:** Hand the 2-3 distilled approaches to `interview` to lock one — this is the hard-to-reverse decision that commits Phase 6's Design Brief. **Await its resolved decision. Do not guess.**
 - **Routing:** If Phase 5 flag is set → Phase 5. Otherwise → Phase 6.
 
 ## Phase 5: Persona Critique
