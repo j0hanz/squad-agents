@@ -29,7 +29,7 @@ Dispatch one `researcher` subagent per lane, **in parallel, in one message**. To
 Each lane agent is scoped to read ONLY its own lane's files and answer exactly these five questions, in free text:
 
 1. **Purpose:** "State this lane's job in one sentence. If you cannot state a single coherent purpose, say so explicitly — that itself is a finding."
-2. **Imports out:** "List every import this lane has from outside itself, as literal import paths copied character-for-character from the source line, with the file it came from. Do not paraphrase — this list gets mechanically cross-referenced against other lanes."
+2. **Imports out:** "List every import this lane has from outside itself, as literal import paths copied character-for-character from the source line, with the file it came from. Do not paraphrase — this list gets mechanically cross-referenced against other lanes. If there are none, say 'none' explicitly."
 3. **Bleed smell:** "Does this lane mix infrastructure concerns (I/O, DB/HTTP clients, filesystem, framework glue) directly into what looks like core/domain logic in the same file? Name the specific file and quote the pattern if so."
 4. **Size/cohesion outliers:** "Is there a file here that's unusually large or doing several unrelated things? Name the file; say whether its size is one cohesive concept or several jammed together."
 5. **Hidden coupling:** "Is this lane coupled to something elsewhere in the repo in a way that isn't a normal import (shared global state, monkeypatching, naming-convention contracts)? Name the specific file or lane if so."
