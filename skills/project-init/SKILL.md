@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: "Bootstrap a repo's agent instructions via a blind parallel discovery fan-out converging into a deterministic generator. Produces a lean (<100-line) markdown-kv AGENTS.md plus one-line CLAUDE.md/GEMINI.md redirect stubs. Discovery agents are read-only and emit evidence-cited claims; a single script is the sole writer and never executes a discovered command. Trigger on: 'init project', 'project-init', 'onboard repo', 'generate AGENTS.md', 'setup agent instructions', 'initialize project memory', 'audit AGENTS.md'."
+description: 'Use when initializing, bootstrapping, generating, or auditing agent instructions (AGENTS.md, CLAUDE.md, GEMINI.md) in a new or existing repository. Scans build managers, stack layouts, and conventions using safe, read-only discovery agents to generate a verified instructions file.'
 disable-model-invocation: false
 user-invocable: true
 allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill, Read, Grep, Glob, Agent
@@ -8,9 +8,13 @@ allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill, Read, Gr
 
 # project-init
 
-**goal:** A lean, high-signal `AGENTS.md` (`<100` lines, markdown-kv `key: value`, never prose) + one-line stub `CLAUDE.md`/`GEMINI.md` that redirect to it.
-**method:** Blind parallel discovery (read-only Researcher fan-out, evidence-cited claims) → ONE deterministic generator (`scripts/init.py`) that verifies, merges, and writes.
-**invariant:** Discovered commands are transcribed as TEXT, never executed. `init.py` is the SOLE writer.
+## Overview
+
+This skill bootstraps a repository's agent instructions via a blind parallel discovery fan-out converging into a deterministic generator.
+
+- **Goal:** A lean, high-signal `AGENTS.md` (<100 lines, markdown-kv `key: value`, never prose) + one-line stub `CLAUDE.md`/`GEMINI.md` that redirect to it.
+- **Method:** Blind parallel discovery (read-only Researcher fan-out, evidence-cited claims) → ONE deterministic generator (`scripts/init.py`) that verifies, merges, and writes.
+- **Invariant:** Discovered commands are transcribed as TEXT, never executed. `init.py` is the SOLE writer.
 
 ```
 Phase 0  PRESCAN + SURVEY
@@ -35,6 +39,8 @@ Phase 3  CONSENT + WRITE
 
 ## Phase 0: Check and Ask
 
+**MANDATORY**: Before conducting the survey, you MUST read the option mappings in `references/hard-rules.md`. Do NOT load `references/canonical-keys.md` during this phase.
+
 1. **Scan:** Run `python "$CLAUDE_PLUGIN_ROOT/skills/project-init/scripts/init.py" prescan .` to get project details. (Below, `init.py` is shorthand for this same `python "$CLAUDE_PLUGIN_ROOT/skills/project-init/scripts/init.py"` invocation.)
 2. **Check for Old Rules:** Look for `AGENTS.md`. If it has the `<!-- project-init:hard-rules... -->` tag, use those answers (`commit=`, `maturity=`, `testing=`, `ci=`, and `sections=` if present — a marker written before `sections=` existed has none, treat that as "include everything"). Do not ask the user again unless they force it.
 3. **Ask the User (if no old rules):** Run `AskUserQuestion` exactly once with all 4 questions from `references/hard-rules.md` (commit policy, project maturity, testing rigor, optional sections to omit — the last is multiSelect, 0–3 picks). Use the exact words provided, including the "Don't include" option on the first three. Do not add an extra "Other" choice (the tool already provides one). Stop if the user cancels.
@@ -44,6 +50,8 @@ Phase 3  CONSENT + WRITE
 ---
 
 ## Phase 1: Search (Read-Only)
+
+**MANDATORY**: Ensure all discovery agents validate claims against the closed vocabulary defined in `references/canonical-keys.md`. Do NOT load `references/hard-rules.md` during this phase.
 
 1. **Send Searchers:** Use `multi-agent-dispatch` to send 3 read-only agents at the same time. Give them all facts found in Phase 0.
 2. **Assign Lanes:**
@@ -94,7 +102,9 @@ Phase 3  CONSENT + WRITE
 
 ---
 
-## STRICT PROHIBITIONS (NEVER DO THESE)
+## Rules
+
+### STRICT PROHIBITIONS (NEVER DO THESE)
 
 - **NEVER** run any command found in the project.
 - **NEVER** give search agents access to Bash.
