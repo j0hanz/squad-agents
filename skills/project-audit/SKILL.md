@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: 'Use when the codebase has structural problems — circular dependencies, infra code bleeding into domain logic, hidden coupling, God files, unclear module responsibilities, or modules whose stated purpose contradicts how other modules actually use them. Parallel per-directory agent judgment, not static-analysis scripts. Read-only: produces a ranked report, never modifies code, never proposes new modules or scaffolding.'
+description: 'Use when the codebase has structural problems — circular dependencies, infra code bleeding into domain logic, hidden coupling, God files, unclear module responsibilities, or modules whose stated purpose contradicts how other modules actually use them. Parallel per-directory agent judgment, not static-analysis scripts.'
 disable-model-invocation: false
 allowed-tools: Bash(python *), Bash(python3 *), Agent(researcher)
 ---
@@ -56,17 +56,11 @@ One flat report. Each finding: `{finding, kind (cycle / bleed / cohesion / coupl
 ## Heuristics
 
 - **No detection scripts beyond `check_cycles.py`.** The five questions are answered by judgment, not regex/AST. If you find yourself writing a second analysis script, stop — that's drifting back toward the retired `architecting` skill's mechanism, which this skill was explicitly built to not be.
-- **Disclose limitations, don't paper over them.** Best-effort cycle detection, heuristic redaction, and the flat-repo fallback all have honest, stated ceilings in the output — never imply a guarantee that isn't there.
 - **Scale:** the 8-lane cap is the load-bearing scale control. Lane size still varies within a band — wall-clock is bounded by whatever lane lands largest, not perfectly equal. This is accepted, not solved further.
 
 ## Worked Example
 
-- Trigger: "this repo's modules feel tangled, can you audit the structure?"
-- Step 1: 11 top-level directories found; `docs/` and `.github/` dropped; two single-file directories merged into neighbors; one 400-file directory split in two — 7 lanes total.
-- Step 2: 7 parallel `researcher` dispatches. Lane `billing` answers Q1 "pure billing calculations," Q5 names no coupling. Lane `infra/db` answers Q5 "reaches directly into `billing/Invoice` to read its private ledger field."
-- Step 3: `check_cycles.py` finds no import cycle between `billing` and `infra/db` (the coupling isn't via import). Synthesis pass adjudicates the Q1-vs-Q5 contradiction: `infra/db`'s quoted field-access is concrete evidence outranking `billing`'s unverified "pure" self-description — surfaced as a confirmed intent-mismatch, not an open question. Two other lanes also report similar coupling shapes from `infra/db` — pattern-merged into one finding: "infra/db reaches into 3 domain lanes' internals."
-- Step 4: report leads with the corroborated 3-lane pattern finding, then the single-lane billing/db contradiction, then everything else.
-- Next: user picks the pattern finding, invokes `request-plan` to scope an `InvoicePort`-style fix.
+11 directories → 7 lanes (merged 2 single-file dirs, split 1 400-file dir). Lane `billing` claims "pure billing calculations"; lane `infra/db` reports reaching directly into `billing/Invoice`'s private ledger field — concrete evidence outranks the unverified self-description, so this surfaces as a confirmed intent-mismatch. Two other lanes report the same shape from `infra/db`, pattern-merged into one 3-lane finding. Report leads with that pattern, then the single-lane contradiction, then the rest.
 
 ## Next Skills
 
@@ -74,9 +68,4 @@ One flat report. Each finding: `{finding, kind (cycle / bleed / cohesion / coupl
 - **diagnose:** if a finding turns out to be a live, currently-failing bug rather than structural debt.
 - **multi-agent-development:** execute a multi-file structural fix once planned.
 
-## Constraints (Strict)
-
-- No new-module design mode, no ADR authoring, no scaffolding — read-only diagnosis only.
-- No overlap with `find-bugs` (bugs/security in diffs), `security-review`, or `ponytail-audit` (over-engineering/YAGNI) — stay structural.
-- Never grant the lane `researcher` dispatch `WebFetch`.
-- Never skip the redaction step before quoting source text.
+Hard limits (read-only diagnosis, no scope creep): no new-module design, no ADR, no scaffolding; never grant the lane `researcher` dispatch `WebFetch`; never skip redaction before quoting source text. No overlap with `find-bugs`, `security-review`, or `ponytail-audit` — stay structural.
