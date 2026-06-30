@@ -40,7 +40,3 @@ hooks: hook handlers must be Bash-only — no JS/Python/MJS files allowed in `ho
 manifest: `plugin.json` must use schema validation (`https://json.schemastore.org/claude-code-plugin-manifest.json`)
 skills: every skill in `skills/` must contain `SKILL.md` with flat YAML frontmatter (keys: `name`, `description`)
 dependencies: Python dev dependencies are declared in `pyproject.toml` — never run `pip` directly
-
-## Commit Attribution
-
-Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
