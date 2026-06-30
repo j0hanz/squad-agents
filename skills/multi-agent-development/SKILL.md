@@ -135,7 +135,7 @@ Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and lau
 
 - **Agents**: Use a new agent for every task. Independent tasks in a cluster get separate agents launched together, not reused or queued.
 - **Prompts**: Give agents all facts. They have no memory.
-- **Commits**: Give reviewers the exact old commit and new commit.
+- **Commits**: Implementer subjects follow `<type>: [task title]` — format rules (policy, secret-scan, vocabulary) defer to `write-commit`.
 - **Rejects**: Throw away bad work. Start over from a clean base.
 - **Conflicts**: If a Git merge fails, do NOT immediately abort or escalate. Dispatch the specialized `conflict-resolver` agent (`agents/conflict-resolver.md`) to read conflict markers, resolve them, test, and commit the resolution. Only pause and ask the user if the conflict resolver returns `VERDICT: BLOCKED`.
 - **Resuming**: Before restarting, check `git log` for commits matching the plan's task titles (`<type>: [task title]` subjects) to see which tasks already completed — never trust self-recollection alone.
@@ -143,5 +143,6 @@ Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and lau
 
 ## Next Skills
 
+- `write-commit`: Apply commit rules for each task's staged changes before final validation.
 - `verification-before-completion`: Run this for Final Validation handoff.
 - `diagnose`: Run this for merge/test failure investigation.

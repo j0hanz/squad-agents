@@ -124,7 +124,7 @@ Creative Checkpoint
 - **Self-Review:** Fix any contradictions or scope creep in the chosen design before writing.
 - **Format:** Write a strict `markdown-kv` brief containing: Approach, Why, Scope, Constraints, Interface, Architecture, Risks, First Step.
 - **Save:** Present in chat, then write to `docs/design/YYYY-MM-DD-<topic>-design.md`.
-- **Commit Guard:** Do not commit. If the user wants to commit, hand off to `pr-workflow` or let them do it manually.
+- **Commit Guard:** Do not commit. If the user wants to commit only (no push), hand off to `write-commit`. If the user wants to commit, push, and open a PR, hand off to `pr-workflow`.
 
 ## Worked Example
 

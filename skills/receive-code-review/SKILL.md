@@ -73,5 +73,5 @@ Test immediately after each individual fix — never batch multiple fixes before
 
 - **Bugs & security findings:** Hand off to `diagnose` for root-cause analysis before patching.
 - **Hygiene/cleanup findings:** Fix directly in this skill.
-- **All items resolved:** Run `verification-before-completion`, then request a fresh review.
+- **All items resolved:** Run `verification-before-completion`, then `write-commit` to stage and commit the fixes, then request a fresh review via `request-code-review` or hand off to `pr-workflow`.
 - **Stuck after 2 attempts on the same finding:** Mark **BLOCKED**, escalate to the user, do not retry a 3rd time.

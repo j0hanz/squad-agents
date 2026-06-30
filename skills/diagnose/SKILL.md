@@ -117,7 +117,7 @@ Symptom: `POST /orders` 500s intermittently in staging, never locally.
 **project-audit:** clean up multiple files/modules
 **request-plan:** major specification gaps
 
-**Resume after fix:** `verification-before-completion` | `test-driven-development` | `multi-agent-development` | `multi-agent-dispatch` (INTEGRATE) | `receive-code-review` (Step 4) | `project-init` (Failure Recovery) | `pr-workflow` (commit/push step)
+**Resume after fix:** `verification-before-completion` | `test-driven-development` | `multi-agent-development` | `multi-agent-dispatch` (INTEGRATE) | `receive-code-review` (Step 4) | `project-init` (Failure Recovery) | `write-commit` (commit the fix) | `pr-workflow` (push + open PR)
 
 ## References
 

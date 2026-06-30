@@ -43,7 +43,7 @@ Gate 3: Execution Strategy
 
 Gate 4: Quality & Delivery
   -> verification-before-completion -> request-code-review
-       -- PASS (recommendation) --> pr-workflow
+       -- PASS (recommendation) --> write-commit --> pr-workflow
        -- FAIL ----------------------> receive-code-review
                                           -- blocking issue ------> diagnose
                                           -- hygiene issue -------> fix inline

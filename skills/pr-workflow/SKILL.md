@@ -8,9 +8,9 @@ allowed-tools: Bash(git *), Bash(gh *), Read, AskUserQuestion
 
 # pr-workflow
 
-The convenient terminal step: take work that's done (and ideally reviewed) and land it as a single, atomically-committed PR with the least fuss. Generate the branch name, the commit messages, and the PR body — don't make the human author plumbing. Reserve confirmation for the one moment it matters: **the push**, because that's the first step that leaves the machine and is hard to retract.
+The convenient terminal step: take work that's done (and ideally reviewed) and land it as a single, atomically-committed PR with the least fuss. Generate the branch name and the PR body — don't make the human author plumbing. Reserve confirmation for the one moment it matters: **the push**, because that's the first step that leaves the machine and is hard to retract.
 
-**Canonical source for commit/branch mechanics.** Any other skill that commits, branches, or names a commit message (`multi-agent-development`, `parallel-brainstorming`, etc.) defers to Step 2/3 here rather than inventing its own format. Don't duplicate the rules below elsewhere — link to this skill instead.
+**Commit mechanics → `write-commit`.** Step 3 below delegates all staging, secret-scan, policy-detection, and message-format rules to `write-commit`. Do not duplicate those rules here.
 
 ## Process Flow
 
@@ -45,15 +45,9 @@ Start: Deliver Request
 
 ## Step 3: Commit Safely
 
-1. Make one commit for each group of files — one logical change per commit, nothing bundled.
-2. Add specific files: `git add -- path/to/file`. Do NOT use `git add -A`.
-3. **Secret Check:** Run `git diff --staged | grep -iE 'password|secret|api_key|AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9._-]+|token|BEGIN .*PRIVATE KEY'` and `git diff --staged --name-only | grep -E '\.env($|\.)|\.pem$|\.pfx$|id_rsa$'`. Stop completely and warn the user if either finds anything. Pattern-based, not exhaustive — a bare credential in an unflagged variable name can still slip through; for high-stakes repos pair this with a real scanner (e.g. `gitleaks`).
-4. **Detect commit policy:** Read `CLAUDE.md`/`AGENTS.md` for a `<!-- project-init:hard-rules ... commit=(strict|relaxed|minimal) -->` marker. No marker found → treat as `relaxed`.
-5. **Message:**
-   - Subject: `<type>(<scope>): <why you did it>` under `commit=strict` (scope = touched module/dir); `<type>: <why you did it>` otherwise. Imperative mood, max 72 characters, states _why_, not a restatement of the diff.
-   - Body (only when the group spans multiple files or the why needs more than the subject): blank line, then 1-3 plain sentences on the problem solved.
-   - Footer: `Refs #<n>` / `Closes #<n>` when an issue number is known from the branch name, user message, or linked ticket.
-6. Show the commit to the user and wait for them to say "OK".
+1. Follow `write-commit` for all staging, secret-scan, policy-detection, and message-format rules.
+2. Make one commit for each group of files — one logical change per commit, nothing bundled.
+3. Show the generated commit message to the user and wait for them to say "OK" before committing.
 
 ## Step 4: Ask Before Pushing
 
