@@ -41,7 +41,7 @@ Stat Check: Run `git diff --stat {{base}}..{{head}}`
 Prompt: Fill `references/reviewer-dispatch-prompt.md`
 Dispatch: Run `diff-reviewer` (Write/Edit denied by its tools frontmatter)
 Safety Check: Run `git status --porcelain` (if modified: discard, restore, re-dispatch)
-Output Validation: Require `## Code Review Result` block with `Status`, `Blocking Issues`, `Advisory Issues`, and `What Was Checked` sections (retry once if missing, then fail). Full schema and a filled example live in `references/reviewer-dispatch-prompt.md`.
+Output Validation: Require the reviewer's output to match the schema in `references/reviewer-dispatch-prompt.md` (retry once if it doesn't, then fail).
 
 ## Phase 2: Hand Off
 
@@ -53,5 +53,5 @@ On FAIL: Invoke `receive-code-review` (do not fix directly)
 
 Self-Review: Forbidden in the same thread
 Subagent Writes: Forbidden (enforce tool limits)
-Invalid Output: Forbidden (never accept without `## Code Review Result` block)
+Invalid Output: Forbidden (never accept malformed reviewer output — see Output Validation above)
 Isolated Review: Forbidden (diff or before/after blocks required)

@@ -54,17 +54,7 @@ Assign roles: **Investigator** (read-only, traces root cause), **Writer** (dispa
 
 Writer lanes dispatch `subagent_type: implementer` (`agents/implementer.md`), not generic `general-purpose` — it already requires `isolation: worktree` and returns its own fixed output schema (see Step 5: INTEGRATE), so skip the generic five-field/VERDICT-SCHEMA setup for Writer lanes specifically. Investigator and Researcher lanes MUST dispatch the named `researcher` agent (`agents/researcher.md`) — this enforces hard read-only tool restrictions at the harness level.
 
-Every Investigator/Researcher dispatch prompt MUST contain five fields — subagents start cold with no memory of this conversation:
-
-- **SCOPE:** exact files the agent may touch (and may not).
-- **OBJECTIVE:** one concrete, falsifiable done-condition, not "improve X."
-- **CONTEXT:** error text, baseline commit, conventions — everything needed to start cold.
-- **CONSTRAINTS:** tool restrictions, explicit "Do Not" rules.
-- **OUTPUT SCHEMA:** require `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` verbatim.
-
-For Writer lanes, structure the dispatch prompt using `implementer`'s own five fields instead (SCOPE/OBJECTIVE/CONTEXT/CONSTRAINTS/OUTPUT, per `agents/implementer.md`) — its OUTPUT is implicit (it always replies with its own fixed schema), so don't also impose the generic VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE schema on top of it.
-
-For the full contract, common mistakes, specialist-routing table, large-artifact `.claude/dispatch/` handoff rule, and Model Tiering table, see `../multi-agent-development/references/subagent-contract.md` — read it before dispatching when available, and apply an explicit `model:` override at the dispatch call site per the tiering guidance. The five fields above are the fallback if that file is missing.
+For the full contract, common mistakes, specialist-routing table, large-artifact `.claude/dispatch/` handoff rule, and Model Tiering table, see `../multi-agent-development/references/subagent-contract.md` — read it before dispatching when available, and apply an explicit `model:` override at the dispatch call site per the tiering guidance. If that file cannot be loaded, the five fields are: SCOPE, OBJECTIVE, CONTEXT, CONSTRAINTS, OUTPUT SCHEMA.
 
 - Writers MUST use `isolation: worktree` to prevent overlapping edits — state it explicitly in the dispatch call since `isolation` is dispatcher-side guidance, not an enforced agent property.
 
@@ -76,6 +66,8 @@ For the full contract, common mistakes, specialist-routing table, large-artifact
 - As soon as a lane launches in the background, start GROUP/MATRIX for the next batch immediately — "batch N is running" is not a reason to delay scoping batch N+1.
 - Track every in-flight background lane by name/id. When notified of a completion, INTEGRATE that lane immediately rather than batching notifications up.
 
+**Done when:** every lane in the batch has disjoint files, empty `Depends on`, and is tracked by name/id before any agent is dispatched.
+
 ## Step 5: INTEGRATE
 
 Each lane reports against a different schema depending on its role — interpret accordingly before tiering:
@@ -83,11 +75,7 @@ Each lane reports against a different schema depending on its role — interpret
 - **Writer lanes (`implementer`):** Returns `VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]` + SUMMARY + FILES_CHANGED + COMMIT + CONCERNS/BLOCKER/QUESTION. Map to a tier: `DONE` → PASS/merged; `DONE_WITH_CONCERNS` → MINOR or IMPORTANT depending on the concern's severity (merge-and-log, or re-dispatch with the concern verbatim); `BLOCKED` → CRITICAL/discarded, re-dispatch fresh only after resolving the blocker; `NEEDS_CONTEXT` → CRITICAL/discarded, re-dispatch with the question answered, not retried verbatim.
 - **Investigator/Researcher lanes (`researcher`):** Returns the generic `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` contract (where `VERDICT` is `SUCCESS | FAILURE | BLOCKED | NEEDS_CONTEXT`) — tier its dispatch-specific VERDICT enum the same CRITICAL/IMPORTANT/MINOR way as before.
 
-Tier every lane, regardless of schema, into the same three buckets used here and by `multi-agent-development`'s quality reviewer:
-
-- **CRITICAL** — lane's work is wrong, broken, or blocked: discard, do not merge, re-dispatch fresh.
-- **IMPORTANT** — works but needs a fix before merge: re-dispatch with the issue verbatim.
-- **MINOR** — cosmetic: merge now, log for later.
+Tier every lane, regardless of schema, into the same three buckets (CRITICAL, IMPORTANT, MINOR) used here and by `multi-agent-development`'s quality reviewer — see `../multi-agent-development/references/quality-reviewer-prompt.md` for the canonical definitions.
 
 ### Git Merge Conflict Resolution
 
@@ -99,10 +87,7 @@ If a Git merge conflict occurs during integration, do NOT immediately abort or e
 
 ### Context Compaction & Token Hygiene
 
-To prevent orchestrator context bloat during multi-lane integration:
-
-1. Once a lane's work is integrated (merged and tests pass), prune intermediate agent logs, thinking steps, and full file diffs from the active conversation context.
-2. Retain only a high-level summary and the merge commit hash in the main thread.
+See the Context Compaction rule in `skills/multi-agent-development/SKILL.md` (Operational Rules): prune intermediate subagent logs, thinking steps, and full file diffs once a lane is integrated, keeping only a high-level summary and the merge commit hash.
 
 Then run the real test suite. Neither implementer's `DONE` nor a researcher's `VERDICT: SUCCESS` is proof by itself — never merge on either report alone. A lane is mergeable only once its work clears the project-wide [Definition of Done](../verification-before-completion/references/definition-of-done.md), independently verified.
 

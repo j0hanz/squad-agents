@@ -42,12 +42,7 @@ Default to running all tasks straight through — that was already the recommend
 
 **Single task, no dependencies?** Skip the Matrix — there's nothing to partition. Go straight to the Core Loop.
 
-Before asking the user, write the same Lane Matrix `multi-agent-dispatch` uses — it's what makes "strict order" a fact instead of a guess:
-
-| Task | Files touched | Depends on | Risk | Verification |
-| :--- | :------------ | :--------- | :--- | :----------- |
-| 1    | [exact paths] | none       | ...  | ...          |
-| 2    | ...           | Task 1     | ...  | ...          |
+Before asking the user, write the Lane Matrix defined in `skills/multi-agent-dispatch/SKILL.md` (Lane Matrix section) — it's what makes "strict order" a fact instead of a guess.
 
 - **File Rule**: Combine tasks into one if they touch the same files — never run two tasks against overlapping paths even sequentially without merging them first.
 - **Cluster Rule**: Group every run of tasks that share `Depends on: none` and disjoint files into one cluster. A cluster is dispatched together (see Clustered Phase 1 below) — clusters themselves still run in the matrix's dependency order.
@@ -66,10 +61,10 @@ For a cluster of 2+ tasks with no dependency between them: dispatch one implemen
 
 - **Phase 2+3 (default — low/med risk, first pass)**: Combined Review.
 - **Agent**: ONE read-only `spec-reviewer`, given both `references/spec-reviewer-prompt.md` and `references/quality-reviewer-prompt.md` as its dispatch contract, asked to return both `SPEC_VERDICT` and `QUALITY_VERDICT` in one pass. This avoids two cold-start agents independently re-reading the same diff.
-- **Rules**: Max 2 tries total. If `SPEC_FAIL`, fix and re-run the combined pass (don't bother scoring quality on a spec-failing diff). If `SPEC_PASS` but `CRITICAL`/`IMPORTANT`, fix and re-run.
+- **Rules**: Combined review retries in combined mode up to 2 tries. If `SPEC_FAIL`, fix and re-run the combined pass (don't bother scoring quality on a spec-failing diff). If `SPEC_PASS` but `CRITICAL`/`IMPORTANT`, fix and re-run. On the 2nd failure in combined mode, OR if the task was designated high-risk up-front, split into per-agent review (Phase 2 / Phase 3 below).
 - **Before advancing:** needs `SPEC_PASS` + (`QUALITY_PASS` or `MINOR`).
 
-- **Phase 2 / Phase 3 (split — high risk, or any retry after a fix)**: run as two separate agents instead, per the original per-phase contracts below. Fresh eyes matter once a fix has already gone in.
+- **Phase 2 / Phase 3 (split)**: run as two separate agents, per the original per-phase contracts below. Fresh eyes matter once a fix has already gone in.
   - **Phase 2**: Read-only `spec-reviewer` per `references/spec-reviewer-prompt.md`. Do not substitute `diff-reviewer` — it lacks the full task spec context. Max 2 tries; `SPEC_FAIL` twice → escalate.
   - **Phase 3**: Read-only `quality-reviewer` per `references/quality-reviewer-prompt.md`, only after `SPEC_PASS`. Do not substitute `diff-reviewer`. Max 2 tries (separate from Phase 2's count); `CRITICAL`/`IMPORTANT` twice → escalate.
 
@@ -81,6 +76,7 @@ For a cluster of 2+ tasks with no dependency between them: dispatch one implemen
 - **Test**: Run project tests.
 - **Verify**: Run `verification-before-completion`.
 - **Review**: Run `request-code-review` (Mandatory).
+- **Done when:** every task is PASS or escalated-by-name, the full test suite is GREEN, and both `verification-before-completion` and `request-code-review` have run.
 
 ### Report Template
 
@@ -137,7 +133,7 @@ Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and lau
 - **Prompts**: Give agents all facts. They have no memory.
 - **Commits**: Implementer subjects follow `<type>: [task title]` — format rules (policy, secret-scan, vocabulary) defer to `write-commit`.
 - **Rejects**: Throw away bad work. Start over from a clean base.
-- **Conflicts**: If a Git merge fails, do NOT immediately abort or escalate. Dispatch the specialized `conflict-resolver` agent (`agents/conflict-resolver.md`) to read conflict markers, resolve them, test, and commit the resolution. Only pause and ask the user if the conflict resolver returns `VERDICT: BLOCKED`.
+- **Conflicts**: If a Git merge fails, follow the conflict-resolution procedure in `skills/multi-agent-dispatch/SKILL.md:92-99` (dispatch the specialized `conflict-resolver` agent; escalate to the user only if it reports the conflict cannot be resolved).
 - **Resuming**: Before restarting, check `git log` for commits matching the plan's task titles (`<type>: [task title]` subjects) to see which tasks already completed — never trust self-recollection alone.
 - **Context**: The orchestrator thread accumulates summaries across every task loop even though subagents are isolated. Prune intermediate subagent logs, thinking steps, and full file diffs from the main conversation context once integrated, keeping only a high-level summary and the merge commit hash.
 

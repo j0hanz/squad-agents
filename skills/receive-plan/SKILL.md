@@ -23,8 +23,7 @@ Plan/Specs Pair Received
   -> 4. Main thread verdict (no Arbiter agent)
        -- any High finding, or ≥2 Med findings --> REVISE
        -- else -----------------------------------------> Step 5
-  -- REVISE, round-trip 1 --> route to origin, re-submit
-  -- REVISE, round-trip 2 --> escalate to user, stop
+  -- REVISE round-trips capped per Strict Rules (NO Endless Loops)
   -> 5. Finalize: flip Status: DRAFT → APPROVED
 ```
 
@@ -64,7 +63,7 @@ Read the critic's findings directly — no separate Arbiter agent:
 - **≥2 Med** findings → REVISE.
 - **Low** only, or nothing → APPROVED (note Low findings as a comment in the plan header).
 
-Cap: **1 REVISE round-trip**. On the 2nd unresolved submission, hand off to `interview` with the unresolved-findings list — the user is choosing between accepting known risk, a full re-draft, or abandoning the plan, a hard-to-reverse call that deserves a structured decision, not a bare escalation message.
+REVISE cap — see Strict Rules (NO Endless Loops). On the 2nd unresolved submission, hand off to `interview` with the unresolved-findings list — the user is choosing between accepting known risk, a full re-draft, or abandoning the plan, a hard-to-reverse call that deserves a structured decision, not a bare escalation message.
 
 ## Step 5: Finalize
 

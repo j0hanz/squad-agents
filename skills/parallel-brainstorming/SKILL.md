@@ -65,7 +65,7 @@ Creative Checkpoint
 ## Phase 1: Framing & Discovery
 
 - **Probe:** Identify target users. Ask clarifying questions if the request is ambiguous.
-- **Scan:** Run `python C:/agent-dev/skills/parallel-brainstorming/scripts/scan_context.py -- '<nouns>' --cwd '<root>' | python C:/agent-dev/skills/parallel-brainstorming/scripts/compress_report.py` (fallback to `grep_search` if it fails).
+- **Scan:** Run `python ${CLAUDE_SKILL_DIR}/scripts/scan_context.py -- '<nouns>' --cwd '<root>' | python ${CLAUDE_SKILL_DIR}/scripts/compress_report.py` (fallback to `grep_search` if it fails).
 - **Report:** Extract Related Files, Recent Changes, Terms, Interfaces, Constraints, Scope (S/M/L/XL), and Unknowns.
 - **Zero-Code Check:** Stop and offer exit if existing code/config already solves this.
 - **Understanding Lock:** Summarize the problem and your understanding. Only invoke `interview` if you have genuine doubts. Otherwise, proceed directly to Phase 3.

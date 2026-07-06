@@ -90,6 +90,7 @@ _If unsure how minimal is minimal, read `references/minimal-impl-examples.md` fu
 - Improve structure (naming, deduplication) without changing behavior.
 - Never interleave a behavior fix with a refactor — they are separate passes.
 - Re-run tests after every refactor; must stay GREEN.
+- **Done when:** no further structural improvement available AND full suite GREEN; then evaluate coverage against the scenario list (gaps → back to RED; else hand off).
 
 ## Strict Rules
 

@@ -81,6 +81,7 @@ Phase 0: Triage (serial vs. tournament)
 **action:** instrument decision boundaries dynamically
 **format:** prefix logs with `[DEBUG-XXXX]`
 **constraint:** target logs strictly; use profilers for performance
+**Done when:** all candidate root causes ranked by evidence AND the top hypothesis has a defined falsification probe
 
 ## Phase 5: Red-Green Fix
 
@@ -97,6 +98,7 @@ Phase 0: Triage (serial vs. tournament)
 **action:** verify fix via Phase 1 loop
 **action:** re-run the original hypothesis set against the post-fix Oracle to catch masked/latent causes
 **action:** promote scripts to test suite or delete
+**Done when:** no `[DEBUG-XXXX]` tags remain grep-clean AND the original hypothesis set re-runs clean on the post-fix Oracle
 
 ## Worked Example
 
@@ -116,8 +118,6 @@ Symptom: `POST /orders` 500s intermittently in staging, never locally.
 **test-driven-development:** new logic/tests (not for writing new feature tests — use it directly)
 **project-audit:** clean up multiple files/modules
 **request-plan:** major specification gaps
-
-**Resume after fix:** `verification-before-completion` | `test-driven-development` | `multi-agent-development` | `multi-agent-dispatch` (INTEGRATE) | `receive-code-review` (Step 4) | `project-init` (Failure Recovery) | `write-commit` (commit the fix) | `pr-workflow` (push + open PR)
 
 ## References
 

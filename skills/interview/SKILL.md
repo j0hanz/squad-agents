@@ -1,6 +1,6 @@
 ---
 name: interview
-description: 'Use when the user wants to stress-test a plan, design, or decision before committing to it.'
+description: 'Called inline by other skills to stress-test a plan, design, or decision before committing to it.'
 disable-model-invocation: false
 allowed-tools: Read, Grep, Glob, AskUserQuestion
 ---

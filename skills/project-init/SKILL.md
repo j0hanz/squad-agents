@@ -1,8 +1,7 @@
 ---
 name: project-init
-description: 'Use when a repository needs AGENTS.md, CLAUDE.md, or GEMINI.md — initializing a new repo, bootstrapping agent instructions, or auditing an existing instructions file.'
+description: 'Use when a repository needs AGENTS.md, CLAUDE.md, or GEMINI.md — initializing a new repo, bootstrapping agent instructions, or auditing an existing instructions file. Prefer over hand-writing AGENTS.md/CLAUDE.md from scratch.'
 disable-model-invocation: false
-user-invocable: true
 allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill(multi-agent-dispatch), Read, Grep, Glob
 ---
 
@@ -77,9 +76,9 @@ Phase 3  CONSENT + WRITE
 ## Phase 3: Ask and Save
 
 1. **Protect Old Files:** If root `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` already exist, or if any package-level `<pkg>/AGENTS.md` exists, show them to the user, make a backup (`.bak`), and **ask for explicit permission** before replacing them.
-2. **Save Root:** Run `init.py generate --claims claims.json ... --skip-sections <s> --out AGENTS.md`.
+2. **Save Root:** Run `init.py generate --claims claims.json --commit <c> --maturity <m> --testing <t> --ci <ci> --skip-sections <s> --out AGENTS.md`.
 3. **Save Packages (Monorepos):** For each package folder `<pkg>`, run:
-   `init.py generate --claims claims.json --package <pkg> --skip-sections <s> --out <pkg>/AGENTS.md`.
+   `init.py generate --claims claims.json --package <pkg> --commit <c> --maturity <m> --testing <t> --ci <ci> --skip-sections <s> --out <pkg>/AGENTS.md`.
 4. **Link Files:** Run `init.py wire AGENTS.md CLAUDE.md GEMINI.md` (root level redirect stubs only).
 5. **Test Root File:** Run `init.py lint AGENTS.md`. It must pass.
 6. **Test Package Files (Monorepos):** For each package folder `<pkg>`, run `init.py lint <pkg>/AGENTS.md`. They must pass.
@@ -88,7 +87,6 @@ Phase 3  CONSENT + WRITE
 ## Fixing Errors
 
 - If any script fails, use the `diagnose` skill on the error message. Fix the problem and restart the current phase. Never restart Phase 0.
-- When done, run `verification-before-completion`.
 
 ## Rules
 

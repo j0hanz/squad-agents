@@ -21,7 +21,6 @@ allowed-tools: Bash(git *), Read
 - Exactly one logical change per commit.
 - Stop if passwords, tokens, or keys are present.
 - `git add <exact-file-name>` ONLY. No wildcards or `git add .`.
-- No dangerous commands, config changes, force pushing, or skipping hooks.
 
 ## FORMAT
 
@@ -50,6 +49,8 @@ allowed-tools: Bash(git *), Read
 4. `git add <exact-file-name>` — one logical group of files.
 5. `git commit -m "<type>(<scope>): <subject>"` (append `-m "<body>"` if needed).
 6. Repeat steps 4–5 for each additional logical change group.
+
+**Done when:** `git status --porcelain` shows a clean working tree (or only intentionally-unstaged files) AND every staged logical group has its own commit.
 
 ## EXAMPLES
 

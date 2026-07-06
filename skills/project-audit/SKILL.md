@@ -67,5 +67,3 @@ If 2+ corroborated findings are comparably actionable, that's a hard-to-reverse 
 - **request-plan:** formalize a fix for any specific finding.
 - **diagnose:** if a finding turns out to be a live, currently-failing bug rather than structural debt.
 - **multi-agent-development:** execute a multi-file structural fix once planned.
-
-Hard limits (read-only diagnosis, no scope creep): no new-module design, no ADR, no scaffolding; never grant the lane `researcher` dispatch `WebFetch`; never skip redaction before quoting source text.

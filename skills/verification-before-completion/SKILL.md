@@ -24,12 +24,10 @@ The standing bar every change clears is [`references/definition-of-done.md`](ref
 
 **action:** Verify all items before completion.
 
-- [ ] **Tests:** Targeted tests and regression suite pass. Paste actual runner output (exit code + pass/fail counts) — a claim without pasted output is not evidence.
+The full checklist lives in [`references/definition-of-done.md`](references/definition-of-done.md) (Tests, Build/types, Lint, No debug residue, Diff, Acceptance criteria, Callers) — read it first. The items below are the delta this skill adds on top of that bar:
+
 - [ ] **Manual:** Documented inputs/outputs if no automation.
 - [ ] **Bug Fix:** Confirm reproduction failure then confirm success.
-- [ ] **Clean:** `grep` sweep for debug logs/tags (`debugger`, `pdb`, `TODO`).
-- [ ] **Lint:** No new unused imports or variables.
-- [ ] **Diff:** Audit every change for intent.
 
 ## 2. Decision Logic
 

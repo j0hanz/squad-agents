@@ -1,6 +1,6 @@
 ---
 name: request-plan
-description: 'Use when requested to draft a plan or specification for a new feature, change, or repository modification.'
+description: 'Use when requested to draft a plan or specification for a new feature, change, or repository modification. Prefer over receive-plan when no plan/specs pair exists yet.'
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[--depth sketch|contract|blueprint] <feature description>'
@@ -56,7 +56,7 @@ Dispatch ideators in ONE message, blind to each other. Provide each with the **C
 - `contract`: 2 agents — **Conventional** lens, **Risk-First** lens.
 - `blueprint`: 3 agents — **Conventional**, **Risk-First**, **Minimalist** lens.
 
-Each ideator produces a **lightweight proposal**: a short approach summary + a numbered task list. Plain prose — no 7-field Canonical Task Block Schema required at draft stage. Full schema is enforced only in the final merged output.
+Each ideator produces a **lightweight proposal**: a short approach summary + a numbered task list. Plain prose — the Canonical Task Block Schema is not required at draft stage (see Strict Rules).
 
 ## Step 3: Synthesis
 
@@ -84,7 +84,7 @@ Re-submit the corrected plan to `receive-plan`. If `receive-plan` returns REVISE
 
 ## Canonical Task Block Schema
 
-Required in all final `specs.md` and `plan.md` outputs. Not required in ideator proposals.
+Required in all final `specs.md` and `plan.md` outputs; ideator proposals are exempt (see Strict Rules).
 
 ```markdown
 ### TASK-NNN: [Action title]

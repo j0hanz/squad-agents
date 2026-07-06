@@ -81,7 +81,6 @@ Start: Deliver Request
 ## STRICT RULES (NEVER DO THIS)
 
 - **NEVER** force-push (`git push -f`) or skip branch rules — it rewrites history other agents or branches may depend on.
-- **NEVER** bypass Step 4's push confirmation gate, even for automated or worktree branches.
 
 ## Next Steps & Errors
 
