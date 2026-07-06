@@ -7,7 +7,7 @@ allowed-tools: Bash(git *), Read
 
 # Git Commit Agent
 
-**Canonical source for commit mechanics.** Every other skill that stages and commits (`pr-workflow` Step 3, `dispatch-agents` Operational Rules, `parallel-brainstorming` Phase 6, `diagnose` Resume-after-fix, `receive-code-review` Routing) defers to the rules here. Link, don't duplicate.
+**Canonical source for commit mechanics.** Sibling skills defer here, not duplicate: `pr-workflow` Step 3, `parallel-brainstorming` Phase 6, `receive-code-review` Routing. Link, don't duplicate.
 
 ```text
   ┌───────────────┐     git add      ┌──────────────┐   git commit    ┌──────────────┐
@@ -24,6 +24,8 @@ allowed-tools: Bash(git *), Read
 
 ## FORMAT
 
+Conventional Commits — apply when step 2 selects Conventional; scope mandatory only under `strict`.
+
 `<type>(<scope>): <subject>`
 
 - **Type**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
@@ -35,20 +37,20 @@ allowed-tools: Bash(git *), Read
 **What NEVER goes in:**
 
 - "This commit does X", "I", "we", "now", "currently" (diff shows _what_ changed).
-- AI attributions ("Generated with...").
+- AI attributions: never add prose like "Generated with Claude Code." Add a `Co-Authored-By:` trailer only if `AGENTS.md` policy requires one.
 - **AI Vocabulary**: "crucial", "delve", "enhance", "intricate", "pivotal", "showcase", "additionally", "underscore", "valuable".
 - **AI Punctuation**: Em/en dashes (—/–). Use commas, colons, or parentheses.
 
 ## WORKFLOW
 
 1. `git status --porcelain` & `git diff` to find scope/intent.
-2. Check commit policy: read `AGENTS.md` for `<!-- project-init:hard-rules ... commit=(strict|relaxed|minimal) -->`. No marker → treat as `relaxed`.
-   - `strict`: include scope (`<type>(<scope>): <subject>`).
-   - `relaxed` / `minimal`: scope is optional (`<type>: <subject>`).
-3. Secret scan: `git diff --staged | grep -iE 'password|secret|api_key|AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9._-]+|token|BEGIN .*PRIVATE KEY'`. Stop and warn if anything matches.
-4. `git add <exact-file-name>` — one logical group of files.
-5. `git commit -m "<type>(<scope>): <subject>"` (append `-m "<body>"` if needed).
-6. Repeat steps 4–5 for each additional logical change group.
+2. Check commit policy: read `AGENTS.md` for `<!-- project-init:hard-rules ... commit=(strict|relaxed|minimal|skip) -->`. No marker → treat as `relaxed`.
+   - `strict`: Conventional required — `<type>(<scope>): <subject>` (scope mandatory).
+   - `relaxed` / `minimal` / `skip`: match the repo's existing style (`git log --format=%s`). Conventional with scope optional when the repo already uses it; free-form otherwise.
+3. `git add <exact-file-name>` — one logical group of files.
+4. Secret scan: `git diff --staged | grep -iE 'password|secret|api_key|AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9._-]+|token|BEGIN .*PRIVATE KEY'`. Stop and warn if anything matches.
+5. `git commit -m "<message per step 2>"` (append `-m "<body>"` if needed).
+6. Repeat steps 3–5 for each additional logical change group.
 
 **Done when:** `git status --porcelain` shows a clean working tree (or only intentionally-unstaged files) AND every staged logical group has its own commit.
 
@@ -61,5 +63,4 @@ allowed-tools: Bash(git *), Read
 ## NEXT STEPS
 
 - **Ready to push + open PR?** Hand off to `pr-workflow` (Steps 4–5).
-- **Secret found?** Stop completely. Surface to user — do not commit.
 - **Merge conflict?** Use `diagnose`.
