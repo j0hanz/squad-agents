@@ -1,5 +1,3 @@
-# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
-
 # Spec Compliance Reviewer Prompt
 
 **purpose:** Verify implementation matches task spec — nothing more, nothing less.

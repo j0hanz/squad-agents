@@ -14,7 +14,7 @@ Orchestrate sequential task execution with zero context pollution and high quali
 
 - **Dependencies or shared state across tasks?** → Sequential (this skill).
 - **Fully independent tasks, no shared state?** → Parallel (`multi-agent-dispatch`).
-- **A plan mixing both?** → This skill, but cluster the independent tasks (see Partitioning & Scope) and dispatch each cluster the way `multi-agent-dispatch` does — background, in parallel — instead of forcing every task through the loop one at a time.
+- **A plan mixing both?** → This skill. Cluster the independent tasks (see Partitioning & Scope) and dispatch each cluster the way `multi-agent-dispatch` does — background, in parallel — instead of forcing every task through the loop one at a time.
 
 ## Process Flow
 
@@ -34,35 +34,35 @@ Cluster done when every task in it is done/blocked -> Next Cluster?
 
 ## Step 0: Setup
 
-Read `references/implementer-prompt.md`, `references/spec-reviewer-prompt.md`, `references/quality-reviewer-prompt.md`, and `references/subagent-contract.md` once, here — not again per task or per phase. The Core Loop below assumes you already have them.
+Read `references/implementer-prompt.md`, `references/spec-reviewer-prompt.md`, `references/quality-reviewer-prompt.md`, and `references/subagent-contract.md` once, here — not again per task or per phase. The Core Loop assumes you already have them.
 
-Default to running all tasks straight through — that was already the recommended option, so don't spend a round-trip asking for it. Raise `AskUserQuestion` ("run all" vs. "run one task first to validate the loop") only when the plan is large or unfamiliar enough that a single test task is a genuinely safer first step.
+Default to running all tasks straight through. Raise `AskUserQuestion` ("run all" vs. "run one task first to validate the loop") only when the plan is large or unfamiliar enough that a single test task is a genuinely safer first step.
 
 ## Partitioning & Scope
 
-**Single task, no dependencies?** Skip the Matrix — there's nothing to partition. Go straight to the Core Loop.
+**Single task, no dependencies?** Skip the Matrix — go straight to the Core Loop.
 
-Before asking the user, write the Lane Matrix defined in `skills/multi-agent-dispatch/SKILL.md#Step 2: MATRIX` — it's what makes "strict order" a fact instead of a guess.
+Before asking the user, write the Lane Matrix defined in `skills/multi-agent-dispatch/SKILL.md#Step 2: MATRIX` — it makes "strict order" a fact, not a guess.
 
-- **File Rule**: Combine tasks into one if they touch the same files — never run two tasks against overlapping paths even sequentially without merging them first.
-- **Cluster Rule**: Group every run of tasks that share `Depends on: none` and disjoint files into one cluster. A cluster is dispatched together (see Clustered Phase 1 below) — clusters themselves still run in the matrix's dependency order.
-- **Action**: Derive the order directly from the matrix's `Depends on` column and state it as plain text — that was already the recommended option, so don't ask for it. Raise `AskUserQuestion` only if the matrix itself is ambiguous (conflicting or circular dependencies) and the order can't be resolved from the files alone.
+- **File Rule**: Merge tasks that touch the same files — never run two tasks against overlapping paths without merging first.
+- **Cluster Rule**: Group every run of tasks sharing `Depends on: none` and disjoint files into one cluster. Dispatch a cluster together (see Clustered Phase 1); clusters themselves still run in the matrix's dependency order.
+- **Action**: Derive order directly from the matrix's `Depends on` column and state it as plain text — don't ask for it. Raise `AskUserQuestion` only if the matrix is ambiguous (conflicting or circular dependencies) and the order can't be resolved from the files alone.
 
 ## Clustered Phase 1 (independent tasks only)
 
-For a cluster of 2+ tasks with no dependency between them: dispatch one implementer per task in the SAME message, each with `isolation: "worktree"` and `run_in_background: true`. Don't wait for one to finish before launching the next in the cluster — that's the serialization this skill otherwise forces, and it's unnecessary when the Matrix already proves the tasks don't touch each other. Run Phase 2/Phase 3 for each task as soon as its implementer reports back, independently of the others in the cluster — a slow task in the cluster never blocks review of a fast one. Move to the next task/cluster only once every task in the current cluster has reached `QUALITY_PASS` or escalated.
+For a cluster of 2+ tasks with no dependency between them: dispatch one implementer per task in the SAME message, each with `isolation: "worktree"` and `run_in_background: true`. Don't wait for one to finish before launching the next — that serialization is unnecessary once the Matrix proves the tasks don't touch each other. Run Phase 2/Phase 3 for each task as soon as its implementer reports back, independently of the others — a slow task never blocks review of a fast one. Move to the next task/cluster only once every task in the current cluster reaches `QUALITY_PASS` or escalates.
 
 ## Core Loop (Strict Order, per task or per cluster member)
 
 - **Phase 1**: Implement.
-- **Agent**: `implementer` (isolated worktree), per `references/implementer-prompt.md` and `references/subagent-contract.md` (large-artifact rule, Model Tiering — apply an explicit `model:` override at the dispatch call site).
-- **Output**: Verdict, files touched, commit, summary.
-- **Before advancing:** implementer must return `DONE` or `DONE_WITH_CONCERNS`. If `BLOCKED` or `NEEDS_CONTEXT`, stop and surface to the user — do not dispatch Phase 2.
+  - **Agent**: `implementer` (isolated worktree), per `references/implementer-prompt.md` and `references/subagent-contract.md` (large-artifact rule, Model Tiering — apply an explicit `model:` override at the dispatch call site).
+  - **Output**: Verdict, files touched, commit, summary.
+  - **Before advancing:** implementer must return `DONE` or `DONE_WITH_CONCERNS`. If `BLOCKED` or `NEEDS_CONTEXT`, stop and surface to the user — do not dispatch Phase 2.
 
 - **Phase 2+3 (default — low/med risk, first pass)**: Combined Review.
-- **Agent**: ONE read-only `spec-reviewer`, given both `references/spec-reviewer-prompt.md` and `references/quality-reviewer-prompt.md` as its dispatch contract, asked to return both `SPEC_VERDICT` and `QUALITY_VERDICT` in one pass. This avoids two cold-start agents independently re-reading the same diff.
-- **Rules**: Combined review retries in combined mode up to 2 tries. If `SPEC_FAIL`, fix and re-run the combined pass (don't bother scoring quality on a spec-failing diff). If `SPEC_PASS` but `CRITICAL`/`IMPORTANT`, fix and re-run. On the 2nd failure in combined mode, OR if the task was designated high-risk up-front, split into per-agent review (Phase 2 / Phase 3 below).
-- **Before advancing:** needs `SPEC_PASS` + (`QUALITY_PASS` or `MINOR`).
+  - **Agent**: ONE read-only `spec-reviewer`, given both `references/spec-reviewer-prompt.md` and `references/quality-reviewer-prompt.md` as its dispatch contract, returning both `SPEC_VERDICT` and `QUALITY_VERDICT` in one pass. This avoids two cold-start agents re-reading the same diff.
+  - **Rules**: Combined review retries up to 2 tries. If `SPEC_FAIL`, fix and re-run the combined pass (don't score quality on a spec-failing diff). If `SPEC_PASS` but `CRITICAL`/`IMPORTANT`, fix and re-run. On the 2nd failure in combined mode, OR if the task was designated high-risk up-front, split into per-agent review (Phase 2 / Phase 3 below).
+  - **Before advancing:** needs `SPEC_PASS` + (`QUALITY_PASS` or `MINOR`).
 
 - **Phase 2 / Phase 3 (split)**: run as two separate agents, per the original per-phase contracts below. Fresh eyes matter once a fix has already gone in.
   - **Phase 2**: Read-only `spec-reviewer` per `references/spec-reviewer-prompt.md`. Do not substitute `diff-reviewer` — it lacks the full task spec context. Max 2 tries; `SPEC_FAIL` twice → escalate.
@@ -123,7 +123,7 @@ Tests: PASS — `npm test` (full suite)
 Blocked/escalated tasks: none
 ```
 
-Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and launched together; here Task 2 literally cannot start until Task 1's model exists, so the Matrix's `Depends on` column forces order.
+Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and launched together; here Task 2 cannot start until Task 1's model exists, so the Matrix's `Depends on` column forces order.
 
 **Clustered Phase 1:** When tasks share `Depends on: none` and disjoint files, dispatch all their implementers in the same message (`isolation: worktree`, `run_in_background: true`) — review each as it reports back independently. Tasks that depend on the cluster wait for every member to reach `QUALITY_PASS` before launching.
 

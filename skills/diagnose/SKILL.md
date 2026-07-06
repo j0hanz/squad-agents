@@ -36,14 +36,14 @@ Phase 0: Triage (serial vs. tournament)
 ## Phase 0: Triage
 
 **action:** default to serial — probe one hypothesis at a time, directly
-**action:** escalate to the tournament (Phase 3 tournament path) only when 3+ genuinely independent candidate causes exist, or the bug is flaky/stress-class
+**action:** escalate to tournament (Phase 3 tournament path) only when 3+ genuinely independent candidate causes exist, or the bug is flaky/stress-class
 **gate:** never tournament a single obvious cause (e.g. one-line null check) — serial is faster and correct for the common case
 
 ## Phase 1: Feedback Loop
 
-**action:** create <2s deterministic pass/fail signal — this loop is the **Oracle** that Phase 3.5 arbitrates against
+**action:** create <2s deterministic pass/fail signal — this loop is the **Oracle** Phase 3.5 arbitrates against
 **action:** isolate filesystem, pin seeds/time
-**action:** if no deterministic loop is achievable (slow/flaky/timing-sensitive), raise repro rate via stress (`references/feedback-loops.md`) rather than blocking — degrade to serial interactive debugging, never block the skill
+**action:** if no deterministic loop achievable, raise repro rate via stress (`references/feedback-loops.md`) — degrade to serial interactive debugging, never block the skill
 **mandatory:** read `references/feedback-loops.md` (do NOT load `references/phases.md`)
 **gate:** require loop or request telemetry/logs
 
@@ -106,14 +106,14 @@ Phase 0: Triage (serial vs. tournament)
 
 Symptom: `POST /orders` 500s intermittently in staging, never locally.
 
-**Phase 0:** one plausible cause visible in the stack trace (null `cart.discount`) → serial, not tournament.
-**Phase 1:** Oracle = `curl` the endpoint with a cart fixture missing `discount`; deterministic, <1s.
-**Phase 2:** reproduces 10/10 runs with the fixture → repro rate well above the 50% gate.
-**Phase 3:** hypothesis — "If `discount` is read before the null-check, then setting `discount: undefined` in the fixture will trigger the same 500." Probed directly against the Oracle: confirmed.
-**Phase 3.5:** single survivor, no entanglement → `APPROVED`, proceed.
-**Phase 4:** `[DEBUG-4471]` log at the read site confirms `discount` is `undefined` at the point of failure, not later.
-**Phase 5:** regression test asserts 200 + default discount applied when the field is absent; confirmed RED before the fix, GREEN after; N-1 test (revert → RED → restore → GREEN) confirms the fix is load-bearing.
-**Phase 6:** `[DEBUG-4471]` removed, Oracle re-run clean, original hypothesis set re-run post-fix to rule out a masked second cause. Reported using the `## Output Format` schema below.
+- **Phase 0:** one plausible cause in the stack trace (null `cart.discount`) → serial, not tournament.
+- **Phase 1:** Oracle = `curl` the endpoint with a cart fixture missing `discount`; deterministic, <1s.
+- **Phase 2:** reproduces 10/10 → well above the 50% gate.
+- **Phase 3:** hypothesis — "If `discount` is read before the null-check, setting `discount: undefined` in the fixture triggers the same 500." Probed directly against the Oracle: confirmed.
+- **Phase 3.5:** single survivor, no entanglement → `APPROVED`, proceed.
+- **Phase 4:** `[DEBUG-4471]` log at the read site confirms `discount` is `undefined` at the point of failure.
+- **Phase 5:** regression test asserts 200 + default discount applied when the field is absent; RED before fix, GREEN after; N-1 (revert → RED → restore → GREEN) confirms the fix is load-bearing.
+- **Phase 6:** `[DEBUG-4471]` removed, Oracle re-run clean, original hypothesis set re-run post-fix to rule out a masked second cause. Reported via `## Output Format` below.
 
 ## Next Skills
 

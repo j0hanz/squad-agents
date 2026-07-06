@@ -114,9 +114,7 @@ def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
 
 def _extract_lane_refs(text: str, lane_names: set[str]) -> list[str]:
     """Pull cross-lane references from free text: backtick-quoted or
-    bold-quoted identifiers that match a known lane directory name.
-    ponytail: markdown-token scan is enough for a skills tree; a real code
-    repo would feed Python import paths to build_lane_graph directly."""
+    bold-quoted identifiers that match a known lane directory name."""
     refs: list[str] = []
     for m in re.findall(r"`([a-z][a-z0-9-]+)`", text):
         if m in lane_names:
@@ -128,7 +126,7 @@ def _extract_lane_refs(text: str, lane_names: set[str]) -> list[str]:
 
 
 def _self_check() -> None:
-    # ponytail: one assert exercising normalize_import -> resolve_lane ->
+    # one assert exercising normalize_import -> resolve_lane ->
     # build_lane_graph -> find_cycles; fails if the entrypoint's core breaks.
     g = build_lane_graph(
         {"a": ["'./b/x'"], "b": ["'./a/y'"]},

@@ -63,7 +63,7 @@ Read the critic's findings directly — no separate Arbiter agent:
 - **≥2 Med** findings → REVISE.
 - **Low** only, or nothing → APPROVED (note Low findings as a comment in the plan header).
 
-REVISE cap — see Strict Rules (NO Endless Loops). On the 2nd unresolved submission, hand off to `interview` with the unresolved-findings list — the user is choosing between accepting known risk, a full re-draft, or abandoning the plan, a hard-to-reverse call that deserves a structured decision, not a bare escalation message.
+REVISE cap — see Strict Rules (NO Endless Loops). On the 2nd unresolved submission, hand off to `interview` with the unresolved-findings list so the user can choose: accept known risk, full re-draft, or abandon.
 
 ## Step 5: Finalize
 

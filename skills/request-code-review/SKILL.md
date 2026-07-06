@@ -9,7 +9,7 @@ disallowed-tools: Write, Edit
 
 # request-code-review
 
-Get an unbiased review by dispatching a fresh-context subagent. Never review your own work in the same thread that wrote it — you already rationalized every decision once; a subagent with no memory of the implementation reads the diff cold, the way a human reviewer would.
+Dispatch a fresh-context subagent to review the diff cold. Never review your own work in the thread that wrote it — you already rationalized every decision; a subagent with no memory of the implementation reads it the way a human reviewer would.
 
 ## Process Flow
 

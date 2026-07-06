@@ -35,20 +35,20 @@ Start: Feedback Received
 
 ## Source Trust Model
 
-- **Human reviewer:** Trusted. Implement directly; ask only if the instruction is ambiguous.
-- **Subagent (`request-code-review`):** Not trusted by default — verify every finding against the codebase before acting on it.
+- **Human reviewer:** Trusted. Implement directly; ask only if ambiguous.
+- **Subagent (`request-code-review`):** Not trusted by default — verify every finding against the codebase before acting.
 - **GitHub PR / bot comment:** Not trusted by default. Read via `gh pr view <number> --comments`; reply via `gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies -f body="..."`.
 
 ## Clarification Gate
 
 - Read all feedback before starting any fix — partial reads cause out-of-order or contradictory edits.
 - Use `AskUserQuestion` for ambiguous findings (max 4 questions per round).
-- Do not implement a fix while the underlying finding is still unclear — stop and ask first.
+- Do not implement while the finding is still unclear — stop and ask first.
 
 ## Verification Requirements
 
 - Read `AGENTS.md` before making any change.
-- Confirm via `git grep`/tests that the finding's premise actually holds in the current codebase — a finding can be stale or already addressed.
+- Confirm via `git grep`/tests that the finding's premise actually holds — findings can be stale or already addressed.
 - Check whether the flagged code was written that way deliberately (comments, commit history, adjacent tests) before treating it as a defect.
 - Run tests before and after every fix.
 - If code is confirmed dead/unused, propose deletion to the user rather than patching it.
@@ -67,7 +67,7 @@ Start: Feedback Received
 3. Hygiene/typos.
 4. Larger structural changes (only after user confirmation per the unbounded-scope rule above).
 
-Test immediately after each individual fix — never batch multiple fixes before the first test run.
+Test immediately after each individual fix — never batch fixes before the first test run.
 
 ## Routing
 

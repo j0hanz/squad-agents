@@ -17,16 +17,16 @@ Trigger: structural/architecture audit request
 
 ## Step 1: GROUP
 
-- List the target repo's top-level directories one level deep (`Glob` for entries, no file content read).
-- Drop directories that are obviously non-code by name/pattern: `docs`, `.github`, `.git`, `node_modules`, `dist`, `build`, lockfile-only directories. No agent dispatch wasted on them.
-- Band the remaining directories into **at most 8 lanes** by file count: merge directories with very few files into the nearest lane, split a directory with disproportionately many files into multiple lanes within the same directory. Never dispatch more than 8 lanes, regardless of repo size — this is the hard cap that keeps cost and latency bounded.
-- **Flat-repo fallback:** if there are no meaningful subdirectories (everything under one `src/`), chunk files by detected primary file extension (group `.ts`/`.tsx` together, `.py` together, etc.) instead of alphabetically — still cheap and mechanical, no parsing. **Mandatory:** when this fallback fires, the final report header MUST say so and add: "findings below use arbitrary file-extension chunks, not real module boundaries — treat purpose and contradiction findings with reduced confidence." Never omit this line when the fallback is used.
+- List the repo's top-level directories one level deep (`Glob` for entries, no file content read).
+- Drop obviously non-code directories by name/pattern: `docs`, `.github`, `.git`, `node_modules`, `dist`, `build`, lockfile-only dirs.
+- Band the rest into **at most 8 lanes** by file count: merge sparse dirs into the nearest lane, split a disproportionately large dir into multiple lanes within itself. Never dispatch more than 8 lanes regardless of repo size — this is the hard cap that bounds cost and latency.
+- **Flat-repo fallback:** if there are no meaningful subdirectories (everything under one `src/`), chunk files by detected primary extension (group `.ts`/`.tsx` together, `.py` together, etc.) instead of alphabetically — still mechanical, no parsing. **Mandatory:** when this fallback fires, the final report header MUST say so and add: "findings below use arbitrary file-extension chunks, not real module boundaries — treat purpose and contradiction findings with reduced confidence." Never omit this line.
 
 ## Step 2: LAUNCH
 
-Dispatch one `researcher` subagent per lane, **in parallel, in one message**. Tool grant: `Read, Grep, Glob, Bash` only — **never WebFetch**, no question below needs an external URL, and granting it only widens the blast radius if a lane reads adversarial/prompt-injected content.
+Dispatch one `researcher` subagent per lane, **in parallel, in one message**. Tool grant: `Read, Grep, Glob, Bash` only — **never WebFetch**; no question below needs an external URL, and granting it widens the blast radius if a lane reads adversarial/prompt-injected content.
 
-Each lane agent is scoped to read ONLY its own lane's files and answer exactly these five questions, in free text:
+Each lane agent reads ONLY its own lane's files and answers exactly these five questions, in free text:
 
 1. **Purpose:** "State this lane's job in one sentence. If you cannot state a single coherent purpose, say so explicitly — that itself is a finding."
 2. **Imports out:** "List every import this lane has from outside itself, as literal import paths copied character-for-character from the source line, with the file it came from. Do not paraphrase — this list gets mechanically cross-referenced against other lanes. If there are none, say 'none' explicitly."
@@ -36,7 +36,7 @@ Each lane agent is scoped to read ONLY its own lane's files and answer exactly t
 
 **Redaction (load-bearing, not optional):** before any quoted text from Q2/Q3 leaves the lane agent's answer, redact any line that looks like a credential — API keys, tokens, passwords, AWS-key-shaped strings, high-entropy strings — replacing it with `[redacted: possible credential]`. This is a heuristic, not a guarantee; state that plainly in the final report, never imply secrets are guaranteed-safe to quote.
 
-If a lane has nothing to report across all five questions, its entry in the final report compresses to one line: `Lane <name>: nothing flagged.`
+If a lane reports nothing across all five questions, its final-report entry compresses to one line: `Lane <name>: nothing flagged.`
 
 ## Step 3: AGGREGATE
 

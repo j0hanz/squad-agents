@@ -11,14 +11,14 @@ Autonomous TDD execution. **HARD GATE:** No implementation code WITHOUT a failin
 
 ## When NOT to use TDD
 
-These are escape hatches from the HARD GATE — never self-invoke one silently. Confirm the carve-out via `AskUserQuestion` before skipping RED (the tool supplies a free-text "Other" automatically). Pick from the three categories below (see their definitions immediately following):
+Escape hatches from the HARD GATE. Never self-invoke one silently — confirm via `AskUserQuestion` first (the tool supplies a free-text "Other"). Pick from the three categories below:
 
-1. ✅ **Recommended** — Skip TDD: [the matching category from the list below] because [specific reason this case matches].
-2. **Alternative** — Use full TDD anyway + the reason the carve-out doesn't actually apply.
+1. ✅ **Recommended** — Skip TDD: [matching category] because [specific reason].
+2. **Alternative** — Use full TDD anyway + reason the carve-out doesn't apply.
 
-- **Exploratory Spikes:** When the implementation path is unknown and you need to "find the shape" of the code first (throwaway code). **Mandatory:** once the shape is found, the spike code MUST be discarded (`git stash drop`/delete, not committed) and re-implemented through the normal RED-GREEN-REFACTOR loop. A spike is a sketch, never the shipped diff.
+- **Exploratory Spikes:** Implementation path unknown; throwaway code to "find the shape." **Mandatory:** once found, the spike MUST be discarded (`git stash drop`/delete, not committed) and re-implemented through RED-GREEN-REFACTOR. A spike is a sketch, never the shipped diff.
 - **Trivial One-Liners:** Pure data mappings or standard boilerplate with zero logic.
-- **Pure UI/CSS:** Visual styling that requires manual "eye-balling" rather than logical assertions.
+- **Pure UI/CSS:** Visual styling needing manual "eye-balling," not logical assertions.
 
 ## Process Flow
 
@@ -42,7 +42,7 @@ Start: TDD Request -> Carve-out applies (spike/trivial/CSS)? -- yes --> AskUserQ
 **action:** `AskUserQuestion`.
 
 1. **Recommended:** Start TDD for [feature].
-2. **Alternative:** Explore first, then start TDD — state the reason exploration is needed before code.
+2. **Alternative:** Explore first, then start TDD — state why exploration is needed before code.
 
 ## Step 1: Define the Interface
 
@@ -63,16 +63,16 @@ _If JavaScript/TypeScript, read `references/js-ts-patterns.md` fully._
 1. Write the smallest test for one behavior.
 2. Stub the implementation (e.g. `return null`) — just enough to compile/run.
 3. Run the test.
-4. **Gate:** confirm FAILURE. A test that passes immediately is testing nothing — delete and rewrite it.
+4. **Gate:** confirm FAILURE. A test that passes immediately tests nothing — delete and rewrite it.
 
 ### N-1 Test (False-Green Elimination)
 
 Before trusting a passing test:
 
 1. Revert the implementation.
-2. Run the test — confirm it fails (RED).
+2. Run the test — confirm RED.
 3. Restore the implementation.
-4. Run the test — confirm it passes (GREEN).
+4. Run the test — confirm GREEN.
 
 ## Step 3: GREEN (Make It Pass)
 
@@ -88,7 +88,7 @@ _If unsure how minimal is minimal, read `references/minimal-impl-examples.md` fu
 
 - **Gate:** only proceed while GREEN.
 - Improve structure (naming, deduplication) without changing behavior.
-- Never interleave a behavior fix with a refactor — they are separate passes.
+- Never interleave a behavior fix with a refactor — separate passes.
 - Re-run tests after every refactor; must stay GREEN.
 - **Done when:** no further structural improvement available AND full suite GREEN; then evaluate coverage against the scenario list (gaps → back to RED; else hand off).
 
@@ -112,8 +112,6 @@ Any of these signals means you have left TDD. The fix is the same every time: de
 - Keeping code-first output "as reference" or "to adapt" instead of deleting it.
 
 **All of these mean:** delete the code-first implementation, re-enter the cycle at RED, and run the test to confirm it fails before re-implementing.
-
-# ponytail: full TDD apparatus deferred, add rationalization table when first gap observed
 
 <!-- Defer the deeper apparatus (rationalization table, spirit-vs-letter clause, commitment framing, pressure-test evidence). Add it only when a real session demonstrates a rationalization this list doesn't already kill. The full kit lives in the writing-skills anti-rationalization reference — see it before re-adding anything: ~/.claude/skills/writing-skills/references/anti-rationalization/README.md -->
 

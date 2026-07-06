@@ -1,5 +1,3 @@
-# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
-
 # Reference: Feedback Loop Patterns
 
 ## 1. CLI Tools

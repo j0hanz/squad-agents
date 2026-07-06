@@ -1,5 +1,3 @@
-# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
-
 # Claim Schema & Canonical Keys
 
 This is the OUTPUT-SCHEMA contract for Phase 1 discovery lanes. Each lane returns a **JSON array of claims**. Claims whose key is outside this closed vocabulary, or whose evidence fails verification, are dropped by `init.py generate` (and listed in the dropped report). Nothing else reaches `AGENTS.md`.

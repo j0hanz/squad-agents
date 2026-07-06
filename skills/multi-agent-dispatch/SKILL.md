@@ -23,15 +23,15 @@ Batches pipeline, they don't queue: launching batch N in the background is the s
 - **NO Overlapping Writes:** Never launch parallel agents editing the same files. Use sequential execution instead.
 - **NO Assumed Context:** Subagents start blank. Put every needed fact directly into the prompt.
 - **MAX 3 Agents in the foreground at once:** the cap counts only results read and merged in one sitting, not how many agents can be running.
-- **Background lanes are exempt from that cap:** a lane launched with `run_in_background` doesn't occupy a foreground slot — the harness notifies on completion instead of blocking on it, so a 4th+ lane can launch the moment its own dependencies clear, without waiting on batch N's INTEGRATE. If the harness has no background/notify primitive, treat MAX 3 as a hard concurrency cap instead and run remaining lanes in sequential batches of ≤3.
+- **Background lanes are exempt from that cap:** a lane launched with `run_in_background` doesn't occupy a foreground slot — the harness notifies on completion, so a 4th+ lane can launch the moment its dependencies clear, without waiting on batch N's INTEGRATE. If the harness has no background/notify primitive, treat MAX 3 as a hard concurrency cap and run remaining lanes in sequential batches of ≤3.
 - **NO Blind Trust:** Agents make mistakes. Run the test suite to prove their work is correct — never merge on a self-reported verdict alone.
 - **NO Hidden Skips:** Name any skipped check or lane in the final report. Never bury it in a summary.
 
 ## Step 1: GROUP
 
-Form task groups from the work already visible (a plan, a backlog, several independent fix-its) and state them as plain text — don't stop on `AskUserQuestion` by default, that just adds a wait for something the file list already answers. Ask only when grouping is genuinely ambiguous (unclear whether two tasks actually share state or a file).
+Form task groups from the work already visible (a plan, a backlog, several independent fix-its) and state them as plain text — don't stop on `AskUserQuestion` by default; the file list already answers it. Ask only when grouping is genuinely ambiguous (unclear whether two tasks share state or a file).
 
-Heuristic, not a rule: parallel dispatch pays off most once there are 3+ tasks (or failures) in separate files with unrelated causes. Below that, sequential is usually simpler to reason about — don't force parallelism for its own sake.
+Heuristic, not a rule: parallel dispatch pays off most with 3+ tasks (or failures) in separate files with unrelated causes. Below that, sequential is usually simpler — don't force parallelism for its own sake.
 
 **Done when:** every task group is stated as plain text with its file list and no `AskUserQuestion` is still pending.
 
@@ -68,7 +68,7 @@ For the full contract (five required prompt fields), common mistakes, specialist
 
 - Re-check the matrix for the lanes in this batch: zero file overlap, zero unresolved dependencies.
 - Launch all agents for a batch in ONE single message.
-- **Default every Writer lane to `run_in_background: true`.** Reserve foreground (blocking) dispatch for a lane whose result is needed before writing the next prompt. The harness notifies on completion either way; background just keeps the next batch's Matrix, a user reply, or an independent lane moving instead of sitting idle until the slowest agent in the batch returns.
+- **Default every Writer lane to `run_in_background: true`.** Reserve foreground (blocking) dispatch for a lane whose result is needed before writing the next prompt. The harness notifies on completion either way; background keeps the next batch's Matrix, a user reply, or an independent lane moving instead of sitting idle until the slowest agent in the batch returns.
 - As soon as a lane launches in the background, start GROUP/MATRIX for the next batch immediately — "batch N is running" is not a reason to delay scoping batch N+1.
 - Track every in-flight background lane by name/id. When notified of a completion, INTEGRATE that lane immediately rather than batching notifications up.
 

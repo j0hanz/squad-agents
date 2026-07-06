@@ -8,9 +8,9 @@ allowed-tools: Bash(git *), Bash(gh *), Read, AskUserQuestion, Skill(write-commi
 
 # pr-workflow
 
-The convenient terminal step: take work that's done (and ideally reviewed) and land it as a single, atomically-committed PR with the least fuss. Generate the branch name and the PR body — don't make the human author plumbing. Reserve confirmation for the one moment it matters: **the push**, because that's the first step that leaves the machine and is hard to retract.
+Terminal step: land work that's done (ideally reviewed) as a single, atomically-committed PR. Generate the branch name and PR body — don't make the human author plumbing. Reserve confirmation for **the push**: the first step that leaves the machine and is hard to retract.
 
-**Commit mechanics → `write-commit`.** Step 3 below delegates all staging, secret-scan, policy-detection, and message-format rules to `write-commit`. Do not duplicate those rules here.
+**Commit mechanics → `write-commit`.** Step 3 delegates all staging, secret-scan, policy-detection, and message-format rules to `write-commit`. Do not duplicate them here.
 
 ## Process Flow
 
@@ -36,10 +36,10 @@ Start: Deliver Request
 ## Step 1: Group Changes
 
 1. Run `git status --porcelain`, `git diff --stat`, `git diff --name-only`, and `git diff --staged --stat` in parallel.
-2. Group related files together. Keep features, fixes, and formatting in totally separate groups.
-3. Show the groups to the user clearly and briefly.
+2. Group related files together. Keep features, fixes, and formatting in separate groups.
+3. Show the groups to the user briefly.
 
-**Done when:** changed files are grouped into logical change groups and the groups are shown to the user.
+**Done when:** changed files are grouped into logical change groups and shown to the user.
 
 ## Step 2: Create Branch
 
@@ -52,8 +52,8 @@ Start: Deliver Request
 ## Step 3: Commit Safely
 
 1. Follow `write-commit` for all staging, secret-scan, policy-detection, and message-format rules.
-2. Make one commit for each group of files — one logical change per commit, nothing bundled.
-3. Show the generated commit message to the user and wait for them to say "OK" before committing.
+2. Make one commit per file group — one logical change per commit, nothing bundled.
+3. Show the generated commit message to the user and wait for "OK" before committing.
 
 **Done when:** one commit per file group is made and the user said "OK" before each commit.
 
@@ -85,8 +85,8 @@ Start: Deliver Request
 
 ## Multi-Agent Rules (Working with other AI)
 
-1. **Separate Folders:** Give each agent its own folder and branch using `git worktree add ../<repo>-<task> -b <type>/<task>`.
-2. **Keep Commits Separate:** Never squash (squish together) commits from different agents. Keep the exact history.
+1. **Separate Folders:** Give each agent its own folder and branch via `git worktree add ../<repo>-<task> -b <type>/<task>`.
+2. **Keep Commits Separate:** Never squash commits from different agents. Keep the exact history.
 3. **Merging:** Open one PR per branch. If merging branches together, fix conflicts one by one. Use `diagnose` if a merge fails.
 4. **Same Gate Applies:** Each agent's push still goes through Step 4 — one confirmation per branch, no exceptions for worktrees.
 

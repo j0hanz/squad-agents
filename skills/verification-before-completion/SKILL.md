@@ -20,18 +20,16 @@ Start: Ready to Complete
 
 ## 1. Mandatory Checklist
 
-The standing bar every change clears is [`references/definition-of-done.md`](references/definition-of-done.md) — the project-wide Definition of Done. The items below are that bar applied here; read it first.
-
-**action:** Verify all items before completion.
-
-The full checklist lives in [`references/definition-of-done.md`](references/definition-of-done.md) (Tests, Build/types, Lint, No debug residue, Diff, Acceptance criteria, Callers) — read it first. The items below are the delta this skill adds on top of that bar:
+The full bar lives in [`references/definition-of-done.md`](references/definition-of-done.md) (Tests, Build/types, Lint, No debug residue, Diff, Acceptance criteria, Callers) — read it first. The items below are the delta this skill adds on top of that bar:
 
 - [ ] **Manual:** Documented inputs/outputs if no automation.
 - [ ] **Bug Fix:** Confirm reproduction failure then confirm success.
 
+**action:** Verify all items before completion.
+
 ## 2. Decision Logic
 
-**"Non-trivial" heuristic:** a change is non-trivial unless it is a single-file edit of 20 lines or fewer with no new public surface and no logic branching. This is a bias-toward-caution heuristic, not a precise boundary — when in doubt, treat the change as non-trivial. Self-classifying a change as trivial to skip the review handoff below is itself a verification failure.
+**"Non-trivial" heuristic:** a change is non-trivial unless it is a single-file edit of 20 lines or fewer with no new public surface and no logic branching. Bias toward caution — when in doubt, treat as non-trivial. Self-classifying a change as trivial to skip the review handoff below is itself a verification failure.
 
 **Trivial -> done when** (all must hold, each observable — prose alone fails):
 

@@ -7,7 +7,7 @@ allowed-tools: Bash(git *), Read
 
 # Git Commit Agent
 
-**Canonical source for commit mechanics.** Every other skill that stages and commits (`pr-workflow` Step 3, `multi-agent-development` Operational Rules, `parallel-brainstorming` Phase 6, `diagnose` Resume-after-fix, `receive-code-review` Routing) defers to the rules here. Do not duplicate these rules elsewhere — link to this skill instead.
+**Canonical source for commit mechanics.** Every other skill that stages and commits (`pr-workflow` Step 3, `multi-agent-development` Operational Rules, `parallel-brainstorming` Phase 6, `diagnose` Resume-after-fix, `receive-code-review` Routing) defers to the rules here. Link, don't duplicate.
 
 ```text
   ┌───────────────┐     git add      ┌──────────────┐   git commit    ┌──────────────┐

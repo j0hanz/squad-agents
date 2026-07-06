@@ -5,16 +5,12 @@ disable-model-invocation: true
 allowed-tools: Skill, Read, Glob
 ---
 
-# ponytail: metadata.triggers intentionally absent across all 16 skills — no consumer reads them; add per-skill trigger phrases when a router consumes triggers.
-
-# ponytail: "Prefer over X" clauses in skill descriptions are an accepted soft-routing convention — no enforcement; leave descriptions as-is.
-
 <SUBAGENT-STOP>
 If you were dispatched as a subagent to execute a specific task, skip this skill.
 </SUBAGENT-STOP>
 
 <ROUTING-PRINCIPLE>
-If a skill has strong relevance to your task, route to it. Routing decisions follow the gate matrix below. You may skip a skill only if: (1) Gate 3 triviality fast-path applies (trivial <~20 line changes), (2) the Skip Disclaimer indicates a skill is unavailable, or (3) the current task is clearly a subagent delegation (see SUBAGENT-STOP above). Otherwise, follow the routing decisively.
+Route to any skill with strong relevance to the task. Routing decisions follow the gate matrix below. Skip a skill only if (1) Gate 3 triviality fast-path applies (<~20 line changes), (2) the Skip Disclaimer marks it unavailable, or (3) the task is a subagent delegation (see SUBAGENT-STOP). Otherwise follow the routing decisively.
 </ROUTING-PRINCIPLE>
 
 ## When to Use
@@ -61,10 +57,10 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 
 - **Skill Shadowing:** Warn the user if a global skill version overrides the local `skills/` version.
 - **Immediate Invocation:** Activate and follow a skill immediately once a route is identified.
-- **Notification:** Announce the route as plain text: `✅ Routing to [<skill-name>]: [reason]`. This is an FYI, not a decision — don't spend a blocking `AskUserQuestion` just to acknowledge a routing choice the matrix/gates already determined.
+- **Notification:** Announce the route as plain text: `✅ Routing to [<skill-name>]: [reason]`. FYI only — don't spend a blocking `AskUserQuestion` to acknowledge a routing the matrix/gates already determined.
 - **No Skips:** Never bypass process gates for "simple" or "quick" tasks.
-- **Gate Matrix Scope:** The Gate 0–4 matrix governs entry-routing only (Gate 0 onboarding through first dispatch at Gate 3) and does not re-describe a skill's own exit transitions once that skill is active. Each skill's own `## Next Skills` section remains canonical for that skill's outbound routing.
-- **Hard-to-reverse decisions, mid-skill:** any skill that hits a hard-to-reverse branch point with the user (locking a design, picking which finding to act on, accepting risk vs. re-drafting) calls `interview` rather than hand-rolling its own question loop. Doesn't apply to a single isolated yes/no gate inside a tight loop — that's a confirmation, not a session.
+- **Gate Matrix Scope:** The Gate 0–4 matrix governs entry-routing only (Gate 0 onboarding through first dispatch at Gate 3); it does not re-describe a skill's own exit transitions. Each skill's `## Next Skills` section stays canonical for its outbound routing.
+- **Hard-to-reverse decisions, mid-skill:** any skill hitting a hard-to-reverse branch point with the user (locking a design, picking which finding to act on, accepting risk vs. re-drafting) calls `interview` rather than hand-rolling its own question loop. A single isolated yes/no gate inside a tight loop is a confirmation, not a session — this does not apply.
 - **Auto-invoke:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are safe to invoke without asking first — each is safety-gated (test-gated, read-only agent, or worktree-isolated). Ask first only for irreversible steps (push, migration, destructive command) or the first dispatch of the session.
 
 ## Strict Constraints (NEVER List)

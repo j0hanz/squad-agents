@@ -20,8 +20,8 @@ Do not skip discovery just because a task looks easy. If a task needs zero disco
 **2. WORKFLOW RULES**
 
 - **Internal Brainstorming:** Generate multiple divergent ideas in a single shot using structured internal thinking to simulate different perspectives.
-- **Internal Critique:** Review ideas by adopting multiple personas (e.g., Skeptic, Guardian, Advocate) sequentially within the same context.
-- **Synthesis:** Combine ideas and make final decisions yourself without needing to spawn subagents.
+- **Internal Critique:** Review ideas by adopting multiple personas (Skeptic, Guardian, Advocate) sequentially within the same context.
+- **Synthesis:** Combine ideas and make final decisions yourself without spawning subagents.
 
 **3. STRICT ROLES (SIMULATED)**
 Adopt these roles within your thought process:
@@ -32,7 +32,7 @@ Adopt these roles within your thought process:
 **4. DISPATCH SETTINGS**
 
 - **Code Scans:** Run the provided python scripts directly.
-- **Parallel Work:** Do NOT use subagents. Use single-shot multi-lane ideation (generating multiple perspectives in one response) to save time and tokens.
+- **Parallel Work:** Do NOT use subagents. Use single-shot multi-lane ideation (multiple perspectives in one response) to save time and tokens.
 
 ## Process Flow
 
@@ -64,11 +64,11 @@ Creative Checkpoint
 
 ## Phase 1: Framing & Discovery
 
-- **Probe:** Identify target users. Ask clarifying questions if the request is ambiguous.
+- **Probe:** Identify target users; ask clarifying questions if the request is ambiguous.
 - **Scan:** Run `python ${CLAUDE_SKILL_DIR}/scripts/scan_context.py '<nouns>' --cwd '<root>' | python ${CLAUDE_SKILL_DIR}/scripts/compress_report.py` (fallback to `Grep` if it fails).
 - **Report:** Extract Related Files, Recent Changes, Terms, Interfaces, Constraints, Scope (S/M/L/XL), and Unknowns.
 - **Zero-Code Check:** Stop and offer exit if existing code/config already solves this.
-- **Understanding Lock:** Summarize the problem and your understanding. Only invoke `interview` if you have genuine doubts. Otherwise, proceed directly to Phase 3.
+- **Understanding Lock:** Summarize the problem and your understanding. Only invoke `interview` if you have genuine doubts; otherwise proceed directly to Phase 3.
 - **Routing:**
 - Scope XL → Offer to break it down.
 - Ambiguous → Go to Phase 2.
@@ -78,16 +78,16 @@ Creative Checkpoint
 
 ## Phase 2: Clarification
 
-- **Resolve via `interview`:** hand the ambiguous terms to `interview` (max 4 per batch) rather than hand-rolling a question loop — it already enforces one-at-a-time, two-option questioning.
-- **Glossary:** Save the resolved definitions to `glossary.md` (never `CONTEXT.md`).
-- **Visuals:** Offer a diagram _only_ if layout or data flow requires it. Wait for a reply.
+- **Resolve via `interview`:** hand the ambiguous terms to `interview` (max 4 per batch) — it already enforces one-at-a-time, two-option questioning, so do not hand-roll a question loop.
+- **Glossary:** Save resolved definitions to `glossary.md` (never `CONTEXT.md`).
+- **Visuals:** Offer a diagram only if layout or data flow requires it. Wait for a reply.
 
 **Done when:** ambiguous terms are resolved via `interview` (max 4 per batch) and saved to `glossary.md`.
 
 ## Creative Checkpoint (Pre-Ideation)
 
 - **Evaluate:** Look for a 10x simpler or zero-code solution.
-- **Seed:** If found, use this as "Approach A" (Minimalist lane) in Phase 3.
+- **Seed:** If found, use it as "Approach A" (Minimalist lane) in Phase 3.
 
 ## Phase 3: Multi-Lane Divergent Ideation
 
@@ -108,7 +108,7 @@ Creative Checkpoint
 ## Phase 4: Convergence & Synthesis
 
 - **Synthesize:** Group similar ideas. Combine strong mechanisms with risk-mitigations from other lanes.
-- **Distill:** Present 2-3 distinct approaches. Approach A must be Minimalist. For each, include: What, Gains, Costs, Fit, First Step.
+- **Distill:** Present 2-3 distinct approaches. Approach A must be Minimalist. For each: What, Gains, Costs, Fit, First Step.
 - **Approval Lock:** Hand the 2-3 distilled approaches to `interview` to lock one — this is the hard-to-reverse decision that commits Phase 6's Design Brief. **Await its resolved decision. Do not guess.**
 - **Routing:** If Phase 5 flag is set → Phase 5. Otherwise → Phase 6.
 
@@ -124,8 +124,8 @@ Creative Checkpoint
 3. _User Advocate:_ Evaluates usability and cognitive load.
 
 - **Severity Rating:** High (Blocks deployment), Med (Worse outcome), Low (Minor). Ignore styling/naming.
-- **Resolution:** Record objections. You must "Accept & Revise" or "Reject with technical rationale" for all High/Med issues.
-- **Self-Arbitration:** Resolve any debates yourself. Decide whether the design is `APPROVED`, needs `REVISE`, or is `REJECT`.
+- **Resolution:** Record objections. For all High/Med issues, you must "Accept & Revise" or "Reject with technical rationale."
+- **Self-Arbitration:** Resolve any debates yourself. Mark the design `APPROVED`, `REVISE`, or `REJECT`.
 
 **Done when:** every High/Med objection is "Accept & Revise" or "Reject with technical rationale", and the design is marked `APPROVED`, `REVISE`, or `REJECT`.
 
@@ -142,16 +142,16 @@ Creative Checkpoint
 
 Request: "add a way for users to save and re-run searches."
 
-1. **Phase 1:** Scan finds an existing `Filter` model and a one-off "recent searches" list already in `localStorage`. Scope: M. No flag (not high-risk, not L/XL).
-2. **Creative Checkpoint:** Minimalist seed found — extend the existing `Filter` model with a `name` + `saved: boolean` column instead of a new table.
-3. **Phase 3 (Multi-lane generation):** Conventional — new `SavedSearch` table + CRUD API, mirrors existing `Bookmark` feature. Minimalist — reuse `Filter` + 2 columns, no new endpoints (piggyback on existing filter-list endpoint). Constraint-First — same as Minimalist but adds a per-user cap (20 saved searches) to bound query cost.
-4. **Phase 4:** Synthesize 2 approaches — Approach A (Minimalist + cap, cheapest) and Approach B (Conventional, more flexible but a new table + endpoints). User picks Approach A. Not flagged for L/XL or high risk → skip Phase 5.
+1. **Phase 1:** Scan finds an existing `Filter` model and a one-off "recent searches" list in `localStorage`. Scope: M. No flag (not high-risk, not L/XL).
+2. **Creative Checkpoint:** Minimalist seed found — extend `Filter` with a `name` + `saved: boolean` column instead of a new table.
+3. **Phase 3 (Multi-lane generation):** Conventional — new `SavedSearch` table + CRUD API, mirrors `Bookmark` feature. Minimalist — reuse `Filter` + 2 columns, no new endpoints (piggyback on existing filter-list endpoint). Constraint-First — same as Minimalist but adds a per-user cap (20 saved searches) to bound query cost.
+4. **Phase 4:** Synthesize 2 approaches — Approach A (Minimalist + cap, cheapest) and Approach B (Conventional, more flexible but a new table + endpoints). User picks A. Not flagged → skip Phase 5.
 5. **Phase 6:** Design Brief written to `docs/design/2026-06-29-saved-searches-design.md`: Approach (extend `Filter`), Why (reuses existing model, smallest diff), Scope (M), Constraints (cap 20/user), Interface (`Filter.saved`, `Filter.name`), Architecture (no new table), Risks (cap needs a migration default), First Step (`ALTER TABLE filters ADD COLUMN saved boolean DEFAULT false`).
 6. Commit Guard: user declines auto-commit → brief left in chat + on disk; handoff to `request-plan` to formalize tasks.
 
 ## STRICT RULES (NEVER DO)
 
-- **Blend Ideation:** Keep your generated Phase 3 perspectives distinct and avoid bleeding them into each other until Phase 4 synthesis.
+- **Blend Ideation:** Keep Phase 3 perspectives distinct; do not bleed them into each other until Phase 4 synthesis.
 - **Ship Raw Ideas:** Phase 4 synthesis is mandatory. Never present raw brainstormed ideas as the final answer.
 - **Accept Empty Rejections:** Require a technical reason for any rejected High-severity issue during Phase 5 critique.
 - **Use Subagents for Ideation:** Do not use `invoke_subagent` for Phase 3 or 5. Do it yourself to save tokens and time.
