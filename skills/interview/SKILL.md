@@ -1,31 +1,76 @@
 ---
 name: interview
-description: 'Use when a plan, design, or decision has unresolved hard-to-reverse branches to lock before committing — requirements are ambiguous or incomplete before scoping a task, or unknowns must be resolved via AskUserQuestion before defining scope.'
-allowed-tools: Read, Grep, Glob, AskUserQuestion
+description: 'Use when project requirements are ambiguous, design decisions have unresolved branches, or options require user alignment. Symptoms: temptation to make assumptions under pressure.'
+metadata:
+  category: technique
+  triggers: /grill-me, AskUserQuestion, ambiguous requirements, design options, clarify scope, user feedback, align plans, decision points, alternatives, unknowns
+  allowed-tools: Read, Grep, Glob, AskUserQuestion
 ---
 
 # Interview
 
-**Objective:** Resolve every material, hard-to-reverse decision on the table — plan, design, finding, or escalation. Stop when no unresolved decision would materially affect architecture, implementation, cost, risk, or scope.
+Resolve critical, hard-to-reverse decisions (plans, designs, database schemas, package dependencies) before scoping or implementing. Stop when no unresolved decision materially affects architecture, cost, risk, or scope.
 
-**Called by:** other skills invoke this one inline (via the `Skill` tool, same thread, full context shared — no cold-start prompt) when their flow hits a hard-to-reverse branch point instead of hand-rolling a question loop. Known callers: `parallel-brainstorming` (Phase 2 term clarification, Phase 4 approach lock), `project-audit` (picking which corroborated finding to formalize), `receive-plan` (2nd-round REVISE escalation: accept risk vs. re-draft vs. abandon). A single isolated yes/no confirmation embedded in a tight loop (e.g. a TDD scope check, a push confirmation) is a gate, not a session — don't route it here.
+**Core Principle:** Follow the letter and spirit of these rules strictly.
 
-**Strict Execution Rules:**
+## When to Use
 
-- **Search First:** When inside a repository, use Read/Grep/Glob to find existing decisions, conventions, or constraints before questioning — check the obvious places (config, similar existing features, docs), not exhaustively. Ground each recommended option in what you find. If no repository context exists, proceed directly to interviewing.
-- **One at a Time:** Ask exactly ONE question. Wait for feedback before the next.
-- **Tool Only:** MUST use the `AskUserQuestion` tool for every question. Never ask via plain text.
-- **Strictly Two Options:** Provide EXACTLY 2 options per question:
-  1. Your recommended answer.
-  2. The next most likely alternative (or a concrete "something else" framing if truly open-ended — a real option, not a duplicate of the tool's built-in "Other").
-     _(Do not add a third "Other" option; the tool includes one automatically.)_
-- **No Shrugging:** Reject vague or one-word answers and re-ask with sharper options. Push for concrete decisions, prioritizing hard-to-reverse choices over trivial ones. Skip trivially reversible or default-safe decisions — don't interview on those. If the user explicitly defers to your judgment after a re-ask, take your recommended option, record it as the decision, and move on.
-- **Resolution Standard:** A decision is resolved only when recordable as a clear implementation instruction with no material ambiguity.
-- **Nothing to Ask:** If no hard-to-reverse branches remain (or none existed), say so and stop — don't manufacture questions to fill the format.
-- **Wrap-Up:** When every branch is resolved, end with a numbered list of the resolved decisions, one definitive sentence each.
+Use when:
 
-**Example:** "Should auth use JWT (recommended — stateless, no session store) or session cookies (simpler revocation)?"
+- Plans, designs, or findings have unresolved, hard-to-reverse branch points.
+- Requirements are ambiguous or incomplete.
+- Unknowns must be resolved with the user before defining scope.
 
-## Next Skills
+### Escape Hatch (When NOT to Use)
 
-Hands the numbered resolved-decisions list back to whichever skill invoked it — interview never drafts, implements, or commits anything itself. The caller resumes its own process flow from there.
+Bypass only for:
+
+- Spike/exploratory code where all work will be discarded.
+- Trivial choices (e.g., local variable names, cosmetic UI). Architectural, API, database, dependency, or business logic choices are never trivial.
+- Isolated yes/no confirmation gates (e.g., TDD checks, git push confirmations).
+
+## How It Works
+
+Follow this sequence strictly:
+
+1. **Search First:** Search repository configs/docs (Read/Grep/Glob) for constraints before asking. Ground recommendations in findings.
+2. **One at a Time:** Ask exactly one question per turn. Never combine decisions. Wait for feedback before asking the next.
+3. **Tool Only:** Ask questions/clarifications only via the `AskUserQuestion` tool. Never ask in plain text.
+4. **Two Realistic Options:** Provide exactly two options:
+   - Option 1: Recommended grounded choice.
+   - Option 2: Next most likely concrete alternative.
+   - Do not provide passive/dummy choices (e.g., "Do nothing"). Both must be actionable paths.
+5. **No Shrugging:** Reject vague answers; re-ask with mutually exclusive options. Do not nudge the user to defer. If they explicitly defer, proceed with the recommended choice.
+6. **Wrap-Up:** End with a numbered list of all resolved decisions (one sentence each).
+
+## Examples
+
+### ❌ BAD (Plain text, compound, dummy option)
+
+> "Should we use JWT or session cookies? Also, should we use Redis or PostgreSQL? Or we can just do nothing."
+
+### ✅ GOOD (One question, structured options, grounded)
+
+```json
+{
+  "Question": "Based on database.js, should we store sessions in PostgreSQL (recommended — matches existing db infra) or Redis (faster read/write but adds dependency)?",
+  "Options": ["PostgreSQL (Recommended)", "Redis (Alternative)"]
+}
+```
+
+## Checklist & Red Flags
+
+Ensure these are true before completing the task:
+
+- [ ] **Searched First:** Checked codebase conventions before proposing (Red Flag: Proposing choices blind).
+- [ ] **Tool Usage:** All questions sent via `AskUserQuestion` (Red Flag: Plain text questions).
+- [ ] **Single Focus:** Asked exactly one question per turn (Red Flag: Compound questions).
+- [ ] **Two Options:** Offered exactly two realistic, actionable choices (Red Flag: Dummy choices like "Do nothing").
+- [ ] **No Bias:** Did not nudge user to defer (Red Flag: Nudging or shrugging).
+- [ ] **Wrap-Up:** Concluded with a numbered list of all resolved decisions.
+
+## Related Skills
+
+- [parallel-brainstorming](../parallel-brainstorming/SKILL.md) - Invokes interview for term clarification and approach locking.
+- [project-audit](../project-audit/SKILL.md) - Invokes interview to pick which corroborated finding to formalize.
+- [receive-plan](../receive-plan/SKILL.md) - Invokes interview to resolve risk/re-draft escalations.
