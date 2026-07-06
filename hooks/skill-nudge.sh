@@ -34,22 +34,17 @@ agent_sdlc_json_escape() {
 agent_sdlc_enum_skills() {
   # Lists available skill directory names.
   local root="${CLAUDE_PLUGIN_ROOT:-.}"
-  local found=0
   while IFS= read -r -d '' file; do
-    found=1
     local d="${file%/SKILL.md}"
     printf '%s\n' "${d##*/}"
   done < <(find "$root/skills" -maxdepth 2 -name "SKILL.md" -print0 2>/dev/null | sort -z || true)
-  if [ "$found" -eq 0 ]; then
-    return 0
-  fi
 }
 
 # Exit early if nudge is disabled.
 if [ "${AGENT_SDLC_SKILL_NUDGE:-1}" = "0" ]; then
   exit 0
 fi
-BOOTSTRAP_MODE="${AGENT_SDLC_BOOTSTRAP_MODE:-full}"
+BOOTSTRAP_MODE="${AGENT_SDLC_BOOTSTRAP_MODE:-cooldown}"
 
 # Fetch skill list once — shared by both cooldown and full modes.
 available=$(agent_sdlc_enum_skills)
@@ -59,7 +54,7 @@ STATE_DIR="${CLAUDE_PROJECT_DIR:-.}/.claude"
 STATE_FILE="$STATE_DIR/skill-nudge-state"
 COOLDOWN_SECONDS=86400 # 24h cooldown.
 
-# Mode: cooldown.
+# Mode: cooldown (default — once per 24h).
 if [ "$BOOTSTRAP_MODE" = "cooldown" ]; then
   now=$(date +%s)
   if [ -f "$STATE_FILE" ]; then
@@ -80,7 +75,7 @@ if [ "$BOOTSTRAP_MODE" = "cooldown" ]; then
   exit 0
 fi
 
-# Mode: full (default).
+# Mode: full (opt-in via AGENT_SDLC_BOOTSTRAP_MODE=full — fires every session).
 list=$(printf '%s\n' "$available" | paste -sd ',' -)
 gates="Gate 0 Repository Onboarding, Gate 1 Task Definition, Gate 2 Scope & System, Gate 3 Execution Strategy, Gate 4 Quality & Delivery"
 message="<EXTREMELY_IMPORTANT>[agent-sdlc:skill-nudge] Before responding, check using-agent-sdlc-skills for routing: ${gates}. Bundled skills available this session: ${list}.</EXTREMELY_IMPORTANT>"

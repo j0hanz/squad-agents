@@ -227,6 +227,35 @@ test('skill-nudge.sh emits additionalContext on first fire, then stays quiet (co
   }
 });
 
+test('skill-nudge.sh default mode (no BOOTSTRAP_MODE env) is cooldown', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-default-'));
+  try {
+    const first = runHandler(
+      'skill-nudge.sh',
+      {},
+      {
+        CLAUDE_PROJECT_DIR: dir,
+        CLAUDE_PLUGIN_ROOT: pluginRoot,
+      },
+    );
+    assert.strictEqual(first.exitCode, 0);
+    assert.notStrictEqual(first.stdout.trim(), '', 'default should emit on first fire');
+
+    const second = runHandler(
+      'skill-nudge.sh',
+      {},
+      {
+        CLAUDE_PROJECT_DIR: dir,
+        CLAUDE_PLUGIN_ROOT: pluginRoot,
+      },
+    );
+    assert.strictEqual(second.exitCode, 0);
+    assert.strictEqual(second.stdout.trim(), '', 'default should cooldown on second fire');
+  } finally {
+    cleanupProject(dir);
+  }
+});
+
 test('skill-nudge.sh respects AGENT_SDLC_SKILL_NUDGE=0', () => {
   const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-'));
   try {
