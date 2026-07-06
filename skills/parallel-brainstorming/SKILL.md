@@ -14,26 +14,6 @@ design work — it still needs Phase 1 Discovery first. Does not apply to bug fi
 config changes with no design space.
 </HARD-GATE>
 
-**1. NEVER SKIP DISCOVERY SILENTLY**
-Do not skip discovery just because a task looks easy. If a task needs zero discovery, you MUST name the exact step skipped (Stakeholder Probe, Codebase Scan, or Understanding Statement) and explain why.
-
-**2. WORKFLOW RULES**
-
-- **Internal Brainstorming:** Generate multiple divergent ideas in a single shot using structured internal thinking to simulate different perspectives.
-- **Internal Critique:** Review ideas by adopting multiple personas (Skeptic, Guardian, Advocate) sequentially within the same context.
-- **Synthesis:** Combine ideas and make final decisions yourself without spawning subagents.
-
-**3. STRICT ROLES (SIMULATED)**
-Adopt these roles within your thought process:
-
-- **Phase 3 Lenses:** Brainstorm from distinct angles (Minimalist, Conventional, Radical).
-- **Phase 5 Reviewers (Skeptic, Guardian, Advocate):** Find flaws in the synthesized design.
-
-**4. DISPATCH SETTINGS**
-
-- **Code Scans:** Run the provided python scripts directly.
-- **Parallel Work:** Do NOT use subagents. Use single-shot multi-lane ideation (multiple perspectives in one response) to save time and tokens.
-
 ## Process Flow
 
 ```
@@ -64,9 +44,10 @@ Creative Checkpoint
 
 ## Phase 1: Framing & Discovery
 
+- **No Silent Skips:** If a task needs zero discovery, name the exact step skipped (Probe, Scan, or Understanding Lock) and explain why — never skip silently.
 - **Probe:** Identify target users; ask clarifying questions if the request is ambiguous.
 - **Scan:** Run `python ${CLAUDE_SKILL_DIR}/scripts/scan_context.py '<nouns>' --cwd '<root>' | python ${CLAUDE_SKILL_DIR}/scripts/compress_report.py` (fallback to `Grep` if it fails).
-- **Report:** Extract Related Files, Recent Changes, Terms, Interfaces, Constraints, Scope (S/M/L/XL), and Unknowns.
+- **Report:** Extract Related Files (with recent commits and test coverage), Interface Shapes, Design Docs, Analogous Features, Constraints, Scope (S/M/L/XL) with reasoning, and Unknowns.
 - **Zero-Code Check:** Stop and offer exit if existing code/config already solves this.
 - **Understanding Lock:** Summarize the problem and your understanding. Only invoke `interview` if you have genuine doubts; otherwise proceed directly to Phase 3.
 - **Routing:**
@@ -74,7 +55,7 @@ Creative Checkpoint
 - Ambiguous → Go to Phase 2.
 - High Risk / Scope L+ → Set Phase 5 Flag.
 
-**Done when:** a Context Report lists Related Files, Recent Changes, Terms, Interfaces, Constraints, Scope (S/M/L/XL), and Unknowns, and the zero-code check has been answered.
+**Done when:** a Context Report lists Related Files, Interface Shapes, Design Docs, Analogous Features, Constraints, Scope (S/M/L/XL), and Unknowns, and the zero-code check has been answered.
 
 ## Phase 2: Clarification
 
@@ -88,6 +69,8 @@ Creative Checkpoint
 
 - **Evaluate:** Look for a 10x simpler or zero-code solution.
 - **Seed:** If found, use it as "Approach A" (Minimalist lane) in Phase 3.
+
+**Done when:** a 10x/zero-code candidate is seeded as Approach A, or you've confirmed none exists and are proceeding to Phase 3 unseeded.
 
 ## Phase 3: Multi-Lane Divergent Ideation
 
@@ -155,3 +138,10 @@ Request: "add a way for users to save and re-run searches."
 - **Ship Raw Ideas:** Phase 4 synthesis is mandatory. Never present raw brainstormed ideas as the final answer.
 - **Accept Empty Rejections:** Require a technical reason for any rejected High-severity issue during Phase 5 critique.
 - **Use Subagents for Ideation:** Do not use `invoke_subagent` for Phase 3 or 5. Do it yourself to save tokens and time.
+
+## Next Skills
+
+- `write-commit`: commit the Design Brief only (no push).
+- `pr-workflow`: commit, push, and open a PR for the Design Brief.
+- `request-plan`: formalize the Design Brief into a task plan when auto-commit is declined.
+- `dispatch-agents`: execute the resulting plan once tasks are formalized.
