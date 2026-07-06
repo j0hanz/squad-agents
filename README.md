@@ -1,12 +1,12 @@
-# Agent SDLC Plugin
+# Squad Agents Plugin
 
-[![License](https://img.shields.io/github/license/j0hanz/agent-sdlc?style=for-the-badge)](https://github.com/j0hanz/agent-sdlc/blob/master/LICENSE) [![Latest release](https://img.shields.io/github/v/release/j0hanz/agent-sdlc?style=for-the-badge&include_prereleases&sort=semver)](https://github.com/j0hanz/agent-sdlc/releases) [![Node.js](https://img.shields.io/badge/node-%3E%3D22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org) [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org) [![GitHub stars](https://img.shields.io/github/stars/j0hanz/agent-sdlc?style=for-the-badge&logo=github)](https://github.com/j0hanz/agent-sdlc/stargazers)
+[![License](https://img.shields.io/github/license/j0hanz/squad-agents?style=for-the-badge)](https://github.com/j0hanz/squad-agents/blob/master/LICENSE) [![Latest release](https://img.shields.io/github/v/release/j0hanz/squad-agents?style=for-the-badge&include_prereleases&sort=semver)](https://github.com/j0hanz/squad-agents/releases) [![Node.js](https://img.shields.io/badge/node-%3E%3D22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org) [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org) [![GitHub stars](https://img.shields.io/github/stars/j0hanz/squad-agents?style=for-the-badge&logo=github)](https://github.com/j0hanz/squad-agents/stargazers)
 
 A Claude Code plugin for authoring and maintaining skills and hooks — structured workflows and lifecycle hooks that guide Claude through the full agent development lifecycle.
 
 ## Overview
 
-Agent SDLC Plugin extends Claude Code with 15 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to specialized, safe-by-default subagents (`implementer`, `researcher`, `conflict-resolver`, etc.) orchestrated by the `dispatch-agents` skill.
+Squad Agents Plugin extends Claude Code with 15 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to specialized, safe-by-default subagents (`implementer`, `researcher`, `conflict-resolver`, etc.) orchestrated by the `dispatch-agents` skill.
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
@@ -37,10 +37,10 @@ Agent SDLC Plugin extends Claude Code with 15 skills and 2 lifecycle hooks cover
 ```json
 {
   "extraKnownMarketplaces": {
-    "claude-agent-sdlc": {
+    "squad-agents": {
       "source": {
         "source": "github",
-        "repo": "j0hanz/agent-sdlc"
+        "repo": "j0hanz/squad-agents"
       }
     }
   }
@@ -50,14 +50,14 @@ Agent SDLC Plugin extends Claude Code with 15 skills and 2 lifecycle hooks cover
 1. Install the plugin:
 
 ```bash
-claude plugin install claude-agent-sdlc@claude-agent-sdlc
+claude plugin install squad-agents@squad-agents
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/j0hanz/agent-sdlc.git
-claude --plugin-dir ./agent-sdlc
+git clone https://github.com/j0hanz/squad-agents.git
+claude --plugin-dir ./squad-agents
 ```
 
 ## Prerequisites
@@ -89,7 +89,7 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `pr-workflow`                    | "open a PR", "ship it", "push my work", "push my branch"                 | Branch, push & open a PR — delegates commit mechanics to `write-commit`                                                    |
 | `write-commit`                   | "write a commit", "commit message", "generate commit", "commit code"     | Canonical commit step — stages, secret-scans, and commits with conventional format; hands off to `pr-workflow` for push+PR |
 | `verification-before-completion` | (automatic before task completion)                                       | Verify changes work before marking done                                                                                    |
-| `using-agent-sdlc-skills`        | (meta-routing)                                                           | Routes to the right skill based on context                                                                                 |
+| `using-squad-agents-skills`      | (meta-routing)                                                           | Routes to the right skill based on context                                                                                 |
 | `project-init`                   | "init project", "generate AGENTS.md/CLAUDE.md/GEMINI.md", "onboard repo" | Parallel discovery fan-out → lean AGENTS.md + stubs                                                                        |
 
 ### Subagent Dispatch
@@ -108,16 +108,16 @@ This plugin defines custom agents in the `agents/` directory covering specialize
 
 Bash-only handlers (`hooks/*.sh`), wired in `hooks/hooks.json`. `shell-safety` is the only blocking hook — everything else is additive (warns or injects context, never blocks).
 
-| Event                 | Handler        | What it does                                                                                                                                                           | Blocking? |
-| :-------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- |
-| `PreToolUse` (`Bash`) | `shell-safety` | Rejects a small, explicit denylist of catastrophic commands (`rm -rf /`, force-push to main/master, `git clean -fdx`). Override with `AGENT_SDLC_SKIP_SHELL_SAFETY=1`. | Yes       |
-| `SessionStart` (`*`)  | `skill-nudge`  | Points toward this plugin's bundled skills, at most once per 24h. Opt out with `AGENT_SDLC_SKILL_NUDGE=0`.                                                             | No        |
+| Event                 | Handler        | What it does                                                                                                                                                             | Blocking? |
+| :-------------------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- |
+| `PreToolUse` (`Bash`) | `shell-safety` | Rejects a small, explicit denylist of catastrophic commands (`rm -rf /`, force-push to main/master, `git clean -fdx`). Override with `SQUAD_AGENTS_SKIP_SHELL_SAFETY=1`. | Yes       |
+| `SessionStart` (`*`)  | `skill-nudge`  | Points toward this plugin's bundled skills, at most once per 24h. Opt out with `SQUAD_AGENTS_SKILL_NUDGE=0`.                                                             | No        |
 
 `shell-safety.sh` is self-contained with no shared-library dependency, so a bug in any other hook file can never silently disable the one blocking guard. The denylist is intentionally narrow and documented as best-effort, not comprehensive protection.
 
 ### Configuration
 
-You can configure project-local behaviors for the `claude-agent-sdlc` plugin by creating a settings file at `.claude/claude-agent-sdlc.local.md` in the root of your project:
+You can configure project-local behaviors for the `squad-agents` plugin by creating a settings file at `.claude/squad-agents.local.md` in the root of your project:
 
 ```markdown
 ---
@@ -128,9 +128,9 @@ skip_shell_safety: false
 skill_nudge: true
 ---
 
-# claude-agent-sdlc Configuration
+# squad-agents Configuration
 
-This file configures local settings for the `claude-agent-sdlc` plugin.
+This file configures local settings for the `squad-agents` plugin.
 ```
 
 > [!IMPORTANT]
@@ -190,4 +190,4 @@ Released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-[Back to top](#agent-sdlc-plugin)
+[Back to top](#squad-agents-plugin)

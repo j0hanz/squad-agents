@@ -243,7 +243,7 @@ function validateHooks() {
 // Validate cross-skill routing references (see docs/adr/0001-routing-graph-duplication.md).
 // Routing knowledge is intentionally duplicated between the central router and each skill;
 // this guards the duplication against drift instead of deduplicating it.
-const ROUTER_SKILL = 'using-agent-sdlc-skills';
+const ROUTER_SKILL = 'using-squad-agents-skills';
 function validateRouting(skillsDir) {
   let skillNames;
   try {
@@ -291,7 +291,7 @@ function validateRouting(skillsDir) {
 
 // Main validation
 function main() {
-  console.log('🔍 Validating agent-sdlc plugin structure...\n');
+  console.log('🔍 Validating squad-agents plugin structure...\n');
 
   // Validate skills
   const skillsDir = path.join(pluginRoot, 'skills');

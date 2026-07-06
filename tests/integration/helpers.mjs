@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
  * Caller is responsible for cleanup via cleanupProject().
  */
 export function createTmpProject(files = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-project-'));
+  const dir = mkdtempSync(join(tmpdir(), 'squad-agents-project-'));
   for (const [name, content] of Object.entries(files)) {
     writeFileSync(join(dir, name), content, 'utf-8');
   }

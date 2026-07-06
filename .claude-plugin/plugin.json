@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
-  "name": "claude-agent-sdlc",
+  "name": "squad-agents",
   "version": "1.1.5",
   "description": "Multi-agent workflows for Claude Code: development, testing, debugging, and review.",
   "license": "MIT",
@@ -8,8 +8,8 @@
     "name": "j0hanz",
     "email": "l.johansson93@outlook.com"
   },
-  "repository": "https://github.com/j0hanz/agent-sdlc",
-  "homepage": "https://github.com/j0hanz/agent-sdlc",
+  "repository": "https://github.com/j0hanz/squad-agents",
+  "homepage": "https://github.com/j0hanz/squad-agents",
   "keywords": [
     "agent",
     "claude",

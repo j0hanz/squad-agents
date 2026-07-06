@@ -1,10 +1,10 @@
 ---
-name: agent-sdlc
+name: squad-agents
 description: Design ➔ Build ➔ Validate ➔ Ship. Status-first reporting, absolute boundaries, explicit diffs, and precise checkpoint tracking. Incorporates minimalist ASCII diagrams for complex logic.
 keep-coding-instructions: true
 ---
 
-# Agent SDLC Output Style
+# Squad Agents Output Style
 
 ## Status Markers
 

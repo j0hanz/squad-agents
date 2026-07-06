@@ -7,22 +7,22 @@ shopt -s inherit_errexit 2>/dev/null || true
 cat >/dev/null 2>&1 || true # Drain unused stdin.
 
 # Load project-local settings.
-AGENT_SDLC_SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/claude-agent-sdlc.local.md"
-if [[ -z "${AGENT_SDLC_SKILL_NUDGE:-}" ]]; then
-  if [[ -f "$AGENT_SDLC_SETTINGS_FILE" ]]; then
-    FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$AGENT_SDLC_SETTINGS_FILE" 2>/dev/null || true)
+SQUAD_AGENTS_SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/squad-agents.local.md"
+if [[ -z "${SQUAD_AGENTS_SKILL_NUDGE:-}" ]]; then
+  if [[ -f "$SQUAD_AGENTS_SETTINGS_FILE" ]]; then
+    FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$SQUAD_AGENTS_SETTINGS_FILE" 2>/dev/null || true)
     if [[ -n "$FRONTMATTER" ]]; then
       NUDGE_VAL=$(printf '%s\n' "$FRONTMATTER" | grep '^skill_nudge:' | sed 's/skill_nudge: *//' | sed 's/[[:space:]]*$//' | sed 's/^"\(.*\)"$/\1/' | sed "s/^'\(.*\)'$/\1/" 2>/dev/null || true)
       if [[ "$NUDGE_VAL" == "false" ]]; then
-        export AGENT_SDLC_SKILL_NUDGE=0
+        export SQUAD_AGENTS_SKILL_NUDGE=0
       elif [[ "$NUDGE_VAL" == "true" ]]; then
-        export AGENT_SDLC_SKILL_NUDGE=1
+        export SQUAD_AGENTS_SKILL_NUDGE=1
       fi
     fi
   fi
 fi
 
-agent_sdlc_json_escape() {
+squad_agents_json_escape() {
   # Escapes \ and " — the only two characters that need escaping in these
   # messages (no newlines, no control chars, no angle brackets to escape).
   local s="$1"
@@ -31,7 +31,7 @@ agent_sdlc_json_escape() {
   printf '%s' "$s"
 }
 
-agent_sdlc_enum_skills() {
+squad_agents_enum_skills() {
   # Lists available skill directory names.
   local root="${CLAUDE_PLUGIN_ROOT:-.}"
   while IFS= read -r -d '' file; do
@@ -41,13 +41,13 @@ agent_sdlc_enum_skills() {
 }
 
 # Exit early if nudge is disabled.
-if [ "${AGENT_SDLC_SKILL_NUDGE:-1}" = "0" ]; then
+if [ "${SQUAD_AGENTS_SKILL_NUDGE:-1}" = "0" ]; then
   exit 0
 fi
-BOOTSTRAP_MODE="${AGENT_SDLC_BOOTSTRAP_MODE:-cooldown}"
+BOOTSTRAP_MODE="${SQUAD_AGENTS_BOOTSTRAP_MODE:-cooldown}"
 
 # Fetch skill list once — shared by both cooldown and full modes.
-available=$(agent_sdlc_enum_skills)
+available=$(squad_agents_enum_skills)
 [ -z "$available" ] && exit 0
 
 STATE_DIR="${CLAUDE_PROJECT_DIR:-.}/.claude"
@@ -69,16 +69,16 @@ if [ "$BOOTSTRAP_MODE" = "cooldown" ]; then
   printf '%s' "$now" >"$STATE_FILE" 2>/dev/null || true
 
   list=$(printf '%s\n' "$available" | paste -sd ',' - | sed 's/,/, /g')
-  message="[agent-sdlc:skill-nudge] This plugin includes skills for structured workflows: ${list}. They auto-trigger on matching tasks, or invoke directly with /skill-name."
-  escaped=$(agent_sdlc_json_escape "$message")
+  message="[squad-agents:skill-nudge] This plugin includes skills for structured workflows: ${list}. They auto-trigger on matching tasks, or invoke directly with /skill-name."
+  escaped=$(squad_agents_json_escape "$message")
   printf '%s\n' "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"${escaped}\"}}"
   exit 0
 fi
 
-# Mode: full (opt-in via AGENT_SDLC_BOOTSTRAP_MODE=full — fires every session).
+# Mode: full (opt-in via SQUAD_AGENTS_BOOTSTRAP_MODE=full — fires every session).
 list=$(printf '%s\n' "$available" | paste -sd ',' -)
 gates="Gate 0 Repository Onboarding, Gate 1 Task Definition, Gate 2 Scope & System, Gate 3 Execution Strategy, Gate 4 Quality & Delivery"
-message="<EXTREMELY_IMPORTANT>[agent-sdlc:skill-nudge] Before responding, check using-agent-sdlc-skills for routing: ${gates}. Bundled skills available this session: ${list}.</EXTREMELY_IMPORTANT>"
-escaped=$(agent_sdlc_json_escape "$message")
+message="<EXTREMELY_IMPORTANT>[squad-agents:skill-nudge] Before responding, check using-squad-agents-skills for routing: ${gates}. Bundled skills available this session: ${list}.</EXTREMELY_IMPORTANT>"
+escaped=$(squad_agents_json_escape "$message")
 printf '%s\n' "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"${escaped}\"}}"
 exit 0

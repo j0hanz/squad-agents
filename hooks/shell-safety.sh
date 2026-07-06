@@ -6,20 +6,20 @@
 set -Eeuo pipefail
 shopt -s inherit_errexit 2>/dev/null || true
 
-OVERRIDE_VAR="AGENT_SDLC_SKIP_SHELL_SAFETY"
+OVERRIDE_VAR="SQUAD_AGENTS_SKIP_SHELL_SAFETY"
 if [ "${!OVERRIDE_VAR:-0}" = "1" ]; then
-  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"[agent-sdlc:shell-safety] WARNING: shell guard bypassed via AGENT_SDLC_SKIP_SHELL_SAFETY env var"}}'
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"[squad-agents:shell-safety] WARNING: shell guard bypassed via SQUAD_AGENTS_SKIP_SHELL_SAFETY env var"}}'
   exit 0
 fi
 
 # Load local settings.
-AGENT_SDLC_SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/claude-agent-sdlc.local.md"
-if [[ -f "$AGENT_SDLC_SETTINGS_FILE" ]]; then
-  FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$AGENT_SDLC_SETTINGS_FILE" 2>/dev/null || true)
+SQUAD_AGENTS_SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/squad-agents.local.md"
+if [[ -f "$SQUAD_AGENTS_SETTINGS_FILE" ]]; then
+  FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$SQUAD_AGENTS_SETTINGS_FILE" 2>/dev/null || true)
   if [[ -n "$FRONTMATTER" ]]; then
     SKIP_SAFETY=$(printf '%s\n' "$FRONTMATTER" | grep '^skip_shell_safety:' | sed 's/skip_shell_safety: *//' | sed 's/[[:space:]]*$//' | sed 's/^"\(.*\)"$/\1/' | sed "s/^'\(.*\)'$/\1/" 2>/dev/null || true)
     if [[ "$SKIP_SAFETY" == "true" ]]; then
-      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"[agent-sdlc:shell-safety] WARNING: shell guard bypassed via skip_shell_safety in local config"}}'
+      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"[squad-agents:shell-safety] WARNING: shell guard bypassed via skip_shell_safety in local config"}}'
       exit 0
     fi
   fi
@@ -39,7 +39,7 @@ if [ -z "$command" ]; then
 fi
 
 deny() {
-  printf '[agent-sdlc:shell-safety] Blocked: %s. Set %s=1 to override.\n' "$1" "$OVERRIDE_VAR" >&2
+  printf '[squad-agents:shell-safety] Blocked: %s. Set %s=1 to override.\n' "$1" "$OVERRIDE_VAR" >&2
   exit 2
 }
 

@@ -1,5 +1,5 @@
 [project]
-name = "agent-sdlc"
+name = "squad-agents"
 version = "0.1.0"
 description = "Claude Code plugin for agent development and testing"
 requires-python = ">=3.10"

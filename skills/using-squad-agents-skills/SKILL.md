@@ -1,5 +1,5 @@
 ---
-name: using-agent-sdlc-skills
+name: using-squad-agents-skills
 description: 'Use when starting a new task and the correct starting point, lifecycle gate, or routing among skills is unclear.'
 disable-model-invocation: true
 allowed-tools: Skill, Read, Glob

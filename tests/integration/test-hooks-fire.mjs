@@ -117,11 +117,11 @@ test('shell-safety.sh allows force-push to a named non-default branch — docume
   assert.strictEqual(exitCode, 0);
 });
 
-test('shell-safety.sh respects the AGENT_SDLC_SKIP_SHELL_SAFETY override', () => {
+test('shell-safety.sh respects the SQUAD_AGENTS_SKIP_SHELL_SAFETY override', () => {
   const { exitCode } = runHandler(
     'shell-safety.sh',
     { tool_input: { command: 'rm -rf /' } },
-    { AGENT_SDLC_SKIP_SHELL_SAFETY: '1' },
+    { SQUAD_AGENTS_SKIP_SHELL_SAFETY: '1' },
   );
   assert.strictEqual(exitCode, 0);
 });
@@ -135,11 +135,11 @@ test('shell-safety.sh respects skip_shell_safety in settings file (various forma
   ];
 
   for (const format of formats) {
-    const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-safety-settings-'));
+    const dir = mkdtempSync(join(tmpdir(), 'squad-agents-safety-settings-'));
     try {
       mkdirSync(join(dir, '.claude'), { recursive: true });
       writeFileSync(
-        join(dir, '.claude', 'claude-agent-sdlc.local.md'),
+        join(dir, '.claude', 'squad-agents.local.md'),
         `---
 ${format}
 ---
@@ -167,11 +167,11 @@ test('skill-nudge.sh respects skill_nudge in settings file (various formats)', (
   ];
 
   for (const format of formats) {
-    const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-settings-'));
+    const dir = mkdtempSync(join(tmpdir(), 'squad-agents-nudge-settings-'));
     try {
       mkdirSync(join(dir, '.claude'), { recursive: true });
       writeFileSync(
-        join(dir, '.claude', 'claude-agent-sdlc.local.md'),
+        join(dir, '.claude', 'squad-agents.local.md'),
         `---
 ${format}
 ---
@@ -184,7 +184,7 @@ ${format}
         {
           CLAUDE_PROJECT_DIR: dir,
           CLAUDE_PLUGIN_ROOT: pluginRoot,
-          AGENT_SDLC_BOOTSTRAP_MODE: 'full',
+          SQUAD_AGENTS_BOOTSTRAP_MODE: 'full',
         },
       );
       assert.strictEqual(exitCode, 0);
@@ -196,7 +196,7 @@ ${format}
 });
 
 test('skill-nudge.sh emits additionalContext on first fire, then stays quiet (cooldown)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-'));
+  const dir = mkdtempSync(join(tmpdir(), 'squad-agents-nudge-'));
   try {
     const first = runHandler(
       'skill-nudge.sh',
@@ -204,7 +204,7 @@ test('skill-nudge.sh emits additionalContext on first fire, then stays quiet (co
       {
         CLAUDE_PROJECT_DIR: dir,
         CLAUDE_PLUGIN_ROOT: pluginRoot,
-        AGENT_SDLC_BOOTSTRAP_MODE: 'cooldown',
+        SQUAD_AGENTS_BOOTSTRAP_MODE: 'cooldown',
       },
     );
     assert.strictEqual(first.exitCode, 0);
@@ -217,7 +217,7 @@ test('skill-nudge.sh emits additionalContext on first fire, then stays quiet (co
       {
         CLAUDE_PROJECT_DIR: dir,
         CLAUDE_PLUGIN_ROOT: pluginRoot,
-        AGENT_SDLC_BOOTSTRAP_MODE: 'cooldown',
+        SQUAD_AGENTS_BOOTSTRAP_MODE: 'cooldown',
       },
     );
     assert.strictEqual(second.exitCode, 0);
@@ -228,7 +228,7 @@ test('skill-nudge.sh emits additionalContext on first fire, then stays quiet (co
 });
 
 test('skill-nudge.sh default mode (no BOOTSTRAP_MODE env) is cooldown', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-default-'));
+  const dir = mkdtempSync(join(tmpdir(), 'squad-agents-nudge-default-'));
   try {
     const first = runHandler(
       'skill-nudge.sh',
@@ -256,13 +256,13 @@ test('skill-nudge.sh default mode (no BOOTSTRAP_MODE env) is cooldown', () => {
   }
 });
 
-test('skill-nudge.sh respects AGENT_SDLC_SKILL_NUDGE=0', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'agent-sdlc-nudge-'));
+test('skill-nudge.sh respects SQUAD_AGENTS_SKILL_NUDGE=0', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'squad-agents-nudge-'));
   try {
     const { stdout, exitCode } = runHandler(
       'skill-nudge.sh',
       {},
-      { CLAUDE_PROJECT_DIR: dir, CLAUDE_PLUGIN_ROOT: pluginRoot, AGENT_SDLC_SKILL_NUDGE: '0' },
+      { CLAUDE_PROJECT_DIR: dir, CLAUDE_PLUGIN_ROOT: pluginRoot, SQUAD_AGENTS_SKILL_NUDGE: '0' },
     );
     assert.strictEqual(exitCode, 0);
     assert.strictEqual(stdout.trim(), '');

@@ -52,7 +52,7 @@ for prompt_file in "${prompt_files[@]}"; do
     # Strip a trailing -pressure suffix so the detection pattern matches the base skill.
     expected_skill="${skill_name%-pressure}"
 
-    OUTPUT_DIR="/tmp/agent-sdlc-tests/${TIMESTAMP}/skill-triggering/${skill_name}"
+    OUTPUT_DIR="/tmp/squad-agents-tests/${TIMESTAMP}/skill-triggering/${skill_name}"
     mkdir -p "$OUTPUT_DIR"
     
     PROMPT=$(cat "$prompt_file" | tr -d '\r')
