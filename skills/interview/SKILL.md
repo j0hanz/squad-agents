@@ -3,7 +3,7 @@ name: interview
 description: 'Use when project requirements are ambiguous, design decisions have unresolved branches, or options require user alignment. Symptoms: temptation to make assumptions under pressure.'
 metadata:
   category: technique
-  triggers: /grill-me, AskUserQuestion, ambiguous requirements, design options, clarify scope, user feedback, align plans, decision points, alternatives, unknowns
+  triggers: ambiguous requirements, design options, clarify scope, user feedback, align plans, decision points, alternatives, unknowns
   allowed-tools: Read, Grep, Glob, AskUserQuestion
 ---
 
@@ -11,11 +11,7 @@ metadata:
 
 Resolve critical, hard-to-reverse decisions (plans, designs, database schemas, package dependencies) before scoping or implementing. Stop when no unresolved decision materially affects architecture, cost, risk, or scope.
 
-**Core Principle:** Follow the letter and spirit of these rules strictly.
-
 ## When to Use
-
-Use when:
 
 - Plans, designs, or findings have unresolved, hard-to-reverse branch points.
 - Requirements are ambiguous or incomplete.
@@ -31,17 +27,18 @@ Bypass only for:
 
 ## How It Works
 
-Follow this sequence strictly:
-
 1. **Search First:** Search repository configs/docs (Read/Grep/Glob) for constraints before asking. Ground recommendations in findings.
+   - _Gate: every option cited to a codebase finding. Red Flag: proposing choices blind._
 2. **One at a Time:** Ask exactly one question per turn. Never combine decisions. Wait for feedback before asking the next.
+   - _Gate: one decision per turn. Red Flag: compound questions._
 3. **Tool Only:** Ask questions/clarifications only via the `AskUserQuestion` tool. Never ask in plain text.
-4. **Two Realistic Options:** Provide exactly two options:
-   - Option 1: Recommended grounded choice.
-   - Option 2: Next most likely concrete alternative.
-   - Do not provide passive/dummy choices (e.g., "Do nothing"). Both must be actionable paths.
+   - _Gate: all questions sent via `AskUserQuestion`. Red Flag: plain text questions._
+4. **Two Realistic Options:** Provide exactly two options — a binary prevents deferral. Option 1 is the recommended grounded choice; Option 2 is the next most likely concrete alternative. Both must be actionable paths; no passive/dummy choices (e.g., "Do nothing").
+   - _Gate: exactly two realistic, actionable choices. Red Flag: dummy choices._
 5. **No Shrugging:** Reject vague answers; re-ask with mutually exclusive options. Do not nudge the user to defer. If they explicitly defer, proceed with the recommended choice.
+   - _Gate: a concrete choice locked, or recommended choice taken on explicit defer. Red Flag: nudging or shrugging._
 6. **Wrap-Up:** End with a numbered list of all resolved decisions (one sentence each).
+   - _Gate: every resolved decision listed. Red Flag: closing without the list._
 
 ## Examples
 
@@ -53,21 +50,25 @@ Follow this sequence strictly:
 
 ```json
 {
-  "Question": "Based on database.js, should we store sessions in PostgreSQL (recommended — matches existing db infra) or Redis (faster read/write but adds dependency)?",
-  "Options": ["PostgreSQL (Recommended)", "Redis (Alternative)"]
+  "questions": [
+    {
+      "question": "Based on database.js, should we store sessions in PostgreSQL (recommended — matches existing db infra) or Redis (faster read/write but adds dependency)?",
+      "header": "Session store",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "PostgreSQL (Recommended)",
+          "description": "Matches existing db infra; no new dependency."
+        },
+        {
+          "label": "Redis (Alternative)",
+          "description": "Faster read/write, but adds a new dependency."
+        }
+      ]
+    }
+  ]
 }
 ```
-
-## Checklist & Red Flags
-
-Ensure these are true before completing the task:
-
-- [ ] **Searched First:** Checked codebase conventions before proposing (Red Flag: Proposing choices blind).
-- [ ] **Tool Usage:** All questions sent via `AskUserQuestion` (Red Flag: Plain text questions).
-- [ ] **Single Focus:** Asked exactly one question per turn (Red Flag: Compound questions).
-- [ ] **Two Options:** Offered exactly two realistic, actionable choices (Red Flag: Dummy choices like "Do nothing").
-- [ ] **No Bias:** Did not nudge user to defer (Red Flag: Nudging or shrugging).
-- [ ] **Wrap-Up:** Concluded with a numbered list of all resolved decisions.
 
 ## Related Skills
 
