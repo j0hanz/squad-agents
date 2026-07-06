@@ -84,7 +84,6 @@ Itemize every failing check with `file:line` / `REQ-id` / `TASK-id` — never a 
 
 ## Next Skills
 
-- **multi-agent-development**: sequential/dependent execution once APPROVED.
-- **multi-agent-dispatch**: independent-task execution once APPROVED.
+- **dispatch-agents**: multi-task execution (independent or sequential) once APPROVED.
 - **test-driven-development**: single focused feature once APPROVED.
 - **request-plan**: if REVISE traces back to missing content requiring a full re-draft.

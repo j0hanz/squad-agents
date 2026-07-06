@@ -14,7 +14,7 @@ beside them. Acceptance criteria change per task; the DoD does not.
 
 A task is **not done**, and a lane's `VERDICT: SUCCESS` is **not trusted**, until
 every item below holds. This is the single shared bar referenced by `request-plan`/`receive-plan`,
-`multi-agent-development`, `multi-agent-dispatch`, and this skill — so each skill
+`dispatch-agents`, and this skill — so each skill
 stops re-stating its own partial copy.
 
 ## The bar
@@ -30,7 +30,7 @@ stops re-stating its own partial copy.
 ## How skills use it
 
 - **request-plan** — do not write per-task acceptance criteria that restate the DoD; assume the DoD as the floor and add only what's task-specific on top.
-- **multi-agent-development / multi-agent-dispatch** — a lane is mergeable only when its work clears this bar, independently verified (never on the agent's self-report).
+- **dispatch-agents** — a lane is mergeable only when its work clears this bar, independently verified (never on the agent's self-report).
 - **verification-before-completion** — this bar is the Mandatory Checklist's source of truth.
 
 If a project legitimately cannot meet an item (e.g. no test suite yet), that is a

@@ -3,7 +3,7 @@ name: diagnose
 description: 'Use when there is a bug, crash, test failure, or unexpected behavior that needs root-cause analysis before a fix is attempted. Prefer over test-driven-development when diagnosing an existing defect rather than building a new feature.'
 disable-model-invocation: false
 argument-hint: '[symptom description or error trace]'
-allowed-tools: Agent(researcher), Agent(implementer), AskUserQuestion, Bash(git *), Read, Grep, Glob, Skill(multi-agent-dispatch)
+allowed-tools: Agent(researcher), Agent(implementer), AskUserQuestion, Bash(git *), Read, Grep, Glob, Skill(dispatch-agents)
 ---
 
 # diagnose
@@ -50,7 +50,7 @@ Phase 0: Triage (serial vs. tournament)
 ## Phase 2: Reproduce
 
 **action:** achieve >50% reproduction rate
-**action (tournament only):** race 2-3 candidate repro strategies via `multi-agent-dispatch`; keep the fastest deterministic >50% strategy and lock it as the Oracle
+**action (tournament only):** race 2-3 candidate repro strategies via `dispatch-agents`; keep the fastest deterministic >50% strategy and lock it as the Oracle
 **gate:** require logged repro signal before Phase 3
 
 # mirror of references/phases.md#Phase-3 and #Phase-35 — phases.md holds the ranking/efficiency/conjunction/masking/entangled-survivor rationale; this section holds the action/role/contract/concurrency/output/narration/gate operational contract. Diverged (GATE-D): both kept.
@@ -61,10 +61,10 @@ Phase 0: Triage (serial vs. tournament)
 **action:** propose 3-5 falsifiable hypotheses via `AskUserQuestion` (surface top 3, queue rest)
 **format:** "If [X] is the cause, then [Y] will change when I do [Z]." (conjunctions allowed: "If [X] AND [Y]...", for interaction bugs)
 **serial path (default):** probe one hypothesis directly against the Oracle
-**tournament path (Phase 0 escalated):** dispatch via `multi-agent-dispatch`, one falsifiable proposition per worktree, lanes blind to siblings
+**tournament path (Phase 0 escalated):** dispatch via `dispatch-agents`, one falsifiable proposition per worktree, lanes blind to siblings
 
 - **role:** observational/static probe -> read-only `researcher` agent (`agents/researcher.md`); instrumented/executed probe -> worktree-isolated `implementer` agent (`agents/implementer.md`) with `isolation: worktree`
-- **contract:** 5-field cold-start (SCOPE/OBJECTIVE/CONTEXT/CONSTRAINTS/OUTPUT) per `../multi-agent-development/references/subagent-contract.md`
+- **contract:** 5-field cold-start (SCOPE/OBJECTIVE/CONTEXT/CONSTRAINTS/OUTPUT) per `../dispatch-agents/references/subagent-contract.md`
 - **concurrency:** background-exempt only with a notify primitive; else batch lanes in <=3
 - **output:** `VERDICT: SURVIVED | KILLED` + EVIDENCE (the probe as a runnable block, asserting the predicted mechanism effect Y — not just the Oracle bit)
 - **narration:** report each lane's verdict to the user as it completes — no silent background batch
@@ -89,7 +89,7 @@ Phase 0: Triage (serial vs. tournament)
 
 **action:** write regression test targeting the root-cause seam (not the symptom point)
 **action:** confirm RED
-**action (tournament only):** race candidate fixes via `multi-agent-dispatch` (`implementer`, `isolation: worktree`); pick the diff that is GREEN, passes N-1, and does not merely suppress the symptom
+**action (tournament only):** race candidate fixes via `dispatch-agents` (`implementer`, `isolation: worktree`); pick the diff that is GREEN, passes N-1, and does not merely suppress the symptom
 **action:** apply minimal fix on working copy
 **action:** confirm GREEN
 **action:** execute N-1 test (revert fix -> confirm RED -> restore fix)

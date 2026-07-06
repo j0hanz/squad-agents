@@ -35,11 +35,10 @@ Gate 2: Systemic Issue?
 
 Gate 3: Execution Strategy
   -- trivial (<~20 lines) OR standard/focused --> test-driven-development
-  -- independent --------------------------------> multi-agent-dispatch
-  -- sequential/complex -------------------------> multi-agent-development
+  -- 2+ tasks (any shape) -----------------------> dispatch-agents
   test-driven-development -- stuck after 3 attempts --> diagnose --> back to Gate 3 (retry)
   test-driven-development -- spec ambiguous ----------> request-plan --> back to Gate 3
-  [dispatch | development | TDD] --> Gate 4
+  [dispatch-agents | TDD] --> Gate 4
 
 Gate 4: Quality & Delivery
   -> verification-before-completion -> request-code-review
@@ -61,12 +60,11 @@ diagnose -- bug resolved, merge-ready ----> Gate 4
 - **No Skips:** Never bypass process gates for "simple" or "quick" tasks.
 - **Gate Matrix Scope:** The Gate 0–4 matrix governs entry-routing only (Gate 0 onboarding through first dispatch at Gate 3); it does not re-describe a skill's own exit transitions. Each skill's `## Next Skills` section stays canonical for its outbound routing.
 - **Hard-to-reverse decisions, mid-skill:** any skill hitting a hard-to-reverse branch point with the user (locking a design, picking which finding to act on, accepting risk vs. re-drafting) calls `interview` rather than hand-rolling its own question loop. A single isolated yes/no gate inside a tight loop is a confirmation, not a session — this does not apply.
-- **Auto-invoke:** `test-driven-development`, `request-code-review`, `multi-agent-development`, and `multi-agent-dispatch` are safe to invoke without asking first — each is safety-gated (test-gated, read-only agent, or worktree-isolated). Ask first only for irreversible steps (push, migration, destructive command) or the first dispatch of the session.
+- **Auto-invoke:** `test-driven-development`, `request-code-review`, and `dispatch-agents` are safe to invoke without asking first — each is safety-gated (test-gated, read-only agent, or worktree-isolated). Ask first only for irreversible steps (push, migration, destructive command) or the first dispatch of the session.
 
 ## Strict Constraints (NEVER List)
 
 - **NEVER** route to `test-driven-development` if Gate 1 is incomplete.
-- **NEVER** use `multi-agent-dispatch` for tasks with shared state or dependencies.
 - **NEVER** skip `diagnose` when a bug interrupts feature work.
 - **NEVER** allow infinite TDD retries (strictly capped at 3).
 - **NEVER** skip `request-code-review` after multi-agent development.

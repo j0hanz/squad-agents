@@ -1,1 +1,0 @@
-I have the plan and spec ready for the new user profile feature. Can you implement the plan and work through all the tasks one by one with review gates?

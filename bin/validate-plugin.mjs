@@ -257,7 +257,7 @@ function validateRouting(skillsDir) {
 
   // ERROR: every `../<sibling>/` cross-skill reference must resolve to a real skill dir.
   // Catches dangling links left by a rename/removal, including the shared
-  // multi-agent-development/references/subagent-contract.md path.
+  // dispatch-agents/references/subagent-contract.md path.
   for (const name of skillNames) {
     const content = fs.readFileSync(path.join(skillsDir, name, 'SKILL.md'), 'utf-8');
     const seen = new Set();

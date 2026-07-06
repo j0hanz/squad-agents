@@ -3,7 +3,7 @@
 ## Phase 0: Triage (serial vs. tournament)
 
 - **Default:** serial. One hypothesis, one probe, directly against the Oracle — faster and correct for the common case (single obvious cause: null check, off-by-one, missing await).
-- **Escalate to tournament when:** 3+ genuinely independent candidate causes survive initial triage, or the bug is flaky/stress-class (low/unclear repro rate, suspected race). Mirrors `multi-agent-dispatch`'s "3+ tasks in separate files with unrelated causes" heuristic.
+- **Escalate to tournament when:** 3+ genuinely independent candidate causes survive initial triage, or the bug is flaky/stress-class (low/unclear repro rate, suspected race). Mirrors `dispatch-agents`'s "3+ tasks in separate files with unrelated causes" heuristic.
 - **Anti-pattern:** tournament on a one-cause bug. Worktree setup + blind-lane dispatch + arbitration costs more than just fixing it — proportionality is load-bearing, not optional ceremony.
 
 ## Phase 1: Build a Feedback Loop

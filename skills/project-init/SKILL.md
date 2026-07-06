@@ -2,7 +2,7 @@
 name: project-init
 description: 'Use when a repository needs AGENTS.md, CLAUDE.md, or GEMINI.md — initializing a new repo, bootstrapping agent instructions, or auditing an existing instructions file. Prefer over hand-writing AGENTS.md/CLAUDE.md from scratch.'
 disable-model-invocation: false
-allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill(multi-agent-dispatch), Skill(diagnose), Read, Grep, Glob
+allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill(dispatch-agents), Skill(diagnose), Read, Grep, Glob
 ---
 
 # project-init
@@ -50,7 +50,7 @@ Phase 3  CONSENT + WRITE
 
 **MANDATORY**: Ensure all discovery agents validate claims against the closed vocabulary in `references/canonical-keys.md`. Do NOT load `references/hard-rules.md` during this phase.
 
-1. **Send Searchers:** Use `multi-agent-dispatch` to send 3 read-only agents in parallel. Give them all facts found in Phase 0.
+1. **Send Searchers:** Use `dispatch-agents` to send 3 read-only agents in parallel. Give them all facts found in Phase 0.
 2. **Assign Lanes:**
 
 - **Lane 1 (Build):** package managers, build steps, run commands.

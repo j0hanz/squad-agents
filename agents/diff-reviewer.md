@@ -1,6 +1,6 @@
 ---
 name: diff-reviewer
-description: Read-only — assesses Security/Correctness and Performance/Hygiene of a diff. Dispatch after implementer completion, before merge. Do not substitute for spec-reviewer or quality-reviewer in multi-agent workflows.
+description: Read-only — assesses Security/Correctness and Performance/Hygiene of a diff. Dispatch after implementer completion, before merge. Do not substitute for reviewer in multi-agent workflows.
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit
 model: haiku
