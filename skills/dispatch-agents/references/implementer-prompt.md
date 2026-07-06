@@ -30,30 +30,12 @@ CONSTRAINTS:
   - Commit when complete, one commit for this task. Subject follows the `pr-workflow` skill's convention: `<type>: [task title]` (or `<type>(<scope>): [task title]` under a strict repo commit policy), imperative, max 72 chars.
   - [Add task-specific constraints here]
 
-OUTPUT:
+OUTPUT SCHEMA:
   VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]
-
-  SUMMARY:
-  [2-4 sentences: what was built, which functions/classes added, how tests verify it]
-
-  FILES_CHANGED:
-  [file path] — [what changed]
-
-  COMMIT: [git hash]
-
+  FILES_TOUCHED: [list of files changed, or "none"]
+  SUMMARY: [2-4 sentences: what was built, which functions/classes added, how tests verify it]
+  EVIDENCE: [git commit hash, test results, or file:line citations]
   CONCERNS: [if DONE_WITH_CONCERNS: describe ambiguity or risk. Otherwise: none.]
-  BLOCKER:  [if BLOCKED: exact blocker — missing requirement, conflicting constraint.]
-  QUESTION: [if NEEDS_CONTEXT: one specific clarifying question.]
+  BLOCKER:  [if BLOCKED: exact blocker — missing requirement, conflicting constraint. Otherwise: none.]
+  QUESTION: [if NEEDS_CONTEXT: one specific clarifying question. Otherwise: none.]
 ```
-
-## Dispatcher Rules
-
-| Condition                                                          | Action                                |
-| :----------------------------------------------------------------- | :------------------------------------ |
-| Spec ambiguous — multiple valid approaches exist                   | Return `NEEDS_CONTEXT`; do not guess  |
-| Task writes files                                                  | Dispatch with `isolation: "worktree"` |
-| Security-sensitive, complex algorithmic, or adversarial edge cases | Use `model: "opus"`                   |
-| Standard implementation                                            | Use `model: "sonnet"` (default)       |
-
-**constraint:** Never bundle two tasks into one implementer call.
-**constraint:** Return `NEEDS_CONTEXT` rather than guessing on any ambiguous design decision.
