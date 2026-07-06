@@ -86,28 +86,18 @@ OUTPUT:
   [2-3 sentences: combined verdict with specific evidence from code, not from report]
 ```
 
-## Verdict Rules
+## Verdict & Dispatch Rules
 
-| SPEC_VERDICT | QUALITY_VERDICT | Derived GATE | Action                                                                                                                                                      |
-| :----------- | :-------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SPEC_PASS    | QUALITY_PASS    | PASS         | Advance the lane                                                                                                                                            |
-| SPEC_PASS    | MINOR           | PASS         | Advance the lane; log the minor for a later refactor                                                                                                        |
-| SPEC_PASS    | IMPORTANT       | FAIL         | Re-dispatch implementer with IMPORTANT_ISSUES verbatim; re-run reviewer                                                                                     |
-| SPEC_PASS    | CRITICAL        | FAIL         | Re-dispatch implementer with CRITICAL_ISSUES verbatim; re-run reviewer                                                                                      |
-| SPEC_FAIL    | (any)           | FAIL         | Re-dispatch implementer with MISSING_REQUIREMENTS + EXTRA_WORK + MISINTERPRETATIONS verbatim; re-run reviewer. Do not score quality on a spec-failing diff. |
+| SPEC_VERDICT | QUALITY_VERDICT | GATE | Action                                                                                                                                 |
+| :----------- | :-------------- | :--- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| SPEC_PASS    | QUALITY_PASS    | PASS | Advance the lane                                                                                                                       |
+| SPEC_PASS    | MINOR           | PASS | Advance; log the minor for a later refactor                                                                                            |
+| SPEC_PASS    | IMPORTANT       | FAIL | Re-dispatch implementer with IMPORTANT_ISSUES verbatim; re-run reviewer                                                                |
+| SPEC_PASS    | CRITICAL        | FAIL | Re-dispatch implementer with CRITICAL_ISSUES verbatim; re-run reviewer                                                                 |
+| SPEC_FAIL    | (any)           | FAIL | Re-dispatch with MISSING_REQUIREMENTS + EXTRA_WORK + MISINTERPRETATIONS verbatim; re-run. Do not score quality on a spec-failing diff. |
 
-**GATE derivation:** `GATE = FAIL` if `SPEC_VERDICT == SPEC_FAIL` OR `QUALITY_VERDICT in {CRITICAL, IMPORTANT}`. Otherwise `GATE = PASS`.
+**GATE derivation:** `GATE = FAIL` if `SPEC_VERDICT == SPEC_FAIL` OR `QUALITY_VERDICT in {CRITICAL, IMPORTANT}`; otherwise `GATE = PASS`.
 
-## Dispatcher Rules
+**Retry policy:** Max 2 fix iterations. On 2nd `FAIL`, escalate the lane to the user BY NAME — no third try, no split-into-two-agents fallback (the combined reviewer is the only review path).
 
-| Condition          | Action                                                                                             |
-| :----------------- | :------------------------------------------------------------------------------------------------- |
-| `GATE: PASS`       | Advance the lane                                                                                   |
-| `GATE: FAIL` (1st) | Dispatch a fresh `implementer` with the reviewer's findings verbatim; re-run the reviewer          |
-| `GATE: FAIL` (2nd) | Escalate the lane to the user BY NAME — spec is ambiguous or the task keeps failing. No third try. |
-| `MINOR` (alone)    | Does NOT block advancement — log and proceed                                                       |
-
-**constraint:** Max 2 fix iterations before escalating to the user by name.
-**constraint:** Provide the task spec verbatim — never paraphrase.
-**constraint:** Supply both commit hashes so the reviewer diffs exactly what changed.
-**constraint:** NO split-into-two-agents fallback. The combined reviewer is the only review path. On 2nd failure, escalate — do not fall back to separate spec/quality agents.
+**constraint:** Provide the task spec verbatim; supply both commit hashes so the reviewer diffs exactly what changed.

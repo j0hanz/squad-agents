@@ -53,24 +53,7 @@ The `dispatch-agents` skill uses exactly four named agents. None of them spawn f
 | `reviewer`          | Read-only combined spec+quality gate | (none, read-only)      | `SPEC_VERDICT: SPEC_PASS \| SPEC_FAIL` + `QUALITY_VERDICT: QUALITY_PASS \| CRITICAL \| IMPORTANT \| MINOR` + derived `GATE: PASS \| FAIL` |
 | `conflict-resolver` | Writer — resolves merge conflicts    | (none, edits in place) | `DONE \| BLOCKED`                                                                                                                         |
 
-### Writer Verdict Schema (implementer)
-
-```text
-VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]
-SUMMARY: [what was built]
-FILES_CHANGED: [paths]
-COMMIT: [git hash]
-CONCERNS / BLOCKER / QUESTION: [per verdict]
-```
-
-### Investigator Verdict Schema (researcher)
-
-```text
-VERDICT: [SUCCESS | FAILURE | BLOCKED | NEEDS_CONTEXT]
-FILES_TOUCHED: [list of paths, or "none"]
-SUMMARY: [concise description of findings]
-EVIDENCE: [test results, grep output, or file:line citations]
-```
+_Per-role output schemas: writer in `references/implementer-prompt.md`, investigator = the common schema above. Verdict enums live in the Roles table._
 
 ## Issue Tiering (CRITICAL / IMPORTANT / MINOR)
 

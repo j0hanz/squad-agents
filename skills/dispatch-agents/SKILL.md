@@ -12,7 +12,7 @@ Execute a multi-task plan or backlog by grouping tasks into dependency-ordered w
 ## When to Use
 
 - A plan or backlog of 2+ tasks — independent, dependent, or a mix.
-- Prefer this skill over hand-rolling sequential loops or ad hoc parallel `Agent` calls. The Matrix is the launch gate that makes parallelism safe; without it, concurrent edits collide.
+- Prefer this skill over hand-rolling sequential loops or ad hoc parallel `Agent` calls. Without the Matrix (Step 1), concurrent edits collide.
 
 ## Process Flow
 
@@ -108,21 +108,13 @@ Blocked/escalated lanes: [list by name, or "none"]
 
 ## Strict Rules
 
-- **No overlapping writes:** The Matrix is the launch gate. Two lanes in the same wave never touch overlapping paths — same-file tasks merge into one lane before dispatch.
-- **No assumed context:** Every dispatch carries the 5-field contract (SCOPE / OBJECTIVE / CONTEXT / CONSTRAINTS / OUTPUT SCHEMA) from `references/subagent-contract.md`. Subagents start cold.
+- **No overlapping writes:** Two lanes in the same wave never touch overlapping paths — same-file tasks merge into one lane before dispatch.
+- **No assumed context:** Every dispatch carries the 5-field contract from `references/subagent-contract.md`. Subagents start cold.
 - **Wave width sized to genuine independence, max 10 lanes:** A wave contains only lanes the Matrix proves are independent. Never pad a wave to hit the 10-lane cap — 3 genuinely independent lanes is correct, 10 padded ones is slop.
 - **Dispatch stays at depth 1:** None of the four named agents (`implementer`, `researcher`, `reviewer`, `conflict-resolver`) spawn further subagents. The orchestrator (main thread) is the only dispatcher.
 - **No blind trust:** Real tests, independent verification. A `VERDICT: DONE` or `GATE: PASS` is a claim; the test suite is proof.
 - **No hidden skips:** Name every escalated or blocked lane in the final report. Never bury a skip in a summary.
-
-## Failure Modes (check before you call it done)
-
-- Concurrent edits collided because a Matrix "Files touched" cell was guessed instead of verified.
-- An implementer's `DONE` was trusted instead of the reviewer reading the diff and the test suite running.
-- A blocked or skipped lane wasn't surfaced in the final report — it silently didn't happen.
-- A wave was padded to 10 lanes when only 3 were genuinely independent — the extra lanes collided or duplicated work.
-- A named agent spawned a sub-subagent, breaking depth-1 dispatch and flooding the orchestrator's context.
-- On resume, a task's completion was assumed instead of verified against `git log` — always confirm the task's commit exists before treating it as done.
+- **Verify on resume:** Before treating a task as done, confirm its commit exists in `git log` — never assume completion.
 
 ## Next Skills
 
