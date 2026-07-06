@@ -123,7 +123,7 @@ const result: number = calculateDiscount(100, 10);
 
 ## Mocking at System Boundaries Only
 
-Same rule as Python: mock only at true system boundaries.
+Examples for the Strict Rules mocking rule (mock only true externals):
 
 ```typescript
 // RIGHT — mocking an external HTTP call (system boundary)
