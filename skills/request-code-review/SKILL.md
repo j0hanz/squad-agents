@@ -13,15 +13,7 @@ Get an unbiased review by dispatching a fresh-context subagent. Never review you
 
 ## Process Flow
 
-```
-Start: Review Request -> 0. Confirm with user -> Pre-Review Checkpoint (tests, context, diffable)
-  -> 1. Stat Check (git diff --stat) -> 2. Dispatch Agent (diff-reviewer) -> 3. Check Result Shape
-       -- malformed -------> Retry Dispatch (once) -> back to 3. Check Result Shape
-       -- failed twice ----> Escalate to user
-       -- well-formed -----> 4. Hand Off Result
-                                -- PASS -------------> pr-workflow (handoff)
-                                -- FAIL (blocking) ---> receive-code-review (handoff)
-```
+# mirror of "Step 0: Confirm" -> "Pre-Review Checkpoint" -> "Phase 1: Dispatch" -> "Phase 2: Hand Off" below — canonical flow incl. retry-once-then-escalate and PASS->pr-workflow / FAIL->receive-code-review branches.
 
 ## Step 0: Confirm
 
@@ -40,7 +32,7 @@ Diff Check: If no commits, skip dispatch and request Before/After blocks for inl
 Stat Check: Run `git diff --stat {{base}}..{{head}}`
 Prompt: Fill `references/reviewer-dispatch-prompt.md`
 Dispatch: Run `diff-reviewer` (Write/Edit denied by its tools frontmatter)
-Safety Check: Run `git status --porcelain` (if modified: discard, restore, re-dispatch)
+Safety Check: Run `git status --porcelain` (if modified: abort and report; do not mutate working tree)
 Output Validation: Require the reviewer's output to match the schema in `references/reviewer-dispatch-prompt.md` (retry once if it doesn't, then fail).
 
 ## Phase 2: Hand Off
@@ -51,7 +43,4 @@ On FAIL: Invoke `receive-code-review` (do not fix directly)
 
 ## Strict Rules (NEVER)
 
-Self-Review: Forbidden in the same thread
-Subagent Writes: Forbidden (enforce tool limits)
-Invalid Output: Forbidden (never accept malformed reviewer output — see Output Validation above)
-Isolated Review: Forbidden (diff or before/after blocks required)
+# mirror of the NEVERs stated inline in the step prose: intro (self-review forbidden in-thread), Phase 1 Dispatch/Safety Check (subagent writes forbidden via tool limits), Output Validation (malformed reviewer output rejected — retry once then fail), Pre-Review Checkpoint Diff Check (isolated review forbidden — diff or before/after blocks required).

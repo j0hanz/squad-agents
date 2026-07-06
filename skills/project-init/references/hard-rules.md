@@ -1,3 +1,10 @@
+---
+name: hard-rules
+description: Verbatim option sets for the four Phase-0 AskUserQuestion survey prompts in project-init.
+type: reference
+canonical: true
+---
+
 # Hard Rule Survey: Option Sets
 
 The exact option sets for the 4 `AskUserQuestion` prompts in Phase 0 (one tool call: the tool allows up to 4 questions per call). Use this wording verbatim or near-verbatim. Each option lists the marker value it maps to (encoded into the trailing `project-init:hard-rules v1` marker comment so a re-run can reuse the answers unambiguously).

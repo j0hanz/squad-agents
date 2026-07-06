@@ -1,3 +1,5 @@
+# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
+
 # TDD Patterns for JavaScript and TypeScript
 
 ## Test Runner Equivalents

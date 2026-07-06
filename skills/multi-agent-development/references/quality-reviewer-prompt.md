@@ -1,3 +1,10 @@
+---
+name: quality-reviewer-prompt
+description: Dispatch template, checks, and verdict rules for the Phase-3 code-quality reviewer subagent.
+type: reference
+canonical: true
+---
+
 # Code Quality Reviewer Prompt
 
 **purpose:** Assess implementation cleanliness, testability, and maintainability.

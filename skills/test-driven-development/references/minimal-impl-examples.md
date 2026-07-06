@@ -1,3 +1,5 @@
+# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
+
 # Minimal Implementation: Domain-Specific Patterns
 
 The principle: implement exactly what the test requires, nothing more. Domain specifics:

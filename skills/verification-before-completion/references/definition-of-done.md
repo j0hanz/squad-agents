@@ -1,3 +1,10 @@
+---
+name: definition-of-done
+description: Project-wide standing bar every task and dispatched lane must clear before counting as done.
+type: reference
+canonical: true
+---
+
 # Definition of Done (project-wide standing bar)
 
 Per-task acceptance criteria answer "did we build the right thing?" for **one** task.

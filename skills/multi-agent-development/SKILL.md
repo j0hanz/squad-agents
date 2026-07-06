@@ -3,7 +3,7 @@ name: multi-agent-development
 description: 'Use when implementing a multi-task plan where tasks depend on each other, share files, or must run in order. Prefer over multi-agent-dispatch when tasks have shared state or file dependencies that prevent parallel execution.'
 disable-model-invocation: false
 argument-hint: '[path to plan file]'
-allowed-tools: Agent(implementer), Agent(spec-reviewer), Agent(quality-reviewer), Agent(conflict-resolver), AskUserQuestion, Bash(git log*), Bash(git diff*), Skill(write-commit), Skill(verification-before-completion)
+allowed-tools: Agent(implementer), Agent(spec-reviewer), Agent(quality-reviewer), Agent(conflict-resolver), AskUserQuestion, Bash(git log*), Bash(git diff*), Skill(write-commit), Skill(verification-before-completion), Skill(request-code-review)
 ---
 
 # multi-agent-development
@@ -42,7 +42,7 @@ Default to running all tasks straight through — that was already the recommend
 
 **Single task, no dependencies?** Skip the Matrix — there's nothing to partition. Go straight to the Core Loop.
 
-Before asking the user, write the Lane Matrix defined in `skills/multi-agent-dispatch/SKILL.md` (Lane Matrix section) — it's what makes "strict order" a fact instead of a guess.
+Before asking the user, write the Lane Matrix defined in `skills/multi-agent-dispatch/SKILL.md#Step 2: MATRIX` — it's what makes "strict order" a fact instead of a guess.
 
 - **File Rule**: Combine tasks into one if they touch the same files — never run two tasks against overlapping paths even sequentially without merging them first.
 - **Cluster Rule**: Group every run of tasks that share `Depends on: none` and disjoint files into one cluster. A cluster is dispatched together (see Clustered Phase 1 below) — clusters themselves still run in the matrix's dependency order.
@@ -76,7 +76,7 @@ For a cluster of 2+ tasks with no dependency between them: dispatch one implemen
 - **Test**: Run project tests.
 - **Verify**: Run `verification-before-completion`.
 - **Review**: Run `request-code-review` (Mandatory).
-- **Done when:** every task is PASS or escalated-by-name, the full test suite is GREEN, and both `verification-before-completion` and `request-code-review` have run.
+- **Done when:** every task is QUALITY_PASS or escalated-by-name, the full test suite is GREEN, and both `verification-before-completion` and `request-code-review` have run.
 
 ### Report Template
 
@@ -85,7 +85,7 @@ Present the consolidated result to the user in this exact shape:
 ```
 | Task | VERDICT        | Spec   | Quality        | Action                        |
 | :--- | :-------------- | :----- | :-------------- | :----------------------------- |
-| 1    | DONE/BLOCKED... | PASS/FAIL | PASS/CRITICAL/IMPORTANT/MINOR | merged / re-dispatched / blocked |
+| 1    | DONE/BLOCKED... | PASS/FAIL | QUALITY_PASS/CRITICAL/IMPORTANT/MINOR | merged / re-dispatched / blocked |
 
 Tests: [PASS|FAIL — command run]
 Blocked/escalated tasks: [list, or "none"]
@@ -115,9 +115,9 @@ Strict chain (2 needs 1's model, 3 needs 2's contract) → no clustering; run in
 ```
 | Task | VERDICT | Spec | Quality | Action |
 | :--- | :------ | :--- | :------ | :----- |
-| 1    | DONE    | PASS | PASS    | merged |
+| 1    | DONE    | PASS | QUALITY_PASS    | merged |
 | 2    | DONE    | PASS | IMPORTANT → fixed, re-run split (Phase 2/Phase 3) | re-dispatched, then merged |
-| 3    | DONE    | PASS | PASS    | merged |
+| 3    | DONE    | PASS | QUALITY_PASS    | merged |
 
 Tests: PASS — `npm test` (full suite)
 Blocked/escalated tasks: none
@@ -133,7 +133,7 @@ Contrast with `multi-agent-dispatch`: there the lanes were file-disjoint and lau
 - **Prompts**: Give agents all facts. They have no memory.
 - **Commits**: Implementer subjects follow `<type>: [task title]` — format rules (policy, secret-scan, vocabulary) defer to `write-commit`.
 - **Rejects**: Throw away bad work. Start over from a clean base.
-- **Conflicts**: If a Git merge fails, follow the conflict-resolution procedure in `skills/multi-agent-dispatch/SKILL.md:92-99` (dispatch the specialized `conflict-resolver` agent; escalate to the user only if it reports the conflict cannot be resolved).
+- **Conflicts**: If a Git merge fails, follow the conflict-resolution procedure in `skills/multi-agent-dispatch/SKILL.md#Git Merge Conflict Resolution` (dispatch the specialized `conflict-resolver` agent; escalate to the user only if it reports the conflict cannot be resolved).
 - **Resuming**: Before restarting, check `git log` for commits matching the plan's task titles (`<type>: [task title]` subjects) to see which tasks already completed — never trust self-recollection alone.
 - **Context**: The orchestrator thread accumulates summaries across every task loop even though subagents are isolated. Prune intermediate subagent logs, thinking steps, and full file diffs from the main conversation context once integrated, keeping only a high-level summary and the merge commit hash.
 

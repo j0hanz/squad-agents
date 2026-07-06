@@ -65,7 +65,7 @@ Creative Checkpoint
 ## Phase 1: Framing & Discovery
 
 - **Probe:** Identify target users. Ask clarifying questions if the request is ambiguous.
-- **Scan:** Run `python ${CLAUDE_SKILL_DIR}/scripts/scan_context.py -- '<nouns>' --cwd '<root>' | python ${CLAUDE_SKILL_DIR}/scripts/compress_report.py` (fallback to `grep_search` if it fails).
+- **Scan:** Run `python ${CLAUDE_SKILL_DIR}/scripts/scan_context.py '<nouns>' --cwd '<root>' | python ${CLAUDE_SKILL_DIR}/scripts/compress_report.py` (fallback to `Grep` if it fails).
 - **Report:** Extract Related Files, Recent Changes, Terms, Interfaces, Constraints, Scope (S/M/L/XL), and Unknowns.
 - **Zero-Code Check:** Stop and offer exit if existing code/config already solves this.
 - **Understanding Lock:** Summarize the problem and your understanding. Only invoke `interview` if you have genuine doubts. Otherwise, proceed directly to Phase 3.
@@ -74,11 +74,15 @@ Creative Checkpoint
 - Ambiguous → Go to Phase 2.
 - High Risk / Scope L+ → Set Phase 5 Flag.
 
+**Done when:** a Context Report lists Related Files, Recent Changes, Terms, Interfaces, Constraints, Scope (S/M/L/XL), and Unknowns, and the zero-code check has been answered.
+
 ## Phase 2: Clarification
 
 - **Resolve via `interview`:** hand the ambiguous terms to `interview` (max 4 per batch) rather than hand-rolling a question loop — it already enforces one-at-a-time, two-option questioning.
 - **Glossary:** Save the resolved definitions to `glossary.md` (never `CONTEXT.md`).
 - **Visuals:** Offer a diagram _only_ if layout or data flow requires it. Wait for a reply.
+
+**Done when:** ambiguous terms are resolved via `interview` (max 4 per batch) and saved to `glossary.md`.
 
 ## Creative Checkpoint (Pre-Ideation)
 
@@ -99,12 +103,16 @@ Creative Checkpoint
 
 - **Output (Per Agent):** Idea, core mechanism, winning factor, key risk, first step.
 
+**Done when:** 2-3 distinct approaches are generated in one response, each with idea, core mechanism, winning factor, key risk, and first step.
+
 ## Phase 4: Convergence & Synthesis
 
 - **Synthesize:** Group similar ideas. Combine strong mechanisms with risk-mitigations from other lanes.
 - **Distill:** Present 2-3 distinct approaches. Approach A must be Minimalist. For each, include: What, Gains, Costs, Fit, First Step.
 - **Approval Lock:** Hand the 2-3 distilled approaches to `interview` to lock one — this is the hard-to-reverse decision that commits Phase 6's Design Brief. **Await its resolved decision. Do not guess.**
 - **Routing:** If Phase 5 flag is set → Phase 5. Otherwise → Phase 6.
+
+**Done when:** `interview` returns a resolved decision locking one of the 2-3 distilled approaches (not guessed).
 
 ## Phase 5: Persona Critique
 
@@ -119,12 +127,16 @@ Creative Checkpoint
 - **Resolution:** Record objections. You must "Accept & Revise" or "Reject with technical rationale" for all High/Med issues.
 - **Self-Arbitration:** Resolve any debates yourself. Decide whether the design is `APPROVED`, needs `REVISE`, or is `REJECT`.
 
+**Done when:** every High/Med objection is "Accept & Revise" or "Reject with technical rationale", and the design is marked `APPROVED`, `REVISE`, or `REJECT`.
+
 ## Phase 6: Design Brief
 
 - **Self-Review:** Fix any contradictions or scope creep in the chosen design before writing.
 - **Format:** Write a strict `markdown-kv` brief containing: Approach, Why, Scope, Constraints, Interface, Architecture, Risks, First Step.
 - **Save:** Present in chat, then write to `docs/design/YYYY-MM-DD-<topic>-design.md`.
 - **Commit Guard:** Do not commit. If the user wants to commit only (no push), hand off to `write-commit`. If the user wants to commit, push, and open a PR, hand off to `pr-workflow`.
+
+**Done when:** the markdown-kv Design Brief (Approach, Why, Scope, Constraints, Interface, Architecture, Risks, First Step) is written to `docs/design/YYYY-MM-DD-<topic>-design.md`.
 
 ## Worked Example
 

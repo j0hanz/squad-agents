@@ -2,7 +2,7 @@
 name: project-init
 description: 'Use when a repository needs AGENTS.md, CLAUDE.md, or GEMINI.md — initializing a new repo, bootstrapping agent instructions, or auditing an existing instructions file. Prefer over hand-writing AGENTS.md/CLAUDE.md from scratch.'
 disable-model-invocation: false
-allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill(multi-agent-dispatch), Read, Grep, Glob
+allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill(multi-agent-dispatch), Skill(diagnose), Read, Grep, Glob
 ---
 
 # project-init
@@ -44,6 +44,8 @@ Phase 3  CONSENT + WRITE
 4. **Find CI Automatically:** Do not ask the user about CI. Look for folders: `.github/workflows/` means `github-actions`, `.gitlab-ci.yml` means `gitlab-ci`. Otherwise, use `local-only`. CI has no "Don't include" — it's never skippable.
 5. **Choose Path:** If the scan says `has_manifest == false`, explore the project yourself (`Glob` for structure, `Grep` for content, `Read` for specific files), skip Phase 1, and go straight to Phase 2. Otherwise, go to Phase 1.
 
+**Done when:** `init.py prescan .` has run, the hard-rules answers are resolved (from old marker or `AskUserQuestion`), and the next phase is chosen (Phase 1 fan-out, or straight to Phase 2 if `has_manifest == false`).
+
 ## Phase 1: Search (Read-Only)
 
 **MANDATORY**: Ensure all discovery agents validate claims against the closed vocabulary defined in `references/canonical-keys.md`. Do NOT load `references/hard-rules.md` during this phase.
@@ -64,6 +66,8 @@ Phase 3  CONSENT + WRITE
 
 5. **Output:** The agents must only output a JSON list of facts matching `references/canonical-keys.md`. No extra text.
 
+**Done when:** 3 read-only Researcher lanes (plus per-package lanes for monorepos) have returned JSON fact lists matching `references/canonical-keys.md`, with every claim citing a file path and exact quote.
+
 ## Phase 2: Check and Preview
 
 1. **Combine:** Put all facts from Phase 1 into one file called `claims.json`.
@@ -72,6 +76,8 @@ Phase 3  CONSENT + WRITE
    `init.py generate --claims claims.json --package <pkg> --commit <c> --maturity <m> --testing <t> --ci <ci> --skip-sections <s>`
 4. **Filter:** The script will keep only proven facts and drop bad ones.
 5. **Show the User:** Show the user the draft of `AGENTS.md` (root and packages) and the list of dropped facts. If there is an error, fix the inputs or rerun the bad agent. Do not save yet.
+
+**Done when:** `init.py generate --claims claims.json` (no `--out`) prints an `AGENTS.md` draft and the dropped-facts list with no lint errors, and the user has seen both.
 
 ## Phase 3: Ask and Save
 
@@ -83,6 +89,8 @@ Phase 3  CONSENT + WRITE
 5. **Test Root File:** Run `init.py lint AGENTS.md`. It must pass.
 6. **Test Package Files (Monorepos):** For each package folder `<pkg>`, run `init.py lint <pkg>/AGENTS.md`. They must pass.
 7. **Report to User:** Tell the user what files were saved, how many lines they have, and remind them of the facts that were dropped.
+
+**Done when:** `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` (plus any package-level `<pkg>/AGENTS.md`) are written, `init.py lint AGENTS.md` passes, and the receipt lists saved files and dropped facts.
 
 ## Fixing Errors
 

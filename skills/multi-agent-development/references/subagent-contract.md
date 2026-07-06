@@ -1,3 +1,10 @@
+---
+name: subagent-contract
+description: Canonical zero-shot prompt contract (five required fields) for dispatching general-purpose subagents.
+type: reference
+canonical: true
+---
+
 # Subagent Prompt Contract (Zero-Shot)
 
 Canonical contract for any skill dispatching a `general-purpose` subagent (used by `multi-agent-development` and `multi-agent-dispatch`). Subagents start cold with no memory of the parent conversation. Every dispatch prompt MUST contain all five fields below.

@@ -1,3 +1,5 @@
+# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
+
 # Implementer Subagent Prompt
 
 **purpose:** Execute a single scoped task — implement exactly what the spec states.

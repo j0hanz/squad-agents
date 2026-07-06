@@ -1,3 +1,5 @@
+# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
+
 # Reviewer Dispatch Prompt Template
 
 Fill every `{{placeholder}}` before sending: `{{base_commit}}`, `{{head_commit}}`, `{{repo_path}}`, `{{plan_or_requirements_summary}}`, `{{patterns_reference_path}}`. Never dispatch with a placeholder still in the text — if a value is unknown, ask the user rather than guessing.

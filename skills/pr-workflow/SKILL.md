@@ -31,11 +31,15 @@ Start: Deliver Request
 1. **Reviewed?** If not reviewed, suggest `request-code-review`. Do not proceed unless the user says yes.
 2. **Check Git:** Run `git status --porcelain` and `git branch --show-current`.
 
+**Done when:** `git status --porcelain` and `git branch --show-current` output is captured and review status is confirmed.
+
 ## Step 1: Group Changes
 
 1. Run `git status --porcelain`, `git diff --stat`, `git diff --name-only`, and `git diff --staged --stat` in parallel.
 2. Group related files together. Keep features, fixes, and formatting in totally separate groups.
 3. Show the groups to the user clearly and briefly.
+
+**Done when:** changed files are grouped into logical change groups and the groups are shown to the user.
 
 ## Step 2: Create Branch
 
@@ -43,16 +47,22 @@ Start: Deliver Request
 2. **Types:** `feature`, `fix`, `refactor`, `docs`, `test`, `chore`.
 3. **Action:** If on `main`, run `git checkout -b <name>` with a self-generated name. If already on a correct feature branch, stay there.
 
+**Done when:** `git checkout -b <type>/<short-name>` succeeded, or the current branch is confirmed as a correct feature branch.
+
 ## Step 3: Commit Safely
 
 1. Follow `write-commit` for all staging, secret-scan, policy-detection, and message-format rules.
 2. Make one commit for each group of files — one logical change per commit, nothing bundled.
 3. Show the generated commit message to the user and wait for them to say "OK" before committing.
 
+**Done when:** one commit per file group is made and the user said "OK" before each commit.
+
 ## Step 4: Ask Before Pushing
 
 1. **Gate:** Call `AskUserQuestion` (Yes/No, no manual "Other") asking permission to push. This is a separate turn — never call `git push` in the same response as the question.
 2. **Action:** Run `git push -u origin <branch>` only after the answer is yes. Any other answer stops here; do not retry the push without asking again.
+
+**Done when:** `AskUserQuestion` returned yes and `git push -u origin <branch>` succeeded.
 
 ## Step 5: Create Pull Request (PR)
 
@@ -70,6 +80,8 @@ Start: Deliver Request
    - <things intentionally left alone, follow-ups, or risks>
 
 ```
+
+**Done when:** `gh pr create --title "<title>" --body "<body>"` returns a PR URL.
 
 ## Multi-Agent Rules (Working with other AI)
 

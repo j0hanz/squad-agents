@@ -33,6 +33,8 @@ Form task groups from the work already visible (a plan, a backlog, several indep
 
 Heuristic, not a rule: parallel dispatch pays off most once there are 3+ tasks (or failures) in separate files with unrelated causes. Below that, sequential is usually simpler to reason about — don't force parallelism for its own sake.
 
+**Done when:** every task group is stated as plain text with its file list and no `AskUserQuestion` is still pending.
+
 ## Step 2: MATRIX (write it down — don't reason about independence silently)
 
 Before assigning roles or launching anything, write this table:
@@ -48,15 +50,19 @@ This table **is** the dispatch gate:
 - Any overlap or dependency → that lane moves to a later batch, or to sequential `multi-agent-development`.
 - Treat any cell without a concrete answer (not "probably fine") as a sign that lane isn't ready to parallelize.
 
+**Done when:** the Lane Matrix table is written with concrete file paths in every "Files touched" cell and a non-empty "Depends on" answer for every lane.
+
 ## Step 3: SELECT
 
 Assign roles: **Investigator** (read-only, traces root cause), **Writer** (dispatches the named `implementer` agent, `isolation: worktree`), **Researcher** (read-only, reports file paths/usages).
 
 Writer lanes dispatch `subagent_type: implementer` (`agents/implementer.md`), not generic `general-purpose` — it already requires `isolation: worktree` and returns its own fixed output schema (see Step 5: INTEGRATE), so skip the generic five-field/VERDICT-SCHEMA setup for Writer lanes specifically. Investigator and Researcher lanes MUST dispatch the named `researcher` agent (`agents/researcher.md`) — this enforces hard read-only tool restrictions at the harness level.
 
-For the full contract, common mistakes, specialist-routing table, large-artifact `.claude/dispatch/` handoff rule, and Model Tiering table, see `../multi-agent-development/references/subagent-contract.md` — read it before dispatching when available, and apply an explicit `model:` override at the dispatch call site per the tiering guidance. If that file cannot be loaded, the five fields are: SCOPE, OBJECTIVE, CONTEXT, CONSTRAINTS, OUTPUT SCHEMA.
+For the full contract (five required prompt fields), common mistakes, specialist-routing table, large-artifact `.claude/dispatch/` handoff rule, and Model Tiering table, see `../multi-agent-development/references/subagent-contract.md#prompt-fields` — read it before dispatching when available, and apply an explicit `model:` override at the dispatch call site per the tiering guidance.
 
 - Writers MUST use `isolation: worktree` to prevent overlapping edits — state it explicitly in the dispatch call since `isolation` is dispatcher-side guidance, not an enforced agent property.
+
+**Done when:** every lane has an assigned role (Investigator/Writer/Researcher) and Writer lanes specify `isolation: worktree` at the dispatch call site.
 
 ## Step 4: LAUNCH
 
@@ -72,7 +78,9 @@ For the full contract, common mistakes, specialist-routing table, large-artifact
 
 Each lane reports against a different schema depending on its role — interpret accordingly before tiering:
 
-- **Writer lanes (`implementer`):** Returns `VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]` + SUMMARY + FILES_CHANGED + COMMIT + CONCERNS/BLOCKER/QUESTION. Map to a tier: `DONE` → PASS/merged; `DONE_WITH_CONCERNS` → MINOR or IMPORTANT depending on the concern's severity (merge-and-log, or re-dispatch with the concern verbatim); `BLOCKED` → CRITICAL/discarded, re-dispatch fresh only after resolving the blocker; `NEEDS_CONTEXT` → CRITICAL/discarded, re-dispatch with the question answered, not retried verbatim.
+<!-- # mirror of subagent-contract.md#prompt-fields — the VERDICT enum tokens below are duplicated from the canonical contract; the tier-mapping prose (DONE -> QUALITY_PASS/merged; etc.) is dispatch-local integration guidance that has no canonical home in subagent-contract.md, so both copies are kept per GATE-D. -->
+
+- **Writer lanes (`implementer`):** Returns `VERDICT: [DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT]` + SUMMARY + FILES_CHANGED + COMMIT + CONCERNS/BLOCKER/QUESTION. Map to a tier: `DONE` → QUALITY_PASS/merged; `DONE_WITH_CONCERNS` → MINOR or IMPORTANT depending on the concern's severity (merge-and-log, or re-dispatch with the concern verbatim); `BLOCKED` → CRITICAL/discarded, re-dispatch fresh only after resolving the blocker; `NEEDS_CONTEXT` → CRITICAL/discarded, re-dispatch with the question answered, not retried verbatim.
 - **Investigator/Researcher lanes (`researcher`):** Returns the generic `VERDICT/FILES_TOUCHED/SUMMARY/EVIDENCE` contract (where `VERDICT` is `SUCCESS | FAILURE | BLOCKED | NEEDS_CONTEXT`) — tier its dispatch-specific VERDICT enum the same CRITICAL/IMPORTANT/MINOR way as before.
 
 Tier every lane, regardless of schema, into the same three buckets (CRITICAL, IMPORTANT, MINOR) used here and by `multi-agent-development`'s quality reviewer — see `../multi-agent-development/references/quality-reviewer-prompt.md` for the canonical definitions.
@@ -87,7 +95,7 @@ If a Git merge conflict occurs during integration, do NOT immediately abort or e
 
 ### Context Compaction & Token Hygiene
 
-See the Context Compaction rule in `skills/multi-agent-development/SKILL.md` (Operational Rules): prune intermediate subagent logs, thinking steps, and full file diffs once a lane is integrated, keeping only a high-level summary and the merge commit hash.
+See the Context Compaction rule in `skills/multi-agent-development/SKILL.md#Operational Rules`: prune intermediate subagent logs, thinking steps, and full file diffs once a lane is integrated, keeping only a high-level summary and the merge commit hash.
 
 Then run the real test suite. Neither implementer's `DONE` nor a researcher's `VERDICT: SUCCESS` is proof by itself — never merge on either report alone. A lane is mergeable only once its work clears the project-wide [Definition of Done](../verification-before-completion/references/definition-of-done.md), independently verified.
 
@@ -98,7 +106,7 @@ Present the consolidated result to the user in this exact shape:
 ```
 | Lane | VERDICT (native schema)                         | Tier                          | Action                          |
 | :--- | :----------------------------------------------- | :----------------------------- | :------------------------------- |
-| 1    | DONE/DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT (Writer) or SUCCESS/FAILURE/BLOCKED (Investigator/Researcher) | PASS/CRITICAL/IMPORTANT/MINOR  | merged / re-dispatched / discarded |
+| 1    | DONE/DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT (Writer) or SUCCESS/FAILURE/BLOCKED (Investigator/Researcher) | QUALITY_PASS/CRITICAL/IMPORTANT/MINOR  | merged / re-dispatched / discarded |
 
 Tests: [PASS|FAIL — command run]
 Skipped/blocked lanes: [list, or "none"]
@@ -110,6 +118,8 @@ Skipped/blocked lanes: [list, or "none"]
 - Re-run only the failed lanes with fresh agents.
 - If a lane failed because it secretly depended on another lane finishing first, stop parallel work for that pair — update the Matrix and switch them to sequential.
 - Always report blocked or failed lanes to the user, tiered as above.
+
+**Done when:** every lane is tiered (CRITICAL/IMPORTANT/MINOR), the real test suite is GREEN, the report template is filled, and any skipped/blocked lane is named in the report.
 
 ## Failure Modes (check before calling it done)
 
@@ -137,9 +147,9 @@ Files disjoint, no dependencies → all three launch in ONE message, each dispat
 ```
 | Lane | VERDICT (implementer) | Tier | Action |
 | :--- | :--------------------- | :--- | :----- |
-| 1    | DONE                    | PASS | merged |
+| 1    | DONE                    | QUALITY_PASS | merged |
 | 2    | DONE_WITH_CONCERNS      | MINOR | merged, logged naming nit from CONCERNS |
-| 3    | DONE                    | PASS | merged |
+| 3    | DONE                    | QUALITY_PASS | merged |
 
 Tests: PASS — `vitest run` (all 6 green)
 Skipped/blocked lanes: none

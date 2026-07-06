@@ -1,3 +1,5 @@
+# ponytail: local reference, frontmatter deferred until a cross-skill consumer appears
+
 # Reference: Phases
 
 ## Phase 0: Triage (serial vs. tournament)

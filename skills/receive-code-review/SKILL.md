@@ -2,7 +2,7 @@
 name: receive-code-review
 description: 'Use when code review feedback has been received — from a human reviewer, PR bot, or subagent — and needs to be verified and implemented. Prefer over request-code-review when acting on existing feedback rather than requesting a new review.'
 disable-model-invocation: false
-allowed-tools: Bash(gh *), Bash(git *), AskUserQuestion, Read, Grep, Skill(write-commit), Skill(verification-before-completion)
+allowed-tools: Bash(gh *), Bash(git *), AskUserQuestion, Read, Grep, Skill(write-commit), Skill(verification-before-completion), Skill(diagnose), Skill(request-code-review), Skill(pr-workflow)
 ---
 
 # receive-code-review

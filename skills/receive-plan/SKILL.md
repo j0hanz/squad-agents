@@ -4,7 +4,7 @@ description: 'Use when a plan and spec pair already exists and needs validation 
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[path to plan.md / specs.md, or "the plan I just wrote"]'
-allowed-tools: Agent(researcher), Skill(interview), Read, Grep, Glob, Write
+allowed-tools: Agent(researcher), Skill(interview), Read, Grep, Glob, Write, Edit
 ---
 
 # receive-plan
@@ -40,7 +40,7 @@ Main thread runs grep/file-read directly — no subagent. Fail fast on any of:
 
 - Every `Satisfies: REQ-xxx` resolves to a REQ defined in specs.md.
 - Every `Depends on: TASK-NNN` resolves to a real task; dependency graph is acyclic.
-- Every Task Block has all 7 required fields (`Depends on`, `Files`, `Symbols`, `Satisfies`, `Action`, `Validate`, `Expected result`).
+- Every Task Block has all 7 required fields (`Depends on`, `Files`, `Symbols`, `Satisfies`, `Action`, `Validate`, `Expected result`). # SSOT: see request-plan/SKILL.md#Canonical-Task-Block-Schema
 - Every cited file path exists on disk.
 
 Report as `N_checked / N_total` per check category. Any `N_checked < N_total` → immediate REVISE with itemized failures; skip Step 3.

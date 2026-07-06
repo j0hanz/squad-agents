@@ -15,6 +15,11 @@ disclosed limitation, not a bug.
 
 from __future__ import annotations
 
+import argparse
+import re
+import sys
+from pathlib import Path
+
 
 def normalize_import(raw: str) -> str:
     s = raw.strip()
@@ -105,3 +110,81 @@ def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
                     result.append(component)
 
     return result
+
+
+def _extract_lane_refs(text: str, lane_names: set[str]) -> list[str]:
+    """Pull cross-lane references from free text: backtick-quoted or
+    bold-quoted identifiers that match a known lane directory name.
+    ponytail: markdown-token scan is enough for a skills tree; a real code
+    repo would feed Python import paths to build_lane_graph directly."""
+    refs: list[str] = []
+    for m in re.findall(r"`([a-z][a-z0-9-]+)`", text):
+        if m in lane_names:
+            refs.append(m)
+    for m in re.findall(r"\*\*([a-z][a-z0-9-]+):?\*\*", text):
+        if m in lane_names:
+            refs.append(m)
+    return refs
+
+
+def _self_check() -> None:
+    # ponytail: one assert exercising normalize_import -> resolve_lane ->
+    # build_lane_graph -> find_cycles; fails if the entrypoint's core breaks.
+    g = build_lane_graph(
+        {"a": ["'./b/x'"], "b": ["'./a/y'"]},
+        {"a": "a", "b": "b"},
+    )
+    assert find_cycles(g), "self-check: expected a cycle"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Join lane cross-references into an inter-lane graph and report "
+            "cycles. Each immediate subdirectory of <root> is a lane; "
+            "cross-references are read from its SKILL.md."
+        )
+    )
+    parser.add_argument("root", help="root directory whose immediate subdirs are lanes")
+    args = parser.parse_args()
+
+    _self_check()
+
+    root = Path(args.root)
+    if not root.is_dir():
+        print(f"error: {root!s} is not a directory", file=sys.stderr)
+        sys.exit(2)
+
+    lane_names = {
+        p.name
+        for p in root.iterdir()
+        if p.is_dir() and not p.name.startswith((".", "__"))
+    }
+    lane_dirs = {name: name for name in lane_names}
+
+    lane_imports: dict[str, list[str]] = {}
+    for name in lane_names:
+        skill_md = root / name / "SKILL.md"
+        if skill_md.is_file():
+            lane_imports[name] = _extract_lane_refs(
+                skill_md.read_text(encoding="utf-8", errors="replace"), lane_names
+            )
+        else:
+            lane_imports[name] = []
+
+    graph = build_lane_graph(lane_imports, lane_dirs)
+    cycles = find_cycles(graph)
+
+    print(f"root: {root}")
+    print(f"lanes: {len(lane_names)}")
+    print(f"edges: {sum(len(v) for v in graph.values())}")
+    if not cycles:
+        print("cycles: none")
+        return
+    print(f"cycles: {len(cycles)}")
+    for i, cyc in enumerate(cycles, 1):
+        print(f"  cycle {i}: {' -> '.join(cyc)}")
+
+
+if __name__ == "__main__":
+    main()

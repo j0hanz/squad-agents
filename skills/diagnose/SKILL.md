@@ -53,6 +53,8 @@ Phase 0: Triage (serial vs. tournament)
 **action (tournament only):** race 2-3 candidate repro strategies via `multi-agent-dispatch`; keep the fastest deterministic >50% strategy and lock it as the Oracle
 **gate:** require logged repro signal before Phase 3
 
+# mirror of references/phases.md#Phase-3 and #Phase-35 — phases.md holds the ranking/efficiency/conjunction/masking/entangled-survivor rationale; this section holds the action/role/contract/concurrency/output/narration/gate operational contract. Diverged (GATE-D): both kept.
+
 ## Phase 3: Hypothesize & Falsify
 
 **mandatory:** read `references/phases.md` (do NOT load `references/feedback-loops.md`)

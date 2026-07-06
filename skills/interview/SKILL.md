@@ -1,6 +1,6 @@
 ---
 name: interview
-description: 'Called inline by other skills to stress-test a plan, design, or decision before committing to it.'
+description: 'Use when a plan, design, or decision has unresolved hard-to-reverse branches to lock before committing — requirements are ambiguous or incomplete before scoping a task, or unknowns must be resolved via AskUserQuestion before defining scope.'
 disable-model-invocation: false
 allowed-tools: Read, Grep, Glob, AskUserQuestion
 ---

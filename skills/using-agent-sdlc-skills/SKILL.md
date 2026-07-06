@@ -1,9 +1,13 @@
 ---
 name: using-agent-sdlc-skills
 description: 'Use when starting a new task and the correct starting point, lifecycle gate, or routing among skills is unclear.'
-disable-model-invocation: false
-allowed-tools: Skill
+disable-model-invocation: true
+allowed-tools: Skill, Read, Glob
 ---
+
+# ponytail: metadata.triggers intentionally absent across all 16 skills — no consumer reads them; add per-skill trigger phrases when a router consumes triggers.
+
+# ponytail: "Prefer over X" clauses in skill descriptions are an accepted soft-routing convention — no enforcement; leave descriptions as-is.
 
 <SUBAGENT-STOP>
 If you were dispatched as a subagent to execute a specific task, skip this skill.
