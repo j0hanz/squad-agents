@@ -14,10 +14,6 @@ metadata:
 
 Dispatch a fresh-context subagent to review the diff cold. Never review your own work in the thread that wrote it — you already rationalized every decision; a subagent with no memory of the implementation reads it the way a human reviewer would.
 
-## Process Flow
-
-<!-- mirror of "Step 0: Confirm" -> "Pre-Review Checkpoint" -> "Phase 1: Dispatch" -> "Phase 2: Hand Off" below — canonical flow incl. retry-once-then-escalate and PASS->pr-workflow / FAIL->receive-code-review branches. -->
-
 ## Step 0: Confirm
 
 Action: AskUserQuestion (no manual "Other" option)
@@ -59,8 +55,6 @@ On PASS: Prompt user "Run `/pr-workflow`"
 On FAIL: Invoke `receive-code-review` (do not fix directly)
 
 ## Strict Rules (NEVER)
-
-<!-- mirror of the NEVERs stated inline in the step prose: intro (self-review forbidden in-thread), Phase 1 Dispatch/Safety Check (subagent writes forbidden via tool limits), Output Validation (malformed reviewer output rejected — retry once then fail), Pre-Review Checkpoint Diff Check (isolated review forbidden — diff or before/after blocks required). -->
 
 - **NEVER** review your own work in the same thread/context that wrote it. You MUST dispatch a fresh-context subagent reviewer.
 - **NEVER** skip unit test verification. Tests must be confirmed as passing immediately before requesting a review.
