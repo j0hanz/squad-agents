@@ -29,7 +29,9 @@ from typing import IO, Any
 MARKER_VERSION = "v1"
 MAX_LINES = 100
 VALUE_MAX_CHARS = 320
-CONV_FACT_SEP = " || "  # conv.* values may pack atomic facts; split on this at render time
+CONV_FACT_SEP = (
+    " || "  # conv.* values may pack atomic facts; split on this at render time
+)
 MATCH_FILE_SIZE_CAP = 5 * 1024 * 1024  # don't scan blobs/binaries for a match string
 PRESCAN_MAX_DEPTH = 2
 PRESCAN_SKIP_DIRS = {
@@ -197,13 +199,14 @@ def _priority(key: str) -> int:
     return 0
 
 
-def safe_print(text: str, file: IO[str] = sys.stdout) -> None:
+def safe_print(text: str, file: IO[str] | None = None) -> None:
     """Print, surviving consoles whose codec can't encode a character (Windows)."""
+    target_file = sys.stdout if file is None else file
     try:
-        print(text, file=file)
+        print(text, file=target_file)
     except UnicodeEncodeError:
-        codec = getattr(file, "encoding", None) or "ascii"
-        print(text.encode(codec, "replace").decode(codec), file=file)
+        codec = getattr(target_file, "encoding", None) or "ascii"
+        print(text.encode(codec, "replace").decode(codec), file=target_file)
 
 
 # ── Evidence tier: derived deterministically from the cited path, never agent-set
@@ -214,7 +217,6 @@ _LOCKFILES = {
     "bun.lockb",
     "cargo.lock",
     "go.sum",
-    "go.mod",
     "uv.lock",
     "poetry.lock",
     "gemfile.lock",
@@ -229,9 +231,9 @@ _CONFIG_HINTS = (
     "biome.json",
     "ruff.toml",
     ".eslintrc",
-    "makefile",
     "composer.json",
     ".csproj",
+    "go.mod",
 )
 
 
@@ -374,7 +376,9 @@ def merge_claims(
 _TRAILING_PAREN_RE = re.compile(r"^(.*\S)(\s+\(.+\))$")
 
 
-def _bullet_lines(values: list[str], *, backtick: bool = False, split: bool = False) -> list[str]:
+def _bullet_lines(
+    values: list[str], *, backtick: bool = False, split: bool = False
+) -> list[str]:
     """Render claim values as `- ` bullets.
 
     backtick=True wraps each value in backticks, keeping a trailing
@@ -412,10 +416,16 @@ def render_agents_md(
 
     pkg_normalized = package.strip().replace("\\", "/").rstrip("/") if package else None
 
-    header = f"# Agent Instructions: {pkg_normalized}" if pkg_normalized else "# Agent Instructions"
+    header = (
+        f"# Agent Instructions: {pkg_normalized}"
+        if pkg_normalized
+        else "# Agent Instructions"
+    )
     lines = [header, ""]
 
-    project_values = [purpose] + ([winners["stack"].value] if "stack" in winners else [])
+    project_values = [purpose] + (
+        [winners["stack"].value] if "stack" in winners else []
+    )
     lines += ["## Project", "", *_bullet_lines(project_values)]
 
     if not pkg_normalized:
@@ -440,13 +450,22 @@ def render_agents_md(
             if body:
                 body.append("")
             cmd_values = [winners[k].value for k in cmd_keys]
-            body += ["### Common Commands", "", *_bullet_lines(cmd_values, backtick=True)]
+            body += [
+                "### Common Commands",
+                "",
+                *_bullet_lines(cmd_values, backtick=True),
+            ]
         lines += ["", "## Package Manager", "", *body]
 
     dep_keys = sorted(k for k in winners if k.startswith("dep."))
     if dep_keys:
         dep_values = [winners[k].value for k in dep_keys]
-        lines += ["", "## Dependency Locations", "", *_bullet_lines(dep_values, backtick=True)]
+        lines += [
+            "",
+            "## Dependency Locations",
+            "",
+            *_bullet_lines(dep_values, backtick=True),
+        ]
 
     conv_keys = sorted(k for k in winners if k.startswith("conv."))
     if conv_keys:
@@ -477,6 +496,10 @@ def render_agents_md(
 
 def _trim_to_budget(
     winners: dict[str, Claim],
+    commit: str = "minimal",
+    maturity: str = "development",
+    testing: str = "not-enforced",
+    ci: str = "local-only",
     package: str | None = None,
     skip_sections: frozenset[str] = frozenset(),
 ) -> tuple[dict[str, Claim], list[str]]:
@@ -493,10 +516,10 @@ def _trim_to_budget(
     for victim in candidates:
         body = render_agents_md(
             kept,
-            "minimal",
-            "development",
-            "not-enforced",
-            "local-only",
+            commit,
+            maturity,
+            testing,
+            ci,
             package=package,
             skip_sections=skip_sections,
         )
@@ -686,7 +709,13 @@ def _cmd_generate(args: argparse.Namespace) -> int:
         }
 
     winners, trimmed = _trim_to_budget(
-        winners, package=args.package, skip_sections=skip_sections
+        winners,
+        commit=args.commit,
+        maturity=args.maturity,
+        testing=args.testing,
+        ci=args.ci,
+        package=args.package,
+        skip_sections=skip_sections,
     )
     dropped += trimmed
 

@@ -357,7 +357,9 @@ def test_skip_value_omits_hard_rule_line_not_ci(tmp_path: Path):
     assert "commit=skip maturity=skip testing=skip ci=github-actions" in out
     assert "## Hard Rules" in out  # ci line keeps the section non-empty
     hard_rules_body = out.split("## Hard Rules", 1)[1].split("<!--", 1)[0]
-    assert hard_rules_body.count("- ") == 1  # only the CI bullet remains, commit/maturity/testing all skipped
+    assert (
+        hard_rules_body.count("- ") == 1
+    )  # only the CI bullet remains, commit/maturity/testing all skipped
 
 
 def test_skip_sections_filters_winners_and_records_marker(tmp_path: Path, monkeypatch):
@@ -585,3 +587,197 @@ def test_cli_package_validation(tmp_path: Path, monkeypatch, capsys):
         ]
     )
     assert init._cmd_generate(args) == 0
+
+
+def test_cli_generate_invalid_claims(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+
+    # 1. Missing claims file
+    args = init._build_parser().parse_args(
+        [
+            "generate",
+            "--claims",
+            "missing_claims.json",
+            "--commit",
+            "minimal",
+            "--maturity",
+            "development",
+            "--testing",
+            "always",
+            "--ci",
+            "local-only",
+        ]
+    )
+    assert init._cmd_generate(args) == 1
+    assert "FAIL: could not load claims" in capsys.readouterr().err
+
+    # 2. Invalid JSON content
+    bad_json = tmp_path / "bad.json"
+    bad_json.write_text("invalid json")
+    args = init._build_parser().parse_args(
+        [
+            "generate",
+            "--claims",
+            str(bad_json),
+            "--commit",
+            "minimal",
+            "--maturity",
+            "development",
+            "--testing",
+            "always",
+            "--ci",
+            "local-only",
+        ]
+    )
+    assert init._cmd_generate(args) == 1
+    assert "FAIL: could not load claims" in capsys.readouterr().err
+
+    # 3. JSON is not an array
+    dict_json = tmp_path / "dict.json"
+    dict_json.write_text('{"key": "value"}')
+    args = init._build_parser().parse_args(
+        [
+            "generate",
+            "--claims",
+            str(dict_json),
+            "--commit",
+            "minimal",
+            "--maturity",
+            "development",
+            "--testing",
+            "always",
+            "--ci",
+            "local-only",
+        ]
+    )
+    assert init._cmd_generate(args) == 1
+    assert "claims file must be a JSON array" in capsys.readouterr().err
+
+
+def test_cli_wire_subcommand(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    source = tmp_path / "AGENTS.md"
+    source.write_text("# Agent Instructions\n")
+    target = tmp_path / "CLAUDE.md"
+
+    args = init._build_parser().parse_args(["wire", str(source), str(target)])
+    assert init._cmd_wire(args) == 0
+    assert target.read_text() == "# See [AGENTS.md](AGENTS.md)\n"
+
+
+def test_cli_lint_subcommand(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+
+    # 1. Valid AGENTS.md
+    valid_content = (
+        "# Agent Instructions\n\npurpose: test\n\n## Hard Rules\n\n"
+        "commit: minimal\nmaturity: development\ntesting: always\nci: local-only\n\n"
+        "<!-- project-init:hard-rules v1 commit=minimal maturity=development testing=always ci=local-only -->\n"
+    )
+    agents_file = tmp_path / "AGENTS.md"
+    agents_file.write_text(valid_content)
+
+    args = init._build_parser().parse_args(["lint", str(agents_file)])
+    assert init._cmd_lint(args) == 0
+    assert "PASS: AGENTS.md is valid" in capsys.readouterr().out
+
+    # 2. Invalid AGENTS.md
+    invalid_file = tmp_path / "INVALID.md"
+    invalid_file.write_text("bad text")
+    args = init._build_parser().parse_args(["lint", str(invalid_file)])
+    assert init._cmd_lint(args) == 1
+    assert "FAIL" in capsys.readouterr().err
+
+
+def test_cli_prescan_subcommand(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "package.json").write_text("{}\n")
+
+    args = init._build_parser().parse_args(["prescan", str(tmp_path)])
+    assert init._cmd_prescan(args) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["packages"] == ["."]
+    assert out["has_manifest"] is True
+
+
+def test_skip_sections_whitespace_and_commas(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    claims_file = tmp_path / "claims.json"
+    claims_file.write_text("[]\n")
+
+    args = init._build_parser().parse_args(
+        [
+            "generate",
+            "--claims",
+            str(claims_file),
+            "--commit",
+            "minimal",
+            "--maturity",
+            "development",
+            "--testing",
+            "always",
+            "--ci",
+            "local-only",
+            "--skip-sections",
+            " conventions , , dependencies ",
+        ]
+    )
+    assert init._cmd_generate(args) == 0
+
+
+def test_budget_trimming_mismatch_logic(tmp_path: Path, monkeypatch):
+    monkeypatch.setattr(init, "MAX_LINES", 28)
+
+    # We construct a set of winners that is just large enough to exceed 28 lines with dummy rules,
+    # but stays under 28 lines when all hard rules are skipped.
+    winners = {
+        "purpose": init.Claim("purpose", "A repo to test budget trimming", 4, 1.0),
+        "pm": init.Claim("pm", "npm", 4, 1.0),
+        "cmd.build": init.Claim("cmd.build", "npm run build", 4, 1.0),
+        "cmd.test": init.Claim("cmd.test", "npm test", 4, 1.0),
+        "conv.rule1": init.Claim("conv.rule1", "Convention 1", 4, 1.0),
+        "conv.rule2": init.Claim("conv.rule2", "Convention 2", 4, 1.0),
+        "conv.rule3": init.Claim("conv.rule3", "Convention 3", 4, 1.0),
+    }
+
+    # If we trim to budget using actual "skip" options, it shouldn't drop any rules.
+    trimmed_winners_no_skip, dropped_no_skip = init._trim_to_budget(
+        winners,
+        commit="minimal",
+        maturity="development",
+        testing="not-enforced",
+        ci="local-only",
+    )
+
+    trimmed_winners_skip, dropped_skip = init._trim_to_budget(
+        winners, commit="skip", maturity="skip", testing="skip", ci="local-only"
+    )
+
+    # In the no-skip (dummy values) run, at least one convention is dropped to fit.
+    assert len(dropped_no_skip) > 0
+    # In the skip run (shorter document), the document already fits, so nothing is dropped!
+    assert len(dropped_skip) == 0
+
+
+def test_evidence_tier_custom():
+    """Verify correct evidence tier classification for go.mod, go.sum, and Makefile."""
+    # go.mod is manifest / config -> Tier 3
+    assert init.evidence_tier("go.mod") == 3
+    assert init.evidence_tier("path/to/go.mod") == 3
+
+    # go.sum is lockfile -> Tier 4
+    assert init.evidence_tier("go.sum") == 4
+
+    # Makefile is other source file -> Tier 2
+    assert init.evidence_tier("Makefile") == 2
+    assert init.evidence_tier("makefile") == 2
+
+    # package-lock.json is lockfile -> Tier 4
+    assert init.evidence_tier("package-lock.json") == 4
+
+    # package.json is config/manifest -> Tier 3
+    assert init.evidence_tier("package.json") == 3
+
+    # README.md is prose/docs -> Tier 1
+    assert init.evidence_tier("README.md") == 1
+
