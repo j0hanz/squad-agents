@@ -265,3 +265,32 @@ See \`../no-such-skill/references/thing.md\` for details.
     }
   }
 });
+
+test('validate-plugin handles block scalar YAML frontmatter', () => {
+  const tempSkillDir = path.join(projectRoot, 'skills', 'temp-block-scalar-skill');
+  if (!fs.existsSync(tempSkillDir)) {
+    fs.mkdirSync(tempSkillDir);
+  }
+  const skillMdPath = path.join(tempSkillDir, 'SKILL.md');
+  const content = `---
+name: temp-block-scalar-skill
+description: >
+  A multiline description
+  that should parse cleanly.
+---
+Some instructions.
+`;
+
+  fs.writeFileSync(skillMdPath, content, 'utf-8');
+
+  try {
+    execSync(`node bin/validate-plugin.mjs`, { cwd: projectRoot, stdio: 'pipe' });
+  } finally {
+    if (fs.existsSync(skillMdPath)) {
+      fs.unlinkSync(skillMdPath);
+    }
+    if (fs.existsSync(tempSkillDir)) {
+      fs.rmdirSync(tempSkillDir);
+    }
+  }
+});
