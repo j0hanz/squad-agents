@@ -7,11 +7,13 @@ The principle: implement exactly what the test requires, nothing more. Domain sp
 ```python
 # Test: assert calculate_discount(100, 10) == 90
 
-# Minimal ✅
+# Minimal [x]
 def calculate_discount(price, discount_percent):
     return price * (1 - discount_percent / 100)
+```
 
-# NOT ✅ (adds validation not yet tested)
+```python
+# NOT [x] (adds validation not yet tested)
 def calculate_discount(price, discount_percent):
     if price < 0:
         raise ValueError("Price must be >= 0")
@@ -25,11 +27,13 @@ When the validation test arrives (later), add it then.
 ```python
 # Test: assert validator.validate_email("x@y.com") == True
 
-# Minimal ✅
+# Minimal [x]
 def validate_email(self, email):
     return '@' in email
+```
 
-# NOT ✅ (adds regex not yet tested)
+```python
+# NOT [x] (adds regex not yet tested)
 def validate_email(self, email):
     import re
     return bool(re.match(r'^[^@]+@[^@]+\.[^@]+$', email))
@@ -42,12 +46,14 @@ When the RFC-compliance test arrives (later), add it then.
 ```python
 # Test: assert parse("a,b,c") == ["a", "b", "c"]
 
-# Minimal ✅ (iteration is necessary to pass this test)
+# Minimal [x] (iteration is necessary to pass this test)
 def parse(self, line):
     return line.split(',')
+```
 
+```python
 # Later test: assert parse("a,b\nc,d") handles newlines
-# Minimal at this point ✅
+# Minimal at this point [x]
 def parse(self, data):
     return [line.split(',') for line in data.split('\n')]
 ```
@@ -58,21 +64,25 @@ Each feature gets its own test and minimal implementation.
 
 ```python
 # Test 1: assert validator.validate_email() == True
-# Minimal ✅
+# Minimal [x]
 class UserValidator:
     def validate_email(self, email):
         return '@' in email
+```
 
+```python
 # Test 2: assert validator.validate_password() == True
-# Minimal ✅ (no helper extracted yet — each method is called once)
+# Minimal [x] (no helper extracted yet — each method is called once)
 class UserValidator:
     def validate_email(self, email):
         return '@' in email
     def validate_password(self, pwd):
         return len(pwd) >= 8
+```
 
+```python
 # Test 3: assert combined validation (if you notice same logic 2+ times)
-# NOW extract ✅
+# NOW extract [x]
 def _contains_required_character(self, text, char):
     return char in text
 ```

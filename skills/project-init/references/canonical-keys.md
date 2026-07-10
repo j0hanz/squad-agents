@@ -40,7 +40,9 @@ A `conv.*` value may hold more than one atomic fact, joined by the literal token
 A claim like:
 
 ```json
-"value": "Throw `FsError` carrying a `Problem` (`src/core/errors.ts`) || Never throw raw `Error`"
+{
+  "value": "Throw `FsError` carrying a `Problem` (`src/core/errors.ts`) || Never throw raw `Error`"
+}
 ```
 
 renders as:

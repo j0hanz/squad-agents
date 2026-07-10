@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: 'Use when the codebase has structural problems — circular dependencies, infra code bleeding into domain logic, hidden coupling, God files, unclear module responsibilities, or modules whose stated purpose contradicts how other modules actually use them. Parallel per-directory agent judgment, not static-analysis scripts.'
+description: 'Use when the codebase has structural problems like circular dependencies, infrastructure bleeding into domain logic, hidden coupling, God files, or unclear module responsibilities.'
 disable-model-invocation: false
 allowed-tools: Bash(python *), Bash(python3 *), Agent(researcher), Skill(interview), Glob
 ---
@@ -18,9 +18,11 @@ Trigger: structural/architecture audit request
 ## Step 1: GROUP
 
 - List the repo's top-level directories one level deep (`Glob` for entries, no file content read).
-- Drop obviously non-code directories by name/pattern: `docs`, `.github`, `.git`, `node_modules`, `dist`, `build`, lockfile-only dirs.
+- Drop non-code directories by name/pattern: `docs`, `.github`, `.git`, `node_modules`, `dist`, `build`, lockfile-only dirs.
 - Band the rest into **at most 8 lanes** by file count: merge sparse dirs into the nearest lane, split a disproportionately large dir into multiple lanes within itself. Never dispatch more than 8 lanes regardless of repo size — this is the hard cap that bounds cost and latency.
 - **Flat-repo fallback:** if there are no meaningful subdirectories (everything under one `src/`), chunk files by detected primary extension (group `.ts`/`.tsx` together, `.py` together, etc.) instead of alphabetically — still mechanical, no parsing. **Mandatory:** when this fallback fires, the final report header MUST say so and add: "findings below use arbitrary file-extension chunks, not real module boundaries — treat purpose and contradiction findings with reduced confidence." Never omit this line.
+
+**Done when:** the Lane Matrix grouping is written as a table listing all subdirectories mapped to <=8 lanes, with non-code directories explicitly excluded.
 
 ## Step 2: LAUNCH
 
@@ -32,7 +34,9 @@ Each lane agent reads ONLY its own lane's files and answers exactly these five q
 2. **Imports out:** "List every import this lane has from outside itself, as literal import paths copied character-for-character from the source line, with the file it came from. Do not paraphrase — this list gets mechanically cross-referenced against other lanes. If there are none, say 'none' explicitly."
 3. **Bleed smell:** "Does this lane mix infrastructure concerns (I/O, DB/HTTP clients, filesystem, framework glue) directly into what looks like core/domain logic in the same file? Name the specific file and quote the pattern if so."
 4. **Size/cohesion outliers:** "Is there a file here that's unusually large or doing several unrelated things? Name the file; say whether its size is one cohesive concept or several jammed together."
-5. **Hidden coupling:** "Is this lane coupled to something elsewhere in the repo in a way that isn't a normal import (shared global state, monkeypatching, naming-convention contracts)? Name the specific file or lane if so."
+5. **Hidden coupling:** "Is this lane coupled to something elsewhere in the repo outside normal imports (shared global state, monkeypatching, naming-convention contracts)? Name the specific file or lane if so."
+
+**Done when:** researcher subagents have been dispatched for all lanes in parallel in a single message, and all responses are received.
 
 **Redaction (load-bearing, not optional):** before any quoted text from Q2/Q3 leaves the lane agent's answer, redact any line that looks like a credential — API keys, tokens, passwords, AWS-key-shaped strings, high-entropy strings — replacing it with `[redacted: possible credential]`. This is a heuristic, not a guarantee; state that plainly in the final report, never imply secrets are guaranteed-safe to quote.
 
@@ -47,16 +51,20 @@ If a lane reports nothing across all five questions, its final-report entry comp
   3. **Pattern merging:** if 3+ lanes independently report the same finding shape (e.g., "mixes infra into domain"), merge into one repo-wide pattern finding instead of listing it once per lane.
   4. **Overlap detection:** compare every pair of lanes' Q1 answers for plausible responsibility overlap (two lanes both claiming the same job) — no other step catches this.
 
+**Done when:** cycle check has run, synthesis pass is completed, findings are ranked by corroboration, and pattern merging/contradiction adjudication are complete.
+
 ## Step 4: OUTPUT
 
 One flat report. Each finding: `{finding, kind (cycle / bleed / cohesion / coupling / intent-mismatch / overlap), corroboration (N lanes, or "single-lane"), evidence}`. Corroborated findings first. **No numeric score, no HIGH/MEDIUM/LOW tier, no borrowed severity vocabulary** — corroboration count is the only ranking signal, and it means something different (independent agreement, not absolute severity). No ADR, no scaffold, no handoff artifact file. Close with: "Start with corroborated findings above; `request-plan` can formalize any single-lane finding you want to act on."
 
 If 2+ corroborated findings are comparably actionable, that's a hard-to-reverse scoping call (it commits which refactor the team pursues first) — hand it to `interview` rather than letting report order pick silently. Skip this when there's only one corroborated finding or the ranking is already a clear lead.
 
+**Done when:** a single flat report is output listing corroborated findings first, with no severity rankings, followed by a handoff recommendation.
+
 ## Heuristics
 
-- **No detection scripts beyond `check_cycles.py`.** The five questions are answered by judgment, not regex/AST. If you find yourself writing a second analysis script, stop — that's drifting back toward the retired `architecting` skill's mechanism, which this skill was explicitly built to not be.
-- **Scale:** the 8-lane cap is the load-bearing scale control. Lane size still varies within a band — wall-clock is bounded by whatever lane lands largest, not perfectly equal. This is accepted, not solved further.
+- **No detection scripts beyond `check_cycles.py`.** The five questions are answered by judgment, not regex/AST.
+- **Scale:** the 8-lane cap bounds cost and latency. Lane size still varies within a band. This is accepted.
 
 ## Worked Example
 
@@ -64,6 +72,8 @@ If 2+ corroborated findings are comparably actionable, that's a hard-to-reverse 
 
 ## Next Skills
 
-- **request-plan:** formalize a fix for any specific finding.
-- **diagnose:** if a finding turns out to be a live, currently-failing bug rather than structural debt.
-- **dispatch-agents:** execute a multi-file structural fix once planned.
+| Skill                                          | Use Case                                                   |
+| :--------------------------------------------- | :--------------------------------------------------------- |
+| [request-plan](../request-plan/SKILL.md)       | Formalize a fix for any specific finding                   |
+| [diagnose](../diagnose/SKILL.md)               | If a finding turns out to be a live, currently-failing bug |
+| [dispatch-agents](../dispatch-agents/SKILL.md) | Execute a multi-file structural fix once planned           |

@@ -1,6 +1,6 @@
 ---
 name: dispatch-agents
-description: Use when implementing a multi-task plan or backlog. Groups tasks into dependency-ordered waves and dispatches up to 10 subagents per wave in parallel where safe.
+description: 'Use when a multi-task plan or backlog has dependency-ordered tasks that can run in parallel without file conflicts.'
 disable-model-invocation: false
 argument-hint: '[path to plan file, or the tasks to execute]'
 allowed-tools: Agent, AskUserQuestion, Bash, Read, Grep
@@ -9,10 +9,6 @@ allowed-tools: Agent, AskUserQuestion, Bash, Read, Grep
 # dispatch-agents
 
 Execute a multi-task plan by grouping tasks into dependency-ordered waves and dispatching up to 10 subagents in parallel.
-
-## When to Use
-
-- Executing plans or backlogs with 2+ tasks. Avoid manual sequential loops or ad hoc parallel execution; concurrent writes require strict wave isolation.
 
 ## Process Flow
 
@@ -90,7 +86,9 @@ Blocked/escalated lanes: [list by name, or "none"]
 
 ## Next Skills
 
-- `write-commit`: Commit staged changes.
-- `verification-before-completion`: Final Validation.
-- `diagnose`: Investigate test/merge failures.
-- `request-code-review`: Mandatory at Final Validation.
+| Skill                                                                        | Use Case                        |
+| :--------------------------------------------------------------------------- | :------------------------------ |
+| [write-commit](../write-commit/SKILL.md)                                     | Commit staged changes           |
+| [verification-before-completion](../verification-before-completion/SKILL.md) | Final Validation                |
+| [diagnose](../diagnose/SKILL.md)                                             | Investigate test/merge failures |
+| [request-code-review](../request-code-review/SKILL.md)                       | Mandatory at Final Validation   |

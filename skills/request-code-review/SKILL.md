@@ -1,6 +1,6 @@
 ---
 name: request-code-review
-description: 'Use when implementation is complete and the diff needs a fresh-eye review before merging. Prefer over receive-code-review when requesting a new review rather than acting on feedback.'
+description: 'Use when implementation is complete and the diff needs a fresh-eye review before merging. Prefer over receive-code-review when requesting a new review instead of acting on feedback.'
 disable-model-invocation: false
 argument-hint: '[target: branch, commit, or file]'
 allowed-tools: 'Bash(git *), Agent(diff-reviewer), AskUserQuestion, Read'
@@ -12,7 +12,7 @@ metadata:
 
 # request-code-review
 
-Dispatch a fresh-context subagent to review the diff cold. Never review your own work in the thread that wrote it — you already rationalized every decision; a subagent with no memory of the implementation reads it the way a human reviewer would.
+A subagent reviews the diff with fresh context, reading it like a human reviewer.
 
 ## Step 0: Confirm
 
@@ -21,8 +21,6 @@ Option 1 (Recommended): Dispatch fresh-context review
 Option 2 (Alternative): Inline review (Note: To preserve the rule against self-review, this must still dispatch a fresh-context subagent, passing the diff via direct text block inputs instead of git commits).
 
 ## Pre-Review Checkpoint
-
-Before proceeding, verify the following:
 
 - **Required Inputs**:
   1. **Unit Test Status**: Ask the user via `AskUserQuestion` to confirm that unit tests have passed. Do not proceed if tests are failing.
@@ -35,8 +33,8 @@ Before proceeding, verify the following:
 ## Phase 1: Dispatch
 
 1. **Stat Check**: Run `git diff --stat {{base_commit}}..{{head_commit}}` to verify files changed.
-2. **Safety Check (Baseline)**: Run `git status --porcelain` and record any dirty files. Ensure no untracked or modified files are altered during this process.
-3. **Prompt Compilation**: Fill [references/reviewer-dispatch-prompt.md](references/reviewer-dispatch-prompt.md).
+2. **Safety Check (Baseline)**: Run `git status --porcelain` and record any dirty files. Verify no files are altered during dispatch.
+3. **Prompt Compilation**: Fill [reviewer-dispatch-prompt.md](references/reviewer-dispatch-prompt.md).
    - Map `{{base_commit}}` and `{{head_commit}}` to the resolved SHAs.
    - Map `{{repo_path}}` to the absolute path of the workspace.
    - Map `{{plan_or_requirements_summary}}` to the 1-paragraph summary.
@@ -48,7 +46,7 @@ Before proceeding, verify the following:
 
 ## Phase 2: Hand Off
 
-**Execution Guardrail**: Do not present the final user prompt or proceed to this phase until the subagent execution is completed and validated.
+**Execution Guardrail**: Do not proceed until subagent execution completes and validates.
 
 Action: Keep subagent output verbatim (do not edit)
 On PASS: Prompt user "Run `/pr-workflow`"

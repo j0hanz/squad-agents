@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: 'Use when code changes are declared done and need pressure-testing that declared-done actually means done — gather execution evidence (run tests or manual repro, paste fresh output) before review or release. Prefer over request-code-review when the implementation has not yet been verified by execution.'
+description: 'Use when code changes require verification via execution evidence (test runs or manual reproduction with pasted output). Prefer over request-code-review if implementation is unverified.'
 disable-model-invocation: false
 allowed-tools: AskUserQuestion, Bash, Read, Grep
 ---
@@ -19,12 +19,12 @@ Start: Ready to Complete
 
 ## 1. Mandatory Checklist
 
-The full bar lives in [`references/definition-of-done.md`](references/definition-of-done.md) (Tests, Build/types, Lint, No debug residue, Diff, Acceptance criteria, Callers) — read it first. The items below are the delta this skill adds on top of that bar:
+The full bar lives in [definition-of-done.md](references/definition-of-done.md) (Tests, Build/types, Lint, No debug residue, Diff, Acceptance criteria, Callers) — read it first. The items below are the delta this skill adds on top of that bar:
 
 - [ ] **Manual:** Documented inputs/outputs if no automation (see §3).
 - [ ] **Bug Fix:** Confirm reproduction failure then confirm success.
 
-**action:** Verify all items before completion.
+**Done when:** all checklist items are verified and manual test evidence is documented (if required).
 
 ## 2. Decision Logic
 
@@ -79,5 +79,5 @@ Review does not re-run your code — "I'll catch it in review" is verification d
 
 ## 5. Expert Patterns
 
-**action:** Use the N-1 test (Revert → Fail → Fix → Pass, see [`test-driven-development`](../test-driven-development/SKILL.md#n-1-test-false-green-elimination)) to eliminate false greens.
+**action:** Use the N-1 test (Revert → Fail → Fix → Pass, see [test-driven-development](../test-driven-development/SKILL.md#n-1-test-false-green-elimination)) to eliminate false greens.
 **action:** Test `null`, `undefined`, empty collections, and boundary cases to ensure robust coverage.

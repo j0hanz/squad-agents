@@ -1,16 +1,18 @@
 ---
 name: using-squad-agents-skills
-description: 'Use when starting a new task and the correct starting point, lifecycle gate, or routing among skills is unclear.'
+description: 'Use when the starting point, lifecycle gate, or routing among skills is unclear for a new task.'
 disable-model-invocation: true
 allowed-tools: Skill, Read, Glob
 ---
+
+# using-squad-agents-skills
 
 <SUBAGENT-STOP>
 If you were dispatched as a subagent to execute a specific task, skip this skill.
 </SUBAGENT-STOP>
 
 <ROUTING-PRINCIPLE>
-Route to any skill with strong relevance to the task. Routing follows the gate matrix below. Skip a skill only if (1) Gate 3 triviality fast-path applies (<~20 line changes), (2) the Skip Disclaimer marks it unavailable, or (3) the task is a subagent delegation (see SUBAGENT-STOP). Otherwise follow the routing decisively.
+Route to skills relevant to the task. Routing follows the gate matrix below. Skip a skill only if (1) Gate 3 triviality fast-path applies (<~20 line changes), (2) the Skip Disclaimer marks it unavailable, or (3) the task is a subagent delegation (see SUBAGENT-STOP). Otherwise follow the routing decisively.
 </ROUTING-PRINCIPLE>
 
 ## Lifecycle Reference
@@ -19,17 +21,19 @@ _See the Gate Reference table below for the complete skill routing lifecycle._
 
 ## Gate Reference
 
-| Gate | Entry question                           | Pass route                                   | Fail route                                                                  |
-| :--- | :--------------------------------------- | :------------------------------------------- | :-------------------------------------------------------------------------- |
-| 0    | Repo onboarded (AGENTS.md)?              | → Gate 1                                     | [project-init] (recommended, never auto)                                    |
-| 1    | Task fully defined (APPROVED spec+plan)? | → Gate 2                                     | vague→[parallel-brainstorming]; idea→[request-plan]; DRAFT→[receive-plan]   |
-| 1.5  | Plan approved after drafting?            | → Gate 2                                     | REVISE → fix at origin → [receive-plan]                                     |
-| 2    | Systemic issue or localized?             | new feature → Gate 3                         | structural→[project-audit]; bug→[diagnose]; single-file messy→Gate 3 inline |
-| 3    | Execution strategy?                      | trivial/standard → [test-driven-development] | 2+ tasks → [dispatch-agents]                                                |
-| 3.5  | TDD stuck or clean?                      | clean GREEN → Gate 4                         | 3 attempts→[diagnose]; ambiguous→[request-plan]                             |
-| 4    | Quality & delivery (Verify, Review, PR)? | DONE (merged)                                | verification-fail→DONE; review-fail→[receive-code-review]                   |
+| Gate | Entry question                           | Pass route                                   | Fail route                                                                                                                  |
+| :--- | :--------------------------------------- | :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| 0    | Repo onboarded (AGENTS.md)?              | → Gate 1                                     | [project-init] (recommended, never auto)                                                                                    |
+| 1    | Task fully defined (APPROVED spec+plan)? | → Gate 2                                     | vague→[parallel-brainstorming]; idea→[request-plan]; DRAFT→[receive-plan]                                                   |
+| 1.5  | Plan approved after drafting?            | → Gate 2                                     | REVISE → fix at origin → [receive-plan]                                                                                     |
+| 2    | Systemic issue or localized?             | new feature → Gate 3                         | structural→[project-audit]; bug→[diagnose]; single-file messy→Gate 3 inline                                                 |
+| 3    | Execution strategy?                      | trivial/standard → [test-driven-development] | 2+ tasks → [dispatch-agents]                                                                                                |
+| 3.5  | TDD stuck or clean?                      | clean GREEN → Gate 4                         | 3 attempts→[diagnose]; ambiguous→[request-plan]                                                                             |
+| 4    | Quality & delivery (Verify, Review, PR)? | DONE (merged)                                | verify → [verification-before-completion]; commit → [write-commit]; PR → [pr-workflow]; review-fail → [receive-code-review] |
 
 ## Rules
+
+**Done when:** routing is announced as plain text and the target skill is invoked.
 
 - **Skill Shadowing:** Warn if a global skill version overrides the local `skills/` version.
 - **Immediate Invocation:** Activate a skill the instant a route is identified.

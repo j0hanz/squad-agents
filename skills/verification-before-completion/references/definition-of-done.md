@@ -8,14 +8,9 @@ canonical: true
 # Definition of Done (project-wide standing bar)
 
 Per-task acceptance criteria answer "did we build the right thing?" for **one** task.
-The Definition of Done is the **standing bar every task and every dispatched lane
-clears before it counts as done** — it sits underneath acceptance criteria, not
-beside them. Acceptance criteria change per task; the DoD does not.
+The Definition of Done (DoD) is the standing bar every task and lane must clear — it sits underneath acceptance criteria, not beside them.
 
-A task is **not done**, and a lane's `VERDICT: SUCCESS` is **not trusted**, until
-every item below holds. This is the single shared bar referenced by `request-plan`/`receive-plan`,
-`dispatch-agents`, and this skill — so each skill
-stops re-stating its own partial copy.
+A task is incomplete, and a lane's success is untrusted, until all items below hold.
 
 ## The bar
 

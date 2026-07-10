@@ -47,7 +47,7 @@ Header: `Testing rigor`
 
 Header: `Sections`
 
-multiSelect: the user may pick 0 to 3. **Leaving none selected means include everything that gets discovered**, which is the lazy default and needs no explanation to the user.
+multiSelect: the user may pick 0 to 3. If none selected, include all discovered keys (default).
 
 - Key Conventions: never show a `## Key Conventions` section, even if conventions are discovered → exclude `conv.*` (`conventions`)
 - Dependency Locations: never show a `## Dependency Locations` section, even if discovered → exclude `dep.*` (`dependencies`)
@@ -57,7 +57,7 @@ This question exists because the <100-line budget already drops the lowest-prior
 
 ## Recommendation Heuristics
 
-Pick the `(Recommended)` option per prompt from these signals (fall back to the first option if no signal). **Never recommend "Don't include."** Skip is an opt-out the user reaches for deliberately, not something to default them into.
+Pick the `(Recommended)` option per prompt from these signals (fall back to the first option if no signal). Do not recommend "Don't include."
 
 1. **Commit policy:** `commit=strict` if `git log -20 --format=%s` shows >50% matching `type(scope): subject`; `commit=relaxed` if a `CONTRIBUTING.md`/`.github/` template mentions commit conventions without strict enforcement; else `commit=minimal`.
 2. **Maturity:** `maturity=production` if a version/tag shows `>=1.0.0`, or a `CHANGELOG.md`/release workflow exists; else `maturity=development`.

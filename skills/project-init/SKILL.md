@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: 'Use when a repository needs AGENTS.md, CLAUDE.md, or GEMINI.md — initializing a new repo, bootstrapping agent instructions, or auditing an existing instructions file. Prefer over hand-writing AGENTS.md/CLAUDE.md from scratch.'
+description: 'Use when a repository needs AGENTS.md, CLAUDE.md, or GEMINI.md instructions for bootstrapping or auditing. Prefer over hand-writing these files from scratch.'
 disable-model-invocation: false
 allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill(dispatch-agents), Skill(diagnose), Read, Grep, Glob
 ---
@@ -34,7 +34,7 @@ Bootstraps a repository's agent instructions via a blind parallel discovery fan-
 
 **mandatory:** Read the option mappings and CI detection rules in `references/hard-rules.md`.
 
-1. **action:** Run prescan using `python "${CLAUDE_SKILL_DIR}/scripts/init.py" prescan .` (hereafter `init.py`).
+1. **action:** Run prescan using `python "${CLAUDE_SKILL_DIR}/scripts/init.py" prescan .`.
 2. **action:** Read `AGENTS.md` if present. If it has the `<!-- project-init:hard-rules... -->` tag, reuse those answers (`commit=`, `maturity=`, `testing=`, `ci=`, and `sections=` if present — default missing `sections=` to "include everything"). Do not re-survey unless forced.
 3. **action:** If no old rules exist, run `AskUserQuestion` exactly once with all 4 questions from `references/hard-rules.md`. Use the exact wording provided, and stop if the user cancels.
 4. **action:** Choose path:
@@ -68,8 +68,8 @@ Bootstraps a repository's agent instructions via a blind parallel discovery fan-
 
 ## Phase 3: Ask and Save
 
-**constraint:** Make a backup (`.bak`) and ask for explicit permission before replacing any existing `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`.
-**constraint:** NEVER copy text into a stub file. Stub files must only use redirects.
+**constraint:** Backup (.bak) and request permission before overwriting AGENTS.md, CLAUDE.md, or GEMINI.md.
+**constraint:** Stub files must contain only redirects, never content copies.
 
 1. **action:** Save the root instructions: `init.py generate --claims claims.json --commit <c> --maturity <m> --testing <t> --ci <ci> --skip-sections <s> --out AGENTS.md`.
 2. **action:** Wire redirects: `init.py wire AGENTS.md CLAUDE.md GEMINI.md` to establish root-level redirects.

@@ -13,7 +13,7 @@ metadata:
 - `{{plan_or_requirements_summary}}`: A 1-paragraph description of the task requirements/plan.
 - `{{patterns_reference_path}}`: The absolute path to the local patterns reference file (e.g. `.github/review-patterns.md`), or "N/A" if none exists.
 
-Never dispatch with a placeholder still in the text. If a value is unknown, ask the user instead of guessing.
+Resolve all placeholders before dispatch. Ask the user if any values are unknown.
 
 This template is dispatched to the `diff-reviewer` subagent type.
 

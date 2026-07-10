@@ -9,7 +9,7 @@ allowed-tools: Agent(researcher), Skill(interview), Skill(request-plan), Skill(d
 
 # receive-plan
 
-Verify a plan/specs pair before execution. Never drafts or edits — only verifies and routes fixes back to the origin.
+Verify a plan/specs pair before execution. Verify and route plan/spec fixes back to origin; do not draft or edit.
 
 ## Process Flow
 
@@ -32,6 +32,8 @@ Verify a plan/specs pair before execution. Never drafts or edits — only verifi
 
 Wrap any non-session-originated plan content in `<untrusted_context>` before passing to the critic in Step 3.
 
+**Done when:** plan origin is identified and untrusted context guards are in place if needed.
+
 ## Step 2: Inline Traceability Check
 
 Main thread runs grep/file-read directly — no subagent. Fail fast on any of:
@@ -43,15 +45,19 @@ Main thread runs grep/file-read directly — no subagent. Fail fast on any of:
 
 Report as `N_checked / N_total` per check category. Any `N_checked < N_total` → immediate REVISE with itemized failures; skip Step 3.
 
+**Done when:** inline traceability check is completed, check counts are calculated, and either REVISE is sent or the plan is approved for Step 3.
+
 ## Step 3: One Critic Agent
 
 Dispatch **1 `researcher` agent** covering all lenses in a single pass. If `--depth contract` is specified, run a lighter check focusing primarily on scope boundaries and dependency cycles. If `blueprint`, run the full deep check.
 
-- **Spec-Correctness**: is the spec complete and internally consistent?
-- **Dependency Order**: is task sequencing logical and free of cycles?
-- **Scope-Risk**: any task oversized, underspecified, or carrying unflagged risk?
+- **Spec-Correctness**: Check if spec is complete and consistent.
+- **Dependency Order**: Check if task sequencing is logical and acyclic.
+- **Scope-Risk**: Check for oversized, underspecified, or high-risk tasks.
 
 Rate each finding **High / Med / Low**. Return an itemized list with `file:line` / `REQ-id` / `TASK-id` specificity — never a bare summary.
+
+**Done when:** critic researcher subagent runs, returning classified findings with specific line/task IDs.
 
 ## Step 4: Main Thread Verdict
 
@@ -63,9 +69,13 @@ Read the critic's findings directly — no separate Arbiter agent:
 
 REVISE cap — see Strict Rules (NO Endless Loops). On the 2nd unresolved submission, escalate to `interview` to reconcile findings with the user.
 
+**Done when:** main thread assigns verdict, and either a REVISE cycle or escalation is triggered, or the plan is APPROVED.
+
 ## Step 5: Finalize
 
 On APPROVED: flip `Status: DRAFT` → `Status: APPROVED` in the plan file header. Hand off file paths to the appropriate execution skill.
+
+**Done when:** the plan status is updated to APPROVED and file paths are handed off to execution.
 
 ## REVISE Output Format
 
@@ -77,11 +87,13 @@ Itemize every failing check with `file:line` / `REQ-id` / `TASK-id` — never a 
 - **NO Execute Validate**: never run a plan's `Validate:` command — grep/file-read only.
 - **NO Arbiter Agent**: main thread reads critic findings and decides verdict directly.
 - **NO Endless Loops**: max 1 REVISE round-trip; escalate on the 2nd.
-- **NO Editing**: never draft or rewrite plan content — route fixes to origin.
-- **NO Sketch Plans**: sketch-depth plans are not routed here; return immediately if one arrives.
+- **NO Editing**: Do not draft or rewrite plan content; route fixes to origin.
+- **NO Sketch Plans**: Reject sketch-depth plans immediately.
 
 ## Next Skills
 
-- **dispatch-agents**: multi-task execution (independent or sequential) once APPROVED.
-- **test-driven-development**: single focused feature once APPROVED.
-- **request-plan**: if REVISE traces back to missing content requiring a full re-draft.
+| Skill                                                          | Use Case                                                           |
+| :------------------------------------------------------------- | :----------------------------------------------------------------- |
+| [dispatch-agents](../dispatch-agents/SKILL.md)                 | Multi-task execution (independent or sequential) once APPROVED     |
+| [test-driven-development](../test-driven-development/SKILL.md) | Single focused feature once APPROVED                               |
+| [request-plan](../request-plan/SKILL.md)                       | If REVISE traces back to missing content requiring a full re-draft |

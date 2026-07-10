@@ -1,6 +1,6 @@
 ---
 name: parallel-brainstorming
-description: 'Use when requirements are vague or the solution space is open — before a plan exists and before touching code. Prefer over request-plan or project-audit when the problem is unproven and multiple distinct approaches need to be explored. Not for bug fixes or one-line changes with no design space.'
+description: 'Use when requirements are vague or the solution space is open before a plan exists. Prefer over request-plan when the problem is unproven and multiple distinct approaches need to be explored.'
 disable-model-invocation: false
 allowed-tools: Skill(interview), Write, Bash(python *), Read, Grep, Glob
 ---
@@ -133,7 +133,9 @@ Request: "add a way for users to save and re-run searches."
 
 ## Next Skills
 
-- `write-commit`: commit the Design Brief only (no push).
-- `pr-workflow`: commit, push, and open a PR for the Design Brief.
-- `request-plan`: formalize the Design Brief into a task plan when auto-commit is declined.
-- `dispatch-agents`: execute the resulting plan once tasks are formalized.
+| Skill                                          | Use Case                                                                 |
+| :--------------------------------------------- | :----------------------------------------------------------------------- |
+| [write-commit](../write-commit/SKILL.md)       | Commit the Design Brief only (no push)                                   |
+| [pr-workflow](../pr-workflow/SKILL.md)         | Commit, push, and open a PR for the Design Brief                         |
+| [request-plan](../request-plan/SKILL.md)       | Formalize the Design Brief into a task plan when auto-commit is declined |
+| [dispatch-agents](../dispatch-agents/SKILL.md) | Execute the resulting plan once tasks are formalized                     |

@@ -1,6 +1,6 @@
 ---
 name: diagnose
-description: 'Use when there is a bug, crash, test failure, or unexpected behavior that needs root-cause analysis before a fix is attempted. Prefer over test-driven-development when diagnosing an existing defect rather than building a new feature.'
+description: 'Use when there is a bug, crash, test failure, or unexpected behavior needing root-cause analysis before fixing. Prefer over test-driven-development when diagnosing an existing defect rather than building a feature.'
 disable-model-invocation: false
 argument-hint: '[symptom description or error trace]'
 allowed-tools: Agent(researcher), Agent(implementer), AskUserQuestion, Bash(git *), Read, Grep, Glob, Skill(dispatch-agents)
@@ -51,8 +51,6 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 **action (tournament only):** race 2-3 candidate repro strategies via `dispatch-agents`; keep the fastest deterministic >50% strategy and lock it as the Oracle
 **gate:** require logged repro signal before Phase 3
 
-# mirror of references/phases.md#Phase-3 and #Phase-35 — phases.md holds the ranking/efficiency/conjunction/masking/entangled-survivor rationale; this section holds the action/role/contract/concurrency/output/narration/gate operational contract. Diverged (GATE-D): both kept.
-
 ## Phase 3: Hypothesize & Falsify
 
 **mandatory:** read `references/phases.md` (do NOT load `references/feedback-loops.md`)
@@ -91,6 +89,7 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 **action:** apply minimal fix on working copy
 **action:** confirm GREEN
 **action:** execute N-1 test (revert fix -> confirm RED -> restore fix)
+**Done when:** the regression test is green, passes N-1 check, and minimal fix is committed to the working copy.
 
 ## Phase 6: Finalization
 
@@ -115,14 +114,18 @@ Symptom: `POST /orders` 500s intermittently in staging, never locally.
 
 ## Next Skills
 
-**test-driven-development:** new logic/tests (not for writing new feature tests — use it directly)
-**project-audit:** clean up multiple files/modules
-**request-plan:** major specification gaps
+| Skill                                                          | Use Case                                        |
+| :------------------------------------------------------------- | :---------------------------------------------- |
+| [test-driven-development](../test-driven-development/SKILL.md) | For implementing new logic and regression tests |
+| [project-audit](../project-audit/SKILL.md)                     | For cleaning up multiple files or modules       |
+| [request-plan](../request-plan/SKILL.md)                       | For major specification gaps                    |
 
 ## References
 
-**references/feedback-loops.md:** setup patterns by system type — these patterns build the Oracle
-**references/phases.md:** detailed phases, hypothesis prioritization, profiling, tournament mechanics
+| Reference                                         | Purpose                                                                     |
+| :------------------------------------------------ | :-------------------------------------------------------------------------- |
+| [feedback-loops.md](references/feedback-loops.md) | Setup patterns by system type to build the Oracle                           |
+| [phases.md](references/phases.md)                 | Detailed phases, hypothesis prioritization, profiling, tournament mechanics |
 
 ## Output Format
 

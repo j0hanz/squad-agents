@@ -10,7 +10,7 @@ allowed-tools: Bash(git *), Bash(gh *), Read, AskUserQuestion, Skill(write-commi
 
 Terminal step: land work that's done (ideally reviewed) as a single, atomically-committed PR. Generate the branch name and PR body — don't make the human author plumbing. Reserve confirmation for **the push**: the first step that leaves the machine and is hard to retract.
 
-**Commit mechanics → `write-commit`.** Step 3 delegates all staging, secret-scan, policy-detection, and message-format rules to `write-commit`. Do not duplicate them here.
+**Commit mechanics → [write-commit](../write-commit/SKILL.md).** Step 3 delegates all staging, secret-scan, policy-detection, and message-format rules to [write-commit](../write-commit/SKILL.md). Do not duplicate them here.
 
 ## Process Flow
 
@@ -51,7 +51,7 @@ Start: Deliver Request
 
 ## Step 3: Commit Safely
 
-1. Follow `write-commit` for all staging, secret-scan, policy-detection, and message-format rules.
+1. Follow [write-commit](../write-commit/SKILL.md) for all staging, secret-scan, policy-detection, and message-format rules.
 2. Make one commit per file group — one logical change per commit, nothing bundled.
 3. Show the generated commit message to the user and wait for "OK" before committing.
 
@@ -96,6 +96,8 @@ Start: Deliver Request
 
 ## Next Steps & Errors
 
-- **Need review?** Use `request-code-review`.
-- **Got review comments?** Use `receive-code-review`.
-- **Got an error?** Use `diagnose`.
+| Scenario             | Next Action                                                |
+| :------------------- | :--------------------------------------------------------- |
+| Need review?         | Use [request-code-review](../request-code-review/SKILL.md) |
+| Got review comments? | Use [receive-code-review](../receive-code-review/SKILL.md) |
+| Got an error?        | Use [diagnose](../diagnose/SKILL.md)                       |

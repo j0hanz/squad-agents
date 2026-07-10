@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: 'Use when writing new logic (RED-first) or when a TDD red flag appears — a test that trivially passes, code written before its test, GREEN with no observed RED, or tests-after rationalization.'
+description: 'Use when new logic requires implementation (RED-first) or when a TDD red flag (trivially passing test, code written before its test, or lack of observed RED) occurs.'
 disable-model-invocation: false
 allowed-tools: AskUserQuestion, Bash, Read, Grep, Glob, Write, Edit, NotebookEdit
 ---
@@ -45,6 +45,8 @@ Escape hatches from the HARD GATE. Never self-invoke one silently — confirm vi
 1. **Recommended:** Start TDD for [feature].
 2. **Alternative:** Explore first, then start TDD — state why exploration is needed before code.
 
+**Done when:** user response is captured via AskUserQuestion.
+
 ## Pre-TDD: Define the Interface
 
 **action:** `AskUserQuestion` to lock the shape before writing a test against it.
@@ -57,6 +59,8 @@ Escape hatches from the HARD GATE. Never self-invoke one silently — confirm vi
 - State the target test file path.
 - Start the **behavior list**: happy path + the enumerated errors; it grows by one edge case per RED cycle and is the coverage gauge for REFACTOR.
 - **Gate:** run the relevant existing tests first — establish a clean baseline before adding new tests.
+
+**Done when:** interface details, errors, and test path are locked and user confirms.
 
 ## Step 1: RED (Failing Test)
 

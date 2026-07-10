@@ -1,13 +1,13 @@
 ---
 name: write-commit
-description: 'Use when staging changes and writing git commit messages. Prefer over pr-workflow when changes only need to be committed locally and not yet pushed or submitted as a PR.'
+description: 'Use during local git commit creation and file staging. Prefer over pr-workflow when changes are local and do not require remote pushing or a PR.'
 disable-model-invocation: false
 allowed-tools: Bash(git *), Read
 ---
 
-# Git Commit Agent
+# write-commit
 
-**Canonical source for commit mechanics.** Sibling skills defer here, not duplicate: `pr-workflow` Step 3, `parallel-brainstorming` Phase 6, `receive-code-review` Routing. Link, don't duplicate.
+**Canonical source for commit mechanics.** Sibling skills defer here: [pr-workflow](../pr-workflow/SKILL.md) Step 3, [parallel-brainstorming](../parallel-brainstorming/SKILL.md) Phase 6, [receive-code-review](../receive-code-review/SKILL.md) Routing. Link, do not duplicate.
 
 ```text
   ┌───────────────┐     git add      ┌──────────────┐   git commit    ┌──────────────┐
@@ -60,7 +60,9 @@ Conventional Commits — apply when step 2 selects Conventional; scope mandatory
 - `fix(billing): resolve null pointer in webhook`
 - `feat(auth)!: remove deprecated v1 auth endpoint`
 
-## NEXT STEPS
+## Next Steps
 
-- **Ready to push + open PR?** Hand off to `pr-workflow` (Steps 4–5).
-- **Merge conflict?** Use `diagnose`.
+| Scenario                 | Next Action                                                    |
+| :----------------------- | :------------------------------------------------------------- |
+| Ready to push + open PR? | Hand off to [pr-workflow](../pr-workflow/SKILL.md) (Steps 4–5) |
+| Merge conflict?          | Use [diagnose](../diagnose/SKILL.md)                           |

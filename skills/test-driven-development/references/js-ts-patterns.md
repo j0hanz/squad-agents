@@ -26,9 +26,7 @@ test('applies 10% discount to base price', () => {
 
 **Run: RED — environment failure**
 
-```
-Cannot find module './discount' from 'discount.test.ts'
-```
+`Cannot find module './discount' from 'discount.test.ts'`
 
 **Step 2 — Create stub:**
 
@@ -67,8 +65,11 @@ describe('calculateDiscount', () => {
   test('returns original price when discount is 0', () => { ... });
   test('throws when price is negative', () => { ... });
 });
+```
 
 // WRONG: describe used to batch unrelated behaviors (still horizontal slicing)
+
+```typescript
 describe('discount module', () => {
   test('calculateDiscount works', () => { ... });
   test('applyPromoCode works', () => { ... });  // different function — own cycle
@@ -95,8 +96,11 @@ test('fetches user', async () => {
   const user = await fetchUser('u-123'); // if this throws, test fails with wrong message
   expect(user.name).toBe('Alice');
 });
+```
 
 // RIGHT — explicitly check assertion reached
+
+```typescript
 test('fetches user', async () => {
   expect.assertions(1); // Jest: fails if no assertion runs
   const user = await fetchUser('u-123');
