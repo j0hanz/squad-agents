@@ -52,19 +52,8 @@ Bypass only for:
 {
   "questions": [
     {
-      "question": "Based on database.js, should we store sessions in PostgreSQL (recommended — matches existing db infra) or Redis (faster read/write but adds dependency)?",
-      "header": "Session store",
-      "multiSelect": false,
-      "options": [
-        {
-          "label": "PostgreSQL (Recommended)",
-          "description": "Matches existing db infra; no new dependency."
-        },
-        {
-          "label": "Redis (Alternative)",
-          "description": "Faster read/write, but adds a new dependency."
-        }
-      ]
+      "question": "Based on database.js, should we store sessions in PostgreSQL or Redis?",
+      "options": ["PostgreSQL (Recommended)", "Redis (Alternative)"]
     }
   ]
 }

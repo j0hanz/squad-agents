@@ -13,71 +13,9 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 Route to any skill with strong relevance to the task. Routing follows the gate matrix below. Skip a skill only if (1) Gate 3 triviality fast-path applies (<~20 line changes), (2) the Skip Disclaimer marks it unavailable, or (3) the task is a subagent delegation (see SUBAGENT-STOP). Otherwise follow the routing decisively.
 </ROUTING-PRINCIPLE>
 
-## Lifecycle Diagram
+## Lifecycle Reference
 
-Read top-to-bottom. `──►` is a transition; `── cond ──►` is a branch. Skill targets are in `[brackets]`. Each gate has one entry question and fixed pass/fail exits — no skill re-evaluates an upstream gate.
-
-```
-START ─ new task
-  │
-  ▼
-Gate 0 · Repo onboarded? ── no AGENTS.md ────────► [project-init] (recommendation) ──► Gate 1
-  │  pass: AGENTS.md present
-  ▼
-Gate 1 · Task defined?
-  │
-  ├── vague / open solution space ───────► [parallel-brainstorming] ─► Gate 1.5
-  ├── idea only, no plan/spec yet ───────► [request-plan] ───────────► Gate 1.5
-  ├── spec+plan exist, Status: DRAFT ────► [receive-plan] ───────────► Gate 1.5
-  └── pass: spec+plan exist, APPROVED ──► Gate 2
-  ▼
-Gate 1.5 · Plan approved? ── reached from any Gate 1 drafting route
-  │
-  ├── REVISE (High finding | ≥2 Med) ───► fix at origin ──► [receive-plan] (cap per its rules)
-  └── pass: APPROVED ───────────────────► Gate 2
-  ▼
-Gate 2 · Systemic or localized?
-  │
-  ├── boundary / God class / circular deps / 2+ files ──► [project-audit] ──► Gate 3
-  ├── crash / bug / unexpected behavior ───────────────► [diagnose] ──────► (resolved) Gate 2-resume
-  ├── messy function, single file, no boundary crossed ► Gate 3 (fix inline via TDD)
-  └── pass: new feature, scope clear ──────────────────► Gate 3
-  ▼
-Gate 3 · Execution strategy
-  │
-  ├── trivial (<~20 lines) OR standard/focused ──► [test-driven-development] ─► Gate 3.5
-  └── 2+ tasks (any shape) ───────────────────────► [dispatch-agents] ────────► Gate 3.5
-  ▼
-Gate 3.5 · Stuck or clean? ── reached from either Gate 3 route
-  │
-  ├── TDD: 3 failed attempts on same test ──► [diagnose] ──► Gate 3 (retry)
-  ├── TDD: spec ambiguous ──────────────────► [request-plan] ─► Gate 3 (retry)
-  └── pass: clean GREEN + full coverage ───► Gate 4
-  ▼
-Gate 4 · Quality & delivery ── linear, no branching back upstream
-  │
-  ▼
-Gate 4a · [verification-before-completion]  ── gate: execution evidence, never code-reading alone
-  │  fail: trivial-only exit per its Decision Logic ──► DONE
-  ▼
-Gate 4b · [request-code-review]
-  │
-  ├── PASS ──────────────────────────────► Gate 4c
-  └── FAIL ─────────────────────────────► [receive-code-review]
-        │
-        ├── blocking issue ──► [diagnose] ───────────► Gate 4b (re-review, cap 2)
-        ├── hygiene issue ───► fix inline ───────────► Gate 4b (re-review, cap 2)
-        └── re-review cap exceeded ──► escalate to user
-  ▼
-Gate 4c · [write-commit]  ── gate: atomic, secret-scanned
-  ▼
-Gate 4d · [pr-workflow]  ── CONFIRM PUSH (first irreversible / outward-facing step)
-  │
-  ├── not yet reviewed ──► [request-code-review] (handoff)
-  └── git/gh fails ──────► [diagnose]
-  ▼
-Gate 4e · merge ── gate: explicit go-ahead only ── DONE
-```
+_See the Gate Reference table below for the complete skill routing lifecycle._
 
 ## Gate Reference
 
@@ -89,11 +27,7 @@ Gate 4e · merge ── gate: explicit go-ahead only ── DONE
 | 2    | Systemic issue or localized?             | new feature → Gate 3                         | structural→[project-audit]; bug→[diagnose]; single-file messy→Gate 3 inline |
 | 3    | Execution strategy?                      | trivial/standard → [test-driven-development] | 2+ tasks → [dispatch-agents]                                                |
 | 3.5  | TDD stuck or clean?                      | clean GREEN → Gate 4                         | 3 attempts→[diagnose]; ambiguous→[request-plan]                             |
-| 4a   | Verified by execution?                   | → Gate 4b                                    | trivial-only → DONE                                                         |
-| 4b   | Review PASS?                             | → Gate 4c                                    | FAIL → [receive-code-review]                                                |
-| 4c   | Committed atomically?                    | → Gate 4d                                    | —                                                                           |
-| 4d   | Pushed + PR open?                        | → Gate 4e                                    | not reviewed→[request-code-review]; fail→[diagnose]                         |
-| 4e   | Merge approved?                          | DONE                                         | escalate to user                                                            |
+| 4    | Quality & delivery (Verify, Review, PR)? | DONE (merged)                                | verification-fail→DONE; review-fail→[receive-code-review]                   |
 
 ## Rules
 

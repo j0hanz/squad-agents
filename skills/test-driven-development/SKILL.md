@@ -22,20 +22,21 @@ Escape hatches from the HARD GATE. Never self-invoke one silently — confirm vi
 
 ## Process Flow
 
-```
-Start: TDD Request -> Escape hatch applies (spike/trivial/CSS)? -- yes --> AskUserQuestion confirms skip -> exit (handle outside this skill)
-                                                              -- no  --> 0. Confirm with user -> Pre-TDD: Interface (signatures, errors, examples) -> TDD Cycle:
-
-  1. RED (write failing test + minimal stub) -> run test, confirm failure
-       -- failure confirmed --> 2. GREEN (write minimal implementation) -> run test
-                                   -- fail --> Stuck? (3+ attempts)
-                                                  -- yes --> diagnose/request-plan (handoff)
-                                                  -- no  --> retry GREEN
-                                   -- pass --> 3. REFACTOR (surgical cleanup) -> run test, stay passing
-                                                  -> All behaviors covered?
-                                                       -- no  --> back to TDD Cycle
-                                                       -- yes --> verification-before-completion (handoff)
-```
+- **Start: TDD Request**
+  - _Escape hatch applies (spike/trivial/CSS)_: AskUserQuestion confirms skip -> exit (handle outside this skill)
+  - _No escape hatch_: 0. Confirm with user -> Pre-TDD: Interface (signatures, errors, examples) -> TDD Cycle
+- **TDD Cycle**:
+  - **1. RED (write failing test + minimal stub)** -> run test, confirm failure
+    - _failure confirmed_: 2. GREEN (write minimal implementation) -> run test
+  - **2. GREEN (write minimal implementation)**
+    - _fail_: Stuck? (3+ attempts)
+      - _yes_: diagnose/request-plan (handoff)
+      - _no_: retry GREEN
+    - _pass_: 3. REFACTOR
+  - **3. REFACTOR (surgical cleanup)** -> run test, stay passing
+    - _All behaviors covered?_
+      - _no_: back to TDD Cycle
+      - _yes_: verification-before-completion (handoff)
 
 ## Step 0: Confirm Scope
 

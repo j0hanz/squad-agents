@@ -16,31 +16,23 @@ config changes with no design space.
 
 ## Process Flow
 
-```
-1. Framing & Discovery
-  -- zero-code/config solves it --> STOP (offer exit)
-  -- scope XL -------------> offer subsystem split, then continue
-  -- ambiguous terms ------> 2. Clarification
-  -- clear + scoped -------> Creative Checkpoint
-
-2. Clarification ----------> Creative Checkpoint
-
-Creative Checkpoint
-  -- zero-code / analogous / 10x found -> seeds Minimalist lane -> 3
-  -- none ---------------------------------------------------- -> 3
-
-3. Multi-Lane Ideation (Single-shot, distinct perspectives)
-  ------------------------------------------------------------> 4. Convergence & Synthesis
-
-4. Convergence & Synthesis
-  -- approved approach + flagged (L/XL, high risk, attack surface) --> 5. Persona Critique
-  -- approved approach + not flagged -------------------------------> 6. Design Brief
-
-5. Persona Critique (Skeptic | Constraint Guardian | User Advocate)
-  -- APPROVED -------------> 6. Design Brief
-  -- REVISE ---------------> back to 4 (re-synthesize)
-  -- REJECT ---------------> back to 3 (re-ideate)
-```
+- **1. Framing & Discovery**
+  - _zero-code/config solves it_: STOP (offer exit)
+  - _scope XL_: offer subsystem split, then continue
+  - _ambiguous terms_: 2. Clarification
+  - _clear + scoped_: Creative Checkpoint
+- **2. Clarification**: -> Creative Checkpoint
+- **Creative Checkpoint**
+  - _zero-code / analogous / 10x found_: seeds Minimalist lane -> 3
+  - _none_: -> 3
+- **3. Multi-Lane Ideation (Single-shot, distinct perspectives)**: -> 4. Convergence & Synthesis
+- **4. Convergence & Synthesis**
+  - _approved approach + flagged (L/XL, high risk, attack surface)_: -> 5. Persona Critique
+  - _approved approach + not flagged_: -> 6. Design Brief
+- **5. Persona Critique (Skeptic | Constraint Guardian | User Advocate)**
+  - _APPROVED_: -> 6. Design Brief
+  - _REVISE_: back to 4 (re-synthesize)
+  - _REJECT_: back to 3 (re-ideate)
 
 ## Phase 1: Framing & Discovery
 

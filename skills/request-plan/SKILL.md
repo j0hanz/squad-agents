@@ -15,24 +15,22 @@ The file base name `<kebab-case-feature-name>` must be a lowercase, kebab-case r
 
 ## Process Flow
 
-```
-Feature Description
-  -> 0. Infer Depth (no prompt — see Depth Inference)
-  -> 1. Discovery (inline grep/glob → Context Report)
-  -> 2. Drafting
-       sketch:    Main thread drafts inline (no subagents)
-       contract:  2 blind Ideators in parallel (researcher agents)
-       blueprint: 3 blind Ideators in parallel (researcher agents)
-  -> 3. Synthesis
-       sketch:    Done (Step 2 is the plan)
-       contract:  Main thread merges 2 proposals
-       blueprint: 1 Synthesizer agent (researcher) merges 3 proposals
-  -> 4. Write plan/NAME.specs.md + plan/NAME.plan.md (Status: DRAFT)
-  -> 5. Verification
-       sketch:    Skip — done
-       contract:  Hand off to receive-plan
-       blueprint: Hand off to receive-plan
-```
+- **Feature Description**
+  - **0. Infer Depth** (no prompt — see Depth Inference)
+  - **1. Discovery** (inline grep/glob → Context Report)
+  - **2. Drafting**
+    - _sketch_: Main thread drafts inline (no subagents)
+    - _contract_: 2 blind Ideators in parallel (researcher agents)
+    - _blueprint_: 3 blind Ideators in parallel (researcher agents)
+  - **3. Synthesis**
+    - _sketch_: Done (Step 2 is the plan)
+    - _contract_: Main thread merges 2 proposals
+    - _blueprint_: 1 Synthesizer agent (researcher) merges 3 proposals
+  - **4. Write** `plan/NAME.specs.md` + `plan/NAME.plan.md` (Status: DRAFT)
+  - **5. Verification**
+    - _sketch_: Skip — done
+    - _contract_: Hand off to receive-plan
+    - _blueprint_: Hand off to receive-plan
 
 ## Step 0: Infer Depth
 

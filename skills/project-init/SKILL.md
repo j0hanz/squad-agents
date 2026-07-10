@@ -15,24 +15,18 @@ Bootstraps a repository's agent instructions via a blind parallel discovery fan-
 - **Method:** Blind parallel discovery (read-only Researcher fan-out, evidence-cited claims) → ONE deterministic generator (`scripts/init.py`) verifies, merges, writes.
 - **Invariant:** Discovered commands are transcribed as TEXT, never executed. `init.py` is the SOLE writer.
 
-```
-Phase 0  PRESCAN + SURVEY
-  -- valid project-init marker found --> reuse encoded answers (offer --force re-survey) --> Phase 1
-  -- no marker -----------------------> AskUserQuestion (4 Qs) ------------------------------> Phase 1
-  -- no manifest (trivial repo) ------> single serial discovery lane (skip fan-out) ---------> Phase 2
-
-Phase 1  DISCOVERY FAN-OUT  (blind, read-only, claims as JSON)
-  L1 build+PM | L2 stack+layout | L3 conventions+CI+docs    (monorepo: + per-package lanes, batch <=3)
-  ------------------------------------------------------------------------------------> Phase 2
-
-Phase 2  MERGE (preview)   init.py generate --claims claims.json (no --out)
-  -- lint FAIL -------> fix inputs / re-dispatch the failing lane
-  -- preview OK ------> show AGENTS.md + dropped report to user --------------------------> Phase 3
-
-Phase 3  CONSENT + WRITE
-  -- existing authored file --> back up + explicit overwrite consent
-  -- approved ---------------> generate --out | wire stubs | lint | receipt --> DONE
-```
+- **Phase 0: PRESCAN + SURVEY**
+  - _valid project-init marker found_: reuse encoded answers (offer --force re-survey) -> Phase 1
+  - _no marker_: AskUserQuestion (4 Qs) -> Phase 1
+  - _no manifest (trivial repo)_: single serial discovery lane (skip fan-out) -> Phase 2
+- **Phase 1: DISCOVERY FAN-OUT (blind, read-only, claims as JSON)**
+  - L1 build+PM | L2 stack+layout | L3 conventions+CI+docs (monorepo: + per-package lanes, batch <=3) -> Phase 2
+- **Phase 2: MERGE (preview)** (init.py generate --claims claims.json, no --out)
+  - _lint FAIL_: fix inputs / re-dispatch the failing lane
+  - _preview OK_: show AGENTS.md + dropped report to user -> Phase 3
+- **Phase 3: CONSENT + WRITE**
+  - _existing authored file_: back up + explicit overwrite consent
+  - _approved_: generate --out | wire stubs | lint | receipt -> DONE
 
 **trigger:** bootstrap agent instructions, initialize repository, audit AGENTS.md, create CLAUDE.md, create GEMINI.md
 

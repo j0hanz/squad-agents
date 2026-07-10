@@ -13,19 +13,17 @@ Verify a plan/specs pair before execution. Never drafts or edits — only verifi
 
 ## Process Flow
 
-```
-Plan/Specs Pair Received
-  -> 1. Identify Origin
-  -> 2. Inline Traceability Check (main thread, grep/file-read)
-       -- any failure --> REVISE immediately, skip Step 3
-       -- clean -------> Step 3
-  -> 3. One Critic Agent (researcher) — spec + dependency + scope in one pass
-  -> 4. Main thread verdict (no Arbiter agent)
-       -- any High finding, or ≥2 Med findings --> REVISE
-       -- else -----------------------------------------> Step 5
-  -- REVISE round-trips capped per Strict Rules (NO Endless Loops)
-  -> 5. Finalize: flip Status: DRAFT → APPROVED
-```
+- **Plan/Specs Pair Received**
+  - **1. Identify Origin**
+  - **2. Inline Traceability Check (main thread, grep/file-read)**
+    - _any failure_: REVISE immediately, skip Step 3
+    - _clean_: Step 3
+  - **3. One Critic Agent (researcher)** — spec + dependency + scope in one pass
+  - **4. Main thread verdict (no Arbiter agent)**
+    - _any High finding, or ≥2 Med findings_: REVISE
+    - _else_: Step 5
+  - _REVISE round-trips capped per Strict Rules (NO Endless Loops)_
+  - **5. Finalize**: flip Status: DRAFT → APPROVED
 
 ## Step 1: Identify Origin
 

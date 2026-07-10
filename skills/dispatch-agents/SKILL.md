@@ -16,9 +16,7 @@ Execute a multi-task plan by grouping tasks into dependency-ordered waves and di
 
 ## Process Flow
 
-```
-Matrix (lane independence) -> Waves (topological sort) -> wave loop (Dispatch -> Review -> Integrate) -> Final Validation
-```
+`Matrix (lane independence) -> Waves (topological sort) -> wave loop (Dispatch -> Review -> Integrate) -> Final Validation`
 
 ## Step 1: Matrix
 

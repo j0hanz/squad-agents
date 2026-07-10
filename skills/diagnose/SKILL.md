@@ -12,21 +12,19 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 
 ## Process Flow
 
-```
-Phase 0: Triage (serial vs. tournament)
-  -> Phase 1: Build Feedback Loop (lock the Oracle)
-  -> Phase 2: Reproduce (confirm bug; tournament-only: race repro strategies)
-  -> Phase 3: Hypothesize & Falsify (3-5 propositions)
-       -- serial --> probe one hypothesis directly; falsified -> next hypothesis
-       -- tournament --> fan blind Falsifiers, 1 proposition/worktree
-  -> Phase 3.5: Converge & Arbitrate (replay survivors; decide by mechanism)
-       -- REVISE (entangled survivors) --> re-bracket, retry 3.5
-       -- REJECT (0 survive, <2 rounds) --> retry Phase 3 with new hypotheses
-       -- REJECT (0 survive, 2 rounds spent) --> fall back serial, escalate to user
-  -> Phase 4: Instrumentation (targeted probes)
-  -> Phase 5: Red-Green Fix (regression test on root-cause seam; tournament-only: race fixes)
-  -> Phase 6: Finalization (de-instrument / verify / re-check for masked causes)
-```
+- **Phase 0:** Triage (serial vs. tournament)
+- **Phase 1:** Build Feedback Loop (lock the Oracle)
+- **Phase 2:** Reproduce (confirm bug; tournament-only: race repro strategies)
+- **Phase 3:** Hypothesize & Falsify (3-5 propositions)
+  - _serial_: probe one hypothesis directly; falsified -> next hypothesis
+  - _tournament_: fan blind Falsifiers, 1 proposition/worktree
+- **Phase 3.5:** Converge & Arbitrate (replay survivors; decide by mechanism)
+  - _REVISE_ (entangled survivors): re-bracket, retry 3.5
+  - _REJECT_ (0 survive, <2 rounds): retry Phase 3 with new hypotheses
+  - _REJECT_ (0 survive, 2 rounds spent): fall back serial, escalate to user
+- **Phase 4:** Instrumentation (targeted probes)
+- **Phase 5:** Red-Green Fix (regression test on root-cause seam; tournament-only: race fixes)
+- **Phase 6:** Finalization (de-instrument / verify / re-check for masked causes)
 
 **trigger:** debug, fix crash, unexpected behavior
 **constraint:** 1 falsifiable proposition per run (tournament mode: 1 per worktree)
