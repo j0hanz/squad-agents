@@ -39,7 +39,11 @@ function parseFrontmatter(frontmatterStr) {
     ) {
       value = value.slice(1, -1);
     }
-    data[currentKey] = value; // '>' block scalars start with '>' and have their value on continuation lines
+    if (value === '>' || value === '|') {
+      data[currentKey] = '';
+    } else {
+      data[currentKey] = value;
+    }
   }
   return data;
 }
