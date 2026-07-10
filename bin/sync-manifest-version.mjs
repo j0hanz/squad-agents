@@ -24,4 +24,9 @@ const marketplace = JSON.parse(fs.readFileSync(marketplacePath, 'utf8'));
 marketplace.plugins[0].version = version;
 fs.writeFileSync(marketplacePath, `${JSON.stringify(marketplace, null, 2)}\n`);
 
-execFileSync('git', ['add', pluginPath, marketplacePath], { cwd: root });
+const pyprojectPath = path.join(root, 'pyproject.toml');
+let pyproject = fs.readFileSync(pyprojectPath, 'utf8');
+pyproject = pyproject.replace(/version\s*=\s*"[^"]*"/, `version = "${version}"`);
+fs.writeFileSync(pyprojectPath, pyproject, 'utf8');
+
+execFileSync('git', ['add', pluginPath, marketplacePath, pyprojectPath], { cwd: root });

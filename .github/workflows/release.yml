@@ -37,6 +37,11 @@ jobs:
               exit 1
             fi
           done
+          pyver=$(grep -E '^version\s*=' pyproject.toml | sed -E 's/version\s*=\s*"([^"]*)"/\1/' | tr -d '[:space:]')
+          if [ "$pyver" != "$tag" ]; then
+            echo "Version mismatch in pyproject.toml: expected $tag, found $pyver"
+            exit 1
+          fi
 
       - run: npm test
 
