@@ -1,6 +1,6 @@
 ---
 name: diagnose
-description: 'Use when there is a bug, crash, test failure, or unexpected behavior needing root-cause analysis before fixing. Prefer over test-driven-development when diagnosing an existing defect rather than building a feature.'
+description: 'Use when a bug, crash, test failure, or unexpected behavior needs root-cause analysis before a fix. Prefer over test-driven-development when diagnosing an existing defect, not building a feature.'
 disable-model-invocation: false
 argument-hint: '[symptom description or error trace]'
 allowed-tools: Agent(researcher), Agent(implementer), AskUserQuestion, Bash(git *), Read, Grep, Glob, Skill(dispatch-agents)
@@ -26,7 +26,6 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 - **Phase 5:** Red-Green Fix (regression test on root-cause seam; tournament-only: race fixes)
 - **Phase 6:** Finalization (de-instrument / verify / re-check for masked causes)
 
-**trigger:** debug, fix crash, unexpected behavior
 **constraint:** 1 falsifiable proposition per run (tournament mode: 1 per worktree)
 **constraint:** modify working copy only
 **constraint:** reject "works on my machine"
@@ -35,7 +34,7 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 
 **action:** default to serial — probe one hypothesis at a time, directly
 **action:** escalate to tournament (Phase 3 tournament path) only when 3+ genuinely independent candidate causes exist, or the bug is flaky/stress-class
-**gate:** never tournament a single obvious cause (e.g. one-line null check) — serial is faster and correct for the common case
+**Done when:** triage mode is selected — tournament only for 3+ independent causes or flaky/stress-class bugs; never tournament a single obvious cause (e.g. one-line null check).
 
 ## Phase 1: Feedback Loop
 
@@ -43,13 +42,13 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 **action:** isolate filesystem, pin seeds/time
 **action:** if no deterministic loop achievable, raise repro rate via stress (`references/feedback-loops.md`) — degrade to serial interactive debugging, never block the skill
 **mandatory:** read `references/feedback-loops.md` (do NOT load `references/phases.md`)
-**gate:** require loop or request telemetry/logs
+**Done when:** a deterministic <2s Oracle is locked, or telemetry/logs requested and the loop is unbuildable.
 
 ## Phase 2: Reproduce
 
 **action:** achieve >50% reproduction rate
 **action (tournament only):** race 2-3 candidate repro strategies via `dispatch-agents`; keep the fastest deterministic >50% strategy and lock it as the Oracle
-**gate:** require logged repro signal before Phase 3
+**Done when:** a logged reproduction signal at >50% rate is captured, ready for Phase 3.
 
 ## Phase 3: Hypothesize & Falsify
 
@@ -64,7 +63,7 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 - **concurrency:** background-exempt only with a notify primitive; else batch lanes in <=3
 - **output:** `VERDICT: SURVIVED | KILLED` + EVIDENCE (the probe as a runnable block, asserting the predicted mechanism effect Y — not just the Oracle bit)
 - **narration:** report each lane's verdict to the user as it completes — no silent background batch
-  **gate:** require confirmed probe result (no guessing by elimination)
+  **Done when:** a confirmed probe result is in hand for each hypothesis (no guessing by elimination).
 
 ## Phase 3.5: Converge & Arbitrate
 
@@ -72,7 +71,7 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 **action:** converge by mechanism, not count — collapse aliases (same cause, different abstraction) into one cause; report multiple causes if genuinely distinct; flag indistinguishable survivors as entangled
 **rule:** never-self-arbitrate — the agent that proposed a hypothesis never declares it the root cause
 **routing:** `APPROVED` (resolved) -> Phase 4 | `REVISE` (entangled survivors) -> re-bracket with disjoint probes, retry 3.5 | `REJECT` (0 survive) -> retry Phase 3 with new hypotheses
-**gate:** max 2 rounds total; if still unresolved, fall back to serial interactive debugging and escalate to the user — never loop indefinitely
+**Done when:** a survivor is `APPROVED` to Phase 4, or after max 2 unresolved rounds, fall back to serial and escalate to the user — never loop indefinitely.
 
 ## Phase 4: Instrumentation
 
@@ -83,13 +82,10 @@ Identify true root cause through systematic falsification. **DO NOT GUESS.**
 
 ## Phase 5: Red-Green Fix
 
-**action:** write regression test targeting the root-cause seam (not the symptom point)
-**action:** confirm RED
-**action (tournament only):** race candidate fixes via `dispatch-agents` (`implementer`, `isolation: worktree`); pick the diff that is GREEN, passes N-1, and does not merely suppress the symptom
-**action:** apply minimal fix on working copy
-**action:** confirm GREEN
-**action:** execute N-1 test (revert fix -> confirm RED -> restore fix)
-**Done when:** the regression test is green, passes N-1 check, and minimal fix is committed to the working copy.
+**action:** write a regression test targeting the root-cause seam (not the symptom point).
+**action (tournament only):** race candidate fixes via `dispatch-agents` (`implementer`, `isolation: worktree`); reject any GREEN that suppresses the symptom without addressing the asserted invariant.
+**delegation:** Apply the fix via test-driven-development (RED-GREEN-N-1) on the root-cause seam; in tournament mode, race implementer lanes and reject any GREEN that suppresses the symptom without addressing the asserted invariant.
+**Done when:** the regression test is green, passes the N-1 check, and the minimal fix is committed to the working copy.
 
 ## Phase 6: Finalization
 

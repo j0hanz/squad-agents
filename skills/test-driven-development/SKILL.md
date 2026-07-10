@@ -1,8 +1,8 @@
 ---
 name: test-driven-development
-description: 'Use when new logic requires implementation (RED-first) or when a TDD red flag (trivially passing test, code written before its test, or lack of observed RED) occurs.'
+description: 'Use when new logic requires implementation, or when a TDD red flag appears — a trivially passing test, code written before its test, or GREEN with no observed RED.'
 disable-model-invocation: false
-allowed-tools: AskUserQuestion, Bash, Read, Grep, Glob, Write, Edit, NotebookEdit
+allowed-tools: AskUserQuestion, Bash, Read, Grep, Glob, Write, Edit, NotebookEdit, Skill(diagnose)
 ---
 
 # test-driven-development
@@ -13,7 +13,7 @@ Autonomous TDD execution. **HARD GATE:** No implementation code WITHOUT a failin
 
 Escape hatches from the HARD GATE. Never self-invoke one silently — confirm via `AskUserQuestion` first (the tool supplies a free-text "Other"). Pick from the three categories below:
 
-1. ✅ **Recommended** — Skip TDD: [matching category] because [specific reason].
+1. **Recommended** — Skip TDD: [matching category] because [specific reason].
 2. **Alternative** — Use full TDD anyway + reason the escape hatch doesn't apply.
 
 - **Exploratory Spikes:** Implementation path unknown; throwaway code to "find the shape." **Mandatory:** once found, the spike MUST be discarded (`git stash drop`/delete, not committed) and re-implemented through RED-GREEN-REFACTOR. A spike is a sketch, never the shipped diff.
@@ -71,6 +71,8 @@ _If JavaScript/TypeScript, read `references/js-ts-patterns.md` fully._
 3. Run the test.
 4. **Gate:** confirm FAILURE. A test that passes immediately tests nothing — delete and rewrite it.
 
+**Done when:** the test runs and fails for the targeted behavior (RED confirmed), not the environment.
+
 ## Step 2: GREEN (Make It Pass)
 
 _If unsure how minimal is minimal, read `references/minimal-impl-examples.md` fully._
@@ -89,6 +91,8 @@ Before trusting a passing test:
 2. Run the test — confirm RED.
 3. Restore the implementation.
 4. Run the test — confirm GREEN.
+
+**Done when:** the test passes on the minimal implementation and the N-1 check holds (revert → RED, restore → GREEN).
 
 ## Step 3: REFACTOR (Clean Up)
 
@@ -117,8 +121,6 @@ Any of these signals means you have left TDD. The fix is the same every time: de
 - Keeping code-first output "as reference" or "to adapt" instead of deleting it.
 
 **All of these mean:** delete the code-first implementation, re-enter the cycle at RED, and run the test to confirm it fails before re-implementing.
-
-<!-- Defer the deeper apparatus (rationalization table, spirit-vs-letter clause, commitment framing, pressure-test evidence). Add it only when a real session demonstrates a rationalization this list doesn't already kill. The full kit lives in the writing-skills anti-rationalization reference — see it before re-adding anything: ~/.claude/skills/writing-skills/references/anti-rationalization/README.md -->
 
 ## Next Steps
 

@@ -18,13 +18,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_MAX_FILES = 5
-_MAX_LOG_LINES = 3
-_MAX_CONSTRAINTS = 5
-_MAX_INTERFACE_SHAPES = 10
-_MAX_UNKNOWNS = 4
-_MAX_DESIGN_DOCS = 3
-_MAX_ANALOGOUS = 2
+_MAX_FILES = 5  # 5: matches the related_files cap in scan_context.py
+_MAX_LOG_LINES = 3  # 3: recent commit signals decay fast; more lines add noise
+_MAX_CONSTRAINTS = 5  # 5: enough to surface limits without flooding the brief
+_MAX_INTERFACE_SHAPES = 10  # 10: shapes are cheap tokens and often decisive for design
+_MAX_UNKNOWNS = 4  # 4: one per batch; interview caps clarifications at 4
+_MAX_DESIGN_DOCS = 3  # 3: docs rarely add signal beyond the top 3
+_MAX_ANALOGOUS = 2  # 2: analogous features seed the Minimalist lane; 2 keep it focused
 
 
 def _dedupe_stable(items: list[Any]) -> list[str]:

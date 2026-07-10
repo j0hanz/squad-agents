@@ -1,8 +1,8 @@
 ---
 name: parallel-brainstorming
-description: 'Use when requirements are vague or the solution space is open before a plan exists. Prefer over request-plan when the problem is unproven and multiple distinct approaches need to be explored.'
+description: 'Use when requirements are vague or the solution space is open before a plan exists. Prefer over request-plan when two or more distinct architectural approaches are in play.'
 disable-model-invocation: false
-allowed-tools: Skill(interview), Write, Bash(python *), Read, Grep, Glob
+allowed-tools: Skill(interview), Write, Bash(python *), Bash(python3 *), Read, Grep, Glob
 ---
 
 # parallel-brainstorming
@@ -16,23 +16,7 @@ config changes with no design space.
 
 ## Process Flow
 
-- **1. Framing & Discovery**
-  - _zero-code/config solves it_: STOP (offer exit)
-  - _scope XL_: offer subsystem split, then continue
-  - _ambiguous terms_: 2. Clarification
-  - _clear + scoped_: Creative Checkpoint
-- **2. Clarification**: -> Creative Checkpoint
-- **Creative Checkpoint**
-  - _zero-code / analogous / 10x found_: seeds Minimalist lane -> 3
-  - _none_: -> 3
-- **3. Multi-Lane Ideation (Single-shot, distinct perspectives)**: -> 4. Convergence & Synthesis
-- **4. Convergence & Synthesis**
-  - _approved approach + flagged (L/XL, high risk, attack surface)_: -> 5. Persona Critique
-  - _approved approach + not flagged_: -> 6. Design Brief
-- **5. Persona Critique (Skeptic | Constraint Guardian | User Advocate)**
-  - _APPROVED_: -> 6. Design Brief
-  - _REVISE_: back to 4 (re-synthesize)
-  - _REJECT_: back to 3 (re-ideate)
+1 → 2 → 3 → 4 → 5 → 6
 
 ## Phase 1: Framing & Discovery
 
@@ -124,12 +108,12 @@ Request: "add a way for users to save and re-run searches."
 5. **Phase 6:** Design Brief written to `docs/design/2026-06-29-saved-searches-design.md`: Approach (extend `Filter`), Why (reuses existing model, smallest diff), Scope (M), Constraints (cap 20/user), Interface (`Filter.saved`, `Filter.name`), Architecture (no new table), Risks (cap needs a migration default), First Step (`ALTER TABLE filters ADD COLUMN saved boolean DEFAULT false`).
 6. Commit Guard: user declines auto-commit → brief left in chat + on disk; handoff to `request-plan` to formalize tasks.
 
-## STRICT RULES (NEVER DO)
+## Strict Rules
 
 - **Blend Ideation:** Keep Phase 3 perspectives distinct; do not bleed them into each other until Phase 4 synthesis.
 - **Ship Raw Ideas:** Phase 4 synthesis is mandatory. Never present raw brainstormed ideas as the final answer.
 - **Accept Empty Rejections:** Require a technical reason for any rejected High-severity issue during Phase 5 critique.
-- **Use Subagents for Ideation:** Do not use `invoke_subagent` for Phase 3 or 5. Do it yourself to save tokens and time.
+- **No Agent tool for Phase 3 or 5.**
 
 ## Next Skills
 

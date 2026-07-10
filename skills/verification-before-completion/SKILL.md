@@ -1,8 +1,8 @@
 ---
 name: verification-before-completion
-description: 'Use when code changes require verification via execution evidence (test runs or manual reproduction with pasted output). Prefer over request-code-review if implementation is unverified.'
+description: 'Use when code changes are declared done and need pressure-testing that declared-done means done. Prefer over request-code-review if the implementation is unverified.'
 disable-model-invocation: false
-allowed-tools: AskUserQuestion, Bash, Read, Grep
+allowed-tools: AskUserQuestion, Bash, Read, Grep, Write
 ---
 
 # verification-before-completion
@@ -38,12 +38,14 @@ The full bar lives in [definition-of-done.md](references/definition-of-done.md) 
 
 Any deviation from (a)/(b)/(c) → non-trivial → route to `request-code-review`. "It's just a typo" without (c) is not done.
 
-| Status             | Action                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **CI-Only**        | Stop. Report: "Blocked by CI. Wait for pipeline."                                                                                                                                                                                                                                                                                                                                                                                          |
-| **No Test Suite**  | **Gate, not a pass:** before marking INCOMPLETE, you MUST write at least one executable smoke/characterization test or manual reproduction script proving the change works (see §3 Manual Verification Template) — a prose rationale alone is not sufficient. Only after that evidence exists may you mark **INCOMPLETE** and document why full coverage wasn't added (e.g. route to `test-driven-development` for proper coverage later). |
-| **Regression**     | Stop. Route to `diagnose`.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| **Verified Clean** | Non-trivial (see heuristic above) → route to `request-code-review`. Trivial → done **only if** the Trivial -> done criterion above holds.                                                                                                                                                                                                                                                                                                  |
+| Status             | Action                                                                                                                                    |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **CI-Only**        | Stop. Report: "Blocked by CI. Wait for pipeline."                                                                                         |
+| **No Test Suite**  | Write a smoke/characterization test or manual repro proving the change works, then mark INCOMPLETE and route.                             |
+| **Regression**     | Stop. Route to `diagnose`.                                                                                                                |
+| **Verified Clean** | Non-trivial (see heuristic above) → route to `request-code-review`. Trivial → done **only if** the Trivial -> done criterion above holds. |
+
+1. **No Test Suite is a gate, not a pass:** before marking INCOMPLETE, you MUST write at least one executable smoke/characterization test or manual reproduction script proving the change works (see §3) — a prose rationale alone is not sufficient. Only after that evidence exists may you mark INCOMPLETE and document why full coverage wasn't added (e.g. route to `test-driven-development` for proper coverage later).
 
 ## 3. Manual Verification Template
 
@@ -71,7 +73,7 @@ Each mode below is a self-report claim that is **not** execution evidence. The r
 | :--------------------- | :-------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
 | **Confidence**         | "It should work" / "it probably works" / "it compiles, so it runs"    | Fresh command output: exit code + counts, from a run **after the last edit**.                                                  |
 | **Green-Wash**         | "Tests pass, so it's done" — mocks hiding logic or missing assertions | The test that exercises the **changed** lines (named); N-1 proof the suite fails without the fix (§5).                         |
-| **Scope Blindness**    | "I didn't touch that part, so it's unaffected"                        | Every call site of each changed public interface, named (`file:line`).                                                         |
+| **Scope Blindness**    | "I didn't touch that part, so it's unaffected"                        | Callers checked — see [definition-of-done.md](references/definition-of-done.md)                                                |
 | **Shadow Regressions** | "The diff is small, so it's safe"                                     | `git diff --stat` with every file/line mapped to the task; grep shared/global state touched outside the diff's primary module. |
 | **Stale Evidence**     | "I already verified" — an earlier run against different state         | Output from the **most recent** run, not the first; re-run after every change.                                                 |
 

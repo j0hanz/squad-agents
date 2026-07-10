@@ -71,7 +71,4 @@
 - **De-instrumentation:** Remove all `[DEBUG-XXXX]` tags.
 - **Masked-cause check:** re-run the original hypothesis set (including `KILLED` ones) against the post-fix Oracle. A hypothesis killed only because the just-fixed cause masked it now resurfaces — catch it here, not in production.
 - **Review_Question:** "What would have prevented this bug?"
-- **Delegation_Paths:**
-  - "Better test coverage" -> Activate `test-driven-development` skill.
-  - "Tangled logic spanning multiple files/modules" -> Activate `project-audit` skill.
-  - "API contract vague" -> Update docs.
+- **Delegation_Paths:** See Next Skills in SKILL.md.

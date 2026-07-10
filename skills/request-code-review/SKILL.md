@@ -1,13 +1,10 @@
 ---
 name: request-code-review
-description: 'Use when implementation is complete and the diff needs a fresh-eye review before merging. Prefer over receive-code-review when requesting a new review instead of acting on feedback.'
+description: 'Use when a verified diff needs a fresh-eye review before merging. Prefer over receive-code-review when requesting a new review rather than acting on feedback.'
 disable-model-invocation: false
 argument-hint: '[target: branch, commit, or file]'
-allowed-tools: 'Bash(git *), Agent(diff-reviewer), AskUserQuestion, Read'
+allowed-tools: 'Bash(git diff *), Bash(git status *), Bash(git log *), Bash(git merge-base *), Agent(diff-reviewer), AskUserQuestion, Read'
 disallowed-tools: Write, Edit
-metadata:
-  category: discipline
-  triggers: code review, security audit, pre-PR validation, correctness check, diff review
 ---
 
 # request-code-review
@@ -16,14 +13,12 @@ A subagent reviews the diff with fresh context, reading it like a human reviewer
 
 ## Step 0: Confirm
 
-Action: AskUserQuestion (no manual "Other" option)
-Option 1 (Recommended): Dispatch fresh-context review
-Option 2 (Alternative): Inline review (Note: To preserve the rule against self-review, this must still dispatch a fresh-context subagent, passing the diff via direct text block inputs instead of git commits).
+Action: Dispatch the `diff-reviewer` subagent with the base..head diff (or, if uncommitted, the working-tree diff passed as a text block).
 
 ## Pre-Review Checkpoint
 
 - **Required Inputs**:
-  1. **Unit Test Status**: Ask the user via `AskUserQuestion` to confirm that unit tests have passed. Do not proceed if tests are failing.
+  1. **Verified**: confirm verification-before-completion has run, or paste fresh test output.
   2. **Commit Range / Diff Source**: Determine base and head commit SHAs. If target is a branch, find the merge base using `git merge-base origin/main HEAD`.
   3. **Plan/Requirements Summary**: Obtain a 1-paragraph summary of the change (either from git commit logs or by asking the user).
 - **Required Outputs**:
@@ -55,7 +50,6 @@ On FAIL: Invoke `receive-code-review` (do not fix directly)
 ## Strict Rules (NEVER)
 
 - **NEVER** review your own work in the same thread/context that wrote it. You MUST dispatch a fresh-context subagent reviewer.
-- **NEVER** skip unit test verification. Tests must be confirmed as passing immediately before requesting a review.
 - **NEVER** run git/file commands that mutate the working tree or index (such as `git stash`, `git checkout`, or `git reset`) to force a clean status check. If the working tree is modified, you MUST abort and report.
 - **NEVER** manually edit, correct, or translate the subagent's review output. It must be kept verbatim.
 - **NEVER** fix findings directly when the status is `FAIL`. You MUST invoke the `receive-code-review` skill.

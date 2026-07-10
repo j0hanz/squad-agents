@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: 'Use when the codebase has structural problems like circular dependencies, infrastructure bleeding into domain logic, hidden coupling, God files, or unclear module responsibilities.'
+description: 'Use when the codebase has structural problems — circular dependencies, infrastructure bleeding into domain logic, hidden coupling, God files, or unclear module responsibilities. Parallel per-directory agent judgment, not static-analysis scripts.'
 disable-model-invocation: false
 allowed-tools: Bash(python *), Bash(python3 *), Agent(researcher), Skill(interview), Glob
 ---
@@ -8,7 +8,6 @@ allowed-tools: Bash(python *), Bash(python3 *), Agent(researcher), Skill(intervi
 # project-audit
 
 ```
-Trigger: structural/architecture audit request
   -> 1. GROUP   (band repo into ≤8 lanes, drop non-code dirs)
   -> 2. LAUNCH  (parallel researcher per lane, 5 fixed questions)
   -> 3. AGGREGATE (check_cycles.py join + synthesis prompt)
@@ -44,7 +43,17 @@ If a lane reports nothing across all five questions, its final-report entry comp
 
 ## Step 3: AGGREGATE
 
-- Run `python ${CLAUDE_SKILL_DIR}/scripts/check_cycles.py` against all lanes' Q2 answers (pass lane→directory-prefix mapping and each lane's raw import list). It normalizes superficial formatting, resolves each import to its owning lane, drops intra-lane edges, and returns confirmed inter-lane cycles. **This is a best-effort secondary signal** — a lane agent that phrases an import inconsistently or misses one produces a silent false negative; state this in the report, never present cycle detection as exhaustive.
+- Run `python ${CLAUDE_SKILL_DIR}/scripts/check_cycles.py` against all lanes' Q2 answers. Pipe a JSON object on stdin mapping each lane to its directory prefix and its raw Q2 import list (copy imports character-for-character from the Q2 answers — normalization handles quotes, `./`, and backslash separators, but not `../`):
+  ```json
+  {
+    "billing": { "dir": "billing", "imports": ["orders/order"] },
+    "orders": { "dir": "orders", "imports": ["billing/invoice"] }
+  }
+  ```
+  ```bash
+  python "${CLAUDE_SKILL_DIR}/scripts/check_cycles.py" < lanes.json
+  ```
+  It normalizes superficial formatting, resolves each import to its owning lane by prefix, drops intra-lane edges, and prints confirmed inter-lane cycles. **This is a best-effort secondary signal** — a lane agent that phrases an import inconsistently or misses one produces a silent false negative; state this in the report, never present cycle detection as exhaustive.
 - Run one synthesis pass (a prompt, not a script) over all lane answers that does four things:
   1. **Corroboration ranking:** any finding independently mentioned by 2+ lanes is surfaced first, labeled "corroborated by N lanes." Single-lane findings come after, labeled as such.
   2. **Adjudication:** for every purpose-vs-coupling contradiction (lane X's Q1 conflicts with what another lane's Q3/Q5 says about it), state which side the evidence favors — a concrete quoted file/pattern outranks an unverified self-description. Only present it as a genuinely open question when both sides have comparably concrete evidence.
@@ -64,7 +73,6 @@ If 2+ corroborated findings are comparably actionable, that's a hard-to-reverse 
 ## Heuristics
 
 - **No detection scripts beyond `check_cycles.py`.** The five questions are answered by judgment, not regex/AST.
-- **Scale:** the 8-lane cap bounds cost and latency. Lane size still varies within a band. This is accepted.
 
 ## Worked Example
 

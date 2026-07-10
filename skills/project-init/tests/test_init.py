@@ -780,4 +780,3 @@ def test_evidence_tier_custom():
 
     # README.md is prose/docs -> Tier 1
     assert init.evidence_tier("README.md") == 1
-

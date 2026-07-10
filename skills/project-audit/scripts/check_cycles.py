@@ -16,6 +16,7 @@ disclosed limitation, not a bug.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -25,6 +26,9 @@ def normalize_import(raw: str) -> str:
     s = raw.strip()
     s = s.rstrip(";")
     s = s.strip().strip("'\"")
+    s = s.replace(
+        "\\", "/"
+    )  # Windows backslash separators -> forward slash before resolution
     if s.startswith("./"):
         s = s[2:]
     return s.strip()
@@ -114,7 +118,12 @@ def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
 
 def _extract_lane_refs(text: str, lane_names: set[str]) -> list[str]:
     """Pull cross-lane references from free text: backtick-quoted or
-    bold-quoted identifiers that match a known lane directory name."""
+    bold-quoted identifiers that match a known lane directory name.
+
+    Matches kebab-case lane names only (``[a-z][a-z0-9-]+``) — the GROUP step
+    bands directories into kebab-case lanes, so names with underscores, dots,
+    or uppercase are intentionally not matched here.
+    """
     refs: list[str] = []
     for m in re.findall(r"`([a-z][a-z0-9-]+)`", text):
         if m in lane_names:
@@ -123,6 +132,79 @@ def _extract_lane_refs(text: str, lane_names: set[str]) -> list[str]:
         if m in lane_names:
             refs.append(m)
     return refs
+
+
+def _scan_root(root: Path) -> tuple[dict[str, list[str]], dict[str, str]]:
+    """Scan mode: each immediate subdirectory of <root> is a lane; cross-refs
+    are read from its SKILL.md. A fallback when lane agents' Q2 import lists
+    aren't piped on stdin."""
+    lane_names = {
+        p.name
+        for p in root.iterdir()
+        if p.is_dir() and not p.name.startswith((".", "__"))
+    }
+    lane_dirs = {name: name for name in lane_names}
+    lane_imports: dict[str, list[str]] = {}
+    for name in lane_names:
+        skill_md = root / name / "SKILL.md"
+        if skill_md.is_file():
+            lane_imports[name] = _extract_lane_refs(
+                skill_md.read_text(encoding="utf-8", errors="replace"), lane_names
+            )
+        else:
+            lane_imports[name] = []
+    return lane_imports, lane_dirs
+
+
+def _read_lane_json(stream) -> tuple[dict[str, list[str]], dict[str, str]]:
+    """stdin mode: the documented Step-3 API. JSON maps each lane to its dir
+    prefix and raw Q2 import list: {"<lane>": {"dir": "<prefix>", "imports":
+    ["'./x'", ...]}, ...}. Feeds build_lane_graph directly."""
+    try:
+        data = json.load(stream)
+    except json.JSONDecodeError as e:
+        print(f"error: invalid JSON on stdin: {e}", file=sys.stderr)
+        sys.exit(2)
+    if not isinstance(data, dict) or not data:
+        print(
+            "error: stdin JSON must be a non-empty object mapping lanes to "
+            "{'dir': <prefix>, 'imports': [<raw>, ...]}",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+    lane_imports: dict[str, list[str]] = {}
+    lane_dirs: dict[str, str] = {}
+    for lane, spec in data.items():
+        if not isinstance(spec, dict):
+            print(
+                f"error: lane {lane!r} must map to an object with 'dir' and 'imports'",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        lane_dirs[lane] = str(spec.get("dir", lane))
+        raw_imports = spec.get("imports", [])
+        if not isinstance(raw_imports, list):
+            print(f"error: lane {lane!r} 'imports' must be a list", file=sys.stderr)
+            sys.exit(2)
+        lane_imports[lane] = [str(x) for x in raw_imports]
+    return lane_imports, lane_dirs
+
+
+def _report(
+    root_label: str,
+    lane_imports: dict[str, list[str]],
+    graph: dict[str, set[str]],
+    cycles: list[list[str]],
+) -> None:
+    print(f"root: {root_label}")
+    print(f"lanes: {len(lane_imports)}")
+    print(f"edges: {sum(len(v) for v in graph.values())}")
+    if not cycles:
+        print("cycles: none")
+        return
+    print(f"cycles: {len(cycles)}")
+    for i, cyc in enumerate(cycles, 1):
+        print(f"  cycle {i}: {' -> '.join(cyc)}")
 
 
 def _self_check() -> None:
@@ -139,49 +221,41 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Join lane cross-references into an inter-lane graph and report "
-            "cycles. Each immediate subdirectory of <root> is a lane; "
-            "cross-references are read from its SKILL.md."
+            "cycles. Two input modes: (1) pipe JSON on stdin mapping each lane "
+            "to its dir prefix and raw Q2 imports "
+            '({"<lane>": {"dir": "<prefix>", "imports": ["\'./x\'", ...]}, ...}) '
+            "— the documented project-audit Step-3 API; (2) give a <root> whose "
+            "immediate subdirectories are lanes, reading cross-refs from each "
+            "lane's SKILL.md (a fallback when lane Q2 lists aren't piped)."
         )
     )
-    parser.add_argument("root", help="root directory whose immediate subdirs are lanes")
+    parser.add_argument(
+        "root",
+        nargs="?",
+        default=None,
+        help="root directory whose immediate subdirs are lanes (scan mode; "
+        "omitted when lane JSON is piped on stdin)",
+    )
     args = parser.parse_args()
 
     _self_check()
 
-    root = Path(args.root)
-    if not root.is_dir():
-        print(f"error: {root!s} is not a directory", file=sys.stderr)
-        sys.exit(2)
-
-    lane_names = {
-        p.name
-        for p in root.iterdir()
-        if p.is_dir() and not p.name.startswith((".", "__"))
-    }
-    lane_dirs = {name: name for name in lane_names}
-
-    lane_imports: dict[str, list[str]] = {}
-    for name in lane_names:
-        skill_md = root / name / "SKILL.md"
-        if skill_md.is_file():
-            lane_imports[name] = _extract_lane_refs(
-                skill_md.read_text(encoding="utf-8", errors="replace"), lane_names
-            )
-        else:
-            lane_imports[name] = []
+    if not sys.stdin.isatty():
+        lane_imports, lane_dirs = _read_lane_json(sys.stdin)
+        root_label = "(stdin)"
+    elif args.root is not None:
+        root = Path(args.root)
+        if not root.is_dir():
+            print(f"error: {root!s} is not a directory", file=sys.stderr)
+            sys.exit(2)
+        lane_imports, lane_dirs = _scan_root(root)
+        root_label = str(root)
+    else:
+        parser.error("provide a root directory, or pipe lane JSON on stdin")
 
     graph = build_lane_graph(lane_imports, lane_dirs)
     cycles = find_cycles(graph)
-
-    print(f"root: {root}")
-    print(f"lanes: {len(lane_names)}")
-    print(f"edges: {sum(len(v) for v in graph.values())}")
-    if not cycles:
-        print("cycles: none")
-        return
-    print(f"cycles: {len(cycles)}")
-    for i, cyc in enumerate(cycles, 1):
-        print(f"  cycle {i}: {' -> '.join(cyc)}")
+    _report(root_label, lane_imports, graph, cycles)
 
 
 if __name__ == "__main__":

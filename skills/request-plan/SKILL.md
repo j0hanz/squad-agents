@@ -1,7 +1,6 @@
 ---
 name: request-plan
-description: 'Use when a new feature, change, or repository modification requires a plan or specification. Prefer over receive-plan when no plan/specs pair exists yet.'
-triggers: plan, design, draft a plan, write a spec
+description: 'Use when a new feature, change, or repository modification requires a plan or specification. Not for unproven problems with open solution space — use parallel-brainstorming.'
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[--depth sketch|contract|blueprint] <feature description>'
@@ -15,22 +14,12 @@ The file base name `<kebab-case-feature-name>` must be kebab-case representation
 
 ## Process Flow
 
-- **Feature Description**
-  - **0. Infer Depth** (no prompt — see Depth Inference)
-  - **1. Discovery** (inline grep/glob → Context Report)
-  - **2. Drafting**
-    - _sketch_: Main thread drafts inline (no subagents)
-    - _contract_: 2 blind Ideators in parallel (researcher agents)
-    - _blueprint_: 3 blind Ideators in parallel (researcher agents)
-  - **3. Synthesis**
-    - _sketch_: Done (Step 2 is the plan)
-    - _contract_: Main thread merges 2 proposals
-    - _blueprint_: 1 Synthesizer agent (researcher) merges 3 proposals
-  - **4. Write** `plan/NAME.specs.md` + `plan/NAME.plan.md` (Status: DRAFT)
-  - **5. Verification**
-    - _sketch_: Skip — done
-    - _contract_: Hand off to receive-plan
-    - _blueprint_: Hand off to receive-plan
+- **0. Infer Depth** (no prompt — see Depth Inference)
+- **1. Discovery** (inline grep/glob → Context Report)
+- **2. Parallel Drafting** (Ideators)
+- **3. Synthesis**
+- **4. Write** `plan/NAME.specs.md` + `plan/NAME.plan.md` (Status: DRAFT)
+- **5. Verification** (hand off to receive-plan; sketch skips)
 
 ## Step 0: Infer Depth
 
@@ -138,9 +127,6 @@ Detail: [Specific requirement statement]
 - **NO Mocked Ideators**: ideators must be distinct subagents; the main thread cannot generate/simulate candidate proposals itself.
 - **NO Shell Execution**: do not run arbitrary terminal/shell commands during discovery, drafting, or synthesis.
 - **NO Schema at Draft Stage**: ideators write lightweight proposals; schema is synthesis-only.
-- **NO Skip Verification**: contract/blueprint always hands off to receive-plan.
-- **NO Infinite Revision Loops**: if `receive-plan` returns a second `REVISE`, escalate to the user and stop immediately.
-- **NO Ad-Hoc File Naming**: output plans must strictly use the format `plan/<kebab-case-feature-name>.[specs|plan].md`.
 
 ## Next Skills
 

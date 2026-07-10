@@ -26,14 +26,18 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any
 
-MARKER_VERSION = "v1"
-MAX_LINES = 100
+MARKER_VERSION = (
+    "v1"  # bump when the hard-rules marker schema changes; lint's _MARKER_RE must match
+)
+MAX_LINES = 100  # hard budget for a generated AGENTS.md; _trim_to_budget drops to this
 VALUE_MAX_CHARS = 320
 CONV_FACT_SEP = (
     " || "  # conv.* values may pack atomic facts; split on this at render time
 )
 MATCH_FILE_SIZE_CAP = 5 * 1024 * 1024  # don't scan blobs/binaries for a match string
-PRESCAN_MAX_DEPTH = 2
+PRESCAN_MAX_DEPTH = (
+    2  # root manifest + one workspace level; deeper packages aren't "top-level"
+)
 PRESCAN_SKIP_DIRS = {
     ".git",
     "node_modules",
@@ -648,6 +652,7 @@ def prescan(root: Path) -> dict[str, Any]:
     return {
         "packages": packages,
         "package_count": len(packages),
+        # 3+ manifests = a workspace, not a single-package repo (root + 1-2 leaves isn't multi-package)
         "is_monorepo": len(packages) >= 3,
         "has_manifest": len(packages) > 0,
     }

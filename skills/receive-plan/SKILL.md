@@ -1,6 +1,6 @@
 ---
 name: receive-plan
-description: 'Use when a plan and spec pair already exists and needs validation before execution. Prefer request-plan when no plan exists yet. Not for sketch-depth plans.'
+description: 'Use when a plan/specs pair exists and needs validation before execution. Not for sketch-depth plans.'
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[--depth contract|blueprint] [path to plan.md / specs.md, or "the plan I just wrote"]'
@@ -9,7 +9,7 @@ allowed-tools: Agent(researcher), Skill(interview), Skill(request-plan), Skill(d
 
 # receive-plan
 
-Verify a plan/specs pair before execution. Verify and route plan/spec fixes back to origin; do not draft or edit.
+Verify and route plan/spec fixes back to origin.
 
 ## Process Flow
 
@@ -40,7 +40,7 @@ Main thread runs grep/file-read directly — no subagent. Fail fast on any of:
 
 - Every `Satisfies: REQ-xxx` resolves to a REQ defined in specs.md.
 - Every `Depends on: TASK-NNN` resolves to a real task; dependency graph is acyclic. Anchors must resolve to #task-nnn.
-- Every Task Block has all 7 required fields (`Depends on`, `Files`, `Symbols`, `Satisfies`, `Action`, `Validate`, `Expected result`). # SSOT: see request-plan/SKILL.md#Canonical-Task-Block-Schema
+- Every Task Block has all 7 required fields (see [Canonical Task Block Schema](../request-plan/SKILL.md#canonical-task-block-schema)).
 - Every cited file path exists on disk.
 
 Report as `N_checked / N_total` per check category. Any `N_checked < N_total` → immediate REVISE with itemized failures; skip Step 3.

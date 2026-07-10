@@ -1,6 +1,6 @@
 ---
 name: pr-workflow
-description: 'Use when ready to ship a change — commit, push, and open a PR. Prefer using this for ordinary code changes, and over request-code-review when the work is already reviewed and just needs to land.'
+description: 'Use when ready to ship a change that needs push and PR. Prefer over write-commit when the work must land remotely; over request-code-review when already reviewed.'
 disable-model-invocation: false
 argument-hint: '[what to ship: "current diff", a branch, or "agent branches"]'
 allowed-tools: Bash(git *), Bash(gh *), Read, AskUserQuestion, Skill(write-commit)
@@ -52,15 +52,15 @@ Start: Deliver Request
 ## Step 3: Commit Safely
 
 1. Follow [write-commit](../write-commit/SKILL.md) for all staging, secret-scan, policy-detection, and message-format rules.
-2. Make one commit per file group — one logical change per commit, nothing bundled.
-3. Show the generated commit message to the user and wait for "OK" before committing.
+2. Show the generated commit message, then commit — one commit per file group.
 
-**Done when:** one commit per file group is made and the user said "OK" before each commit.
+**Done when:** one commit per file group is made.
 
 ## Step 4: Ask Before Pushing
 
 1. **Gate:** Call `AskUserQuestion` (Yes/No, no manual "Other") asking permission to push. This is a separate turn — never call `git push` in the same response as the question.
 2. **Action:** Run `git push -u origin <branch>` only after the answer is yes. Any other answer stops here; do not retry the push without asking again.
+3. **Never force-push:** Never `git push -f` or skip branch rules — it rewrites history other agents or branches may depend on.
 
 **Done when:** `AskUserQuestion` returned yes and `git push -u origin <branch>` succeeded.
 
@@ -89,10 +89,6 @@ Start: Deliver Request
 2. **Keep Commits Separate:** Never squash commits from different agents. Keep the exact history.
 3. **Merging:** Open one PR per branch. If merging branches together, fix conflicts one by one. Use `diagnose` if a merge fails.
 4. **Same Gate Applies:** Each agent's push still goes through Step 4 — one confirmation per branch, no exceptions for worktrees.
-
-## STRICT RULES (NEVER DO THIS)
-
-- **NEVER** force-push (`git push -f`) or skip branch rules — it rewrites history other agents or branches may depend on.
 
 ## Next Steps & Errors
 

@@ -64,7 +64,7 @@ Return exactly this structure, nothing else:
 
 ## Code Review Result
 
-**Status**: [PASS ✓ | FAIL ✗ (N blocking)]
+**Status**: [PASS | FAIL (N blocking)]
 
 ### Blocking Issues
 
@@ -91,5 +91,5 @@ Return exactly this structure, nothing else:
 - For the `[Type]` field in issues, specify the subcategory (e.g., `Injection`, `Secrets`, `Logic Error`, `Hygiene`).
 - If a finding is architectural or file-wide, cite the file name and line 1, but explicitly state that it is a global finding. NEVER hallucinate or guess line numbers.
 - If the diff is empty or you cannot access the repo, say so instead of fabricating a review.
-- If the diff is empty, the Status should be `PASS ✓` with a note under the "What Was Checked" section, and "None" under the issues sections.
+- If the diff is empty, the Status should be `PASS` with a note under the "What Was Checked" section, and "None" under the issues sections.
 ```

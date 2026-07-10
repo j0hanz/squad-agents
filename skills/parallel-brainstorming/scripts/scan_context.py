@@ -117,7 +117,7 @@ def _expand_synonyms(nouns: list[str]) -> list[str]:
     return expanded
 
 
-_SUBPROCESS_TIMEOUT = 15
+_SUBPROCESS_TIMEOUT = 15  # 15s: git grep/rg over a mid-size repo returns well within this; bounds a hung tool
 
 
 def _git_log(path: str, cwd: Path) -> str:
@@ -148,7 +148,9 @@ def _grep_files(pattern: str, cwd: Path) -> list[str] | None:
             timeout=_SUBPROCESS_TIMEOUT,
         )
         if git_result.returncode == 0:
-            return [p for p in git_result.stdout.splitlines() if p][:5]
+            return [p for p in git_result.stdout.splitlines() if p][
+                :5
+            ]  # 5: top-5 files keep the Context Report bounded
         if git_result.returncode > 1:
             print(
                 f"warning: git grep failed for {pattern!r}: {git_result.stderr.strip()}",
@@ -196,7 +198,7 @@ def _grep_files(pattern: str, cwd: Path) -> list[str] | None:
             normalized.append(rel.as_posix())
         else:
             normalized.append(p_path.as_posix())
-    return normalized[:5]
+    return normalized[:5]  # 5: top-5 files keep the Context Report bounded
 
 
 def _find_doc_files(cwd: Path) -> list[str]:
@@ -358,10 +360,14 @@ def scan(nouns: list[str], cwd: Path) -> ScanResult:
         )
 
     # Cap to 5 most relevant files
-    result.related_files = result.related_files[:5]
+    result.related_files = result.related_files[
+        :5
+    ]  # 5: matches _MAX_FILES in compress_report.py
 
     # Record analogous features (files found only via adjacent synonyms)
-    result.analogous_features = list(adjacent_paths)[:2]
+    result.analogous_features = list(adjacent_paths)[
+        :2
+    ]  # 2: only seed the Minimalist lane
 
     # ── Phase 2: parallel git log + constraints + term extraction + test files ──
     with ThreadPoolExecutor(max_workers=8) as pool:

@@ -1,20 +1,13 @@
 ---
 name: write-commit
-description: 'Use during local git commit creation and file staging. Prefer over pr-workflow when changes are local and do not require remote pushing or a PR.'
+description: 'Use when creating a local git commit or staging files. Prefer over pr-workflow when changes stay local.'
 disable-model-invocation: false
 allowed-tools: Bash(git *), Read
 ---
 
 # write-commit
 
-**Canonical source for commit mechanics.** Sibling skills defer here: [pr-workflow](../pr-workflow/SKILL.md) Step 3, [parallel-brainstorming](../parallel-brainstorming/SKILL.md) Phase 6, [receive-code-review](../receive-code-review/SKILL.md) Routing. Link, do not duplicate.
-
-```text
-  ┌───────────────┐     git add      ┌──────────────┐   git commit    ┌──────────────┐
-  │ Working Tree  │ ───────────────► │ Staging Area │ ──────────────► │ Local Branch │
-  │ (Uncommitted) │                  │ (To Commit)  │  Conventional   │ (Committed)  │
-  └───────────────┘                  └──────────────┘     Format      └──────────────┘
-```
+**Canonical source for commit mechanics.** Sibling skills defer here: [pr-workflow](../pr-workflow/SKILL.md) Step 3, [parallel-brainstorming](../parallel-brainstorming/SKILL.md) Phase 6, [receive-code-review](../receive-code-review/SKILL.md) Step 4. Link, do not duplicate.
 
 ## STRICT RULES
 

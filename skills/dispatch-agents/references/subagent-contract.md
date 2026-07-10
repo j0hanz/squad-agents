@@ -15,14 +15,7 @@ Canonical contract for the `dispatch-agents` skill. Subagents start cold with no
 - **OBJECTIVE:** Concrete, verifiable outcome (e.g. "tests pass", not "improve X").
 - **CONTEXT:** Errors, versions, baseline commit. Write large artifacts (>150 lines) under `.claude/dispatch/` and reference the file path here — never inline them in the dispatch prompt.
 - **CONSTRAINTS:** Tool restrictions (e.g., read-only, git formatting conventions).
-- **OUTPUT SCHEMA:** Instruct the subagent to return the role-specific verdict schema (see Roles table below).
-
-```text
-VERDICT: [role-specific enum]
-FILES_TOUCHED: [list of paths, or "none"]
-SUMMARY: [concise description of work/findings]
-EVIDENCE: [test results, grep output, or file:line citations]
-```
+- **OUTPUT SCHEMA:** Instruct the subagent to return its role-specific verdict schema (see the Roles table and per-role prompt files below).
 
 ## Common Mistakes (Check before dispatching)
 
@@ -46,14 +39,14 @@ _Note: Default to `model: "sonnet"` if task complexity is ambiguous. Apply an ex
 
 The `dispatch-agents` skill uses exactly four named agents. None of them spawn further subagents (depth-1 rule).
 
-| Agent               | Role                                 | Isolation              | Verdict Schema                                                                                                                            |
-| :------------------ | :----------------------------------- | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| `implementer`       | Writer — implements one task         | `worktree`             | `DONE \| DONE_WITH_CONCERNS \| BLOCKED \| NEEDS_CONTEXT`                                                                                  |
-| `researcher`        | Read-only investigator               | (none, read-only)      | `SUCCESS \| FAILURE \| BLOCKED \| NEEDS_CONTEXT`                                                                                          |
-| `reviewer`          | Read-only combined spec+quality gate | (none, read-only)      | `SPEC_VERDICT: SPEC_PASS \| SPEC_FAIL` + `QUALITY_VERDICT: QUALITY_PASS \| CRITICAL \| IMPORTANT \| MINOR` + derived `GATE: PASS \| FAIL` |
-| `conflict-resolver` | Writer — resolves merge conflicts    | (none, edits in place) | `DONE \| BLOCKED`                                                                                                                         |
+| Agent               | Role                                 | Isolation              |
+| :------------------ | :----------------------------------- | :--------------------- |
+| `implementer`       | Writer — implements one task         | `worktree`             |
+| `researcher`        | Read-only investigator               | (none, read-only)      |
+| `reviewer`          | Read-only combined spec+quality gate | (none, read-only)      |
+| `conflict-resolver` | Writer — resolves merge conflicts    | (none, edits in place) |
 
-_Note: Per-role output schemas are detailed in their respective prompt files in `references/` (e.g. `implementer-prompt.md`, `reviewer-prompt.md`, `researcher-prompt.md`)._
+_Per-role output schemas live in their prompt files: [implementer-prompt.md](implementer-prompt.md), [researcher-prompt.md](researcher-prompt.md), [reviewer-prompt.md](reviewer-prompt.md). The `conflict-resolver` returns `DONE \| BLOCKED`._
 
 ## Issue Tiering (CRITICAL / IMPORTANT / MINOR)
 

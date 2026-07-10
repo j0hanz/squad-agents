@@ -82,7 +82,7 @@ Blocked/escalated lanes: [list by name, or "none"]
 ## Strict Rules
 
 - **Asynchronous Yield Handling:** When waiting for background subagents, output a brief status update and stop calling tools to end your turn. Do not run Final Validation or declare overall completion until all waves are fully processed.
-- **Dispatch stays at depth 1:** None of the subagents spawn further subagents. The orchestrator is the only dispatcher.
+- Dispatch stays at depth 1 (see [subagent-contract.md](references/subagent-contract.md)).
 
 ## Next Skills
 

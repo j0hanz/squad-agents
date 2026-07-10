@@ -1,10 +1,8 @@
 ---
 name: interview
 description: 'Use when project requirements are ambiguous, design decisions have unresolved branches, or options require user alignment. Symptoms: temptation to make assumptions under pressure.'
-metadata:
-  category: technique
-  triggers: ambiguous requirements, design options, clarify scope, user feedback, align plans, decision points, alternatives, unknowns
-  allowed-tools: Read, Grep, Glob, AskUserQuestion
+disable-model-invocation: false
+allowed-tools: Read, Grep, Glob, AskUserQuestion
 ---
 
 # Interview
@@ -28,11 +26,11 @@ Resolve critical, hard-to-reverse decisions (plans, designs, database schemas, p
 
 ## Examples
 
-### ❌ BAD (Plain text, compound, dummy option)
+### BAD: Plain text, compound, dummy option
 
 > "Should we use JWT or session cookies? Also, should we use Redis or PostgreSQL? Or we can just do nothing."
 
-### ✅ GOOD (One question, structured options, grounded)
+### GOOD: One question, structured options, grounded
 
 ```json
 {

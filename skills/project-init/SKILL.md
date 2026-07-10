@@ -11,7 +11,7 @@ allowed-tools: Bash(python *), Bash(python3 *), AskUserQuestion, Skill(dispatch-
 
 Bootstraps a repository's agent instructions via a blind parallel discovery fan-out converging into a deterministic generator.
 
-- **Goal:** A lean, high-signal `AGENTS.md` (<100 lines, sectioned bullet lists — no `key:` labels, no filler prose) + one-line stub `CLAUDE.md`/`GEMINI.md` that redirect to it.
+- **Goal:** A lean, high-signal `AGENTS.md` (<100 lines, sectioned lists, no filler prose) + one-line stub `CLAUDE.md`/`GEMINI.md` that redirect to it. The generator emits `- ` bullets; a hand-maintained file may use `key: value` lines instead — both are valid, neither is enforced by `lint`.
 - **Method:** Blind parallel discovery (read-only Researcher fan-out, evidence-cited claims) → ONE deterministic generator (`scripts/init.py`) verifies, merges, writes.
 - **Invariant:** Discovered commands are transcribed as TEXT, never executed. `init.py` is the SOLE writer.
 
@@ -27,8 +27,6 @@ Bootstraps a repository's agent instructions via a blind parallel discovery fan-
 - **Phase 3: CONSENT + WRITE**
   - _existing authored file_: back up + explicit overwrite consent
   - _approved_: generate --out | wire stubs | lint | receipt -> DONE
-
-**trigger:** bootstrap agent instructions, initialize repository, audit AGENTS.md, create CLAUDE.md, create GEMINI.md
 
 ## Phase 0: Check and Ask
 
@@ -92,3 +90,4 @@ Bootstraps a repository's agent instructions via a blind parallel discovery fan-
 ## Error Recovery
 
 **constraint:** If a script fails, fix the underlying inputs or script and restart the current phase. Do not restart Phase 0.
+**constraint:** If `init.py` fails opaquely (not a claims/lint error you can read), invoke `Skill(diagnose)` to root-cause the script failure before re-running — do not blind-retry.
