@@ -29,7 +29,12 @@ input=$(cat)
 
 extract_command() {
   # Extracts .tool_input.command from the PreToolUse JSON payload.
-  node -e 'try { console.log(JSON.parse(process.argv[1]).tool_input.command); } catch (e) {}' "$1" 2>/dev/null
+  # Bypasses Node.js process spawn for simple strings (no escape backslashes).
+  if [[ "$1" != *\\* ]] && [[ "$1" =~ \"command\"[[:space:]]*:[[:space:]]*\"([^\"]*)\" ]]; then
+    printf '%s\n' "${BASH_REMATCH[1]}"
+  else
+    node -e 'try { console.log(JSON.parse(process.argv[1]).tool_input.command); } catch (e) {}' "$1" 2>/dev/null
+  fi
 }
 
 command=$(extract_command "$input") || command=""
