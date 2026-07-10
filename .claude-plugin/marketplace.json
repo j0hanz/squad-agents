@@ -9,7 +9,7 @@
     {
       "name": "squad-agents",
       "description": "Multi-agent workflows for Claude Code: development, testing, debugging, and review.",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "source": "./",
       "author": {
         "name": "j0hanz",
