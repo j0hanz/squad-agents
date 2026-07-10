@@ -21,6 +21,10 @@ fs.writeFileSync(pluginPath, `${JSON.stringify(plugin, null, 2)}\n`);
 
 const marketplacePath = path.join(root, '.claude-plugin', 'marketplace.json');
 const marketplace = JSON.parse(fs.readFileSync(marketplacePath, 'utf8'));
+if (!marketplace.plugins || !Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
+  console.error("Error: 'plugins' list is missing or empty in marketplace.json");
+  process.exit(1);
+}
 marketplace.plugins[0].version = version;
 fs.writeFileSync(marketplacePath, `${JSON.stringify(marketplace, null, 2)}\n`);
 
