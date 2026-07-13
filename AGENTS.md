@@ -1,6 +1,6 @@
 # Agent Instructions
 
-purpose: A plugin to help with agent development and testing.
+A Claude Code plugin for managing and executing agent instructions. This plugin provides a structured way to define, validate, and run agent tasks, ensuring consistency and reliability across different environments.
 
 ## Hard Rules
 
