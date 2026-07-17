@@ -113,7 +113,6 @@ Symptom: `POST /orders` 500s intermittently in staging, never locally.
 | Skill                                                          | Use Case                                        |
 | :------------------------------------------------------------- | :---------------------------------------------- |
 | [test-driven-development](../test-driven-development/SKILL.md) | For implementing new logic and regression tests |
-| [project-audit](../project-audit/SKILL.md)                     | For cleaning up multiple files or modules       |
 | [request-plan](../request-plan/SKILL.md)                       | For major specification gaps                    |
 
 ## References

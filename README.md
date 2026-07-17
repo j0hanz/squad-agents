@@ -85,12 +85,10 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `request-code-review`            | "review", "check this", "is this correct"                                | Dispatches a fresh-context subagent to review the diff                                                                     |
 | `receive-code-review`            | "reviewer said", "PR comments"                                           | Verify, push back on, and implement review feedback                                                                        |
 | `test-driven-development`        | "TDD", "write tests", "implement this"                                   | Red-green-refactor workflow                                                                                                |
-| `project-audit`                  | "audit the codebase", "structure", "circular dependency", "coupling"     | Parallel per-directory structural audit                                                                                    |
 | `pr-workflow`                    | "open a PR", "ship it", "push my work", "push my branch"                 | Branch, push & open a PR — delegates commit mechanics to `write-commit`                                                    |
 | `write-commit`                   | "write a commit", "commit message", "generate commit", "commit code"     | Canonical commit step — stages, secret-scans, and commits with conventional format; hands off to `pr-workflow` for push+PR |
 | `verification-before-completion` | (automatic before task completion)                                       | Verify changes work before marking done                                                                                    |
 | `using-squad-agents-skills`      | (meta-routing)                                                           | Routes to the right skill based on context                                                                                 |
-| `project-init`                   | "init project", "generate AGENTS.md/CLAUDE.md/GEMINI.md", "onboard repo" | Parallel discovery fan-out → lean AGENTS.md + stubs                                                                        |
 
 ### Subagent Dispatch
 

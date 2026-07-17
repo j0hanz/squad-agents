@@ -48,5 +48,4 @@ Resolve critical, hard-to-reverse decisions (plans, designs, database schemas, p
 | Skill                                                        | Description                                                       |
 | :----------------------------------------------------------- | :---------------------------------------------------------------- |
 | [parallel-brainstorming](../parallel-brainstorming/SKILL.md) | Invokes interview for term clarification and approach locking     |
-| [project-audit](../project-audit/SKILL.md)                   | Invokes interview to pick which corroborated finding to formalize |
 | [receive-plan](../receive-plan/SKILL.md)                     | Invokes interview to resolve risk/re-draft escalations            |
