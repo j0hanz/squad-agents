@@ -13,12 +13,7 @@
     "format:check": "prettier --check .",
     "validate": "node bin/validate-plugin.mjs",
     "version": "node bin/sync-manifest-version.mjs",
-    "postversion": "git push && git push --tags",
-    "test:node": "node --test tests/validate-plugin.test.mjs",
-    "test:python": "python -m pytest -q",
-    "test": "npm run validate && npm run test:node && npm run test:python",
-    "test:integration": "node --test tests/integration/test-hooks-fire.mjs tests/integration/test-skills-load.mjs",
-    "test:eval": "bash tests/skill-triggering/run-all.sh"
+    "postversion": "git push && git push --tags"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

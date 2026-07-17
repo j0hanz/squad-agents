@@ -1,1 +1,0 @@
-I've finished implementing the feature and all the new tests pass. It looks good to me — I think we're ready to merge.

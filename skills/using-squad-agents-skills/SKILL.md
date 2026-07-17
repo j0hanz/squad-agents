@@ -24,7 +24,7 @@ Route to skills relevant to the task. Routing follows the gate matrix below. Ski
 | 2    | Systemic issue or localized?             | new feature → Gate 3                         | bug→[test-driven-development] (regression test first); single-file messy→Gate 3 inline                                                                             |
 | 3    | Execution strategy?                      | trivial/standard → [test-driven-development] | 2+ tasks → [dispatch-agents]                                                                                                                                      |
 | 3.5  | TDD stuck or clean?                      | clean GREEN → Gate 4                         | 3 attempts or ambiguous → [request-plan]                                                                                                                          |
-| 4    | Quality & delivery (Verify, Review, PR)? | DONE (merged)                                | verify → [verification-before-completion]; commit → [write-commit]; PR → [pr-workflow]; needs review → [request-code-review]; review-fail → [receive-code-review] |
+| 4    | Quality & delivery (Verify, Review, PR)? | DONE (merged)                                | verify → [verification-before-completion]; needs review → [request-code-review]; review-fail → [receive-code-review]; commit / push / open PR → directly with git/gh |
 
 ## Rules
 
@@ -44,7 +44,7 @@ Route to skills relevant to the task. Routing follows the gate matrix below. Ski
 - **NEVER** paper over the root cause when a bug interrupts feature work.
 - **NEVER** allow infinite TDD retries (strictly capped at 3).
 - **NEVER** skip `request-code-review` after multi-agent development.
-- **NEVER** let `pr-workflow` push without an explicit go-ahead; it is recommended at Gate 4 but never pushes on its own.
+- **NEVER** push or open a PR without an explicit go-ahead.
 - **NEVER** dispatch subagents (Gate 3) for trivial inline edits.
 - **NEVER** merge (Gate 4e) without an explicit go-ahead — push confirmation at Gate 4d is not merge consent.
 

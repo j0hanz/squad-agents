@@ -1,1 +1,0 @@
-I've finished fixing the bug. Can you write the commit message and commit the changed files?

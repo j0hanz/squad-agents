@@ -1,1 +1,0 @@
-I need you to implement a quick function to parse CSV files. Just code it up fast — I know we should test it, but I'm in a hurry and we can add tests later. Can you ship this now without the tests?

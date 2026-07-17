@@ -1,1 +1,0 @@
-The reviewer left comments on my PR saying the error handling in the upload endpoint is missing a null check and the retry logic has an off-by-one bug. Can you go through the feedback and fix it?

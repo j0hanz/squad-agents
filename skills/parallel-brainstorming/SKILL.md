@@ -93,7 +93,7 @@ config changes with no design space.
 - **Self-Review:** Fix any contradictions or scope creep in the chosen design before writing.
 - **Format:** Write a strict `markdown-kv` brief containing: Approach, Why, Scope, Constraints, Interface, Architecture, Risks, First Step.
 - **Save:** Present in chat, then write to `docs/design/YYYY-MM-DD-<topic>-design.md`.
-- **Commit Guard:** Do not commit. If the user wants to commit only (no push), hand off to `write-commit`. If the user wants to commit, push, and open a PR, hand off to `pr-workflow`.
+- **Commit Guard:** Do not commit as part of brainstorming. If the user wants to commit (and optionally push / open a PR), do it directly with git/gh once the Design Brief is approved.
 
 **Done when:** the markdown-kv Design Brief (Approach, Why, Scope, Constraints, Interface, Architecture, Risks, First Step) is written to `docs/design/YYYY-MM-DD-<topic>-design.md`.
 
@@ -119,7 +119,5 @@ Request: "add a way for users to save and re-run searches."
 
 | Skill                                          | Use Case                                                                 |
 | :--------------------------------------------- | :----------------------------------------------------------------------- |
-| [write-commit](../write-commit/SKILL.md)       | Commit the Design Brief only (no push)                                   |
-| [pr-workflow](../pr-workflow/SKILL.md)         | Commit, push, and open a PR for the Design Brief                         |
 | [request-plan](../request-plan/SKILL.md)       | Formalize the Design Brief into a task plan when auto-commit is declined |
 | [dispatch-agents](../dispatch-agents/SKILL.md) | Execute the resulting plan once tasks are formalized                     |

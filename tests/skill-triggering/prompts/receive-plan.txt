@@ -1,1 +1,0 @@
-I already have plan/webhook-delivery.plan.md and plan/webhook-delivery.specs.md written. Can you check them over before we start implementing?

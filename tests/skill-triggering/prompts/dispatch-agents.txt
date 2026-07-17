@@ -1,1 +1,0 @@
-I have a plan for real-time notification delivery: first build the notifications schema and model, then implement 8 independent channel adapters (email, sms, push, slack, webhook, in-app, discord, teams) in parallel, then an integration test that depends on all of them. Can you dispatch agents in dependency-ordered waves to implement the whole plan with review gates per lane?

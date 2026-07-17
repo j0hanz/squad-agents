@@ -44,7 +44,7 @@ Action: Dispatch a subagent as a read-only reviewer with the base..head diff (or
 **Execution Guardrail**: Do not proceed until subagent execution completes and validates.
 
 Action: Keep subagent output verbatim (do not edit)
-On PASS: Prompt user "Run `/pr-workflow`"
+On PASS: Prompt user "Changes are ready — commit and push / open a PR."
 On FAIL: Invoke `receive-code-review` (do not fix directly)
 
 ## Strict Rules (NEVER)
@@ -64,4 +64,4 @@ Before completing this task, you must verify that:
 2. [ ] **Clean Status Verification**: `git status --porcelain` was executed and yielded no output before the reviewer was dispatched.
 3. [ ] **Zero Placeholders**: All placeholders (`{{base_commit}}`, `{{head_commit}}`, etc.) were fully replaced with actual, verified values.
 4. [ ] **Verbatim Output**: The final output presented to the user contains the exact, unaltered Markdown output from the subagent reviewer.
-5. [ ] **Next Steps Executed**: The agent has either prompted the user to run `/pr-workflow` (if PASS) or invoked the `receive-code-review` skill (if FAIL), without performing direct fixes.
+5. [ ] **Next Steps Executed**: The agent has either prompted the user that the diff is ready to commit and push (if PASS) or invoked the `receive-code-review` skill (if FAIL), without performing direct fixes.

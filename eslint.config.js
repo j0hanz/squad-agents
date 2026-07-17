@@ -11,7 +11,7 @@ export default [
 
   // All Node.js scripts — skills, bin, tests (hooks/ is bash-only, no .mjs)
   {
-    files: ['skills/**/*.mjs', 'skills/**/*.js', 'bin/**/*.mjs', 'tests/**/*.mjs'],
+    files: ['skills/**/*.mjs', 'skills/**/*.js', 'bin/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',

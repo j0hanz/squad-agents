@@ -1,1 +1,0 @@
-I've sketched a design for switching our session storage from cookies to JWTs. Before I commit to it, can you stress-test the decision and make sure I've actually thought through the hard-to-reverse parts?

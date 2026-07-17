@@ -83,8 +83,6 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 | `request-code-review`            | "review", "check this", "is this correct"                                | Dispatches a fresh-context subagent to review the diff                                                                     |
 | `receive-code-review`            | "reviewer said", "PR comments"                                           | Verify, push back on, and implement review feedback                                                                        |
 | `test-driven-development`        | "TDD", "write tests", "implement this"                                   | Red-green-refactor workflow                                                                                                |
-| `pr-workflow`                    | "open a PR", "ship it", "push my work", "push my branch"                 | Branch, push & open a PR — delegates commit mechanics to `write-commit`                                                    |
-| `write-commit`                   | "write a commit", "commit message", "generate commit", "commit code"     | Canonical commit step — stages, secret-scans, and commits with conventional format; hands off to `pr-workflow` for push+PR |
 | `verification-before-completion` | (automatic before task completion)                                       | Verify changes work before marking done                                                                                    |
 | `using-squad-agents-skills`      | (meta-routing)                                                           | Routes to the right skill based on context                                                                                 |
 
@@ -142,8 +140,7 @@ This file configures local settings for the `squad-agents` plugin.
 │   ├── skill-nudge.sh
 │   └── hooks.json
 ├── output-styles/          # Output style definitions
-├── skills/                 # Skill SKILL.md files (15 skills)
-└── tests/                  # Integration tests and skill-triggering evals
+└── skills/                 # Skill SKILL.md files (15 skills)
 ```
 
 | Directory        | Purpose                                                          |
@@ -152,7 +149,6 @@ This file configures local settings for the `squad-agents` plugin.
 | `skills/`        | One directory per skill, each containing a `SKILL.md` definition |
 | `output-styles/` | Output style definitions                                         |
 | `bin/`           | Manifest validator and release scripts                           |
-| `tests/`         | Integration tests verifying hooks fire and skills load correctly |
 
 ## Scripts
 
