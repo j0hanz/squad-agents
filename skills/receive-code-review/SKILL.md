@@ -2,7 +2,7 @@
 name: receive-code-review
 description: 'Use when code review feedback has been received from a human, bot, or subagent. Prefer over request-code-review when resolving feedback rather than requesting a new review.'
 disable-model-invocation: false
-allowed-tools: Bash, Write, Edit, AskUserQuestion, Read, Grep, Skill(write-commit), Skill(verification-before-completion), Skill(diagnose), Skill(request-code-review), Skill(pr-workflow)
+allowed-tools: Bash, Write, Edit, AskUserQuestion, Read, Grep, Skill(write-commit), Skill(verification-before-completion), Skill(request-code-review), Skill(pr-workflow)
 ---
 
 # receive-code-review
@@ -44,7 +44,7 @@ allowed-tools: Bash, Write, Edit, AskUserQuestion, Read, Grep, Skill(write-commi
 ### Step 4: Complete & Route
 
 1. Route remaining actions based on outcome:
-   - **Bugs & security:** Hand off to [diagnose](../diagnose/SKILL.md) for root-cause analysis before patching.
+   - **Bugs & security:** Do root-cause analysis before patching.
    - **Stuck after 2 attempts:** Mark **BLOCKED**, escalate to the user, and do not retry.
    - **All items resolved:** Run [verification-before-completion](../verification-before-completion/SKILL.md), [write-commit](../write-commit/SKILL.md) to stage/commit, and hand off to [pr-workflow](../pr-workflow/SKILL.md) if already reviewed or [request-code-review](../request-code-review/SKILL.md) if a fresh review is wanted.
 2. **Done when:** all changes are committed and the target next skill or escalation is triggered.

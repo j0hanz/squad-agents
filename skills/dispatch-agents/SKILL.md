@@ -90,5 +90,4 @@ Blocked/escalated lanes: [list by name, or "none"]
 | :--------------------------------------------------------------------------- | :------------------------------ |
 | [write-commit](../write-commit/SKILL.md)                                     | Commit staged changes           |
 | [verification-before-completion](../verification-before-completion/SKILL.md) | Final Validation                |
-| [diagnose](../diagnose/SKILL.md)                                             | Investigate test/merge failures |
 | [request-code-review](../request-code-review/SKILL.md)                       | Mandatory at Final Validation   |

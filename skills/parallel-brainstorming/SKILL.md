@@ -2,7 +2,7 @@
 name: parallel-brainstorming
 description: 'Use when requirements are vague or the solution space is open before a plan exists. Prefer over request-plan when two or more distinct architectural approaches are in play.'
 disable-model-invocation: false
-allowed-tools: Skill(interview), Write, Bash(python *), Bash(python3 *), Read, Grep, Glob
+allowed-tools: AskUserQuestion, Write, Bash(python *), Bash(python3 *), Read, Grep, Glob
 ---
 
 # parallel-brainstorming
@@ -25,7 +25,7 @@ config changes with no design space.
 - **Scan:** Run `python ${CLAUDE_SKILL_DIR}/scripts/scan_context.py '<nouns>' --cwd '<root>' | python ${CLAUDE_SKILL_DIR}/scripts/compress_report.py` (fallback to `Grep` if it fails).
 - **Report:** Extract Related Files (with recent commits and test coverage), Interface Shapes, Design Docs, Analogous Features, Constraints, Scope (S/M/L/XL) with reasoning, and Unknowns.
 - **Zero-Code Check:** Stop and offer exit if existing code/config already solves this.
-- **Understanding Lock:** Summarize the problem and your understanding. Only invoke `interview` if you have genuine doubts; otherwise proceed directly to Phase 3.
+- **Understanding Lock:** Summarize the problem and your understanding. Only ask the user (via `AskUserQuestion`) if you have genuine doubts; otherwise proceed directly to Phase 3.
 - **Routing:**
 - Scope XL → Offer to break it down.
 - Ambiguous → Go to Phase 2.
@@ -35,11 +35,11 @@ config changes with no design space.
 
 ## Phase 2: Clarification
 
-- **Resolve via `interview`:** hand the ambiguous terms to `interview` (max 4 per batch) — it already enforces one-at-a-time, two-option questioning, so do not hand-roll a question loop.
+- **Resolve with the user:** clarify the ambiguous terms via `AskUserQuestion` (max 4 per batch), keeping questions to a couple of options each.
 - **Glossary:** Save resolved definitions to `glossary.md` (never `CONTEXT.md`).
 - **Visuals:** Offer a diagram only if layout or data flow requires it. Wait for a reply.
 
-**Done when:** ambiguous terms are resolved via `interview` (max 4 per batch) and saved to `glossary.md`.
+**Done when:** ambiguous terms are resolved with the user (max 4 per batch) and saved to `glossary.md`.
 
 ## Creative Checkpoint (Pre-Ideation)
 
@@ -68,10 +68,10 @@ config changes with no design space.
 
 - **Synthesize:** Group similar ideas. Combine strong mechanisms with risk-mitigations from other lanes.
 - **Distill:** Present 2-3 distinct approaches. Approach A must be Minimalist. For each: What, Gains, Costs, Fit, First Step.
-- **Approval Lock:** Hand the 2-3 distilled approaches to `interview` to lock one — this is the hard-to-reverse decision that commits Phase 6's Design Brief. **Await its resolved decision. Do not guess.**
+- **Approval Lock:** Present the 2-3 distilled approaches to the user via `AskUserQuestion` to lock one — this is the hard-to-reverse decision that commits Phase 6's Design Brief. **Await their decision. Do not guess.**
 - **Routing:** If Phase 5 flag is set → Phase 5. Otherwise → Phase 6.
 
-**Done when:** `interview` returns a resolved decision locking one of the 2-3 distilled approaches (not guessed).
+**Done when:** the user locks one of the 2-3 distilled approaches (not guessed).
 
 ## Phase 5: Persona Critique
 

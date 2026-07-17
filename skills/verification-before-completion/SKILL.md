@@ -42,7 +42,7 @@ Any deviation from (a)/(b)/(c) → non-trivial → route to `request-code-review
 | :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
 | **CI-Only**        | Stop. Report: "Blocked by CI. Wait for pipeline."                                                                                         |
 | **No Test Suite**  | Write a smoke/characterization test or manual repro proving the change works, then mark INCOMPLETE and route.                             |
-| **Regression**     | Stop. Route to `diagnose`.                                                                                                                |
+| **Regression**     | Stop. Root-cause the regression before proceeding.                                                                                       |
 | **Verified Clean** | Non-trivial (see heuristic above) → route to `request-code-review`. Trivial → done **only if** the Trivial -> done criterion above holds. |
 
 1. **No Test Suite is a gate, not a pass:** before marking INCOMPLETE, you MUST write at least one executable smoke/characterization test or manual reproduction script proving the change works (see §3) — a prose rationale alone is not sufficient. Only after that evidence exists may you mark INCOMPLETE and document why full coverage wasn't added (e.g. route to `test-driven-development` for proper coverage later).

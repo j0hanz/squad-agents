@@ -4,7 +4,7 @@ description: 'Use when a plan/specs pair exists and needs validation before exec
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[--depth contract|blueprint] [path to plan.md / specs.md, or "the plan I just wrote"]'
-allowed-tools: Agent(researcher), Skill(interview), Skill(request-plan), Skill(dispatch-agents), Skill(test-driven-development), Read, Grep, Glob, Write, Edit
+allowed-tools: Agent(researcher), AskUserQuestion, Skill(request-plan), Skill(dispatch-agents), Skill(test-driven-development), Read, Grep, Glob, Write, Edit
 ---
 
 # receive-plan
@@ -67,7 +67,7 @@ Read the critic's findings directly — no separate Arbiter agent:
 - **≥2 Med** findings → REVISE.
 - **Low** only, or nothing → APPROVED (note Low findings as a comment in the plan header).
 
-REVISE cap — see Strict Rules (NO Endless Loops). On the 2nd unresolved submission, escalate to `interview` to reconcile findings with the user.
+REVISE cap — see Strict Rules (NO Endless Loops). On the 2nd unresolved submission, escalate to the user (via `AskUserQuestion`) to reconcile findings.
 
 **Done when:** main thread assigns verdict, and either a REVISE cycle or escalation is triggered, or the plan is APPROVED.
 

@@ -22,7 +22,7 @@ _MAX_FILES = 5  # 5: matches the related_files cap in scan_context.py
 _MAX_LOG_LINES = 3  # 3: recent commit signals decay fast; more lines add noise
 _MAX_CONSTRAINTS = 5  # 5: enough to surface limits without flooding the brief
 _MAX_INTERFACE_SHAPES = 10  # 10: shapes are cheap tokens and often decisive for design
-_MAX_UNKNOWNS = 4  # 4: one per batch; interview caps clarifications at 4
+_MAX_UNKNOWNS = 4  # 4: one per batch; clarifications are capped at 4 per batch
 _MAX_DESIGN_DOCS = 3  # 3: docs rarely add signal beyond the top 3
 _MAX_ANALOGOUS = 2  # 2: analogous features seed the Minimalist lane; 2 keep it focused
 

@@ -58,4 +58,4 @@ Conventional Commits — apply when step 2 selects Conventional; scope mandatory
 | Scenario                 | Next Action                                                    |
 | :----------------------- | :------------------------------------------------------------- |
 | Ready to push + open PR? | Hand off to [pr-workflow](../pr-workflow/SKILL.md) (Steps 4–5) |
-| Merge conflict?          | Use [diagnose](../diagnose/SKILL.md)                           |
+| Merge conflict?          | Resolve the conflict before committing                        |

@@ -2,7 +2,7 @@
 name: test-driven-development
 description: 'Use when new logic requires implementation, or when a TDD red flag appears — a trivially passing test, code written before its test, or GREEN with no observed RED.'
 disable-model-invocation: false
-allowed-tools: AskUserQuestion, Bash, Read, Grep, Glob, Write, Edit, NotebookEdit, Skill(diagnose)
+allowed-tools: AskUserQuestion, Bash, Read, Grep, Glob, Write, Edit, NotebookEdit
 ---
 
 # test-driven-development
@@ -30,7 +30,7 @@ Escape hatches from the HARD GATE. Never self-invoke one silently — confirm vi
     - _failure confirmed_: 2. GREEN (write minimal implementation) -> run test
   - **2. GREEN (write minimal implementation)**
     - _fail_: Stuck? (3+ attempts)
-      - _yes_: diagnose/request-plan (handoff)
+      - _yes_: request-plan (handoff)
       - _no_: retry GREEN
     - _pass_: 3. REFACTOR
   - **3. REFACTOR (surgical cleanup)** -> run test, stay passing
@@ -81,7 +81,7 @@ _If unsure how minimal is minimal, read `references/minimal-impl-examples.md` fu
 2. Write the smallest implementation that satisfies the test — no speculative generality.
 3. No code added "just in case" — only what the current test requires.
 4. 3 failed attempts on the same test → restart with a smaller test.
-5. Still stuck → escalate to `diagnose` or `request-plan`.
+5. Still stuck → escalate to `request-plan`.
 
 ### N-1 Test (False-Green Elimination)
 

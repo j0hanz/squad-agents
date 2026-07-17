@@ -23,7 +23,7 @@ Start: Deliver Request
   -> 4. Push  ── CONFIRM HERE (first irreversible / outward-facing step)
   -> 5. PR (gh pr create, generated title + body + change summary)
        -- not yet reviewed --> request-code-review (handoff before merge)
-       -- git/gh fails ------> diagnose (handoff with the error trace)
+       -- git/gh fails ------> root-cause the error trace before retrying
 ```
 
 ## Step 0: Check Status
@@ -87,7 +87,7 @@ Start: Deliver Request
 
 1. **Separate Folders:** Give each agent its own folder and branch via `git worktree add ../<repo>-<task> -b <type>/<task>`.
 2. **Keep Commits Separate:** Never squash commits from different agents. Keep the exact history.
-3. **Merging:** Open one PR per branch. If merging branches together, fix conflicts one by one. Use `diagnose` if a merge fails.
+3. **Merging:** Open one PR per branch. If merging branches together, fix conflicts one by one. Root-cause the failure if a merge fails.
 4. **Same Gate Applies:** Each agent's push still goes through Step 4 — one confirmation per branch, no exceptions for worktrees.
 
 ## Next Steps & Errors
@@ -96,4 +96,4 @@ Start: Deliver Request
 | :------------------- | :--------------------------------------------------------- |
 | Need review?         | Use [request-code-review](../request-code-review/SKILL.md) |
 | Got review comments? | Use [receive-code-review](../receive-code-review/SKILL.md) |
-| Got an error?        | Use [diagnose](../diagnose/SKILL.md)                       |
+| Got an error?        | Root-cause the failure from the error trace               |

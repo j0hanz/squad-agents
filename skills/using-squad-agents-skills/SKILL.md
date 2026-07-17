@@ -19,11 +19,11 @@ Route to skills relevant to the task. Routing follows the gate matrix below. Ski
 
 | Gate | Entry question                           | Pass route                                   | Fail route                                                                                                                                                        |
 | :--- | :--------------------------------------- | :------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | Task fully defined (APPROVED spec+plan)? | → Gate 2                                     | vague→[parallel-brainstorming]; idea→[request-plan]; DRAFT→[receive-plan]; ambiguity only→[interview]                                                             |
+| 1    | Task fully defined (APPROVED spec+plan)? | → Gate 2                                     | vague→[parallel-brainstorming]; idea→[request-plan]; DRAFT→[receive-plan]; ambiguity only→resolve directly with the user                                          |
 | 1.5  | Plan approved after drafting?            | → Gate 2                                     | REVISE → fix at origin → [receive-plan]                                                                                                                           |
-| 2    | Systemic issue or localized?             | new feature → Gate 3                         | bug→[diagnose]; single-file messy→Gate 3 inline                                                                                                                    |
+| 2    | Systemic issue or localized?             | new feature → Gate 3                         | bug→[test-driven-development] (regression test first); single-file messy→Gate 3 inline                                                                             |
 | 3    | Execution strategy?                      | trivial/standard → [test-driven-development] | 2+ tasks → [dispatch-agents]                                                                                                                                      |
-| 3.5  | TDD stuck or clean?                      | clean GREEN → Gate 4                         | 3 attempts→[diagnose]; ambiguous→[request-plan]                                                                                                                   |
+| 3.5  | TDD stuck or clean?                      | clean GREEN → Gate 4                         | 3 attempts or ambiguous → [request-plan]                                                                                                                          |
 | 4    | Quality & delivery (Verify, Review, PR)? | DONE (merged)                                | verify → [verification-before-completion]; commit → [write-commit]; PR → [pr-workflow]; needs review → [request-code-review]; review-fail → [receive-code-review] |
 
 ## Rules
@@ -35,13 +35,13 @@ Route to skills relevant to the task. Routing follows the gate matrix below. Ski
 - **Notification:** Announce the route as plain text: `Routing to [<skill-name>]: [reason]`. FYI only — never spend a blocking `AskUserQuestion` to re-acknowledge a route the matrix already determined.
 - **No Skips:** Never bypass a gate for "simple" or "quick" tasks; the triviality fast-path lives only at Gate 3.
 - **Gate Matrix Scope:** Gates 0–4 govern entry-routing only (onboarding through first dispatch). Each skill's own `## Next Skills` stays canonical for its outbound transitions.
-- **Hard-to-reverse decisions, mid-skill:** any skill hitting a hard-to-reverse branch (locking a design, picking a finding to act on, accepting risk vs re-drafting) calls `interview` rather than hand-rolling a question loop. A single isolated yes/no inside a tight loop is a confirmation, not a session — this does not apply.
+- **Hard-to-reverse decisions, mid-skill:** any skill hitting a hard-to-reverse branch (locking a design, picking a finding to act on, accepting risk vs re-drafting) resolves it directly with the user via `AskUserQuestion` rather than guessing. A single isolated yes/no inside a tight loop is a confirmation, not a session — this does not apply.
 - **Auto-invoke:** `test-driven-development`, `request-code-review`, and `dispatch-agents` are safe to invoke without asking — each is safety-gated (test-gated, read-only reviewer, worktree-isolated). Ask first only for irreversible steps (push, migration, destructive command) or the first dispatch of the session.
 
 ## Strict Constraints (NEVER List)
 
 - **NEVER** route to `test-driven-development` if Gate 1 is incomplete.
-- **NEVER** skip `diagnose` when a bug interrupts feature work.
+- **NEVER** paper over the root cause when a bug interrupts feature work.
 - **NEVER** allow infinite TDD retries (strictly capped at 3).
 - **NEVER** skip `request-code-review` after multi-agent development.
 - **NEVER** let `pr-workflow` push without an explicit go-ahead; it is recommended at Gate 4 but never pushes on its own.
