@@ -4,7 +4,7 @@ description: 'Use when a plan/specs pair exists and needs validation before exec
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[--depth contract|blueprint] [path to plan.md / specs.md, or "the plan I just wrote"]'
-allowed-tools: Agent(researcher), AskUserQuestion, Skill(request-plan), Skill(dispatch-agents), Skill(test-driven-development), Read, Grep, Glob, Write, Edit
+allowed-tools: Agent, AskUserQuestion, Skill(request-plan), Skill(dispatch-agents), Skill(test-driven-development), Read, Grep, Glob, Write, Edit
 ---
 
 # receive-plan
@@ -18,7 +18,7 @@ Verify and route plan/spec fixes back to origin.
   - **2. Inline Traceability Check (main thread, grep/file-read)**
     - _any failure_: REVISE immediately, skip Step 3
     - _clean_: Step 3
-  - **3. One Critic Agent (researcher)** — spec + dependency + scope in one pass
+  - **3. One Critic Agent** — spec + dependency + scope in one pass
   - **4. Main thread verdict (no Arbiter agent)**
     - _any High finding, or ≥2 Med findings_: REVISE
     - _else_: Step 5
@@ -49,7 +49,7 @@ Report as `N_checked / N_total` per check category. Any `N_checked < N_total` �
 
 ## Step 3: One Critic Agent
 
-Dispatch **1 `researcher` agent** covering all lenses in a single pass. If `--depth contract` is specified, run a lighter check focusing primarily on scope boundaries and dependency cycles. If `blueprint`, run the full deep check.
+Dispatch **1 critic subagent** covering all lenses in a single pass. If `--depth contract` is specified, run a lighter check focusing primarily on scope boundaries and dependency cycles. If `blueprint`, run the full deep check.
 
 - **Spec-Correctness**: Check if spec is complete and consistent.
 - **Dependency Order**: Check if task sequencing is logical and acyclic.
@@ -57,7 +57,7 @@ Dispatch **1 `researcher` agent** covering all lenses in a single pass. If `--de
 
 Rate each finding **High / Med / Low**. Return an itemized list with `file:line` / `REQ-id` / `TASK-id` specificity — never a bare summary.
 
-**Done when:** critic researcher subagent runs, returning classified findings with specific line/task IDs.
+**Done when:** the critic subagent runs, returning classified findings with specific line/task IDs.
 
 ## Step 4: Main Thread Verdict
 

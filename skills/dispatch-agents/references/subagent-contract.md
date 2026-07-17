@@ -37,9 +37,9 @@ _Note: Default to `model: "sonnet"` if task complexity is ambiguous. Apply an ex
 
 ## Roles
 
-The `dispatch-agents` skill uses exactly four named agents. None of them spawn further subagents (depth-1 rule).
+The `dispatch-agents` skill dispatches subagents in exactly four roles (apply the isolation/read-only column at dispatch time). None of them spawn further subagents (depth-1 rule).
 
-| Agent               | Role                                 | Isolation              |
+| Role                | Purpose                              | Isolation              |
 | :------------------ | :----------------------------------- | :--------------------- |
 | `implementer`       | Writer — implements one task         | `worktree`             |
 | `researcher`        | Read-only investigator               | (none, read-only)      |

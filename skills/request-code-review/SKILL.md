@@ -3,7 +3,7 @@ name: request-code-review
 description: 'Use when a verified diff needs a fresh-eye review before merging. Prefer over receive-code-review when requesting a new review rather than acting on feedback.'
 disable-model-invocation: false
 argument-hint: '[target: branch, commit, or file]'
-allowed-tools: 'Bash(git diff *), Bash(git status *), Bash(git log *), Bash(git merge-base *), Agent(diff-reviewer), AskUserQuestion, Read'
+allowed-tools: 'Bash(git diff *), Bash(git status *), Bash(git log *), Bash(git merge-base *), Agent, AskUserQuestion, Read'
 disallowed-tools: Write, Edit
 ---
 
@@ -13,7 +13,7 @@ A subagent reviews the diff with fresh context, reading it like a human reviewer
 
 ## Step 0: Confirm
 
-Action: Dispatch the `diff-reviewer` subagent with the base..head diff (or, if uncommitted, the working-tree diff passed as a text block).
+Action: Dispatch a subagent as a read-only reviewer with the base..head diff (or, if uncommitted, the working-tree diff passed as a text block).
 
 ## Pre-Review Checkpoint
 
@@ -34,7 +34,7 @@ Action: Dispatch the `diff-reviewer` subagent with the base..head diff (or, if u
    - Map `{{repo_path}}` to the absolute path of the workspace.
    - Map `{{plan_or_requirements_summary}}` to the 1-paragraph summary.
    - Map `{{patterns_reference_path}}` to the absolute path of `.github/review-patterns.md` if it exists; otherwise, populate as "N/A".
-4. **Dispatch**: Dispatch the `diff-reviewer` subagent.
+4. **Dispatch**: Dispatch a subagent as the read-only reviewer.
    - _Constraint_: Force-enable read-only mode for the subagent by explicitly denying write/edit tools in the agent invocation config.
 5. **Safety Check (Post-Dispatch)**: Run `git status --porcelain` again. Compare with the baseline. If any modifications were made to the working tree, immediately abort, discard changes (if safe), and report a safety violation.
 6. **Output Validation**: Ensure the subagent's response strictly contains the required headers (`## Code Review Result`, `**Status**:`, `### Blocking Issues`, `### Advisory Issues`, and `### What Was Checked`). If any header is missing or malformed, retry dispatch exactly once with a reminder prompt. If the second attempt fails, abort the process.

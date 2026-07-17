@@ -45,7 +45,7 @@ Topologically sort lanes by `Depends on`. State the wave plan as plain text. Rai
 
 ## Step 4: Review (per writer lane)
 
-- **Review Path:** Run the named `reviewer` agent on each completed writer lane using [reviewer-prompt.md](references/reviewer-prompt.md).
+- **Review Path:** Dispatch a subagent as the `reviewer` on each completed writer lane using [reviewer-prompt.md](references/reviewer-prompt.md).
 - **Red Loop:** For `GATE: FAIL`, execute a red loop (max 2 tries total) with the reviewer's findings verbatim.
 - **Escalation Policy:** Escalate `GATE: FAIL` (on 2nd try) or `BLOCKED` / `NEEDS_CONTEXT` lanes to the user by name.
 
@@ -53,7 +53,7 @@ Topologically sort lanes by `Depends on`. State the wave plan as plain text. Rai
 
 ## Step 5: Integrate & Loop
 
-- **Integrate Wave:** Resolve conflicts using the `conflict-resolver` agent. Verify integration with the project test suite.
+- **Integrate Wave:** Resolve conflicts by dispatching a subagent as the `conflict-resolver`. Verify integration with the project test suite.
 - **Sequential Wave Clear:** Do not advance to wave N+1 until wave N's lanes are resolved or escalated.
 - **Loop Control:** If there are remaining waves in the Wave Plan, loop back to Step 3. Otherwise, proceed to Final Validation.
 

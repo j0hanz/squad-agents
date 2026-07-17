@@ -6,7 +6,7 @@ A Claude Code plugin for authoring and maintaining skills and hooks — structur
 
 ## Overview
 
-Squad Agents Plugin extends Claude Code with 15 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to specialized, safe-by-default subagents (`implementer`, `researcher`, `conflict-resolver`, etc.) orchestrated by the `dispatch-agents` skill.
+Squad Agents Plugin extends Claude Code with 15 skills and 2 lifecycle hooks covering the complete agent development cycle. Skills activate automatically based on task context and can also be invoked manually; hooks fire on session events to guard against destructive commands and surface relevant skills. Multi-step or parallel work is delegated to subagents dispatched in specialized roles (`implementer`, `researcher`, `conflict-resolver`, etc.) by the `dispatch-agents` skill.
 
 | Aspect              | Detail                       |
 | :------------------ | :--------------------------- |
@@ -90,15 +90,15 @@ Skills are invoked automatically by Claude based on task context, or manually wi
 
 ### Subagent Dispatch
 
-This plugin defines custom agents in the `agents/` directory covering specialized roles: `implementer` (code writer), `researcher` (read-only investigator/explorer), `conflict-resolver` (merge conflict resolution), `reviewer`, and `diff-reviewer`. One skill orchestrates these:
+These skills dispatch subagents in specialized roles: `implementer` (code writer), `researcher` (read-only investigator/explorer), `conflict-resolver` (merge conflict resolution), `reviewer`, and `diff-reviewer`. Two skills orchestrate them:
 
-| Skill                 | Pattern                                                                                 |
-| :-------------------- | :-------------------------------------------------------------------------------------- |
-| `dispatch-agents`     | Parallel fan-out or sequential dispatch — one agent per task, gated by `reviewer`       |
-| `request-code-review` | Read-only — one fresh-context `diff-reviewer` per diff, no memory of the implementation |
+| Skill                 | Pattern                                                                                          |
+| :-------------------- | :----------------------------------------------------------------------------------------------- |
+| `dispatch-agents`     | Parallel fan-out or sequential dispatch — one subagent per task, gated by a `reviewer` pass      |
+| `request-code-review` | One fresh-context subagent per diff, run read-only, with no memory of the implementation         |
 
 > [!NOTE]
-> Read-only roles (researcher, reviewers) utilize the specialized `researcher` and `*-reviewer` agents which enforce hard tool restrictions (Write/Edit tools are disabled) at the harness level. Implementer and conflict-resolver roles run in an isolated git worktree (`isolation: "worktree"`).
+> Read-only roles (researcher, reviewers) are dispatched with write/edit tools denied in the invocation config; writer roles (implementer, conflict-resolver) can be dispatched in an isolated git worktree (`isolation: "worktree"`). These are applied per dispatch rather than enforced by a dedicated agent type.
 
 ### Hooks
 
@@ -136,7 +136,6 @@ This file configures local settings for the `squad-agents` plugin.
 
 ```text
 .
-├── agents/                 # Subagent role definitions (5 agents)
 ├── bin/                    # Validation and release scripts
 ├── hooks/                  # Hook manifest and bash handlers
 │   ├── shell-safety.sh
@@ -149,7 +148,6 @@ This file configures local settings for the `squad-agents` plugin.
 
 | Directory        | Purpose                                                          |
 | :--------------- | :--------------------------------------------------------------- |
-| `agents/`        | Subagent role definitions (5 agents)                             |
 | `hooks/`         | Bash hook handlers and the hooks manifest                        |
 | `skills/`        | One directory per skill, each containing a `SKILL.md` definition |
 | `output-styles/` | Output style definitions                                         |

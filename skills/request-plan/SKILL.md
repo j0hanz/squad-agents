@@ -4,7 +4,7 @@ description: 'Use when a new feature, change, or repository modification require
 disable-model-invocation: false
 user-invocable: true
 argument-hint: '[--depth sketch|contract|blueprint] <feature description>'
-allowed-tools: Write, Agent(researcher), Skill(receive-plan), Read, Grep, Glob, Edit
+allowed-tools: Write, Agent, Skill(receive-plan), Read, Grep, Glob, Edit
 ---
 
 # request-plan
@@ -65,7 +65,7 @@ Each ideator produces a **lightweight proposal**: a short approach summary + a n
 
 - `sketch`: Skip — Step 2 output goes directly to Step 4.
 - `contract`: **Main thread** merges the 2 proposals. State what was kept and discarded from each candidate. Write the merged result using the Canonical Task Block Schema.
-- `blueprint`: **1 Synthesizer agent** (researcher) receives both proposals and merges them. Same rationale requirement. Writes final output in Canonical Task Block Schema.
+- `blueprint`: **1 Synthesizer agent** receives both proposals and merges them. Same rationale requirement. Writes final output in Canonical Task Block Schema.
 
 **Done when:**
 

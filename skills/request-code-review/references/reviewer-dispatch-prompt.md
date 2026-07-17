@@ -1,5 +1,5 @@
 ---
-description: Prompt template and instructions for dispatching the diff-reviewer subagent to check security, correctness, performance, and hygiene.
+description: Prompt template and instructions for dispatching a subagent as a read-only reviewer to check security, correctness, performance, and hygiene.
 metadata:
   tags: [reviewer, dispatch, template, subagent]
   source: internal
@@ -15,7 +15,7 @@ metadata:
 
 Resolve all placeholders before dispatch. Ask the user if any values are unknown.
 
-This template is dispatched to the `diff-reviewer` subagent type.
+This template is dispatched to a subagent run as a read-only reviewer (deny write/edit tools in the invocation config).
 
 ```markdown
 Review the changes between {{base_commit}} and {{head_commit}} in {{repo_path}}.
